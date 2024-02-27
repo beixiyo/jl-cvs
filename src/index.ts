@@ -13,5 +13,6 @@ export {
     createCvs,
     getPixel,
     fillPixel,
-    parseImgData
+    parseImgData,
+    cutImg
 } from '@/canvas/tools'
