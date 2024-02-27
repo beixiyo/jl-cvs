@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "Node",
+        "lib": ["ESNext", "DOM", "DOM.Iterable"],
+
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"],
+        },
+        "outDir": "dist",
+        "declaration": true,
+        "declarationDir": "./dist/typings",
+        "skipLibCheck": true,
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.d.ts",
+    ],
+}
