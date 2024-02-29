@@ -6,6 +6,46 @@
 **iife** 模式下，全局导出一个 `_jlCvs` 对象
 
 
+## 拖拽区域截图
+```ts
+/**
+ * 示例如下，您只需传入 Canvas 和 一张图片 即可使用
+ * 或者创建实例后调用 `setImg` 设置图片
+ */
+const si = new ShotImg(document.querySelector('canvas'), img)
+
+/** 获取图片的 blob 或者 base64 */
+const blob = await si.getShotImg('blob')
+
+/**接着你可以用我另一个包下载图片 */
+import { downloadByData } from '@jl-org/tool'
+downloadByData(src, 'shot.png')
+
+
+
+export declare class ShotImg {
+    /**
+     * 把你传入的 Canvas 变成一个可拖动的截图区域
+     * 传入一个 Canvas 元素，图片可选，你可以在后续调用 `setImg` 方法设置图片
+     * @param cvs Canvas 元素
+     * @param img 图片
+     * @param opacity 蒙层透明度
+     * @example new ShotImg(document.querySelector('canvas'), img)
+     */
+    constructor(cvs: HTMLCanvasElement, img?: HTMLImageElement, opacity?: number);
+
+    /** 设置大小 */
+    setSize(w: number, h: number): void;
+
+    /** 设置 Canvas 图片 */
+    setImg(img: HTMLImageElement): void;
+
+    /** 获取选中区域的图片 */
+    getShotImg(type?: 'blob' | 'base64'): Promise<string | void | Blob>;
+}
+```
+
+
 ## Canvas 辅助函数
 ```ts
 /**

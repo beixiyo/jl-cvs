@@ -16,3 +16,5 @@ export {
     parseImgData,
     cutImg
 } from '@/canvas/tools'
+
+export { ShotImg } from '@/canvas/shotImg'
