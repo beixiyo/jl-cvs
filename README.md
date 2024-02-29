@@ -14,10 +14,13 @@
  */
 const si = new ShotImg(document.querySelector('canvas'), img)
 
-/** 获取图片的 blob 或者 base64 */
+/** 
+ * 获取图片的 blob 或者 base64
+ * 如果图片设置过大小，可能会导致截图区域不准确
+ */
 const blob = await si.getShotImg('blob')
 
-/**接着你可以用我另一个包下载图片 */
+/** 接着你可以用我另一个包下载图片 */
 import { downloadByData } from '@jl-org/tool'
 downloadByData(src, 'shot.png')
 
@@ -34,13 +37,13 @@ export declare class ShotImg {
      */
     constructor(cvs: HTMLCanvasElement, img?: HTMLImageElement, opacity?: number);
 
-    /** 设置大小 */
-    setSize(w: number, h: number): void;
-
     /** 设置 Canvas 图片 */
     setImg(img: HTMLImageElement): void;
 
-    /** 获取选中区域的图片 */
+    /**
+     * 获取选中区域的图片
+     * 如果图片设置过大小，可能会导致截图区域不准确
+     */
     getShotImg(type?: 'blob' | 'base64'): Promise<string | void | Blob>;
 }
 ```

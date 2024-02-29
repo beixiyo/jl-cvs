@@ -43,22 +43,19 @@ export class ShotImg {
         this.bindEvent()
     }
 
-    /** 设置大小 */
-    setSize(w: number, h: number) {
-        this.cvs.width = w
-        this.cvs.height = h
-
-        this.width = w
-        this.height = h
-    }
-
     /** 设置 Canvas 图片 */
     setImg(img: HTMLImageElement) {
+        const { width, height } = img
+        this.setSize(width, height)
+
         this.img = img
-        this.ctx.drawImage(img, 0, 0, this.width, this.height)
+        this.drawImg()
     }
 
-    /** 获取选中区域的图片 */
+    /**
+     * 获取选中区域的图片
+     * 如果图片设置过大小，可能会导致截图区域不准确
+     */
     async getShotImg(type: 'blob' | 'base64' = 'base64') {
         if (!this.img) {
             return console.warn('请调用 setImg 先设置图片 (plase call setImg first)')
@@ -70,10 +67,26 @@ export class ShotImg {
 
     /** =========================== 私有方法 ================================= */
 
+    private setSize(w: number, h: number) {
+        this.cvs.width = w
+        this.cvs.height = h
+
+        this.width = w
+        this.height = h
+    }
+
     /** 给图片画上蒙层 */
     private drawMask() {
         this.ctx.fillStyle = `rgba(0, 0, 0, ${this.opacity})`
         this.ctx.fillRect(0, 0, this.width, this.height)
+    }
+
+    private drawImg() {
+        if (!this.img) {
+            console.warn('请调用 setImg 先设置图片')
+            return
+        }
+        this.ctx.drawImage(this.img, 0, 0, this.width, this.height)
     }
 
     private bindEvent() {
@@ -95,7 +108,7 @@ export class ShotImg {
         // 记录 `终点 - 起点` 得到宽高
         this.shotWidth = endX - stX
         this.shotHeight = endY - stY
-
+        
         this.clear()
         this.drawMask()
         this.drawSreenShot()
@@ -123,7 +136,7 @@ export class ShotImg {
 
         // 往擦除区域填充
         this.ctx.globalCompositeOperation = 'destination-over'
-        this.ctx.drawImage(this.img, 0, 0)
+        this.drawImg()
     }
 }
 
