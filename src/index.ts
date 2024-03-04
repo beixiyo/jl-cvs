@@ -14,11 +14,18 @@ export {
     getPixel,
     fillPixel,
     parseImgData,
-    cutImg
+    getRandomNum
 } from '@/canvas/tools'
 
 export { ShotImg } from '@/canvas/shotImg'
 
 export {
-    imgToNoise
-} from '@/canvas/imgToNoise'
+    imgToNoise,
+    compressImg,
+    cutImg
+} from '@/canvas/handleImg'
+
+export {
+    getColor,
+    getColorArr
+} from '@/canvas/color'

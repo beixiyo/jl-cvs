@@ -22,7 +22,7 @@ const blob = await si.getShotImg('blob')
 
 /** 接着你可以用我另一个包下载图片 */
 import { downloadByData } from '@jl-org/tool'
-downloadByData(src, 'shot.png')
+downloadByData(blob, 'shot.png')
 
 
 
@@ -51,6 +51,23 @@ export declare class ShotImg {
 
 ## 图片处理
 ```ts
+/**
+ * 截取图片的一部分，返回 base64 | blob
+ */
+export declare function cutImg<T extends TransferType>(img: HTMLImageElement, resType: T, x?: number, y?: number, width?: number, height?: number, opts?: {
+    type?: 'image/png' | 'image/jpeg' | 'image/webp';
+    quality?: number;
+}): HandleImgReturn<T>;
+
+/**
+ * 压缩图片，`image/jpeg | image/webp` 才能压缩
+ * @param img 图片
+ * @param quality 压缩质量
+ * @param resType 需要返回的文件格式
+ * @returns base64 | blob
+ */
+export declare function compressImg<T extends TransferType>(img: HTMLImageElement, resType: T, quality?: number): HandleImgReturn<T>;
+
 /**
  * 图片噪点化
  * @param img 图片
@@ -103,12 +120,19 @@ export declare function parseImgData(imgData: ImageData['data'], width: number, 
 export declare function fillPixel(ctx: CanvasRenderingContext2D, x: number, y: number, color: string): void;
 
 /**
- * 截取图片的一部分，返回 base64 | blob
+ * 获取随机范围整型数值 不包含最大值
  */
-export declare function cutImg<T extends TransferType>(img: HTMLImageElement, resType: T, x?: number, y?: number, width?: number, height?: number, opts?: {
-    type?: 'image/png' | 'image/jpeg' | 'image/webp';
-    quality?: number;
-}): CutImgReturn<T>;
+export declare function getRandomNum(min: number, max: number): number;
+```
+
+
+## 颜色
+```ts
+/** 获取十六进制随机颜色 */
+export declare function getColor(): string;
+
+/** 随机十六进制颜色数组 */
+export declare function getColorArr(size: number): string[];
 ```
 
 

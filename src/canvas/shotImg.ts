@@ -1,4 +1,4 @@
-import { cutImg } from './tools'
+import { HandleImgReturn, TransferType, cutImg } from './handleImg'
 
 
 export class ShotImg {
@@ -56,12 +56,12 @@ export class ShotImg {
      * 获取选中区域的图片
      * 如果图片设置过大小，可能会导致截图区域不准确
      */
-    async getShotImg(type: 'blob' | 'base64' = 'base64') {
+    getShotImg<T extends TransferType>(type: T): HandleImgReturn<T> | void {
         if (!this.img) {
             return console.warn('请调用 setImg 先设置图片 (plase call setImg first)')
         }
 
-        return cutImg(this.img, type, ...this.stPos, this.shotWidth, this.shotHeight)
+        return cutImg<T>(this.img, type, ...this.stPos, this.shotWidth, this.shotHeight)
     }
 
 
@@ -108,7 +108,7 @@ export class ShotImg {
         // 记录 `终点 - 起点` 得到宽高
         this.shotWidth = endX - stX
         this.shotHeight = endY - stY
-        
+
         this.clear()
         this.drawMask()
         this.drawSreenShot()

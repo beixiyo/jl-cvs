@@ -83,44 +83,8 @@ export function fillPixel(ctx: CanvasRenderingContext2D, x: number, y: number, c
 }
 
 /**
- * 截取图片的一部分，返回 base64 | blob
+ * 获取随机范围整型数值 不包含最大值
  */
-export function cutImg<T extends TransferType>(
-    img: HTMLImageElement,
-    resType: T,
-    x = 0,
-    y = 0,
-    width = img.width,
-    height = img.height,
-    opts: {
-        type?: 'image/png' | 'image/jpeg' | 'image/webp',
-        quality?: number,
-    } = {},
-): CutImgReturn<T> {
-    img.setAttribute('crossOrigin', 'anonymous')
-    const { cvs, ctx } = createCvs(width, height)
-    const { type, quality } = opts
-    ctx.drawImage(img, x, y, width, height, 0, 0, width, height)
-
-    if (resType === 'base64' || resType === undefined) {
-        return Promise.resolve(cvs.toDataURL(type, quality)) as CutImgReturn<T>
-    }
-
-    return new Promise<Blob>((resolve) => {
-        cvs.toBlob(
-            blob => {
-                resolve(blob)
-            },
-            type,
-            quality
-        )
-    }) as CutImgReturn<T>
+export function getRandomNum(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min) + min)
 }
-
-
-
-type TransferType = 'base64' | 'blob'
-type CutImgReturn<T extends TransferType> = 
-    T extends 'blob' 
-    ? Promise<Blob>
-    : Promise<string>
