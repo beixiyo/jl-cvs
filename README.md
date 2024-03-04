@@ -49,6 +49,17 @@ export declare class ShotImg {
 ```
 
 
+## 图片处理
+```ts
+/**
+ * 图片噪点化
+ * @param img 图片
+ * @param level 噪点等级，默认 100
+ */
+export declare function imgToNoise(img: HTMLImageElement, level?: number): HTMLCanvasElement;
+```
+
+
 ## Canvas 辅助函数
 ```ts
 /**

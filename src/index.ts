@@ -18,3 +18,7 @@ export {
 } from '@/canvas/tools'
 
 export { ShotImg } from '@/canvas/shotImg'
+
+export {
+    imgToNoise
+} from '@/canvas/imgToNoise'
