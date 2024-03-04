@@ -6,6 +6,12 @@
 **iife** 模式下，全局导出一个 `_jlCvs` 对象
 
 
+## 安装
+```bash
+npm i @jl-org/cvs
+```
+
+
 ## 拖拽区域截图
 ```ts
 /**
@@ -23,7 +29,6 @@ const blob = await si.getShotImg('blob')
 /** 接着你可以用我另一个包下载图片 */
 import { downloadByData } from '@jl-org/tool'
 downloadByData(blob, 'shot.png')
-
 
 
 export declare class ShotImg {
@@ -173,29 +178,4 @@ export declare function genGridPath(width?: number, height?: number, gap?: numbe
 
 /** 生成 svg 文字数组 */
 export declare function genTextArr(width?: number, height?: number, gap?: number, opts?: FontOpts): SVGTextElement[];
-
-type PositionStr = 'top' | 'bottom' | 'left' | 'right';
-type FontOpts = {
-    /** 文字大小 默认 3 */
-    fontSize?: number;
-    fill?: string;
-    /** 文字左偏移 默认 1.5 */
-    offsetX?: number;
-    /** 文字上偏移 默认 1.8 */
-    offsetY?: number;
-    /** 位置，默认 ['left', 'top'] */
-    position?: PositionStr[];
-};
-type GridOpts = {
-    stroke?: string;
-    strokeWidth?: number;
-    /** 需要水平线 默认 true */
-    needHorizontal?: boolean;
-    /** 需要垂直线 默认 true */
-    needVertical?: boolean;
-};
-type Opts = {
-    fontOpts?: FontOpts;
-    gridOpts?: GridOpts;
-};
 ```
