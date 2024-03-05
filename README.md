@@ -60,7 +60,7 @@ export declare class ShotImg {
  * 截取图片的一部分，返回 base64 | blob
  */
 export declare function cutImg<T extends TransferType>(img: HTMLImageElement, resType: T, x?: number, y?: number, width?: number, height?: number, opts?: {
-    type?: 'image/png' | 'image/jpeg' | 'image/webp';
+    type?: ImgMIME | string;
     quality?: number;
 }): HandleImgReturn<T>;
 
@@ -69,9 +69,10 @@ export declare function cutImg<T extends TransferType>(img: HTMLImageElement, re
  * @param img 图片
  * @param quality 压缩质量
  * @param resType 需要返回的文件格式
+ * @param mimeType 图片类型
  * @returns base64 | blob
  */
-export declare function compressImg<T extends TransferType>(img: HTMLImageElement, resType: T, quality?: number): HandleImgReturn<T>;
+export declare function compressImg<T extends TransferType>(img: HTMLImageElement, resType: T, quality?: number, mimeType?: ImgMIME | string): HandleImgReturn<T>;
 
 /**
  * 图片噪点化

@@ -1,4 +1,5 @@
-import { HandleImgReturn, TransferType, cutImg } from './handleImg'
+import { TransferType } from '@/types'
+import { HandleImgReturn, cutImg } from './handleImg'
 
 
 export class ShotImg {
