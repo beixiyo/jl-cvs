@@ -128,7 +128,7 @@ export function waterMark({
     cvs.height = canvasSize
 
     ctx.translate(cvs.width / 2, cvs.height / 2)
-    ctx.rotate((Math.PI / 180) * rotate * -1)
+    ctx.rotate((Math.PI / 180) * rotate)
     ctx.fillStyle = color
     ctx.font = font
     ctx.textAlign = 'center'
