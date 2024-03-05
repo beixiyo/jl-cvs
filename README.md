@@ -11,6 +11,12 @@
 npm i @jl-org/cvs
 ```
 
+## 全部函数
+- [拖拽截图](#拖拽区域截图)
+- [图片处理](#图片处理)
+- [辅助函数](#canvas-辅助函数)
+- [svg](#svg)
+
 
 ## 拖拽区域截图
 ```ts
@@ -80,6 +86,18 @@ export declare function compressImg<T extends TransferType>(img: HTMLImageElemen
  * @param level 噪点等级，默认 100
  */
 export declare function imgToNoise(img: HTMLImageElement, level?: number): HTMLCanvasElement;
+
+/**
+ * 添加水印
+ * 返回 base64 和图片大小，你可以用 CSS 设置上
+ * @example
+ * background-image: url(${base64});
+ * background-size: ${size}px ${size}px;
+ */
+export declare function waterMark({ fontSize, gap, text, color, rotate }: WaterMarkOpts): {
+    base64: string;
+    size: number;
+};
 ```
 
 

@@ -22,7 +22,8 @@ export { ShotImg } from '@/canvas/shotImg'
 export {
     imgToNoise,
     compressImg,
-    cutImg
+    cutImg,
+    waterMark
 } from '@/canvas/handleImg'
 
 export {

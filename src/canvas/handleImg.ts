@@ -101,8 +101,57 @@ export function imgToNoise(img: HTMLImageElement, level = 100) {
 }
 
 
+/**
+ * 添加水印  
+ * 返回 base64 和图片大小，你可以用 CSS 设置上
+ * @example
+ * background-image: url(${base64});
+ * background-size: ${size}px ${size}px;
+ */
+export function waterMark({
+    fontSize = 40,
+    gap = 20,
+    text = '水印',
+    color = '#fff5',
+    rotate = 35
+}: WaterMarkOpts) {
+    const { cvs, ctx } = createCvs(0, 0),
+        _fontSize = fontSize * devicePixelRatio,
+        font = _fontSize + 'px serif'
+
+    // 获取文字宽度
+    ctx.font = font
+    const { width } = ctx.measureText(text)
+    const canvasSize = Math.max(100, width) + gap * devicePixelRatio
+
+    cvs.width = canvasSize
+    cvs.height = canvasSize
+
+    ctx.translate(cvs.width / 2, cvs.height / 2)
+    ctx.rotate((Math.PI / 180) * rotate * -1)
+    ctx.fillStyle = color
+    ctx.font = font
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+
+    ctx.fillText(text, 0, 0)
+
+    return {
+        base64: cvs.toDataURL(),
+        size: canvasSize / devicePixelRatio,
+    }
+}
+
+
 export type HandleImgReturn<T extends TransferType> =
     T extends 'blob'
     ? Promise<Blob>
     : Promise<string>
-    
+
+export type WaterMarkOpts = {
+    text?: string
+    fontSize?: number
+    gap?: number
+    color?: string
+    rotate?: number
+}
