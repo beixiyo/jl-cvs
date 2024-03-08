@@ -60,7 +60,7 @@ export declare class ShotImg {
 ```
 
 
-## 图片处理
+## 图像处理
 ```ts
 /**
  * 截取图片的一部分，返回 base64 | blob
@@ -71,14 +71,14 @@ export declare function cutImg<T extends TransferType>(img: HTMLImageElement, re
 }): HandleImgReturn<T>;
 
 /**
- * 压缩图片，`image/jpeg | image/webp` 才能压缩
+ * 压缩图片
  * @param img 图片
- * @param quality 压缩质量
  * @param resType 需要返回的文件格式
- * @param mimeType 图片类型
+ * @param quality 压缩质量，默认 0.5
+ * @param mimeType 图片类型，默认 `image/webp`。`image/jpeg | image/webp` 才能压缩，
  * @returns base64 | blob
  */
-export declare function compressImg<T extends TransferType>(img: HTMLImageElement, resType: T, quality?: number, mimeType?: ImgMIME | string): HandleImgReturn<T>;
+export declare function compressImg<T extends TransferType>(img: HTMLImageElement, resType: T, quality?: number, mimeType?: 'image/jpeg' | 'image/webp'): HandleImgReturn<T>;
 
 /**
  * 图片噪点化

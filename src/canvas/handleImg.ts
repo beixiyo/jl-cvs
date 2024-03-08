@@ -1,5 +1,5 @@
 import { createCvs } from './tools'
-import { ImgMIME, TransferType } from '@/types'
+import { TransferType } from '@/types'
 
 
 /**
@@ -13,7 +13,7 @@ export function cutImg<T extends TransferType>(
     width = img.width,
     height = img.height,
     opts: {
-        type?: ImgMIME | string
+        type?: string
         quality?: number,
     } = {},
 ): HandleImgReturn<T> {
@@ -39,18 +39,18 @@ export function cutImg<T extends TransferType>(
 
 
 /**
- * 压缩图片，`image/jpeg | image/webp` 才能压缩
+ * 压缩图片
  * @param img 图片
- * @param quality 压缩质量
  * @param resType 需要返回的文件格式
- * @param mimeType 图片类型
+ * @param quality 压缩质量，默认 0.5
+ * @param mimeType 图片类型，默认 `image/webp`。`image/jpeg | image/webp` 才能压缩，
  * @returns base64 | blob
  */
 export function compressImg<T extends TransferType>(
     img: HTMLImageElement,
     resType: T,
     quality = .5,
-    mimeType?: ImgMIME | string
+    mimeType: 'image/jpeg' | 'image/webp' = 'image/webp'
 ): HandleImgReturn<T> {
     const { cvs, ctx } = createCvs(img.width, img.height)
     ctx.drawImage(img, 0, 0)

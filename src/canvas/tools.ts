@@ -41,14 +41,14 @@ export function getPixel(x: number, y: number, imgData: ImageData['data'], width
     const arr: number[] = []
     for (let i = 0; i < 4; i++) {
         /**
-         * 一个像素点的`RGBA`数据在`imgData`中是连续的
-         * 每个像素点占用`4`个位置
-         * 所以`y * width + x`是 第`y`行第`x`列的像素点在`imgData`中的起始位置
-         * `* 4`是因为每个像素点占用`4`个位置
-         * `+ i`是因为`RGBA`数据是连续的
-         * 所以`imgData[(y * width + x) * 4 + i]`就是第`y`行第`x`列的像素点的第`i`个数据
+         * canvas 的像素点是一维数组，需要通过计算获取对应坐标的像素点
+         * 一个像素点占 4 个位置，分别是 `R` `G` `B` `A`
+         * width * 4 * y 是第 `y` 行的起始位置
+         * x * 4 是第 `x` 列的起始位置
+         * 然后加上 `i` 就是 `R` `G` `B` `A` 的位置
          */
-        arr.push(imgData[(y * width + x) * 4 + i])
+        const index = (width * 4 * y) + (x * 4)
+        arr.push(imgData[index + i])
     }
 
     return arr
