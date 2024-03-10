@@ -38,7 +38,7 @@ export function createCvs(width: number, height: number) {
  * @returns `RGBA`数组
  */
 export function getPixel(x: number, y: number, imgData: ImageData['data'], width: number) {
-    const arr: number[] = []
+    const arr: [number, number, number, number] = [0, 0, 0, 0]
     for (let i = 0; i < 4; i++) {
         /**
          * canvas 的像素点是一维数组，需要通过计算获取对应坐标的像素点
@@ -48,7 +48,7 @@ export function getPixel(x: number, y: number, imgData: ImageData['data'], width
          * 然后加上 `i` 就是 `R` `G` `B` `A` 的位置
          */
         const index = (width * 4 * y) + (x * 4)
-        arr.push(imgData[index + i])
+        arr[i] = imgData[index + i]
     }
 
     return arr
