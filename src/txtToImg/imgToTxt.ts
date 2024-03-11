@@ -24,7 +24,7 @@ export async function imgToTxt(options: TxtImgOpt) {
     }
     else if (opts.img) {
         const img = await createImage(opts.img)
-        if (!img) return console.error('img not found')
+        if (!img) throw (new Error('img src is not available'))
 
         let width = opts.width || img.width,
             height = opts.height || img.height

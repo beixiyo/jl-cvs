@@ -85,7 +85,7 @@ const replaceText = '6';
 /**
  * 用文本来绘制图片或视频
  */
-export declare function imgToTxt(options: TxtImgOpt): Promise<void | {
+export declare function imgToTxt(options: TxtImgOpt): Promise<{
     start(): void;
     stop(): void;
 }>;
@@ -214,9 +214,10 @@ export declare function calcCoord(r: number, deg: number): number[];
  * 创建一个指定宽高的画布
  * @param width 画布的宽度
  * @param height 画布的高度
+ * @param options 上下文配置
  * @returns 包含画布和上下文的对象
  */
-export declare function createCvs(width: number, height: number): {
+export declare function createCvs(width?: number, height?: number, options?: CanvasRenderingContext2DSettings): {
     cvs: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
 };

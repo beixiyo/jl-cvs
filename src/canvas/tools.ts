@@ -19,13 +19,14 @@ export function calcCoord(r: number, deg: number) {
  * 创建一个指定宽高的画布
  * @param width 画布的宽度
  * @param height 画布的高度
+ * @param options 上下文配置
  * @returns 包含画布和上下文的对象
  */
-export function createCvs(width: number, height: number) {
+export function createCvs(width?: number, height?: number, options?: CanvasRenderingContext2DSettings) {
     const cvs = document.createElement('canvas'),
-        ctx = cvs.getContext('2d')
-    cvs.width = width
-    cvs.height = height
+        ctx = cvs.getContext('2d', options)
+    width && (cvs.width = width)
+    height && (cvs.height = height)
 
     return { cvs, ctx }
 }

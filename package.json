@@ -1,6 +1,6 @@
 {
     "name": "@jl-org/cvs",
-    "version": "0.0.5",
+    "version": "0.0.51",
     "description": "利用 Canvas 创造令人惊叹的效果",
     "main": "dist/index.cjs",
     "module": "dist/index.js",

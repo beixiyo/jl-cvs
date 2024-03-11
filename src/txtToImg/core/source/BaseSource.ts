@@ -1,3 +1,4 @@
+import { createCvs } from '@/canvas/tools'
 import { Bitmap } from '../Bitmap'
 
 /**
@@ -10,11 +11,11 @@ export abstract class BaseSource {
     private isInit: boolean
 
     constructor(isDynamic = false) {
-        this.canvas = document.createElement('canvas')
-        this.ctx = this.canvas.getContext('2d', {
+        const { cvs, ctx } = createCvs(undefined, undefined, {
             willReadFrequently: isDynamic
-        })!
-        this.isInit = false
+        })
+        this.canvas = cvs
+        this.ctx = ctx
     }
 
     /** 设置大小等参数 */
