@@ -1,4 +1,4 @@
-import { imgToTxt } from '@/txtToImg'
+import { imgToTxt } from '@jl-org/cvs'
 
 
 const replaceText = '6';

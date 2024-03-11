@@ -11,5 +11,8 @@
   "license": "ISC",
   "devDependencies": {
     "vite": "^5.1.5"
+  },
+  "dependencies": {
+    "@jl-org/cvs": "^0.0.5"
   }
 }

@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+dependencies:
+  '@jl-org/cvs':
+    specifier: ^0.0.5
+    version: 0.0.5
+
 devDependencies:
   vite:
     specifier: ^5.1.5
@@ -217,6 +222,10 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /@jl-org/cvs@0.0.5:
+    resolution: {integrity: sha512-Nci220jnfYcbARZpL365NqWUUlnQaMdVEv7V2f7PxZy0IWHaIZZhni/Y6C3orGYsVSrFfK7ZwBu/Cp+NSMLMYA==}
+    dev: false
 
   /@rollup/rollup-android-arm-eabi@4.12.1:
     resolution: {integrity: sha512-iU2Sya8hNn1LhsYyf0N+L4Gf9Qc+9eBTJJJsaOGUp+7x4n2M9dxTt8UvhJl3oeftSjblSlpCfvjA/IfP3g5VjQ==}
