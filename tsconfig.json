@@ -12,6 +12,7 @@
         "outDir": "dist",
         "declaration": true,
         "declarationDir": "./dist/typings",
+        "emitDeclarationOnly": true,
         "skipLibCheck": true,
     },
     "include": [

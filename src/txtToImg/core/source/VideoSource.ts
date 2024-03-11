@@ -4,20 +4,24 @@ export class VideoSource extends BaseSource {
     video: HTMLVideoElement
     width: number
     height: number
-    constructor(option: VideoSourceOption) {
-        super()
+
+    constructor(isDynamic: boolean, option: VideoSourceOption) {
+        super(isDynamic)
+
         this.video = option.video
         this.width = option.width
         this.height = option.height
+        /** 静音才能播放 */
         this.video.muted = this.video.loop = true
         this.video.play()
     }
 
-    protected initCanvas(): void {
+    protected setCvsSize() {
         this.canvas.width = this.width
         this.canvas.height = this.height
     }
-    protected draw(): void {
+
+    protected draw() {
         this.ctx.drawImage(
             this.video,
             0,

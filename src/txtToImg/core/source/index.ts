@@ -1,25 +1,24 @@
 import { BaseSource } from './BaseSource'
 import { ImgSource, ImgSourceOption } from './ImgSource'
-import { TextSourceOption, TextSource } from './TextSource'
+import { TxtSourceOption, TxtSource } from './TxtSource'
 import { VideoSource, VideoSourceOption } from './VideoSource'
 
 export { BaseSource }
-export type { TextSourceOption }
-export type { ImgSourceOption }
-export type { VideoSourceOption }
+export type { TxtSourceOption, ImgSourceOption, VideoSourceOption}
 
 
 export function createSource(
-    sourceOption: TextSourceOption | ImgSourceOption | VideoSourceOption
+    isDynamic: boolean,
+    sourceOption: TxtSourceOption | ImgSourceOption | VideoSourceOption
 ): BaseSource {
-    if ((sourceOption as TextSourceOption).txt) {
-        return new TextSource(sourceOption as TextSourceOption)
+    if ((sourceOption as TxtSourceOption).txt) {
+        return new TxtSource(isDynamic, sourceOption as TxtSourceOption)
     } 
-    else if ((sourceOption as ImgSourceOption).img) {
-        return new ImgSource(sourceOption as ImgSourceOption)
+    if ((sourceOption as ImgSourceOption).img) {
+        return new ImgSource(isDynamic, sourceOption as ImgSourceOption)
     } 
-    else if ((sourceOption as VideoSourceOption).video) {
-        return new VideoSource(sourceOption as VideoSourceOption)
+    if ((sourceOption as VideoSourceOption).video) {
+        return new VideoSource(isDynamic, sourceOption as VideoSourceOption)
     }
     
     throw new TypeError('invalid source options')

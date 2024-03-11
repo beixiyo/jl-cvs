@@ -1,3 +1,5 @@
+import { Pixel } from '@/types'
+
 /** 弧度 */
 const RADIAN = Math.PI / 180
 /**
@@ -29,7 +31,7 @@ export function createCvs(width: number, height: number) {
 }
 
 /**
- * 取出`canvas`用一维数组描述的颜色中 某个坐标的`RGBA`数组  
+ * 取出`canvas`用一维数组描述的颜色中，某个坐标的`RGBA`数组  
  * 注意坐标从 0 开始
  * @param x 宽度中的第几列
  * @param y 高度中的第几行
@@ -38,7 +40,7 @@ export function createCvs(width: number, height: number) {
  * @returns `RGBA`数组
  */
 export function getPixel(x: number, y: number, imgData: ImageData['data'], width: number) {
-    const arr: [number, number, number, number] = [0, 0, 0, 0]
+    const arr: Pixel = [0, 0, 0, 0]
     for (let i = 0; i < 4; i++) {
         /**
          * canvas 的像素点是一维数组，需要通过计算获取对应坐标的像素点
@@ -83,8 +85,57 @@ export function fillPixel(ctx: CanvasRenderingContext2D, x: number, y: number, c
 }
 
 /**
+ * 设置字体，默认居中
+ */
+export function setFont(ctx: CanvasRenderingContext2D, {
+    size = 16,
+    family = 'sans-serif',
+    weight = 'normal',
+    textAlign = 'center',
+    textBaseline = 'middle',
+    color = '#000'
+}: CtxFontOpt) {
+    ctx.font = `${weight} ${size}px ${family}`
+    ctx.textAlign = textAlign
+    ctx.textBaseline = textBaseline
+    ctx.fillStyle = color
+}
+
+/**
  * 获取随机范围整型数值 不包含最大值
  */
 export function getRandomNum(min: number, max: number) {
     return Math.floor(Math.random() * (max - min) + min)
+}
+
+/** ======================================= DOM 工具 ======================================= */
+
+/**
+ * 判断图片的 src 是否可用，可用则返回图片
+ * @param src 图片
+ */
+export const getImg = (src: string) => {
+    const img = new Image()
+    img.src = src
+
+    return new Promise<false | HTMLImageElement>((resolve) => {
+        img.onload = () => resolve(img)
+        img.onerror = () => resolve(false)
+    })
+}
+
+
+export type CtxFontOpt = {
+    /** 字体大小，默认 16 */
+    size?: number
+    /** 字体，默认 sans-serif */
+    family?: string
+    /** 字重，默认 normal */
+    weight?: string
+    /** 水平位置，默认 center */
+    textAlign?: CanvasTextAlign
+    /** 基线，默认 middle */
+    textBaseline?: CanvasTextBaseline
+    /** 颜色，默认 #000 */
+    color?: string
 }

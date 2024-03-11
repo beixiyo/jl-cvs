@@ -12,10 +12,109 @@ npm i @jl-org/cvs
 ```
 
 ## 全部函数
+- [文本绘制 (图片 | 视频 | 文字)](#文本绘制-图片--视频--文字)
 - [拖拽截图](#拖拽区域截图)
 - [图像处理](#图像处理)
 - [辅助函数](#canvas-辅助函数)
 - [svg](#svg)
+
+
+## 文本绘制 (图片 | 视频 | 文字)
+
+示例如下，所有配置都有文档注释
+```ts
+import { imgToTxt } from '@/txtToImg'
+
+const replaceText = '6';
+/** 绘制文字 */
+(function () {
+    const cvs = document.createElement('canvas')
+    document.body.appendChild(cvs)
+
+    imgToTxt({
+        canvas: cvs,
+        opts: {
+            txt: '哎呀你干嘛',
+            txtStyle: {
+                family: '楷体',
+            }
+        },
+        replaceText,
+    })
+})();
+
+/** 绘制图片 */
+(function () {
+    const cvs = document.createElement('canvas')
+    document.body.appendChild(cvs)
+
+    imgToTxt({
+        canvas: cvs,
+        gap: 8,
+        isGray: false,
+        opts: {
+            img: './assets/ji_ni_tai_mei.png',
+            height: 500,
+        },
+        replaceText
+    })
+
+})();
+
+/** 绘制视频 */
+(function () {
+    const cvs = document.createElement('canvas')
+    document.body.appendChild(cvs)
+
+    imgToTxt({
+        canvas: cvs,
+        gap: 10,
+        isGray: false,
+        opts: {
+            video: './assets/ji_ni_tai_mei.mp4',
+            height: 500,
+        },
+        replaceText
+    })
+
+})()
+```
+
+**类型**
+```ts
+/**
+ * 用文本来绘制图片或视频
+ */
+export declare function imgToTxt(options: TxtImgOpt): Promise<void | {
+    start(): void;
+    stop(): void;
+}>;
+
+export type TxtImgOpt = {
+    canvas: HTMLCanvasElement;
+    /** 用什么文本填充绘制区域 */
+    replaceText?: string;
+    /** 间隙，如果设置的太小，将耗费大量性能 */
+    gap?: number;
+    opts: {
+        img?: HTMLImageElement | string;
+        video?: HTMLVideoElement | string;
+        txtStyle?: {
+            family?: string;
+            size?: number;
+            color?: string;
+        };
+        /** 绘制的文本内容 */
+        txt?: string;
+        width?: number;
+        height?: number;
+    };
+    /** 是否动态，视频默认动态 */
+    isDynamic?: boolean;
+    /** 开启灰度 */
+    isGray?: boolean;
+};
+```
 
 
 ## 拖拽区域截图
@@ -37,6 +136,7 @@ import { downloadByData } from '@jl-org/tool'
 downloadByData(blob, 'shot.png')
 
 
+/** ============================= 类型 ============================= */
 export declare class ShotImg {
     /**
      * 把你传入的 Canvas 变成一个可拖动的截图区域
@@ -122,7 +222,7 @@ export declare function createCvs(width: number, height: number): {
 };
 
 /**
- * 取出`canvas`用一维数组描述的颜色中 某个坐标的`RGBA`数组
+ * 取出`canvas`用一维数组描述的颜色中，某个坐标的`RGBA`数组
  * 注意坐标从 0 开始
  * @param x 宽度中的第几列
  * @param y 高度中的第几行
@@ -130,7 +230,7 @@ export declare function createCvs(width: number, height: number): {
  * @param width 图像区域宽度
  * @returns `RGBA`数组
  */
-export declare function getPixel(x: number, y: number, imgData: ImageData['data'], width: number): number[];
+export declare function getPixel(x: number, y: number, imgData: ImageData['data'], width: number): Pixel;
 
 /**
  * 美化 ctx.getImageData.data 属性
@@ -144,9 +244,20 @@ export declare function parseImgData(imgData: ImageData['data'], width: number, 
 export declare function fillPixel(ctx: CanvasRenderingContext2D, x: number, y: number, color: string): void;
 
 /**
+ * 设置字体，默认居中
+ */
+export declare function setFont(ctx: CanvasRenderingContext2D, { size, family, weight, textAlign, textBaseline, color }: CtxFontOpt): void;
+
+/**
  * 获取随机范围整型数值 不包含最大值
  */
 export declare function getRandomNum(min: number, max: number): number;
+
+/**
+ * 判断图片的 src 是否可用，可用则返回图片
+ * @param src 图片
+ */
+export declare const getImg: (src: string) => Promise<false | HTMLImageElement>;
 ```
 
 

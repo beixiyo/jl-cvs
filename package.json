@@ -1,6 +1,6 @@
 {
     "name": "@jl-org/cvs",
-    "version": "0.0.48",
+    "version": "0.0.5",
     "description": "利用 Canvas 创造令人惊叹的效果",
     "main": "dist/index.cjs",
     "module": "dist/index.js",
@@ -16,7 +16,8 @@
         }
     },
     "scripts": {
-        "build": "rollup -c && tsc-alias"
+        "build": "rollup -c && tsc-alias",
+        "test": "pnpm -C ./test dev"
     },
     "keywords": [
         "canvas",

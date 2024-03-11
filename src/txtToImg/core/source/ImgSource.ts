@@ -4,18 +4,20 @@ export class ImgSource extends BaseSource {
     img: HTMLImageElement
     width: number
     height: number
-    constructor(option: ImgSourceOption) {
-        super()
+
+    constructor(isDynamic: boolean, option: ImgSourceOption) {
+        super(isDynamic)
         this.img = option.img
         this.width = option.width
         this.height = option.height
     }
 
-    protected initCanvas(): void {
+    protected setCvsSize() {
         this.canvas.width = this.width
         this.canvas.height = this.height
     }
-    protected draw(): void {
+
+    protected draw() {
         this.ctx.drawImage(
             this.img,
             0,
