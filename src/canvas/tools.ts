@@ -1,13 +1,15 @@
 import { Pixel } from '@/types'
 
-/** 弧度 */
-const RADIAN = Math.PI / 180
+
 /**
  * 根据半径和角度获取坐标
  * @param r 半径
  * @param deg 角度
  */
 export function calcCoord(r: number, deg: number) {
+    /** 弧度 */
+    const RADIAN = Math.PI / 180
+
     const x = Math.sin(deg * RADIAN) * r,
         // 数学坐标系和图像坐标系相反
         y = -Math.cos(deg * RADIAN) * r
