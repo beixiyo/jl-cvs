@@ -1,6 +1,6 @@
 import { BaseSource, createSource } from './core/source'
 import { Painter, PainterOptions } from './core/Painter'
-import { getImg } from '..'
+import { getImg } from '@/canvasTool/tools'
 
 
 /**

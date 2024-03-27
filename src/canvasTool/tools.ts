@@ -104,6 +104,11 @@ export function setFont(ctx: CanvasRenderingContext2D, {
     ctx.fillStyle = color
 }
 
+/** 清除 canvas 整个画布的内容 */
+export function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+}
+
 /**
  * 获取随机范围整型数值 不包含最大值
  */

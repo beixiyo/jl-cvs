@@ -1,4 +1,5 @@
 export * from '@/txtToImg'
+export * from '@/firework'
 export * from '@/svg/genBoard'
 
 export { ShotImg } from '@/canvasTool/shotImg'

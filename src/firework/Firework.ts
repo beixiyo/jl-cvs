@@ -3,9 +3,9 @@ import { BombBall } from './BombBall'
 
 
 export class Firework {
-    private opacity = 1
+    public opacity = 1
+    private startTime: number
 
-    private bombCount = 300
     private bombArr = []
     private ballArr = []
 
@@ -13,9 +13,12 @@ export class Firework {
         public ctx: CanvasRenderingContext2D,
         public x: number,
         public y: number,
+        private bombCount: number,
         public r = 6,
         public speed = 3
-    ) { }
+    ) { 
+        this.startTime = Date.now()
+    }
 
     draw() {
         if (this.ballArr.length) {
@@ -64,6 +67,11 @@ export class Firework {
                 this.bombArr.push(bombBall)
             }
         }
+    }
+
+    /** 获取创建到现在的间隔时间 */
+    getDiffTime() {
+        return Date.now() - this.startTime
     }
 }
 

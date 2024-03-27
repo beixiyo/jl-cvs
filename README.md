@@ -13,6 +13,7 @@ npm i @jl-org/cvs
 
 ## 全部函数
 - [文本绘制 (图片 | 视频 | 文字)](#文本绘制-图片--视频--文字)
+- [放烟花](#放烟花)
 - [拖拽截图](#拖拽区域截图)
 - [图像处理](#图像处理)
 - [辅助函数](#canvas-辅助函数)
@@ -114,6 +115,18 @@ export type TxtImgOpt = {
     /** 开启灰度 */
     isGray?: boolean;
 };
+```
+
+
+## 放烟花
+```ts
+/** demo */
+import { initFirework } from '@jl-org/cvs'
+
+const cvs = document.createElement('canvas')
+document.body.appendChild(cvs)
+
+const cancel = initFirework(cvs)
 ```
 
 
@@ -248,6 +261,9 @@ export declare function fillPixel(ctx: CanvasRenderingContext2D, x: number, y: n
  * 设置字体，默认居中
  */
 export declare function setFont(ctx: CanvasRenderingContext2D, { size, family, weight, textAlign, textBaseline, color }: CtxFontOpt): void;
+
+/** 清除 canvas 整个画布的内容 */
+export declare function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void;
 
 /**
  * 获取随机范围整型数值 不包含最大值
