@@ -1,4 +1,4 @@
-import { setFont } from '@/canvas/tools'
+import { setFont } from '@/canvasTool/tools'
 import { BaseSource } from './BaseSource'
 
 export class TxtSource extends BaseSource {

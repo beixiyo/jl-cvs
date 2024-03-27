@@ -1,8 +1,8 @@
 export * from '@/txtToImg'
 export * from '@/svg/genBoard'
 
-export { ShotImg } from '@/canvas/shotImg'
+export { ShotImg } from '@/canvasTool/shotImg'
 
-export * from '@/canvas/tools'
-export * from '@/canvas/handleImg'
-export * from '@/canvas/color'
+export * from '@/canvasTool/tools'
+export * from '@/canvasTool/handleImg'
+export * from '@/canvasTool/color'

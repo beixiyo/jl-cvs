@@ -1,4 +1,4 @@
-import { getPixel } from '@/canvas/tools'
+import { getPixel } from '@/canvasTool/tools'
 import { Pixel } from '@/types'
 
 export class Bitmap {
