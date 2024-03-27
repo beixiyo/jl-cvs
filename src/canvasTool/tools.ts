@@ -111,6 +111,7 @@ export function getRandomNum(min: number, max: number) {
     return Math.floor(Math.random() * (max - min) + min)
 }
 
+
 /** ======================================= DOM 工具 ======================================= */
 
 /**
@@ -125,6 +126,19 @@ export const getImg = (src: string) => {
         img.onload = () => resolve(img)
         img.onerror = () => resolve(false)
     })
+}
+
+/** 获取浏览器内容宽度 */
+export function getWinWidth() {
+    return window.innerWidth ||
+        document.documentElement.clientWidth ||
+        document.body.clientWidth
+}
+/** 获取浏览器内容高度 */
+export function getWinHeight() {
+    return window.innerHeight ||
+        document.documentElement.clientHeight ||
+        document.body.clientHeight
 }
 
 
