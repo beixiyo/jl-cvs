@@ -11,9 +11,12 @@
 npm i @jl-org/cvs
 ```
 
+### 所有配置都有中文的文档注释
+
 ## 全部函数
 - [文本绘制 (图片 | 视频 | 文字)](#文本绘制-图片--视频--文字)
 - [放烟花](#放烟花)
+- [签名画板](#签名画板)
 - [拖拽截图](#拖拽区域截图)
 - [图像处理](#图像处理)
 - [辅助函数](#canvas-辅助函数)
@@ -21,8 +24,6 @@ npm i @jl-org/cvs
 
 
 ## 文本绘制 (图片 | 视频 | 文字)
-
-示例如下，所有配置都有文档注释
 ```ts
 import { imgToTxt } from '@/txtToImg'
 
@@ -130,6 +131,39 @@ const cancel = initFirework(cvs)
 ```
 
 
+## 签名画板
+```ts
+import { NoteBoard } from '@jl-org/cvs'
+
+
+const board = new NoteBoard({
+    bgColor: '#fff',
+    storkeColor: '#409eff'
+})
+document.body.appendChild(board.cvs)
+
+
+genBtn('截图', async () => {
+    const src = await board.shotImg('base64')
+    const imgEl = new Image()
+    imgEl.src = src
+    document.body.appendChild(imgEl)
+})
+genBtn('清空', () => {
+    board.clear()
+})
+
+
+function genBtn(txt: string, cb: Function) {
+    const btn = document.createElement('button')
+    btn.innerText = txt
+
+    btn.onclick = cb as any
+    document.body.appendChild(btn)
+}
+```
+
+
 ## 拖拽区域截图
 ```ts
 /**
@@ -211,6 +245,18 @@ export declare function waterMark({ fontSize, gap, text, color, rotate }: WaterM
     base64: string;
     size: number;
 };
+
+/** Blob 转 Base64 */
+export declare function blobToBase64(blob: Blob): Promise<string>;
+
+/**
+ * 根据类型，自动推导转换类型，提供完整的 TS 类型推断
+ * @param cvs 画板
+ * @param type 转换类型
+ * @param opts 转换配置，同 Canvas.toDataURL
+ * @returns
+ */
+export declare function cvsToBlobOrBase64<T extends TransferType>(cvs: HTMLCanvasElement, type: T, opts?: CvsToDataOpts): HandleImgReturn<T>;
 ```
 
 

@@ -1,6 +1,7 @@
 export * from '@/txtToImg'
 export * from '@/firework'
 export * from '@/svg/genBoard'
+export * from '@/NoteBoard'
 
 export { ShotImg } from '@/canvasTool/shotImg'
 

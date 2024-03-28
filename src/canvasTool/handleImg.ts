@@ -12,29 +12,13 @@ export function cutImg<T extends TransferType>(
     y = 0,
     width = img.width,
     height = img.height,
-    opts: {
-        type?: string
-        quality?: number,
-    } = {},
+    opts: CvsToDataOpts = {},
 ): HandleImgReturn<T> {
     img.setAttribute('crossOrigin', 'anonymous')
     const { cvs, ctx } = createCvs(width, height)
-    const { type, quality } = opts
     ctx.drawImage(img, x, y, width, height, 0, 0, width, height)
 
-    if (resType === 'base64') {
-        return Promise.resolve(cvs.toDataURL(type, quality)) as HandleImgReturn<T>
-    }
-
-    return new Promise<Blob>((resolve) => {
-        cvs.toBlob(
-            blob => {
-                resolve(blob)
-            },
-            type,
-            quality
-        )
-    }) as HandleImgReturn<T>
+    return cvsToBlobOrBase64(cvs, resType, opts)
 }
 
 
@@ -55,19 +39,10 @@ export function compressImg<T extends TransferType>(
     const { cvs, ctx } = createCvs(img.width, img.height)
     ctx.drawImage(img, 0, 0)
 
-    if (resType === 'base64') {
-        return Promise.resolve(cvs.toDataURL(mimeType, quality)) as HandleImgReturn<T>
-    }
-
-    return new Promise((resolve) => {
-        cvs.toBlob(
-            (blob) => {
-                resolve(blob)
-            },
-            mimeType,
-            quality
-        )
-    }) as HandleImgReturn<T>
+    return cvsToBlobOrBase64(cvs, resType, {
+        type: mimeType,
+        quality
+    })
 }
 
 
@@ -91,9 +66,13 @@ export function imgToNoise(img: HTMLImageElement, level = 100) {
         const blue = data[i + 2] + level * (Math.random() * 2 - 1)
 
         /** 确保颜色值在 0 到 255 之间 */
-        data[i] = Math.min(Math.max(Math.round(red), 0), 255)
-        data[i + 1] = Math.min(Math.max(Math.round(green), 0), 255)
-        data[i + 2] = Math.min(Math.max(Math.round(blue), 0), 255)
+        data[i] = clamp(red)
+        data[i + 1] = clamp(green)
+        data[i + 2] = clamp(blue)
+    }
+
+    function clamp(val: number, max = 255) {
+        return Math.min(Math.max(Math.round(val), 0), max)
     }
 
     ctx.putImageData(imgData, 0, 0)
@@ -143,6 +122,52 @@ export function waterMark({
 }
 
 
+/**
+ * 根据类型，自动推导转换类型，提供完整的 TS 类型推断
+ * @param cvs 画板
+ * @param type 转换类型
+ * @param opts 转换配置，同 Canvas.toDataURL
+ * @returns 
+ */
+export function cvsToBlobOrBase64<T extends TransferType>(
+    cvs: HTMLCanvasElement,
+    type: T,
+    opts?: CvsToDataOpts
+): HandleImgReturn<T> {
+    if (type === 'base64') {
+        return Promise.resolve(cvs.toDataURL(
+            opts?.type,
+            opts?.quality
+        )) as HandleImgReturn<T>
+    }
+
+    return new Promise<Blob>((resolve) => {
+        cvs.toBlob(
+            blob => {
+                resolve(blob)
+            },
+            opts.type,
+            opts.quality
+        )
+    }) as HandleImgReturn<T>
+}
+
+
+/** Blob 转 Base64 */
+export function blobToBase64(blob: Blob) {
+    const fr = new FileReader()
+    fr.readAsDataURL(blob)
+
+    return new Promise<string>((resolve) => {
+        fr.onload = function () {
+            resolve(this.result as string)
+        }
+    })
+}
+
+
+/** ======================= Type ========================= */
+
 export type HandleImgReturn<T extends TransferType> =
     T extends 'blob'
     ? Promise<Blob>
@@ -155,3 +180,9 @@ export type WaterMarkOpts = {
     color?: string
     rotate?: number
 }
+
+export type CvsToDataOpts = {
+    type?: string
+    quality?: number
+}
+
