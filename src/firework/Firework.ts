@@ -1,5 +1,6 @@
 import { Ball } from '@/canvasTool/Ball'
 import { BombBall } from './BombBall'
+import { getColor } from '@/canvasTool/color'
 
 
 export class Firework {
@@ -14,9 +15,11 @@ export class Firework {
         public x: number,
         public y: number,
         private bombCount: number,
+        private getFireworkColor: (opacity: number) => string,
+        private getBoomColor = getColor,
         public r = 6,
-        public speed = 3
-    ) { 
+        public speed = 2.5,
+    ) {
         this.startTime = Date.now()
     }
 
@@ -24,19 +27,23 @@ export class Firework {
         if (this.ballArr.length) {
             return this.ballArr.forEach((ball, i) => {
                 ball.y += this.speed
-                ball.color = getFireworkColor(this.opacity - i / 100)
+                ball.color = this.getFireworkColor(this.opacity - i / 100)
                 ball.draw(this.ctx)
             })
         }
 
-        /* 自上而下绘制 */
-        for (let i = 0; i < 100; i++) {
+        /**
+         * 自上而下绘制
+         * 通过 80 个小球，偏移 y 轴，绘制出一条烟花
+         * 每次绘制的小球半径减小，透明度减小
+         */
+        for (let i = 0; i < 80; i++) {
             const r = this.r - i / 20
             const ball = new Ball(
                 this.x,
                 this.y - i,
                 r < .1 ? .1 : r,
-                getFireworkColor(this.opacity - i / 100)
+                this.getFireworkColor(this.opacity - i / 100)
             )
 
             ball.draw(this.ctx)
@@ -61,7 +68,8 @@ export class Firework {
                     this.x,
                     this.y,
                     dirX,
-                    dirY
+                    dirY,
+                    this.getBoomColor()
                 )
                 bombBall.draw()
                 this.bombArr.push(bombBall)
@@ -73,9 +81,4 @@ export class Firework {
     getDiffTime() {
         return Date.now() - this.startTime
     }
-}
-
-
-function getFireworkColor(opacity: number) {
-    return `rgba(200, 200, 50, ${opacity})`
 }

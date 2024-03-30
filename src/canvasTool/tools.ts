@@ -116,6 +116,20 @@ export function getRandomNum(min: number, max: number) {
     return Math.floor(Math.random() * (max - min) + min)
 }
 
+/**
+ * 解决 Number.toFixed 计算错误
+ * @example
+ * 1.335.toFixed(2) => '1.33'
+ * numFixed(1.335) => 1.34
+ *
+ * @param num 数值
+ * @param precision 精度 默认 2
+ */
+export function numFixed(num: number, precision = 2) {
+    const scale = 10 ** precision
+    return Math.round(num * scale) / scale
+}
+
 
 /** ======================================= DOM 工具 ======================================= */
 

@@ -128,7 +128,7 @@ export class NoteBoard {
     }
 }
 
-type NoteBoardOptions = {
+export type NoteBoardOptions = {
     /** 背景色，默认白色 */
     bgColor?: string
     /** 边框颜色，默认黑色 */

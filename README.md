@@ -20,6 +20,7 @@ npm i @jl-org/cvs
 - [拖拽截图](#拖拽区域截图)
 - [图像处理](#图像处理)
 - [辅助函数](#canvas-辅助函数)
+- [颜色处理](#颜色处理)
 - [svg](#svg)
 
 
@@ -122,12 +123,42 @@ export type TxtImgOpt = {
 ## 放烟花
 ```ts
 /** demo */
-import { initFirework } from '@jl-org/cvs'
+import { createFirework } from '@jl-org/cvs'
 
 const cvs = document.createElement('canvas')
-document.body.appendChild(cvs)
+document.body.appendChild(cvs);
 
-const cancel = initFirework(cvs)
+/** 可以传递配置项 */
+(window as any).cancel = createFirework(cvs, /** FireworkOpts */)
+
+/** 可选配置项 */
+export type FireworkOpts = {
+    width?: number
+    height?: number
+    /** 
+     * 烟花出现的范围，默认 50  
+     * **这个 y 轴和 DOM 的 y 轴相反**  
+     * 即高度以外 50 到可见范围内随机  
+     */
+    yRange?: number,
+    /** 运动速度，默认 2.5 */
+    speed?: number
+    /** 烟花小球半径，默认 6 */
+    r?: number
+    /** 烟花小球数量，默认 150 */
+    ballCount?: number
+    /** 烟花间隔时间，默认 500 ms */
+    gapTime?: number
+    /** 同时存在最大的烟花数量（超过则爆炸）默认 2 */
+    maxCount?: number
+    /** 
+     * 烟花的颜色，注意不是爆炸后小球的颜色  
+     * 需要接收一个透明度，返回一个 rgba 颜色
+     */
+    getFireworkColor?: (opacity: number) => string
+    /** 烟花爆炸小球的颜色，默认随机 */
+    getBoomColor?: () => string
+}
 ```
 
 
@@ -138,7 +169,8 @@ import { NoteBoard } from '@jl-org/cvs'
 
 const board = new NoteBoard({
     bgColor: '#fff',
-    storkeColor: '#409eff'
+    storkeColor: '#409eff',
+    // ...
 })
 document.body.appendChild(board.cvs)
 
@@ -160,6 +192,22 @@ function genBtn(txt: string, cb: Function) {
 
     btn.onclick = cb as any
     document.body.appendChild(btn)
+}
+
+/** 完整配置 */
+export type NoteBoardOptions = {
+    /** 背景色，默认白色 */
+    bgColor?: string;
+    /** 边框颜色，默认黑色 */
+    borderColor?: string;
+    /** 宽度，默认 800 */
+    width?: number;
+    /** 高度，默认 600 */
+    height?: number;
+    /** 画笔粗细，默认 1 */
+    storkeWidth?: number;
+    /** 画笔颜色，默认黑色 */
+    storkeColor?: string;
 }
 ```
 
@@ -317,6 +365,17 @@ export declare function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLC
 export declare function getRandomNum(min: number, max: number): number;
 
 /**
+ * 解决 Number.toFixed 计算错误
+ * @example
+ * 1.335.toFixed(2) => '1.33'
+ * numFixed(1.335) => 1.34
+ *
+ * @param num 数值
+ * @param precision 精度 默认 2
+ */
+export declare function numFixed(num: number, precision?: number): number;
+
+/**
  * 判断图片的 src 是否可用，可用则返回图片
  * @param src 图片
  */
@@ -324,13 +383,41 @@ export declare const getImg: (src: string) => Promise<false | HTMLImageElement>;
 ```
 
 
-## 颜色
+## 颜色处理
 ```ts
 /** 获取十六进制随机颜色 */
 export declare function getColor(): string;
-
 /** 随机十六进制颜色数组 */
 export declare function getColorArr(size: number): string[];
+
+/**
+### 把十六进制颜色转成 原始长度的颜色
+  - #000 => #000000
+  - #000f => #000000ff
+ */
+export declare function hexColorToRaw(color: string): string;
+
+/** 十六进制 转 RGB */
+export declare function hexToRGB(color: string): string;
+
+/** rgb转十六进制 */
+export declare function rgbToHex(color: string): string;
+
+/**
+ * 淡化颜色透明度 支持`rgb`和十六进制
+ * @param color rgba(0, 239, 255, 1)
+ * @param strength 淡化的强度
+ * @returns 返回 RGBA 类似如下格式的颜色 `rgba(0, 0, 0, 0.1)`
+ */
+export declare function lightenColor(color: string, strength?: number): string;
+
+/**
+ * 颜色添加透明度 支持`rgb`和十六进制
+ * @param color 颜色
+ * @param opacity 透明度
+ * @returns 返回十六进制 类似如下格式的颜色 `#ffffff11`
+ */
+export declare function colorAddOpacity(color: string, opacity?: number): string;
 ```
 
 
