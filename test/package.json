@@ -13,6 +13,7 @@
     "vite": "^5.1.5"
   },
   "dependencies": {
-    "@jl-org/cvs": "^0.0.5"
+    "@jl-org/cvs": "^0.0.5",
+    "@jl-org/tool": "^1.3.6"
   }
 }

@@ -218,21 +218,73 @@ export type NoteBoardOptions = {
  * 示例如下，您只需传入 Canvas 和 一张图片 即可使用
  * 或者创建实例后调用 `setImg` 设置图片
  */
-const si = new ShotImg(document.querySelector('canvas'), img)
+import { ShotImg } from '@/ShotImg'
+import { blobToBase64, downloadByData, getImg } from '@jl-org/tool'
+import { genBtn } from './tools'
 
-/** 
- * 获取图片的 blob 或者 base64
- * 如果图片设置过大小，可能会导致截图区域不准确
- */
-const blob = await si.getShotImg('blob')
 
-/** 接着你可以用我另一个包下载图片 */
-import { downloadByData } from '@jl-org/tool'
-downloadByData(blob, 'shot.png')
+const input = document.createElement('input')
+input.type = 'file'
+document.body.appendChild(input)
+document.body.appendChild(document.createElement('canvas'))
+
+let si: ShotImg
+
+input.onchange = async () => {
+    const file = input.files[0]
+    if (!file) return
+
+    const base64 = await blobToBase64(file)
+    const img = await getImg(base64) as HTMLImageElement
+
+    /**
+     * 示例如下，您只需传入 Canvas 和 一张图片 即可使用
+     * 或者创建实例后调用 `setImg` 设置图片
+     */
+    si = new ShotImg(document.querySelector('canvas'), img)
+}
+
+genBtn('下载图片', async () => {
+
+    /** 
+     * 获取图片的 blob 或者 base64
+     * 如果图片设置过大小，可能会导致截图区域不准确
+     */
+    const blob = await si.getShotImg('blob')
+    downloadByData(blob, 'shot.png')
+})
+
+
+function genBtn(txt: string, cb: Function) {
+    const btn = document.createElement('button')
+    btn.innerText = txt
+
+    btn.onclick = cb as any
+    document.body.appendChild(btn)
+}
 
 
 /** ============================= 类型 ============================= */
 export declare class ShotImg {
+    cvs: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+    /** 手指起始位置 */
+    stPos: Point;
+    /** 手指结束位置 */
+    endPos: Point;
+    /** 拖动截图区域大小 */
+    shotWidth: number;
+    /** 拖动截图区域大小 */
+    shotHeight: number;
+    /** 填充图片宽度 也是`canvas`宽度 */
+    width: number;
+    /** 填充图片高度 也是`canvas`高度 */
+    height: number;
+    /** 你传递的图片 */
+    img: HTMLImageElement | undefined;
+    /** 蒙层透明度 */
+    opacity: number;
+
     /**
      * 把你传入的 Canvas 变成一个可拖动的截图区域
      * 传入一个 Canvas 元素，图片可选，你可以在后续调用 `setImg` 方法设置图片
@@ -249,9 +301,14 @@ export declare class ShotImg {
     /**
      * 获取选中区域的图片
      * 如果图片设置过大小，可能会导致截图区域不准确
+     * @param resType 返回类型，默认 `base64`
+     * @param mimeType 图片 MIME 类型
+     * @param quality 图片质量
      */
-    getShotImg(type?: 'blob' | 'base64'): Promise<string | void | Blob>;
+    getShotImg<T extends TransferType>(resType?: T, mimeType?: string, quality?: number): HandleImgReturn<T> | void;
 }
+export type Point = [number, number];
+
 ```
 
 
@@ -259,21 +316,20 @@ export declare class ShotImg {
 ```ts
 /**
  * 截取图片的一部分，返回 base64 | blob
+ * @param img 图片
+ * @param opts 配置
+ * @param resType 需要返回的文件格式，默认 `base64`
  */
-export declare function cutImg<T extends TransferType>(img: HTMLImageElement, resType: T, x?: number, y?: number, width?: number, height?: number, opts?: {
-    type?: ImgMIME | string;
-    quality?: number;
-}): HandleImgReturn<T>;
+export declare function cutImg<T extends TransferType = 'base64'>(img: HTMLImageElement, opts?: CutImgOpts, resType?: T): HandleImgReturn<T>;
 
 /**
  * 压缩图片
  * @param img 图片
- * @param resType 需要返回的文件格式
+ * @param resType 需要返回的文件格式，默认 `base64`
  * @param quality 压缩质量，默认 0.5
  * @param mimeType 图片类型，默认 `image/webp`。`image/jpeg | image/webp` 才能压缩，
- * @returns base64 | blob
  */
-export declare function compressImg<T extends TransferType>(img: HTMLImageElement, resType: T, quality?: number, mimeType?: 'image/jpeg' | 'image/webp'): HandleImgReturn<T>;
+export declare function compressImg<T extends TransferType = 'base64'>(img: HTMLImageElement, resType?: T, quality?: number, mimeType?: 'image/jpeg' | 'image/webp'): HandleImgReturn<T>;
 
 /**
  * 图片噪点化
@@ -294,17 +350,44 @@ export declare function waterMark({ fontSize, gap, text, color, rotate }: WaterM
     size: number;
 };
 
+/**
+ * 把 canvas 上的图像转成 base64 | blob
+ * @param cvs canvas
+ * @param resType 需要返回的文件格式，默认 `base64`
+ * @param type 图片的 MIME 格式
+ * @param quality 压缩质量
+ */
+export declare function getCvsImg<T extends TransferType = 'base64'>(cvs: HTMLCanvasElement, resType?: T, mimeType?: string, quality?: number): HandleImgReturn<T>;
+
+/** 设置图片的 crossOrigin */
+export declare function setImgCrossOrigin(img: HTMLImageElement): void;
+
 /** Blob 转 Base64 */
 export declare function blobToBase64(blob: Blob): Promise<string>;
 
-/**
- * 根据类型，自动推导转换类型，提供完整的 TS 类型推断
- * @param cvs 画板
- * @param type 转换类型
- * @param opts 转换配置，同 Canvas.toDataURL
- * @returns
- */
-export declare function cvsToBlobOrBase64<T extends TransferType>(cvs: HTMLCanvasElement, type: T, opts?: CvsToDataOpts): HandleImgReturn<T>;
+/** ======================= Type ========================= */
+export type HandleImgReturn<T extends TransferType> = T extends 'blob' ? Promise<Blob> : Promise<string>;
+export type WaterMarkOpts = {
+    text?: string;
+    fontSize?: number;
+    gap?: number;
+    color?: string;
+    rotate?: number;
+};
+export type CvsToDataOpts = {
+    type?: string;
+    quality?: number;
+};
+export type CutImgOpts = {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    /** 图片的 MIME 格式 */
+    mimeType?: string;
+    /** 图像质量，取值范围 0 ~ 1 */
+    quality?: number;
+};
 ```
 
 

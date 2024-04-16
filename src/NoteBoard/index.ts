@@ -1,6 +1,6 @@
 import type { TransferType } from '@/types'
 import { clearAllCvs, createCvs } from '@/canvasTool/tools'
-import { cvsToBlobOrBase64, type CvsToDataOpts, type HandleImgReturn } from '@/canvasTool/handleImg'
+import { getCvsImg, type CvsToDataOpts, type HandleImgReturn } from '@/canvasTool/handleImg'
 
 
 /**
@@ -29,11 +29,17 @@ export class NoteBoard {
     }
 
     /**
-     * 获取画板内容，支持 base64 | blob
+     * 获取画板内容，默认为 base64
+     * @param resType 需要返回的文件格式，默认 `base64`
+     * @param type 图片的 MIME 格式
+     * @param quality 压缩质量
      */
-    shotImg<T extends TransferType>(type: T, opts?: CvsToDataOpts): HandleImgReturn<T> {
-        const { cvs } = this
-        return cvsToBlobOrBase64(cvs, type, opts)
+    shotImg<T extends TransferType>(
+        resType: T = 'base64' as T,
+        mimeType?: string,
+        quality?: number
+    ): HandleImgReturn<T> {
+        return getCvsImg<T>(this.cvs, resType, mimeType, quality)
     }
 
     /**

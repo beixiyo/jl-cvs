@@ -1,4 +1,6 @@
 // import './imgToTxt.test'
-import './firework.test'
+// import './firework.test'
 // import './NoteBoard.test'
-// import './imgToNoise.test'
+// import './shotImg.test'
+// import './handleImg.test'
+import './imgToNoise.test'

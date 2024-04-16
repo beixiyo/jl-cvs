@@ -1,5 +1,5 @@
 import { TransferType } from '@/types'
-import { HandleImgReturn, cutImg } from './handleImg'
+import { HandleImgReturn, cutImg } from '../canvasTool/handleImg'
 
 
 export class ShotImg {
@@ -56,13 +56,32 @@ export class ShotImg {
     /**
      * 获取选中区域的图片
      * 如果图片设置过大小，可能会导致截图区域不准确
+     * @param resType 返回类型，默认 `base64`
+     * @param mimeType 图片 MIME 类型
+     * @param quality 图片质量
      */
-    getShotImg<T extends TransferType>(type: T): HandleImgReturn<T> | void {
+    getShotImg<T extends TransferType>(
+        resType: T = 'base64' as T,
+        mimeType?: string,
+        quality?: number
+    ): HandleImgReturn<T> {
         if (!this.img) {
-            return console.warn('请调用 setImg 先设置图片 (plase call setImg first)')
+            console.warn('请调用 setImg 先设置图片 (plase call setImg first)')
+            return Promise.resolve(new Blob([])) as HandleImgReturn<T>
         }
 
-        return cutImg<T>(this.img, type, ...this.stPos, this.shotWidth, this.shotHeight)
+        return cutImg<T>(
+            this.img,
+            {
+                x: this.stPos[0],
+                y: this.stPos[1],
+                width: this.shotWidth,
+                height: this.shotHeight,
+                mimeType: mimeType,
+                quality: quality,
+            },
+            resType
+        )
     }
 
 
