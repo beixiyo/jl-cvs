@@ -359,8 +359,8 @@ export declare function waterMark({ fontSize, gap, text, color, rotate }: WaterM
  */
 export declare function getCvsImg<T extends TransferType = 'base64'>(cvs: HTMLCanvasElement, resType?: T, mimeType?: string, quality?: number): HandleImgReturn<T>;
 
-/** 设置图片的 crossOrigin */
-export declare function setImgCrossOrigin(img: HTMLImageElement): void;
+/** 设置元素的 crossOrigin */
+export declare function setElCrossOrigin(el: HTMLElement): void;
 
 /** Blob 转 Base64 */
 export declare function blobToBase64(blob: Blob): Promise<string>;
