@@ -16,9 +16,7 @@ export class Ball {
         public r: number,
         public color = getColor(),
         public ctx?: CanvasRenderingContext2D
-    ) {
-
-    }
+    ) { }
 
     /**
      * @param ctx 指定绘制上下文

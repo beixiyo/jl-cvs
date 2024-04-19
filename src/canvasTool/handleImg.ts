@@ -13,7 +13,7 @@ export function cutImg<T extends TransferType = 'base64'>(
     opts: CutImgOpts = {},
     resType: T = 'base64' as T,
 ): HandleImgReturn<T> {
-    setImgCrossOrigin(img)
+    setElCrossOrigin(img)
 
     const {
         width = img.width,
@@ -42,7 +42,7 @@ export function compressImg<T extends TransferType = 'base64'>(
     quality = .5,
     mimeType: 'image/jpeg' | 'image/webp' = 'image/webp'
 ): HandleImgReturn<T> {
-    setImgCrossOrigin(img)
+    setElCrossOrigin(img)
 
     const { cvs, ctx } = createCvs(img.width, img.height)
     ctx.drawImage(img, 0, 0)
@@ -160,9 +160,9 @@ export function getCvsImg<T extends TransferType = 'base64'>(
     }
 }
 
-/** 设置图片的 crossOrigin */
-export function setImgCrossOrigin(img: HTMLImageElement) {
-    img.setAttribute('crossOrigin', 'anonymous')
+/** 设置元素的 crossOrigin */
+export function setElCrossOrigin(el: HTMLElement) {
+    el.setAttribute('crossOrigin', 'anonymous')
 }
 
 /** Blob 转 Base64 */
