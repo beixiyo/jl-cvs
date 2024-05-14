@@ -21,9 +21,24 @@ export class NoteBoard {
 
     constructor(opts?: NoteBoardOptions) {
         this.opts = this.mergeOpts(opts)
-        const { ctx, cvs } = createCvs(this.opts.width, this.opts.height)
-        this.ctx = ctx
-        this.cvs = cvs
+
+        const {
+            canvas,
+            width,
+            height
+        } = this.opts
+
+        if (!canvas) {
+            const { ctx, cvs } = createCvs(width, height)
+            this.ctx = ctx
+            this.cvs = cvs
+        }
+        else {
+            this.cvs = canvas
+            canvas.width = width
+            canvas.height = height
+            this.ctx = canvas.getContext('2d')
+        }
 
         this.init()
     }
@@ -135,6 +150,7 @@ export class NoteBoard {
 }
 
 export type NoteBoardOptions = {
+    canvas?: HTMLCanvasElement
     /** 背景色，默认白色 */
     bgColor?: string
     /** 边框颜色，默认黑色 */

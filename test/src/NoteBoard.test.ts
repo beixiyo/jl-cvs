@@ -2,11 +2,15 @@ import { NoteBoard } from '@/NoteBoard'
 import { genBtn } from './tools'
 
 
+const canvas = document.createElement('canvas')
+document.body.appendChild(canvas)
+
 const board = new NoteBoard({
+    canvas,
     bgColor: '#fff',
     storkeColor: '#409eff'
+    // ...
 })
-document.body.appendChild(board.cvs)
 
 
 genBtn('截图', async () => {
@@ -18,5 +22,3 @@ genBtn('截图', async () => {
 genBtn('清空', () => {
     board.clear()
 })
-
-

@@ -167,12 +167,15 @@ export type FireworkOpts = {
 import { NoteBoard } from '@jl-org/cvs'
 
 
+const canvas = document.createElement('canvas')
+document.body.appendChild(canvas)
+
 const board = new NoteBoard({
+    canvas,
     bgColor: '#fff',
-    storkeColor: '#409eff',
+    storkeColor: '#409eff'
     // ...
 })
-document.body.appendChild(board.cvs)
 
 
 genBtn('截图', async () => {
