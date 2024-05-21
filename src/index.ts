@@ -9,3 +9,5 @@ export * from '@/techNum'
 export * from '@/canvasTool/tools'
 export * from '@/canvasTool/handleImg'
 export * from '@/canvasTool/color'
+
+export { Pixel } from '@/types'

@@ -379,8 +379,7 @@ onMounted(() => {
 </template>
 
 <script setup lang="ts">
-import { getWinHeight, getWinWidth } from '@jl-org/cvs'
-import { createScratch } from '@jl-org/cvs'
+import { getWinHeight, getWinWidth, createTechNum } from '@jl-org/cvs'
 
 
 const refCanvas = ref<HTMLCanvasElement>()

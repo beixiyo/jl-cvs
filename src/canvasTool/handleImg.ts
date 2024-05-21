@@ -13,8 +13,6 @@ export function cutImg<T extends TransferType = 'base64'>(
     opts: CutImgOpts = {},
     resType: T = 'base64' as T,
 ): HandleImgReturn<T> {
-    setElCrossOrigin(img)
-
     const {
         width = img.width,
         height = img.height,
@@ -23,8 +21,9 @@ export function cutImg<T extends TransferType = 'base64'>(
         mimeType,
         quality,
     } = opts
-    const { cvs, ctx } = createCvs(width, height)
 
+    const { cvs, ctx } = createCvs(width, height)
+    setElCrossOrigin(img)
     ctx.drawImage(img, x, y, width, height, 0, 0, width, height)
     return getCvsImg<T>(cvs, resType, mimeType, quality)
 }
@@ -42,9 +41,8 @@ export function compressImg<T extends TransferType = 'base64'>(
     quality = .5,
     mimeType: 'image/jpeg' | 'image/webp' = 'image/webp'
 ): HandleImgReturn<T> {
-    setElCrossOrigin(img)
-
     const { cvs, ctx } = createCvs(img.width, img.height)
+    setElCrossOrigin(img)
     ctx.drawImage(img, 0, 0)
 
     return getCvsImg<T>(cvs, resType, mimeType, quality)
@@ -160,7 +158,7 @@ export function getCvsImg<T extends TransferType = 'base64'>(
     }
 }
 
-/** 设置元素的 crossOrigin */
+/** 设置元素的 crossOrigin 为 anonymous */
 export function setElCrossOrigin(el: HTMLElement) {
     el.setAttribute('crossOrigin', 'anonymous')
 }
