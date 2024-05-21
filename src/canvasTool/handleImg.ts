@@ -1,4 +1,4 @@
-import { createCvs } from './tools'
+import { createCvs, setElCrossOrigin } from './tools'
 import { TransferType } from '@/types'
 
 
@@ -158,10 +158,6 @@ export function getCvsImg<T extends TransferType = 'base64'>(
     }
 }
 
-/** 设置元素的 crossOrigin 为 anonymous */
-export function setElCrossOrigin(el: HTMLElement) {
-    el.setAttribute('crossOrigin', 'anonymous')
-}
 
 /** Blob 转 Base64 */
 export function blobToBase64(blob: Blob) {

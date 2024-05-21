@@ -43,7 +43,8 @@ export class Firework {
                 this.x,
                 this.y - i,
                 r < .1 ? .1 : r,
-                this.getFireworkColor(this.opacity - i / 100)
+                this.getFireworkColor(this.opacity - i / 100),
+                this.ctx
             )
 
             ball.draw(this.ctx)

@@ -16,6 +16,7 @@ npm i @jl-org/cvs
 ## 全部函数
 - [文本绘制 (图片 | 视频 | 文字)](#文本绘制-图片--视频--文字)
 - [放烟花](#放烟花)
+- [图片灰飞烟灭效果](#图片灰飞烟灭效果)
 - [签名画板](#签名画板)
 - [拖拽截图](#拖拽区域截图)
 - [刮刮乐](#刮刮乐)
@@ -161,6 +162,30 @@ export type FireworkOpts = {
     /** 烟花爆炸小球的颜色，默认随机 */
     getBoomColor?: () => string
 }
+```
+
+
+## 图片灰飞烟灭效果
+```vue
+<template>
+    <div class="imgToFade-container" ref="refParent">
+        <canvas ref="refCanvas"></canvas>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { imgToFade } from '@jl-org/cvs'
+
+
+const refCanvas = ref<HTMLCanvasElement>()
+onMounted(async () => {
+    imgToFade(refCanvas.value!, {
+        src: 'yourSrc',
+        width: 800,
+        height: 450
+    })
+})
+</script>
 ```
 
 
@@ -442,9 +467,6 @@ export declare function waterMark({ fontSize, gap, text, color, rotate }: WaterM
  */
 export declare function getCvsImg<T extends TransferType = 'base64'>(cvs: HTMLCanvasElement, resType?: T, mimeType?: string, quality?: number): HandleImgReturn<T>;
 
-/** 设置元素的 crossOrigin */
-export declare function setElCrossOrigin(el: HTMLElement): void;
-
 /** Blob 转 Base64 */
 export declare function blobToBase64(blob: Blob): Promise<string>;
 
@@ -482,6 +504,9 @@ export type CutImgOpts = {
  * @param deg 角度
  */
 export declare function calcCoord(r: number, deg: number): number[];
+
+/** 设置元素的 crossOrigin */
+export declare function setElCrossOrigin(el: HTMLElement): void;
 
 /**
  * 创建一个指定宽高的画布

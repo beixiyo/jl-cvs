@@ -1,5 +1,4 @@
 import { Pixel } from '@/types'
-import { setElCrossOrigin } from './handleImg'
 
 
 /**
@@ -17,6 +16,10 @@ export function calcCoord(r: number, deg: number) {
     return [x, y]
 }
 
+/** 设置元素的 crossOrigin 为 anonymous */
+export function setElCrossOrigin(el: HTMLElement) {
+    el.setAttribute('crossOrigin', 'anonymous')
+}
 
 /**
  * 创建一个指定宽高的画布
@@ -45,15 +48,16 @@ export function createCvs(width?: number, height?: number, options?: CanvasRende
  */
 export function getPixel(x: number, y: number, imgData: ImageData['data'], width: number) {
     const arr: Pixel = [0, 0, 0, 0]
+    /**
+     * canvas 的像素点是一维数组，需要通过计算获取对应坐标的像素点
+     * 一个像素点占 4 个位置，分别是 `R` `G` `B` `A`
+     * width * 4 * y 是第 `y` 行的起始位置
+     * x * 4 是第 `x` 列的起始位置
+     * 然后加上 `i` 就是 `R` `G` `B` `A` 的位置
+     */
+    const index = (width * 4 * y) + (x * 4)
+    
     for (let i = 0; i < 4; i++) {
-        /**
-         * canvas 的像素点是一维数组，需要通过计算获取对应坐标的像素点
-         * 一个像素点占 4 个位置，分别是 `R` `G` `B` `A`
-         * width * 4 * y 是第 `y` 行的起始位置
-         * x * 4 是第 `x` 列的起始位置
-         * 然后加上 `i` 就是 `R` `G` `B` `A` 的位置
-         */
-        const index = (width * 4 * y) + (x * 4)
         arr[i] = imgData[index + i]
     }
 
