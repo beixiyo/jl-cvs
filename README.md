@@ -174,15 +174,15 @@ export type FireworkOpts = {
 </template>
 
 <script setup lang="ts">
-import { imgToFade } from '@jl-org/cvs'
+import { getWinHeight, getWinWidth, imgToFade } from '@jl-org/cvs'
 
 
 const refCanvas = ref<HTMLCanvasElement>()
 onMounted(async () => {
     imgToFade(refCanvas.value!, {
         src: 'yourSrc',
-        width: 800,
-        height: 450
+        width: getWinWidth(),
+        height: getWinHeight()
     })
 })
 </script>

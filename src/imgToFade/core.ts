@@ -127,7 +127,7 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
     function getXY(): [x: number, y: number, index: number] {
         const
             /** 随机像素点索引 */
-            index = pixelIndexs[Math.floor(Math.random() * pixelIndexs.length)],
+            index = Math.floor(Math.random() * pixelIndexs.length),
             /** 获取随机像素点 */
             pixelIndex = pixelIndexs[index],
             /** 数组位置对宽度取余，获取行 */
