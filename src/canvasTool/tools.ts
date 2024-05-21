@@ -130,6 +130,11 @@ export function numFixed(num: number, precision = 2) {
     return Math.round(num * scale) / scale
 }
 
+/** 获取一个随机字符串 */
+export function getRandomStr() {
+    return Math.random().toString(36)[2]
+}
+
 
 /** ======================================= DOM 工具 ======================================= */
 

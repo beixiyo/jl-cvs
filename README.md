@@ -19,6 +19,7 @@ npm i @jl-org/cvs
 - [签名画板](#签名画板)
 - [拖拽截图](#拖拽区域截图)
 - [刮刮乐](#刮刮乐)
+- [黑客科技数字墙](#黑客科技数字墙)
 - [图像处理](#图像处理)
 - [辅助函数](#canvas-辅助函数)
 - [颜色处理](#颜色处理)
@@ -338,7 +339,8 @@ onMounted(() => {
     const { width, height } = refParent.value?.getBoundingClientRect() || {}
     createScratch(refCvs.value, {
         width,
-        height
+        height,
+        // ...
     })
 })
 
@@ -365,6 +367,32 @@ onMounted(() => {
     user-select: none;
 }
 </style>
+```
+
+
+## 黑客科技数字墙
+```vue
+<template>
+    <div class="techNum-container" ref="refParent">
+        <canvas ref="refCanvas"></canvas>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { getWinHeight, getWinWidth } from '@jl-org/cvs'
+import { createScratch } from '@jl-org/cvs'
+
+
+const refCanvas = ref<HTMLCanvasElement>()
+onMounted(() => {
+    const { start, stop, setSize } = createTechNum(refCanvas.value!, /** opts */)
+    start()
+
+    window.addEventListener('resize', () => {
+        setSize(getWinWidth(), getWinHeight())
+    })
+})
+</script>
 ```
 
 
