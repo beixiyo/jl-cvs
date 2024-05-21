@@ -18,6 +18,7 @@ npm i @jl-org/cvs
 - [放烟花](#放烟花)
 - [签名画板](#签名画板)
 - [拖拽截图](#拖拽区域截图)
+- [刮刮乐](#刮刮乐)
 - [图像处理](#图像处理)
 - [辅助函数](#canvas-辅助函数)
 - [颜色处理](#颜色处理)
@@ -310,8 +311,60 @@ export declare class ShotImg {
      */
     getShotImg<T extends TransferType>(resType?: T, mimeType?: string, quality?: number): HandleImgReturn<T> | void;
 }
-export type Point = [number, number];
 
+export type Point = [number, number];
+```
+
+
+## 刮刮乐
+```vue
+<template>
+    <div class="scratch-container" ref="refParent">
+        <div class="ticket">
+            <span class="label">一等奖</span>
+        </div>
+        <canvas ref="refCvs"></canvas>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { createScratch } from '@jl-org/cvs'
+
+
+const refCvs = ref(),
+    refParent = ref<HTMLElement>()
+
+onMounted(() => {
+    const { width, height } = refParent.value?.getBoundingClientRect() || {}
+    createScratch(refCvs.value, {
+        width,
+        height
+    })
+})
+
+</script>
+
+<style lang="scss" scoped>
+.scratch-container {
+    position: relative;
+    width: 300px;
+    height: 250px;
+    background-color: #fcc;
+}
+
+.ticket {
+    display: flex;
+    position: absolute;
+    inset: 0;
+}
+
+.label {
+    margin: auto;
+    color: #fff;
+    font-size: 66px;
+    user-select: none;
+}
+</style>
 ```
 
 
