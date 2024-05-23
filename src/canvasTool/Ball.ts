@@ -22,17 +22,16 @@ export class Ball {
     ) { }
 
     /**
-     * @param ctx 指定上下文绘制
+     * @param ctx 指定上下文绘制，默认当前类的上下文
      */
-    draw(ctx?: CanvasRenderingContext2D) {
-        const _ctx = ctx || this.ctx
-        if (!_ctx) {
+    draw(ctx: CanvasRenderingContext2D = this.ctx) {
+        if (!ctx) {
             throw new Error('必须传递上下文（Context must be passed）')
         }
 
-        _ctx.beginPath()
-        _ctx.fillStyle = this.color
-        _ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2)
-        _ctx.fill()
+        ctx.beginPath()
+        ctx.fillStyle = this.color
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2)
+        ctx.fill()
     }
 }

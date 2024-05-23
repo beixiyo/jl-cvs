@@ -505,7 +505,7 @@ export type CutImgOpts = {
  */
 export declare function calcCoord(r: number, deg: number): number[];
 
-/** 设置元素的 crossOrigin */
+/** 设置元素的 crossOrigin 为 anonymous */
 export declare function setElCrossOrigin(el: HTMLElement): void;
 
 /**
