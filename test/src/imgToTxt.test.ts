@@ -1,4 +1,4 @@
-import { imgToTxt } from '@/index'
+import { imgToTxt } from '@/imgToTxt'
 
 
 const replaceText = '6';

@@ -1,6 +1,6 @@
 {
     "name": "@jl-org/cvs",
-    "version": "0.0.78",
+    "version": "0.0.79",
     "description": "利用 Canvas 创造令人惊叹的效果",
     "main": "dist/index.cjs",
     "module": "dist/index.js",
@@ -24,7 +24,7 @@
         "jl-canvas",
         "jl-cvs"
     ],
-    "author": "cjl",
+    "author": "CJL",
     "license": "MIT",
     "devDependencies": {
         "@rollup/plugin-alias": "^5.1.0",

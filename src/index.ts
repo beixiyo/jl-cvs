@@ -1,4 +1,4 @@
-export * from '@/txtToImg'
+export * from '@/imgToTxt'
 export * from '@/firework'
 export * from '@/svg/genBoard'
 export * from '@/NoteBoard'
@@ -7,9 +7,6 @@ export * from '@/scratch'
 export * from '@/techNum'
 export * from '@/imgToFade'
 
-export * from '@/canvasTool/tools'
-export * from '@/canvasTool/handleImg'
-export * from '@/canvasTool/color'
-export * from '@/canvasTool/Ball'
+export * from '@/canvasTool'
 
 export { Pixel } from '@/types'

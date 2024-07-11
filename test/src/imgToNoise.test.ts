@@ -1,5 +1,4 @@
-import { blobToBase64, imgToNoise } from '@/canvasTool/handleImg'
-import { getImg } from '@/index'
+import { blobToBase64, getImg, imgToNoise } from '@/canvasTool'
 
 
 const input = document.createElement('input')

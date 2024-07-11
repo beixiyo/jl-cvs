@@ -11,14 +11,16 @@
 npm i @jl-org/cvs
 ```
 
-### 所有配置都有中文的文档注释
+**所有配置都有中文的文档注释**
+
+**配置详见 TS 类型文件和文档注释**
 
 ## 全部函数
 - [文本绘制 (图片 | 视频 | 文字)](#文本绘制-图片--视频--文字)
 - [放烟花](#放烟花)
 - [图片灰飞烟灭效果](#图片灰飞烟灭效果)
 - [签名画板](#签名画板)
-- [拖拽截图](#拖拽区域截图)
+- [拖拽区域截图](#拖拽区域截图)
 - [刮刮乐](#刮刮乐)
 - [黑客科技数字墙](#黑客科技数字墙)
 - [图像处理](#图像处理)
@@ -29,7 +31,7 @@ npm i @jl-org/cvs
 
 ## 文本绘制 (图片 | 视频 | 文字)
 ```ts
-import { imgToTxt } from '@/txtToImg'
+import { imgToTxt } from '@jl-org/cvs'
 
 const replaceText = '6';
 /** 绘制文字 */
@@ -86,46 +88,9 @@ const replaceText = '6';
 })()
 ```
 
-**类型**
-```ts
-/**
- * 用文本来绘制图片或视频
- */
-export declare function imgToTxt(options: TxtImgOpt): Promise<{
-    start(): void;
-    stop(): void;
-}>;
-
-export type TxtImgOpt = {
-    canvas: HTMLCanvasElement;
-    /** 用什么文本填充绘制区域 */
-    replaceText?: string;
-    /** 间隙，如果设置的太小，将耗费大量性能 */
-    gap?: number;
-    opts: {
-        img?: HTMLImageElement | string;
-        video?: HTMLVideoElement | string;
-        txtStyle?: {
-            family?: string;
-            size?: number;
-            color?: string;
-        };
-        /** 绘制的文本内容 */
-        txt?: string;
-        width?: number;
-        height?: number;
-    };
-    /** 是否动态，视频默认动态 */
-    isDynamic?: boolean;
-    /** 开启灰度 */
-    isGray?: boolean;
-};
-```
-
 
 ## 放烟花
 ```ts
-/** demo */
 import { createFirework } from '@jl-org/cvs'
 
 const cvs = document.createElement('canvas')
@@ -133,59 +98,21 @@ document.body.appendChild(cvs);
 
 /** 可以传递配置项 */
 (window as any).cancel = createFirework(cvs, /** FireworkOpts */)
-
-/** 可选配置项 */
-export type FireworkOpts = {
-    width?: number
-    height?: number
-    /** 
-     * 烟花出现的范围，默认 50  
-     * **这个 y 轴和 DOM 的 y 轴相反**  
-     * 即高度以外 50 到可见范围内随机  
-     */
-    yRange?: number,
-    /** 运动速度，默认 2.5 */
-    speed?: number
-    /** 烟花小球半径，默认 6 */
-    r?: number
-    /** 烟花小球数量，默认 150 */
-    ballCount?: number
-    /** 烟花间隔时间，默认 500 ms */
-    gapTime?: number
-    /** 同时存在最大的烟花数量（超过则爆炸）默认 2 */
-    maxCount?: number
-    /** 
-     * 烟花的颜色，注意不是爆炸后小球的颜色  
-     * 需要接收一个透明度，返回一个 rgba 颜色
-     */
-    getFireworkColor?: (opacity: number) => string
-    /** 烟花爆炸小球的颜色，默认随机 */
-    getBoomColor?: () => string
-}
 ```
 
 
 ## 图片灰飞烟灭效果
-```vue
-<template>
-    <div class="imgToFade-container" ref="refParent">
-        <canvas ref="refCanvas"></canvas>
-    </div>
-</template>
-
-<script setup lang="ts">
+```ts
 import { getWinHeight, getWinWidth, imgToFade } from '@jl-org/cvs'
 
+const cvs = document.createElement('canvas')
+document.body.appendChild(cvs)
 
-const refCanvas = ref<HTMLCanvasElement>()
-onMounted(async () => {
-    imgToFade(refCanvas.value!, {
-        src: 'yourSrc',
-        width: getWinWidth(),
-        height: getWinHeight()
-    })
+imgToFade(cvs, {
+    src: 'yourURI',
+    width: getWinWidth(),
+    height: getWinHeight()
 })
-</script>
 ```
 
 
@@ -215,29 +142,12 @@ genBtn('清空', () => {
     board.clear()
 })
 
-
 function genBtn(txt: string, cb: Function) {
     const btn = document.createElement('button')
     btn.innerText = txt
 
     btn.onclick = cb as any
     document.body.appendChild(btn)
-}
-
-/** 完整配置 */
-export type NoteBoardOptions = {
-    /** 背景色，默认白色 */
-    bgColor?: string;
-    /** 边框颜色，默认黑色 */
-    borderColor?: string;
-    /** 宽度，默认 800 */
-    width?: number;
-    /** 高度，默认 600 */
-    height?: number;
-    /** 画笔粗细，默认 1 */
-    storkeWidth?: number;
-    /** 画笔颜色，默认黑色 */
-    storkeColor?: string;
 }
 ```
 
@@ -248,9 +158,11 @@ export type NoteBoardOptions = {
  * 示例如下，您只需传入 Canvas 和 一张图片 即可使用
  * 或者创建实例后调用 `setImg` 设置图片
  */
-import { ShotImg } from '@/ShotImg'
+import { ShotImg } from '@jl-org/cvs'
+/**
+ * 这个库自行下载，或者你手动实现功能函数也行
+ */
 import { blobToBase64, downloadByData, getImg } from '@jl-org/tool'
-import { genBtn } from './tools'
 
 
 const input = document.createElement('input')
@@ -261,7 +173,7 @@ document.body.appendChild(document.createElement('canvas'))
 let si: ShotImg
 
 input.onchange = async () => {
-    const file = input.files[0]
+    const file = input!.files![0]
     if (!file) return
 
     const base64 = await blobToBase64(file)
@@ -271,7 +183,7 @@ input.onchange = async () => {
      * 示例如下，您只需传入 Canvas 和 一张图片 即可使用
      * 或者创建实例后调用 `setImg` 设置图片
      */
-    si = new ShotImg(document.querySelector('canvas'), img)
+    si = new ShotImg(document.querySelector('canvas')!, img)
 }
 
 genBtn('下载图片', async () => {
@@ -292,53 +204,6 @@ function genBtn(txt: string, cb: Function) {
     btn.onclick = cb as any
     document.body.appendChild(btn)
 }
-
-
-/** ============================= 类型 ============================= */
-export declare class ShotImg {
-    cvs: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
-    /** 手指起始位置 */
-    stPos: Point;
-    /** 手指结束位置 */
-    endPos: Point;
-    /** 拖动截图区域大小 */
-    shotWidth: number;
-    /** 拖动截图区域大小 */
-    shotHeight: number;
-    /** 填充图片宽度 也是`canvas`宽度 */
-    width: number;
-    /** 填充图片高度 也是`canvas`高度 */
-    height: number;
-    /** 你传递的图片 */
-    img: HTMLImageElement | undefined;
-    /** 蒙层透明度 */
-    opacity: number;
-
-    /**
-     * 把你传入的 Canvas 变成一个可拖动的截图区域
-     * 传入一个 Canvas 元素，图片可选，你可以在后续调用 `setImg` 方法设置图片
-     * @param cvs Canvas 元素
-     * @param img 图片
-     * @param opacity 蒙层透明度
-     * @example new ShotImg(document.querySelector('canvas'), img)
-     */
-    constructor(cvs: HTMLCanvasElement, img?: HTMLImageElement, opacity?: number);
-
-    /** 设置 Canvas 图片 */
-    setImg(img: HTMLImageElement): void;
-
-    /**
-     * 获取选中区域的图片
-     * 如果图片设置过大小，可能会导致截图区域不准确
-     * @param resType 返回类型，默认 `base64`
-     * @param mimeType 图片 MIME 类型
-     * @param quality 图片质量
-     */
-    getShotImg<T extends TransferType>(resType?: T, mimeType?: string, quality?: number): HandleImgReturn<T> | void;
-}
-
-export type Point = [number, number];
 ```
 
 
@@ -421,6 +286,7 @@ onMounted(() => {
 
 
 ## 图像处理
+
 ```ts
 /**
  * 截取图片的一部分，返回 base64 | blob

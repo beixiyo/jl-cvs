@@ -1,4 +1,4 @@
-import { createFirework } from '@/index'
+import { createFirework } from '@/firework'
 
 
 const cvs = document.createElement('canvas')

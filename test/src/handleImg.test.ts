@@ -1,5 +1,5 @@
 import { blobToBase64, getImg } from '@jl-org/tool'
-import { compressImg } from '@/index'
+import { compressImg } from '@/canvasTool'
 
 
 const input = document.createElement('input')
