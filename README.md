@@ -126,8 +126,9 @@ document.body.appendChild(canvas)
 
 const board = new NoteBoard({
     canvas,
-    bgColor: '#fff',
-    storkeColor: '#409eff'
+    fillStyle: '#fff',
+    strokeStyle: '#409eff',
+    lineWidth: 30,
     // ...
 })
 
@@ -141,6 +142,14 @@ genBtn('截图', async () => {
 genBtn('清空', () => {
     board.clear()
 })
+
+genBtn('撤销', () => {
+    board.undo()
+})
+genBtn('重做', () => {
+    board.redo()
+})
+
 
 function genBtn(txt: string, cb: Function) {
     const btn = document.createElement('button')
