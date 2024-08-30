@@ -25,6 +25,10 @@ export class NoteBoard {
     private onMousemove = this._onMousemove.bind(this)
     private onMouseup = this._onMouseup.bind(this)
 
+    customMouseDown?: MouseEventFn
+    customMouseMove?: MouseEventFn
+    customMouseUp?: MouseEventFn
+
     /**
      * 记录
      */
@@ -37,8 +41,17 @@ export class NoteBoard {
         const {
             canvas,
             width,
-            height
+            height,
+
+            onMouseDown,
+            onMouseMove,
+            onMouseUp
         } = this.opts
+
+        this.customMouseDown = onMouseDown
+        this.customMouseMove = onMouseMove
+        this.customMouseUp = onMouseUp
+
 
         if (!canvas) {
             const { ctx, cvs } = createCvs(width, height)
@@ -87,7 +100,7 @@ export class NoteBoard {
         if (this.recordIndex < 0) {
             this.clear()
             this.recordIndex = -1
-            return 
+            return
         }
 
         this.clear()
@@ -119,20 +132,13 @@ export class NoteBoard {
         clearAllCvs(this.ctx, this.cvs)
     }
 
-    /**
-     * 设置画板配置
-     */
-    setOptions(opts: NoteBoardOptions) {
-        this.opts = mergeOpts(opts)
-    }
-
     /** 
      * 移除所有事件
      */
     rmEvent() {
         this.cvs.removeEventListener('mousedown', this.onMousedown)
         this.cvs.removeEventListener('mousemove', this.onMousemove)
-        this.cvs.removeEventListener('mouseup', this.onMouseup)
+        window.removeEventListener('mouseup', this.onMouseup)
     }
 
     /**
@@ -148,33 +154,50 @@ export class NoteBoard {
         }
     }
 
+    /**
+     * 设置样式
+     */
+    setStyle(recordStyle: CanvasAttrs = {}) {
+        const { ctx, cvs } = this
+
+        ctx.lineCap = 'round'
+        ctx.strokeStyle = this.opts.strokeStyle || '#000'
+        this.ctx.lineWidth = this.opts.lineWidth || 1
+
+        for (const k in recordStyle) {
+            const attr = recordStyle[k]
+
+            if (typeof attr === 'function') {
+                continue
+            }
+
+            if (k === 'width') {
+                cvs.width = attr
+                continue
+            }
+            if (k === 'height') {
+                cvs.height = attr
+                continue
+            }
+
+            ctx[k] = attr
+        }
+    }
+
     private init() {
         this.bindEvent()
         this.setStyle()
     }
 
-    private setStyle(recordStyle: RecordItem['attr'] = {}) {
-        const { ctx } = this
-
-        ctx.lineCap = 'round'
-        ctx.strokeStyle = this.opts.strokeStyle
-        if (this.opts.lineWidth) {
-            this.ctx.lineWidth = this.opts.lineWidth
-        }
-
-        for (const k in recordStyle) {
-            const item = recordStyle[k]
-            ctx[k] = item
-        }
-    }
-
     private bindEvent() {
         this.cvs.addEventListener('mousedown', this.onMousedown)
         this.cvs.addEventListener('mousemove', this.onMousemove)
-        this.cvs.addEventListener('mouseup', this.onMouseup)
+        window.addEventListener('mouseup', this.onMouseup)
     }
 
     private _onMousedown(e: MouseEvent) {
+        this.customMouseDown?.(e)
+
         /**
          * 重新绘制了，删除后面多余的记录
          */
@@ -188,6 +211,8 @@ export class NoteBoard {
 
     private _onMousemove(e: MouseEvent) {
         if (!this.isDrawing) return
+
+        this.customMouseMove?.(e)
         const { offsetX, offsetY } = e
         const { ctx, start } = this
 
@@ -204,7 +229,8 @@ export class NoteBoard {
         this.start = { x: offsetX, y: offsetY }
     }
 
-    private _onMouseup() {
+    private _onMouseup(e: MouseEvent) {
+        this.customMouseUp?.(e)
         this.isDrawing = false
     }
 
@@ -243,10 +269,31 @@ export class NoteBoard {
 }
 
 
+type MouseEventFn = (e: MouseEvent) => void
+
 export type NoteBoardOptions = {
     canvas?: HTMLCanvasElement
-    /** 背景色 */
+    onMouseDown?: MouseEventFn
+    onMouseMove?: MouseEventFn
+    onMouseUp?: MouseEventFn
+} & CanvasAttrs
+
+
+type CanvasAttrs = {
+    /**
+     * 画笔颜色
+     * @default '#000'
+     */
+    strokeStyle?: string
+    /**
+     * 画笔粗细
+     * @default 1
+     */
+    lineWidth?: number
+    /** 填充色 */
     fillStyle?: string
+    lineCap?: CanvasPathDrawingStyles['lineCap']
+
     /**
      * 宽度
      * @default 800
@@ -257,16 +304,8 @@ export type NoteBoardOptions = {
      * @default 600
      */
     height?: number
-    /**
-     * 画笔粗细
-     * @default 1
-     */
-    lineWidth?: number
-    /**
-     * 画笔颜色
-     * @default '#000'
-     */
-    strokeStyle?: string
+
+    [K: string]: any
 }
 
 type Position = [x: number, y: number]
@@ -275,10 +314,5 @@ type RecordItem = {
         moveTo: Position
         lineTo: Position
     }[]
-    attr: {
-        strokeStyle?: string
-        lineWidth?: number
-        fillStyle?: string
-        lineCap?: CanvasPathDrawingStyles['lineCap']
-    }
+    attr: CanvasAttrs
 }
