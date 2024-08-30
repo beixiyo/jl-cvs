@@ -6,6 +6,7 @@ const canvas = document.createElement('canvas')
 canvas.style.border = '1px solid'
 document.body.appendChild(canvas)
 
+
 /**
  * 画板 =========================================
  */
@@ -19,11 +20,18 @@ const board = new NoteBoard({
         console.log('鼠标按下', e)
     },
     onMouseMove(e) {
-        console.log('鼠标移动', e)
+        // console.log('鼠标移动', e)
     },
     onMouseUp(e) {
         console.log('鼠标抬起', e)
     },
+
+    onRedo(step) {
+        console.log('重做', step)
+    },
+    onUndo(step) {
+        console.log('撤销', step)
+    }
     // ...
 })
 

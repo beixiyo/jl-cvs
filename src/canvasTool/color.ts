@@ -7,6 +7,47 @@ const Reg = {
 }
 
 
+/**
+ * 把颜色提取出 RGBA
+ * @example
+ * ```ts
+ * getColorInfo('rgba(0, 0, 0, 1)')
+ * getColorInfo('rgb(0, 0, 0)')
+ * 
+ * getColorInfo('#fff')
+ * getColorInfo('#fff1')
+ * ```
+ */
+export function getColorInfo(color: string) {
+    if (color.startsWith('#')) {
+        color = hexToRGB(color)
+    }
+
+    let rgbColor: RegExpMatchArray
+    if ((rgbColor = color.match(Reg.rgb))) {
+        const r = parseInt(rgbColor[1])
+        const g = parseInt(rgbColor[2])
+        const b = parseInt(rgbColor[3])
+        const alpha = rgbColor[4] !== undefined
+            ? parseFloat(rgbColor[4])
+            : 1
+
+        return {
+            r,
+            g,
+            b,
+            a: alpha
+        }
+    }
+
+    return {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 0
+    }
+}
+
 /** 获取十六进制随机颜色 */
 export function getColor() {
     return '#' + Math.random().toString(16).slice(2, 8).padEnd(6, '0')

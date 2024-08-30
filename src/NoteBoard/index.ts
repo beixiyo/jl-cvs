@@ -29,6 +29,9 @@ export class NoteBoard {
     customMouseMove?: MouseEventFn
     customMouseUp?: MouseEventFn
 
+    onUndo?: (step: number) => void
+    onRedo?: (step: number) => void
+
     /**
      * 记录
      */
@@ -45,13 +48,18 @@ export class NoteBoard {
 
             onMouseDown,
             onMouseMove,
-            onMouseUp
+            onMouseUp,
+
+            onUndo,
+            onRedo
         } = this.opts
 
         this.customMouseDown = onMouseDown
         this.customMouseMove = onMouseMove
         this.customMouseUp = onMouseUp
 
+        this.onUndo = onUndo
+        this.onRedo = onRedo
 
         if (!canvas) {
             const { ctx, cvs } = createCvs(width, height)
@@ -97,10 +105,15 @@ export class NoteBoard {
          * 那么 redo 最少只能绘制两步
          */
         this.recordIndex--
+        
         if (this.recordIndex < 0) {
             this.clear()
             this.recordIndex = -1
+            this.onUndo?.(this.recordIndex)
             return
+        }
+        else {
+            this.onUndo?.(this.recordIndex)
         }
 
         this.clear()
@@ -119,10 +132,15 @@ export class NoteBoard {
          * 重做，当前索引往后
          */
         this.recordIndex++
-        this.recordIndex = Math.min(this.record.length - 1, this.recordIndex)
+
+        if (this.recordIndex >= this.record.length) {
+            this.recordIndex = Math.min(this.record.length - 1, this.recordIndex)
+            return
+        }
 
         this.clear()
         this.drawRecord()
+        this.onRedo?.(this.recordIndex)
     }
 
     /**
@@ -273,9 +291,13 @@ type MouseEventFn = (e: MouseEvent) => void
 
 export type NoteBoardOptions = {
     canvas?: HTMLCanvasElement
+
     onMouseDown?: MouseEventFn
     onMouseMove?: MouseEventFn
     onMouseUp?: MouseEventFn
+
+    onRedo?: (step: number) => void
+    onUndo?: (step: number) => void
 } & CanvasAttrs
 
 

@@ -468,6 +468,24 @@ export declare const getImg: (src: string) => Promise<false | HTMLImageElement>;
 
 ## 颜色处理
 ```ts
+/**
+ * 把颜色提取出 RGBA
+ * @example
+ * ```ts
+ * getColorInfo('rgba(0, 0, 0, 1)')
+ * getColorInfo('rgb(0, 0, 0)')
+ *
+ * getColorInfo('#fff')
+ * getColorInfo('#fff1')
+ * ```
+ */
+export declare function getColorInfo(color: string): {
+    r: number;
+    g: number;
+    b: number;
+    a: number;
+};
+
 /** 获取十六进制随机颜色 */
 export declare function getColor(): string;
 /** 随机十六进制颜色数组 */
