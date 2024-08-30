@@ -178,10 +178,6 @@ export class NoteBoard {
     setStyle(recordStyle: CanvasAttrs = {}) {
         const { ctx, cvs } = this
 
-        ctx.lineCap = 'round'
-        ctx.strokeStyle = this.opts.strokeStyle || '#000'
-        this.ctx.lineWidth = this.opts.lineWidth || 1
-
         for (const k in recordStyle) {
             const attr = recordStyle[k]
 
@@ -205,6 +201,11 @@ export class NoteBoard {
     private init() {
         this.bindEvent()
         this.setStyle()
+
+        const { ctx } = this
+        ctx.lineCap = 'round'
+        ctx.strokeStyle = this.opts.strokeStyle || '#000'
+        this.ctx.lineWidth = this.opts.lineWidth || 1
     }
 
     private bindEvent() {
