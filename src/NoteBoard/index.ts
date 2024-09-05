@@ -29,14 +29,14 @@ export class NoteBoard {
     customMouseMove?: MouseEventFn
     customMouseUp?: MouseEventFn
 
-    onUndo?: (step: number) => void
-    onRedo?: (step: number) => void
+    onUndo?: () => void
+    onRedo?: () => void
 
     /**
      * 记录
      */
-    private record: RecordItem[] = []
-    private recordIndex = -1
+    private prevList: RecordItem[] = []
+    private nextList: RecordItem[] = []
 
     constructor(opts?: NoteBoardOptions) {
         this.opts = mergeOpts(opts)
@@ -94,53 +94,30 @@ export class NoteBoard {
      * 撤销
      */
     undo() {
-        if (!this.record.length) {
-            return
+        if (this.prevList.length < 1) {
+            return 
         }
 
-        /**
-         * 撤销，当前索引往前
-         * recordIndex 等于 -1 是因为接下来 redo 时，索引会 ++
-         * 如果 recordIndex 等于 0，那么 ++ 后就等于 1
-         * 那么 redo 最少只能绘制两步
-         */
-        this.recordIndex--
-        
-        if (this.recordIndex < 0) {
-            this.clear()
-            this.recordIndex = -1
-            this.onUndo?.(this.recordIndex)
-            return
-        }
-        else {
-            this.onUndo?.(this.recordIndex)
-        }
+        this.nextList.push(this.prevList.pop())
 
         this.clear()
         this.drawRecord()
+        this.onUndo?.()
     }
 
     /**
      * 重做
      */
     redo() {
-        if (!this.record.length || this.recordIndex < -1) {
-            return
+        if (!this.nextList.length) {
+            return 
         }
 
-        /**
-         * 重做，当前索引往后
-         */
-        this.recordIndex++
-
-        if (this.recordIndex >= this.record.length) {
-            this.recordIndex = Math.min(this.record.length - 1, this.recordIndex)
-            return
-        }
+        this.prevList.push(this.nextList.pop())
 
         this.clear()
         this.drawRecord()
-        this.onRedo?.(this.recordIndex)
+        this.onRedo?.()
     }
 
     /**
@@ -216,11 +193,6 @@ export class NoteBoard {
 
     private _onMousedown(e: MouseEvent) {
         this.customMouseDown?.(e)
-
-        /**
-         * 重新绘制了，删除后面多余的记录
-         */
-        this.record.splice(++this.recordIndex)
         this.addNewRecord()
 
         this.isDrawing = true
@@ -240,7 +212,7 @@ export class NoteBoard {
         ctx.lineTo(offsetX, offsetY)
         ctx.stroke()
 
-        this.record[this.record.length - 1].point.push({
+        this.prevList[this.prevList.length - 1].point.push({
             moveTo: [start.x, start.y],
             lineTo: [offsetX, offsetY]
         })
@@ -253,10 +225,14 @@ export class NoteBoard {
         this.isDrawing = false
     }
 
+    /**
+     * 添加一个新的记录，并删除多余的 redo
+     */
     private addNewRecord() {
         const { ctx, opts } = this
 
-        this.record.push({
+        this.nextList.splice(0)
+        this.prevList.push({
             point: [],
             attr: {
                 strokeStyle: opts.strokeStyle,
@@ -270,8 +246,8 @@ export class NoteBoard {
     private drawRecord() {
         const { ctx } = this
 
-        for (let i = 0; i <= this.recordIndex; i++) {
-            const item = this.record[i]
+        for (let i = 0; i < this.prevList.length; i++) {
+            const item = this.prevList[i]
             this.setStyle(item.attr)
 
             for (let j = 0; j < item.point.length; j++) {
@@ -297,8 +273,8 @@ export type NoteBoardOptions = {
     onMouseMove?: MouseEventFn
     onMouseUp?: MouseEventFn
 
-    onRedo?: (step: number) => void
-    onUndo?: (step: number) => void
+    onRedo?: () => void
+    onUndo?: () => void
 } & CanvasAttrs
 
 
