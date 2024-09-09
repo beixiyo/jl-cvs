@@ -1,12 +1,15 @@
 import { Pixel } from '@/types'
 import { BaseSource } from './source'
 
+
 /** 绘制类 */
 export class Painter {
+
     private replaceText: string
     private gap: number
     private source: BaseSource
     private isDynamic: boolean
+
     /** 这里用的是用户传递的 canvas */
     private canvas: HTMLCanvasElement
     private ctx: CanvasRenderingContext2D

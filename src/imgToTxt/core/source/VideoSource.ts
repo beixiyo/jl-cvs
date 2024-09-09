@@ -16,12 +16,12 @@ export class VideoSource extends BaseSource {
         this.video.play()
     }
 
-    protected setCvsSize() {
+    protected override setCvsSize() {
         this.canvas.width = this.width
         this.canvas.height = this.height
     }
 
-    protected draw() {
+    protected override draw() {
         this.ctx.drawImage(
             this.video,
             0,

@@ -1,10 +1,12 @@
 import { createCvs } from '@/canvasTool/tools'
 import { Bitmap } from '../Bitmap'
 
+
 /**
  * 图片源基类，里面有 初始化 和 获取像素 方法
  */
 export abstract class BaseSource {
+    
     /** 这里的 canvas 是自己创建的，而非用户的 */
     protected canvas: HTMLCanvasElement
     protected ctx: CanvasRenderingContext2D

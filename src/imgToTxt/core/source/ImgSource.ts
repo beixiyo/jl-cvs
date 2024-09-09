@@ -12,12 +12,12 @@ export class ImgSource extends BaseSource {
         this.height = option.height
     }
 
-    protected setCvsSize() {
+    protected override setCvsSize() {
         this.canvas.width = this.width
         this.canvas.height = this.height
     }
 
-    protected draw() {
+    protected override draw() {
         this.ctx.drawImage(
             this.img,
             0,

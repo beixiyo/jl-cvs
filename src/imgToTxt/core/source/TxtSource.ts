@@ -9,7 +9,7 @@ export class TxtSource extends BaseSource {
         this.option = option
     }
 
-    protected setCvsSize() {
+    protected override setCvsSize() {
         const { canvas, ctx, option } = this
 
         canvas.width = option.txt.length * option.size
@@ -26,7 +26,7 @@ export class TxtSource extends BaseSource {
     }
 
     /** 绘制大文字 */
-    protected draw(): void {
+    protected override draw(): void {
         this.ctx.fillText(
             this.option.txt,
             this.canvas.width / 2,
