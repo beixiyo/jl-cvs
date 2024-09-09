@@ -1,7 +1,7 @@
 import type { TransferType } from '@/types'
 import { clearAllCvs, createCvs } from '@/canvasTool/tools'
 import { getCvsImg, type HandleImgReturn } from '@/canvasTool/handleImg'
-import { mergeOpts } from './tools'
+import { getCursor, mergeOpts } from './tools'
 
 
 /**
@@ -18,16 +18,20 @@ export class NoteBoard {
     cvs: HTMLCanvasElement
     private opts: NoteBoardOptions
 
+    /** 开启绘制功能 */
+    private _enableDrawing = true
     private isDrawing = false
     private start = { x: 0, y: 0 }
 
     private onMousedown = this._onMousedown.bind(this)
     private onMousemove = this._onMousemove.bind(this)
     private onMouseup = this._onMouseup.bind(this)
+    private onMouseLeave = this._onMouseLeave.bind(this)
 
     customMouseDown?: MouseEventFn
     customMouseMove?: MouseEventFn
     customMouseUp?: MouseEventFn
+    customMouseLeave?: MouseEventFn
 
     onUndo?: () => void
     onRedo?: () => void
@@ -49,6 +53,7 @@ export class NoteBoard {
             onMouseDown,
             onMouseMove,
             onMouseUp,
+            onMouseLeave,
 
             onUndo,
             onRedo
@@ -57,6 +62,7 @@ export class NoteBoard {
         this.customMouseDown = onMouseDown
         this.customMouseMove = onMouseMove
         this.customMouseUp = onMouseUp
+        this.customMouseLeave = onMouseLeave
 
         this.onUndo = onUndo
         this.onRedo = onRedo
@@ -74,6 +80,20 @@ export class NoteBoard {
         }
 
         this.init()
+    }
+
+    get enableDrawing() {
+        return this._enableDrawing
+    }
+
+    set enableDrawing(val) {
+        this._enableDrawing = val
+
+        if (val) {
+            this.cvs.style.cursor = getCursor(this.opts.lineWidth, this.opts.fillStyle)
+            return
+        }
+        this.cvs.style.cursor = 'unset'
     }
 
     /**
@@ -95,7 +115,7 @@ export class NoteBoard {
      */
     undo() {
         if (this.prevList.length < 1) {
-            return 
+            return
         }
 
         this.nextList.push(this.prevList.pop())
@@ -110,7 +130,7 @@ export class NoteBoard {
      */
     redo() {
         if (!this.nextList.length) {
-            return 
+            return
         }
 
         this.prevList.push(this.nextList.pop())
@@ -131,9 +151,12 @@ export class NoteBoard {
      * 移除所有事件
      */
     rmEvent() {
-        this.cvs.removeEventListener('mousedown', this.onMousedown)
-        this.cvs.removeEventListener('mousemove', this.onMousemove)
-        window.removeEventListener('mouseup', this.onMouseup)
+        const { cvs } = this
+
+        cvs.removeEventListener('mousedown', this.onMousedown)
+        cvs.removeEventListener('mousemove', this.onMousemove)
+        cvs.removeEventListener('mouseup', this.onMouseup)
+        cvs.removeEventListener('mouseleave', this.onMouseLeave)
     }
 
     /**
@@ -182,16 +205,20 @@ export class NoteBoard {
         const { ctx } = this
         ctx.lineCap = 'round'
         ctx.strokeStyle = this.opts.strokeStyle || '#000'
-        this.ctx.lineWidth = this.opts.lineWidth || 1
+        ctx.lineWidth = this.opts.lineWidth || 1
+        ctx.globalCompositeOperation = 'xor'
     }
 
     private bindEvent() {
-        this.cvs.addEventListener('mousedown', this.onMousedown)
-        this.cvs.addEventListener('mousemove', this.onMousemove)
-        window.addEventListener('mouseup', this.onMouseup)
+        const { cvs } = this
+        cvs.addEventListener('mousedown', this.onMousedown)
+        cvs.addEventListener('mousemove', this.onMousemove)
+        cvs.addEventListener('mouseup', this.onMouseup)
+        cvs.addEventListener('mouseleave', this.onMouseLeave)
     }
 
     private _onMousedown(e: MouseEvent) {
+        if (!this.enableDrawing) return
         this.customMouseDown?.(e)
         this.addNewRecord()
 
@@ -201,6 +228,7 @@ export class NoteBoard {
     }
 
     private _onMousemove(e: MouseEvent) {
+        if (!this.enableDrawing) return
         if (!this.isDrawing) return
 
         this.customMouseMove?.(e)
@@ -221,7 +249,14 @@ export class NoteBoard {
     }
 
     private _onMouseup(e: MouseEvent) {
+        if (!this.enableDrawing) return
         this.customMouseUp?.(e)
+        this.isDrawing = false
+    }
+
+    private _onMouseLeave(e: MouseEvent) {
+        if (!this.enableDrawing) return
+        this.customMouseLeave?.(e)
         this.isDrawing = false
     }
 
@@ -263,6 +298,7 @@ export class NoteBoard {
 
 }
 
+export { getCursor } from './tools'
 
 type MouseEventFn = (e: MouseEvent) => void
 
@@ -272,6 +308,7 @@ export type NoteBoardOptions = {
     onMouseDown?: MouseEventFn
     onMouseMove?: MouseEventFn
     onMouseUp?: MouseEventFn
+    onMouseLeave?: MouseEventFn
 
     onRedo?: () => void
     onUndo?: () => void

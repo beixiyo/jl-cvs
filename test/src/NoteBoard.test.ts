@@ -1,9 +1,10 @@
-import { NoteBoard } from '@/NoteBoard'
+import { NoteBoard, getCursor } from '@/NoteBoard'
 import { genBtn } from './tools'
 
 
 const canvas = document.createElement('canvas')
 canvas.style.border = '1px solid'
+canvas.style.cursor = getCursor()
 document.body.appendChild(canvas)
 
 
@@ -12,9 +13,9 @@ document.body.appendChild(canvas)
  */
 const board = new NoteBoard({
     canvas,
-    fillStyle: '#fff',
-    strokeStyle: '#000',
-    lineWidth: 1,
+    fillStyle: '#409eff55',
+    strokeStyle: '#409eff55',
+    lineWidth: 30,
 
     onMouseDown(e) {
         console.log('鼠标按下', e)
@@ -26,11 +27,11 @@ const board = new NoteBoard({
         console.log('鼠标抬起', e)
     },
 
-    onRedo(step) {
-        console.log('重做', step)
+    onRedo() {
+        console.log('重做')
     },
-    onUndo(step) {
-        console.log('撤销', step)
+    onUndo() {
+        console.log('撤销')
     }
     // ...
 })
@@ -45,6 +46,7 @@ genBtn('截图', async () => {
     imgEl.src = src
     document.body.appendChild(imgEl)
 })
+
 genBtn('清空', () => {
     board.clear()
 })
@@ -54,4 +56,8 @@ genBtn('撤销', () => {
 })
 genBtn('重做', () => {
     board.redo()
+})
+
+genBtn('关闭/ 打开绘制', () => {
+    board.enableDrawing = !board.enableDrawing
 })
