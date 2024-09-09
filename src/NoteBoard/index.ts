@@ -137,7 +137,7 @@ export class NoteBoard {
     /**
      * 缩放
      */
-    zoomTo(scaleX: number, scaleY: number, point: Point) {
+    zoomTo(scaleX: number, scaleY: number) {
         const { ctx } = this
         this.clear()
 
@@ -335,6 +335,8 @@ export class NoteBoard {
             lineCap,
             lineWidth,
         })
+
+        this.ctx.globalCompositeOperation = 'xor'
     }
 
     /**
@@ -380,11 +382,6 @@ export class NoteBoard {
 }
 
 export { getCursor } from './tools'
-
-export type Point = {
-    x: number
-    y: number
-}
 
 type MouseEventFn = (e: MouseEvent) => void
 
