@@ -59,5 +59,9 @@ genBtn('重做', () => {
 })
 
 genBtn('关闭/ 打开绘制', () => {
-    board.enableDrawing = !board.enableDrawing
+    board.isEnableDrawing = !board.isEnableDrawing
+})
+
+genBtn('开启擦除模式', () => {
+    board.enableErase()
 })

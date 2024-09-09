@@ -10,7 +10,8 @@ export function mergeOpts(
             width: 800,
             height: 600,
             lineWidth: 1,
-            strokeStyle: '#000'
+            strokeStyle: '#000',
+            lineCap: 'round' as CanvasLineCap,
         },
         ...rawOpts,
         ...opts,

@@ -7,8 +7,10 @@ import { getCursor, mergeOpts } from './tools'
 /**
  * ### 画板，提供如下功能
  * - 签名涂抹
+ * - 擦除
  * - 撤销
  * - 重做
+ * - 缩放
  * - 颜色等样式处理
  * - 下载图片
  */
@@ -19,20 +21,37 @@ export class NoteBoard {
     private opts: NoteBoardOptions
 
     /** 开启绘制功能 */
-    private _enableDrawing = true
+    private _isEnableDrawing = true
+    /** 开启鼠标滚轮缩放 */
+    isEnableZoom = true
+
+    /**
+     * 记录缩放、位置等属性
+     */
+    private zoom = 1
     private isDrawing = false
     private start = { x: 0, y: 0 }
 
+    /** 
+     * 统一事件，方便解绑
+     */
     private onMousedown = this._onMousedown.bind(this)
     private onMousemove = this._onMousemove.bind(this)
     private onMouseup = this._onMouseup.bind(this)
     private onMouseLeave = this._onMouseLeave.bind(this)
+    private onWheel = this._onWheel.bind(this)
 
+    /**
+     * 用户事件
+     */
     customMouseDown?: MouseEventFn
     customMouseMove?: MouseEventFn
     customMouseUp?: MouseEventFn
     customMouseLeave?: MouseEventFn
 
+    /**
+     * 撤销与重做
+     */
     onUndo?: () => void
     onRedo?: () => void
 
@@ -82,14 +101,19 @@ export class NoteBoard {
         this.init()
     }
 
-    get enableDrawing() {
-        return this._enableDrawing
+    /** 是否开启绘制功能 */
+    get isEnableDrawing() {
+        return this._isEnableDrawing
     }
 
-    set enableDrawing(val) {
-        this._enableDrawing = val
+    /** 开启绘制功能，设置光标 */
+    set isEnableDrawing(val) {
+        // 恢复正常模式，而非擦除模式
+        this.ctx.globalCompositeOperation = 'source-over'
+        this._isEnableDrawing = val
 
         if (val) {
+            this.setDefaultStyle()
             this.cvs.style.cursor = getCursor(this.opts.lineWidth, this.opts.fillStyle)
             return
         }
@@ -108,6 +132,18 @@ export class NoteBoard {
         quality?: number
     ): HandleImgReturn<T> {
         return getCvsImg<T>(this.cvs, resType, mimeType, quality)
+    }
+
+    /**
+     * 缩放
+     */
+    zoomTo(scaleX: number, scaleY: number, point: Point) {
+        const { ctx } = this
+        this.clear()
+
+        ctx.resetTransform()
+        ctx.scale(scaleX, scaleY)
+        this.drawRecord()
     }
 
     /**
@@ -157,6 +193,15 @@ export class NoteBoard {
         cvs.removeEventListener('mousemove', this.onMousemove)
         cvs.removeEventListener('mouseup', this.onMouseup)
         cvs.removeEventListener('mouseleave', this.onMouseLeave)
+        cvs.removeEventListener('wheel', this.onWheel)
+    }
+
+    /**
+     * 开启擦除模式
+     */
+    enableErase() {
+        this.ctx.strokeStyle = 'tranparent'
+        this.ctx.globalCompositeOperation = 'destination-out'
     }
 
     /**
@@ -170,6 +215,13 @@ export class NoteBoard {
             ctx.fillStyle = fillStyle
             ctx.fillRect(0, 0, cvs.width, cvs.height)
         }
+    }
+
+    /** 
+     * CanvasRenderingContext2D 原始的 drawImage 方法
+     */
+    drawImage(...params: Parameters<CanvasRenderingContext2D['drawImage']>) {
+        return this.ctx.drawImage(...params)
     }
 
     /**
@@ -200,13 +252,7 @@ export class NoteBoard {
 
     private init() {
         this.bindEvent()
-        this.setStyle()
-
-        const { ctx } = this
-        ctx.lineCap = 'round'
-        ctx.strokeStyle = this.opts.strokeStyle || '#000'
-        ctx.lineWidth = this.opts.lineWidth || 1
-        ctx.globalCompositeOperation = 'xor'
+        this.setDefaultStyle()
     }
 
     private bindEvent() {
@@ -215,10 +261,11 @@ export class NoteBoard {
         cvs.addEventListener('mousemove', this.onMousemove)
         cvs.addEventListener('mouseup', this.onMouseup)
         cvs.addEventListener('mouseleave', this.onMouseLeave)
+        cvs.addEventListener('wheel', this.onWheel)
     }
 
     private _onMousedown(e: MouseEvent) {
-        if (!this.enableDrawing) return
+        if (!this.isEnableDrawing) return
         this.customMouseDown?.(e)
         this.addNewRecord()
 
@@ -228,7 +275,7 @@ export class NoteBoard {
     }
 
     private _onMousemove(e: MouseEvent) {
-        if (!this.enableDrawing) return
+        if (!this.isEnableDrawing) return
         if (!this.isDrawing) return
 
         this.customMouseMove?.(e)
@@ -236,8 +283,8 @@ export class NoteBoard {
         const { ctx, start } = this
 
         ctx.beginPath()
-        ctx.moveTo(start.x, start.y)
-        ctx.lineTo(offsetX, offsetY)
+        ctx.moveTo(this.getZoomOffset(start.x), this.getZoomOffset(start.y))
+        ctx.lineTo(this.getZoomOffset(offsetX), this.getZoomOffset(offsetY))
         ctx.stroke()
 
         this.prevList[this.prevList.length - 1].point.push({
@@ -249,15 +296,45 @@ export class NoteBoard {
     }
 
     private _onMouseup(e: MouseEvent) {
-        if (!this.enableDrawing) return
+        if (!this.isEnableDrawing) return
         this.customMouseUp?.(e)
         this.isDrawing = false
     }
 
     private _onMouseLeave(e: MouseEvent) {
-        if (!this.enableDrawing) return
+        if (!this.isEnableDrawing) return
         this.customMouseLeave?.(e)
         this.isDrawing = false
+    }
+
+    private _onWheel(e: WheelEvent) {
+        if (!this.isEnableZoom) return
+
+        e.preventDefault()
+        this.zoom = e.deltaY > 0
+            ? this.zoom / 1.1
+            : this.zoom * 1.1
+
+        if (this.zoom >= 20) {
+            this.zoom = 20
+        }
+        this.zoom = Math.max(this.zoom, .05)
+
+        this.zoomTo(this.zoom, this.zoom)
+    }
+
+    private setDefaultStyle() {
+        const {
+            fillStyle, strokeStyle,
+            lineCap, lineWidth,
+        } = this.opts
+
+        this.setStyle({
+            fillStyle,
+            strokeStyle,
+            lineCap,
+            lineWidth,
+        })
     }
 
     /**
@@ -296,9 +373,18 @@ export class NoteBoard {
         }
     }
 
+    private getZoomOffset(value: number) {
+        return value / this.zoom
+    }
+
 }
 
 export { getCursor } from './tools'
+
+export type Point = {
+    x: number
+    y: number
+}
 
 type MouseEventFn = (e: MouseEvent) => void
 
