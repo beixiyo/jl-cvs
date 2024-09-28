@@ -4,7 +4,7 @@ import { getRandomNum } from '@/utils'
 
 
 /**
- * 爆炸碎片
+ * 爆炸烟花尾迹
  */
 export class ExplosiveDebris {
 

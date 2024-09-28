@@ -3,6 +3,9 @@ import type { Firework2 } from './Firework2'
 import { getRandomNum } from '@/utils'
 
 
+/**
+ * 发射烟花，以及添加烟花尾迹
+ */
 export class Launcher {
 
     /** 烟花实例 */
@@ -64,7 +67,7 @@ export class Launcher {
         if (opacity < 0) opacity = 0
         this.draw(x, y, opacity)
 
-        // 添加痕迹碎片
+        // 添加烟花尾迹
         if (Math.random() > 0.7 && opacity >= 0.1) {
             firework.addDebris({
                 x: x + getRandomNum(-2, 2, true),

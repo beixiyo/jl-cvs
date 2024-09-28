@@ -13,8 +13,8 @@ export class Firework2 {
     private color: string
     private status: Firework2Status = 'waiting'
 
-    /** 痕迹碎片列表 */
-    private debrisList: Debris[] = []
+    /** 烟花尾迹列表 */
+    private debrisArr: Debris[] = []
     private launcher: Launcher
     private explosive?: Explosive
 
@@ -65,19 +65,19 @@ export class Firework2 {
                 this.status = 'end'
             }
         }
-        // 更新痕迹碎片
+        
         this.updateDebris()
     }
 
     /**
-     * 更新痕迹碎片
+     * 更新烟花尾迹
      */
     updateDebris() {
-        const list = [...this.debrisList]
+        const list = [...this.debrisArr]
         list.forEach(debris => {
             const res = debris.update()
             if (res.isEnd) {
-                delFromItem(this.debrisList, debris)
+                delFromItem(this.debrisArr, debris)
             }
         })
     }
@@ -96,7 +96,7 @@ export class Firework2 {
     }
 
     /**
-     * 添加痕迹碎片
+     * 添加烟花尾迹
      */
     addDebris(opts: DebrisOpts) {
         const debris = new Debris({
@@ -104,7 +104,7 @@ export class Firework2 {
             color: opts.color || this.color
         })
         debris.start()
-        this.debrisList.push(debris)
+        this.debrisArr.push(debris)
     }
 
     isEnd() {

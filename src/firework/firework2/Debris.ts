@@ -3,7 +3,7 @@ import { getRandomNum } from '@/utils'
 
 
 /**
- * 痕迹碎片类
+ * 烟花尾迹
  */
 export class Debris {
 

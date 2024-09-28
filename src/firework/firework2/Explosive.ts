@@ -16,7 +16,7 @@ export class Explosive {
     /** 爆炸碎片数量 */
     debrisNum: number
 
-    debrisList: ExplosiveDebris[] = []
+    debrisArr: ExplosiveDebris[] = []
     /** 是否要二次爆炸 */
     needSecondBurst: boolean
     /** 是否是第一次爆炸 */
@@ -50,17 +50,17 @@ export class Explosive {
                 ...params
             })
             explosiveDebris.start()
-            this.debrisList.push(explosiveDebris)
+            this.debrisArr.push(explosiveDebris)
         }
         this.isFirstBurst = false
     }
 
     update() {
-        const list = [...this.debrisList]
+        const list = [...this.debrisArr]
         list.forEach(debris => {
             const res = debris.update()
             if (res.isEnd) {
-                delFromItem(this.debrisList, debris)
+                delFromItem(this.debrisArr, debris)
 
                 // 二次爆炸
                 if (debris.needSecondBurst) {
