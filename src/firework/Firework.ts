@@ -39,13 +39,13 @@ export class Firework {
          */
         for (let i = 0; i < 80; i++) {
             const r = this.r - i / 20
-            const ball = new Ball(
-                this.x,
-                this.y - i,
-                r < .1 ? .1 : r,
-                this.getFireworkColor(this.opacity - i / 100),
-                this.ctx
-            )
+            const ball = new Ball({
+                x: this.x,
+                y: this.y - i,
+                r: r < .1 ? .1 : r,
+                color: this.getFireworkColor(this.opacity - i / 100),
+                ctx: this.ctx,
+            })
 
             ball.draw(this.ctx)
             this.ballArr.push(ball)

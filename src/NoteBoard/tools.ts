@@ -1,4 +1,4 @@
-import type { NoteBoardOptions } from '.'
+import type { NoteBoardOptions } from './type'
 
 
 export function mergeOpts(

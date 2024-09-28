@@ -5,6 +5,8 @@
 
 **iife** 模式下，全局导出一个 `_jlCvs` 对象
 
+---
+
 
 ## 安装
 ```bash
@@ -16,8 +18,10 @@ npm i @jl-org/cvs
 **配置详见 TS 类型文件和文档注释**
 
 ## 全部函数
+
 - [文本绘制 (图片 | 视频 | 文字)](#文本绘制-图片--视频--文字)
 - [放烟花](#放烟花)
+- [二段爆炸的烟花](#二段爆炸的烟花)
 - [图片灰飞烟灭效果](#图片灰飞烟灭效果)
 - [签名画板，可绘制、撤销等](#签名画板)
 - [拖拽区域截图](#拖拽区域截图)
@@ -27,6 +31,22 @@ npm i @jl-org/cvs
 - [辅助函数](#canvas-辅助函数)
 - [颜色处理](#颜色处理)
 - [svg](#svg)
+
+---
+
+
+## 示例用到的辅助函数
+```ts
+function genBtn(txt: string, cb: Function) {
+    const btn = document.createElement('button')
+    btn.innerText = txt
+
+    btn.onclick = cb as any
+    document.body.appendChild(btn)
+}
+```
+
+---
 
 
 ## 文本绘制 (图片 | 视频 | 文字)
@@ -88,6 +108,8 @@ const replaceText = '6';
 })()
 ```
 
+---
+
 
 ## 放烟花
 ```ts
@@ -100,6 +122,39 @@ document.body.appendChild(cvs);
 (window as any).cancel = createFirework(cvs, /** FireworkOpts */)
 ```
 
+---
+
+
+## 二段爆炸的烟花
+```ts
+import { createFirework2 } from '@jl-org/cvs'
+
+
+const cvs = document.createElement('canvas'),
+    ctx = cvs.getContext('2d')!
+
+const width = 500,
+    height = 600
+
+document.body.appendChild(cvs)
+
+const { addFirework, stop, resume } = createFirework2(cvs, {
+    ctx,
+    height,
+    width,
+});
+
+(window as any).stop = stop;
+(window as any).resume = resume;
+
+
+genBtn('发射烟花', () => {
+    addFirework()
+})
+```
+
+---
+
 
 ## 图片灰飞烟灭效果
 ```ts
@@ -109,11 +164,14 @@ const cvs = document.createElement('canvas')
 document.body.appendChild(cvs)
 
 imgToFade(cvs, {
-    src: 'yourURI',
+    src: 'Your Assets URI',
     width: getWinWidth(),
     height: getWinHeight()
 })
 ```
+
+---
+
 
 
 ## 签名画板
@@ -184,16 +242,9 @@ genBtn('关闭/ 打开绘制', () => {
 genBtn('开启擦除模式', () => {
     board.enableErase()
 })
-
-
-function genBtn(txt: string, cb: Function) {
-    const btn = document.createElement('button')
-    btn.innerText = txt
-
-    btn.onclick = cb as any
-    document.body.appendChild(btn)
-}
 ```
+
+---
 
 
 ## 拖拽区域截图
@@ -239,16 +290,9 @@ genBtn('下载图片', async () => {
     const blob = await si.getShotImg('blob')
     downloadByData(blob, 'shot.png')
 })
-
-
-function genBtn(txt: string, cb: Function) {
-    const btn = document.createElement('button')
-    btn.innerText = txt
-
-    btn.onclick = cb as any
-    document.body.appendChild(btn)
-}
 ```
+
+---
 
 
 ## 刮刮乐
@@ -303,6 +347,8 @@ onMounted(() => {
 </style>
 ```
 
+---
+
 
 ## 黑客科技数字墙
 ```vue
@@ -327,6 +373,8 @@ onMounted(() => {
 })
 </script>
 ```
+
+---
 
 
 ## 图像处理
@@ -405,6 +453,8 @@ export type CutImgOpts = {
 };
 ```
 
+---
+
 
 ## Canvas 辅助函数
 ```ts
@@ -461,27 +511,13 @@ export declare function setFont(ctx: CanvasRenderingContext2D, { size, family, w
 export declare function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void;
 
 /**
- * 获取随机范围整型数值 不包含最大值
- */
-export declare function getRandomNum(min: number, max: number): number;
-
-/**
- * 解决 Number.toFixed 计算错误
- * @example
- * 1.335.toFixed(2) => '1.33'
- * numFixed(1.335) => 1.34
- *
- * @param num 数值
- * @param precision 精度 默认 2
- */
-export declare function numFixed(num: number, precision?: number): number;
-
-/**
  * 判断图片的 src 是否可用，可用则返回图片
  * @param src 图片
  */
 export declare const getImg: (src: string) => Promise<false | HTMLImageElement>;
 ```
+
+---
 
 
 ## 颜色处理
@@ -538,6 +574,8 @@ export declare function lightenColor(color: string, strength?: number): string;
  */
 export declare function colorAddOpacity(color: string, opacity?: number): string;
 ```
+
+---
 
 
 ## svg

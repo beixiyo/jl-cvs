@@ -77,13 +77,13 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
             const color = `rgba(${R}, ${G}, ${B}, ${A})`
 
             const [centerX, centerY] = getCenterPos()
-            const point = new Ball(
-                x + centerX,
-                y + centerY,
-                Math.random() * 2.2,
+            const point = new Ball({
+                x: x + centerX,
+                y: y + centerY,
+                r: Math.random() * 2.2,
                 color,
-                bgCtx
-            )
+                ctx: bgCtx
+            })
             // 记录当前消失的某个像素点
             destroyBalls.push(point)
 

@@ -1,6 +1,7 @@
-import { getRandomStr, getWinHeight, getWinWidth } from '@/canvasTool/tools'
+import { getWinHeight, getWinWidth } from '@/canvasTool/tools'
 import type { TechNumOpts } from './types'
 import { getColor as _getColor } from '@/canvasTool/color'
+import { getRandomStr } from '@/utils'
 
 
 /**

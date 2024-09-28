@@ -1,4 +1,4 @@
-import { numFixed } from './tools'
+import { numFixed } from '@/utils'
 
 
 const Reg = {
