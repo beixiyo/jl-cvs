@@ -4,26 +4,16 @@ import { cutImg } from '@/canvasTool'
 
 const WIDTH = 600
 const HEIGHT = 600
-
+document.body.style.padding = '40px'
 
 /**
  * 图片画板 =========================================
  */
-const imgCanvas = genCanvas(false, canvas => {
-    const div = document.createElement('div')
-    div.style.position = 'absolute'
-    div.style.top = '40px'
-    div.style.left = '0'
-    div.style.overflow = 'hidden'
-
-    div.style.width = WIDTH + 'px'
-    div.style.height = HEIGHT + 'px'
-
-    document.body.appendChild(div)
-    div.appendChild(canvas)
-})
-const imgBoard = new NoteBoard({
-    canvas: imgCanvas,
+const el = document.createElement('div')
+el.style.border = '1px solid'
+document.body.appendChild(el)
+const board = new NoteBoard({
+    el,
     width: WIDTH,
     height: HEIGHT,
 })
@@ -31,7 +21,7 @@ const imgBoard = new NoteBoard({
 /**
  * 居中绘制图片，并自动拉伸大小
  */
-imgBoard.drawImg(
+board.drawImg(
     new URL('./PixPin_2024-10-29_14-27-44.png', import.meta.url).href,
     {
         center: true,
@@ -47,90 +37,26 @@ imgBoard.drawImg(
             rawWidth,
             rawHeight,
         }) {
-            console.log({ drawHeight, drawWidth, minScale, rawWidth, rawHeight })
-            console.log(`图片原始宽度: ${rawWidth}, ${drawWidth / minScale}`)
-            console.log(`图片原始高度: ${rawHeight}, ${drawHeight / minScale}`)
+            // console.log({ drawHeight, drawWidth, minScale, rawWidth, rawHeight })
+            // console.log(`图片原始宽度: ${rawWidth}, ${drawWidth / minScale}`)
+            // console.log(`图片原始高度: ${rawHeight}, ${drawHeight / minScale}`)
 
-            /**
-             * 还原原始尺寸图片
-             */
-            const mask = await cutImg(img, {
-                x,
-                y,
-                width: drawWidth,
-                height: drawHeight,
-                scaleX: 1 / minScale,
-                scaleY: 1 / minScale,
-            })
+            // /**
+            //  * 还原原始尺寸图片
+            //  */
+            // const mask = await cutImg(img, {
+            //     x,
+            //     y,
+            //     width: drawWidth,
+            //     height: drawHeight,
+            //     scaleX: 1 / minScale,
+            //     scaleY: 1 / minScale,
+            // })
 
-            console.log(mask)
+            // console.log(mask)
         },
     },
 )
-
-
-/**
- * 画板 =========================================
- */
-const canvas = genCanvas()
-canvas.style.top = '40px'
-
-let scaleX = 1,
-    scaleY = 1,
-    translateX = 0,
-    translateY = 0
-
-const board = new NoteBoard({
-    canvas,
-    width: WIDTH,
-    height: HEIGHT,
-    fillStyle: '#409eff33',
-    strokeStyle: '#409eff33',
-    lineWidth: 30,
-
-    onMouseDown(e) {
-        // console.log('鼠标按下', e)
-    },
-    onMouseMove(e) {
-        // console.log('鼠标移动', e)
-    },
-    onMouseUp(e) {
-        // console.log('鼠标抬起', e)
-    },
-
-    onRedo() {
-        console.log('重做')
-    },
-    onUndo() {
-        console.log('撤销')
-    },
-
-    /**
-     * 同步缩放
-     */
-    onWheel({ zoomX, zoomY, offsetX, offsetY }) {
-        scaleX = zoomX
-        scaleY = zoomY
-
-        imgCanvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`
-        imgCanvas.style.transformOrigin = `${offsetX}px ${offsetY}px`
-    },
-    /**
-     * @bug
-     */
-    // onDrag({ dx, dy }) {
-    //     translateX = dx
-    //     translateY = dy
-
-    //     imgCanvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`
-    // }
-})
-
-/**
- * 开启绘制和缩放
- */
-board.setMode('draw')
-board.isEnableZoom = true
 
 
 /**
@@ -155,7 +81,6 @@ genBtn('重做', () => {
 })
 genBtn('重置大小', () => {
     board.reset()
-    imgCanvas.style.transform = 'none'
 })
 
 genBtn('关闭/ 打开绘制', () => {
@@ -175,21 +100,3 @@ genBtn('开启/ 关闭拖拽模式', () => {
         ? board.setMode('none')
         : board.setMode('drag')
 })
-
-
-function genCanvas(needBorder = true, appendFn?: (canvas: HTMLCanvasElement) => void) {
-    const canvas = document.createElement('canvas')
-    needBorder && (canvas.style.border = '1px solid')
-    canvas.style.position = 'absolute'
-    canvas.style.top = '0'
-    canvas.style.left = '0'
-
-    if (appendFn) {
-        appendFn(canvas)
-    }
-    else {
-        document.body.appendChild(canvas)
-    }
-
-    return canvas
-}

@@ -23,8 +23,10 @@ import { createUnReDoList, throttle } from '@/utils'
  */
 export class NoteBoard {
 
-    ctx: CanvasRenderingContext2D
-    cvs: HTMLCanvasElement
+    /** 容器 */
+    el: HTMLElement
+    cvs = document.createElement('canvas')
+    ctx = this.cvs.getContext('2d') as CanvasRenderingContext2D
     private opts: NoteBoardOptions
 
     mode: Mode = 'none'
@@ -36,12 +38,13 @@ export class NoteBoard {
      */
     private zoom = 1
     private isDrawing = false
-    private start = { x: 0, y: 0 }
+    private drawStart = { x: 0, y: 0 }
 
     private isDragging = false
     private dragStart = { x: 0, y: 0 }
-    private offsetX = 0
-    private offsetY = 0
+    private scale = 1
+    private translateX = 0
+    private translateY = 0
 
     /** 
      * 统一事件，方便解绑
@@ -56,7 +59,6 @@ export class NoteBoard {
      * 节流函数
      */
     private _zoomTo = throttle(this.zoomTo.bind(this), 30)
-    private _dragCanvas = throttle(this.dragCanvas.bind(this), 8)
 
     /**
      * 用户事件
@@ -84,7 +86,7 @@ export class NoteBoard {
         this.opts = mergeOpts(opts)
 
         const {
-            canvas,
+            el,
             width,
             height,
 
@@ -100,6 +102,9 @@ export class NoteBoard {
             onRedo
         } = this.opts
 
+        /**
+         * 用户事件
+         */
         this.customMouseDown = onMouseDown
         this.customMouseMove = onMouseMove
         this.customMouseUp = onMouseUp
@@ -111,17 +116,17 @@ export class NoteBoard {
         this.onUndo = onUndo
         this.onRedo = onRedo
 
-        if (!canvas) {
-            const { ctx, cvs } = createCvs(width, height)
-            this.ctx = ctx
-            this.cvs = cvs
-        }
-        else {
-            this.cvs = canvas
-            canvas.width = width
-            canvas.height = height
-            this.ctx = canvas.getContext('2d')
-        }
+        /**
+         * 大小设置
+         */
+        this.cvs.width = width
+        this.cvs.height = height
+
+        el.appendChild(this.cvs)
+        el.style.overflow = 'hidden'
+        el.style.width = `${width}px`
+        el.style.height = `${height}px`
+        this.el = el
 
         this.init()
     }
@@ -201,38 +206,10 @@ export class NoteBoard {
 
     /**
      * 拖拽画布
-     * @param dx 
-     * @param dy 
      */
-    async dragCanvas(dx: number, dy: number) {
-        const { ctx } = this
-        this.clear()
-
-        // 保存当前的混合模式
-        const currentCompositeOperation = this.ctx.globalCompositeOperation
-        // 临时设置为默认混合模式
-        this.ctx.globalCompositeOperation = 'source-over'
-
-        this.offsetX += dx
-        this.offsetY += dy
-
-        ctx.save()
-
-        ctx.resetTransform()
-        // 应用缩放和平移
-        ctx.transform(
-            this.zoom,
-            0,
-            0,
-            this.zoom,
-            this.offsetX,
-            this.offsetY
-        )
-
-        await this.drawLast()
-        this.ctx.globalCompositeOperation = currentCompositeOperation
-
-        ctx.restore()
+    async dragCanvas() {
+        const { cvs } = this
+        cvs.style.transform = `scale(${this.scale}, ${this.scale}) translate(${this.translateX}px, ${this.translateY}px)`
     }
 
     /**
@@ -454,41 +431,44 @@ export class NoteBoard {
     }
 
     private _onMousedown(e: MouseEvent) {
+        this.customMouseDown?.(e)
+
         if (this.mode === 'drag') {
             this.isDragging = true
             this.dragStart = { x: e.offsetX, y: e.offsetY }
         }
 
         if (!this.canDraw()) return
-        this.customMouseDown?.(e)
 
         this.isDrawing = true
-        const { offsetX, offsetY } = e
-        this.start = {
-            x: offsetX,
-            y: offsetY,
+        this.drawStart = {
+            x: e.offsetX,
+            y: e.offsetY,
         }
     }
 
     private _onMousemove(e: MouseEvent) {
+        this.customMouseMove?.(e)
+
         if (this.isDragging) {
             const dx = e.offsetX - this.dragStart.x
             const dy = e.offsetY - this.dragStart.y
-            this._dragCanvas(dx, dy)
+
+            this.translateX = this.translateX + dx
+            this.translateY = this.translateY + dy
+
+            this.dragCanvas()
             this.customOnDrag({
-                dx: this.offsetX + dx,
-                dy: this.offsetY + dy,
+                translateX: this.translateX,
+                translateY: this.translateY,
                 e
             })
-            this.dragStart = { x: e.offsetX, y: e.offsetY }
         }
 
-        if (!this.canDraw()) return
-        if (!this.isDrawing) return
+        if (!this.canDraw() || !this.isDrawing) return
 
-        this.customMouseMove?.(e)
         const { offsetX, offsetY } = e
-        const { ctx, start } = this
+        const { ctx, drawStart: start } = this
 
         ctx.beginPath()
         ctx.moveTo(start.x, start.y)
@@ -497,21 +477,24 @@ export class NoteBoard {
         ctx.lineWidth = this.opts.lineWidth
         ctx.stroke()
 
-        this.start = {
+        this.drawStart = {
             x: offsetX,
             y: offsetY,
         }
     }
 
     private _onMouseup(e: MouseEvent) {
+        this.customMouseUp?.(e)
+
         if (this.mode === 'drag') {
             this.isDragging = false
+            this.translateX += e.offsetX - this.dragStart.x
+            this.translateY += e.offsetY - this.dragStart.y
         }
 
         if (!this.canDraw()) return
 
         this.isDrawing = false
-        this.customMouseUp?.(e)
         this.addNewRecord()
     }
 

@@ -12,8 +12,8 @@ export type ZoomFn = (
 
 export type DragFn = (
     params: {
-        dx: number
-        dy: number
+        translateX: number
+        translateY: number
         e: MouseEvent
     }
 ) => void
@@ -21,7 +21,7 @@ export type DragFn = (
 export type Mode = 'draw' | 'erase' | 'drag' | 'none'
 
 export type NoteBoardOptions = {
-    canvas: HTMLCanvasElement
+    el: HTMLElement
 
     onMouseDown?: MouseEventFn
     onMouseMove?: MouseEventFn
