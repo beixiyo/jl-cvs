@@ -12,11 +12,15 @@ document.body.style.padding = '40px'
 const el = document.createElement('div')
 el.style.border = '1px solid'
 document.body.appendChild(el)
+
 const board = new NoteBoard({
     el,
     width: WIDTH,
     height: HEIGHT,
+    lineWidth: 30,
+    strokeStyle: '#409eff55'
 })
+board.drawGlobalCompositeOperation = 'xor'
 
 /**
  * 居中绘制图片，并自动拉伸大小
@@ -37,23 +41,23 @@ board.drawImg(
             rawWidth,
             rawHeight,
         }) {
-            // console.log({ drawHeight, drawWidth, minScale, rawWidth, rawHeight })
-            // console.log(`图片原始宽度: ${rawWidth}, ${drawWidth / minScale}`)
-            // console.log(`图片原始高度: ${rawHeight}, ${drawHeight / minScale}`)
+            console.log({ drawHeight, drawWidth, minScale, rawWidth, rawHeight })
+            console.log(`图片原始宽度: ${rawWidth}, ${drawWidth / minScale}`)
+            console.log(`图片原始高度: ${rawHeight}, ${drawHeight / minScale}`)
 
-            // /**
-            //  * 还原原始尺寸图片
-            //  */
-            // const mask = await cutImg(img, {
-            //     x,
-            //     y,
-            //     width: drawWidth,
-            //     height: drawHeight,
-            //     scaleX: 1 / minScale,
-            //     scaleY: 1 / minScale,
-            // })
+            /**
+             * 还原原始尺寸图片
+             */
+            const mask = await cutImg(img, {
+                x,
+                y,
+                width: drawWidth,
+                height: drawHeight,
+                scaleX: 1 / minScale,
+                scaleY: 1 / minScale,
+            })
 
-            // console.log(mask)
+            console.log(mask)
         },
     },
 )
@@ -66,7 +70,13 @@ genBtn('截图', async () => {
     const src = await board.shotImg('base64')
     const imgEl = new Image()
     imgEl.src = src
+
+    const mask = await board.shotMask('base64')
+    const maskImgEl = new Image()
+    maskImgEl.src = mask
+
     document.body.appendChild(imgEl)
+    document.body.appendChild(maskImgEl)
 })
 
 genBtn('清空', () => {

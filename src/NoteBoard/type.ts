@@ -2,10 +2,7 @@ export type MouseEventFn = (e: MouseEvent) => void
 
 export type ZoomFn = (
     params: {
-        zoomX: number
-        zoomY: number
-        offsetX: number
-        offsetY: number
+        scale: number
         e: WheelEvent
     }
 ) => void

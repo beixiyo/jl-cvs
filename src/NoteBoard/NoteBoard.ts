@@ -1,9 +1,9 @@
 import type { TransferType } from '@/types'
-import { clearAllCvs, createCvs, getImg } from '@/canvasTool/tools'
+import { clearAllCvs, getImg } from '@/canvasTool/tools'
 import { getCvsImg, type HandleImgReturn } from '@/canvasTool/handleImg'
-import { getCursor, mergeOpts } from './tools'
+import { getCursor, mergeOpts, setCanvas } from './tools'
 import type { NoteBoardOptions, MouseEventFn, CanvasAttrs, Mode, DrawImgOpts, ZoomFn, DragFn } from './type'
-import { createUnReDoList, throttle } from '@/utils'
+import { createUnReDoList } from '@/utils'
 
 
 /**
@@ -27,6 +27,15 @@ export class NoteBoard {
     el: HTMLElement
     cvs = document.createElement('canvas')
     ctx = this.cvs.getContext('2d') as CanvasRenderingContext2D
+
+    imgCvs = document.createElement('canvas')
+    imgCtx = this.imgCvs.getContext('2d') as CanvasRenderingContext2D
+
+    /**
+     * 画笔模式，默认 source-over
+     */
+    drawGlobalCompositeOperation: GlobalCompositeOperation = 'source-over'
+
     private opts: NoteBoardOptions
 
     mode: Mode = 'none'
@@ -41,9 +50,9 @@ export class NoteBoard {
 
     private isDragging = false
     private dragStart = { x: 0, y: 0 }
-    private scale = 1
-    private translateX = 0
-    private translateY = 0
+    scale = 1
+    translateX = 0
+    translateY = 0
 
     /** 
      * 统一事件，方便解绑
@@ -113,13 +122,18 @@ export class NoteBoard {
         /**
          * 大小设置
          */
-        this.cvs.width = width
-        this.cvs.height = height
+        setCanvas(this.cvs, width, height)
+        setCanvas(this.imgCvs, width, height)
+        this.cvs.style.zIndex = '10'
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0)'
 
+        el.appendChild(this.imgCvs)
         el.appendChild(this.cvs)
+
         el.style.overflow = 'hidden'
         el.style.width = `${width}px`
         el.style.height = `${height}px`
+        el.style.position = 'relative'
         this.el = el
 
         this.init()
@@ -131,12 +145,11 @@ export class NoteBoard {
         switch (mode) {
             case 'draw':
                 this.setCursor()
-                this.ctx.globalCompositeOperation = 'xor'
+                this.ctx.globalCompositeOperation = this.drawGlobalCompositeOperation
                 break
 
             case 'erase':
                 this.setCursor()
-                this.ctx.strokeStyle = 'tranparent'
                 this.ctx.globalCompositeOperation = 'destination-out'
                 break
 
@@ -154,12 +167,26 @@ export class NoteBoard {
     }
 
     /**
-     * 获取画板内容，默认为 base64
+     * 获取画板图像内容，默认为 base64
      * @param resType 需要返回的文件格式，默认 `base64`
      * @param type 图片的 MIME 格式
      * @param quality 压缩质量
      */
     shotImg<T extends TransferType>(
+        resType: T = 'base64' as T,
+        mimeType?: string,
+        quality?: number
+    ): HandleImgReturn<T> {
+        return getCvsImg<T>(this.imgCvs, resType, mimeType, quality)
+    }
+
+    /**
+     * 获取画板遮罩（画笔）内容，默认为 base64
+     * @param resType 需要返回的文件格式，默认 `base64`
+     * @param type 图片的 MIME 格式
+     * @param quality 压缩质量
+     */
+    shotMask<T extends TransferType>(
         resType: T = 'base64' as T,
         mimeType?: string,
         quality?: number
@@ -171,9 +198,16 @@ export class NoteBoard {
      * 拖拽、缩放画布
      */
     async setTransform() {
-        const { cvs } = this
-        cvs.style.transformOrigin = `${this.dragStart.x}px ${this.dragStart.y}px`
-        cvs.style.transform = `scale(${this.scale}, ${this.scale}) translate(${this.translateX}px, ${this.translateY}px)`
+        const { cvs, imgCvs } = this
+
+        const transformOrigin = `${this.dragStart.x}px ${this.dragStart.y}px`,
+            transform = `scale(${this.scale}, ${this.scale}) translate(${this.translateX}px, ${this.translateY}px)`
+
+        cvs.style.transformOrigin = transformOrigin
+        cvs.style.transform = transform
+
+        imgCvs.style.transformOrigin = transformOrigin
+        imgCvs.style.transform = transform
     }
 
     /**
@@ -312,7 +346,7 @@ export class NoteBoard {
             y = (canvasHeight - drawHeight) / 2
         }
 
-        this.ctx.drawImage(
+        this.imgCtx.drawImage(
             newImg,
             x, y,
             drawWidth,
@@ -337,13 +371,14 @@ export class NoteBoard {
     /**
      * 设置样式
      */
-    setStyle(recordStyle: CanvasAttrs = {}) {
+    setStyle(recordStyle: CanvasAttrs) {
         const { ctx, cvs } = this
 
         for (const k in recordStyle) {
             const attr = recordStyle[k]
 
-            if (typeof attr === 'function') {
+            // 画布填充透明的，直接跳过
+            if (typeof attr === 'function' || k === 'fillStyle') {
                 continue
             }
 
@@ -361,10 +396,10 @@ export class NoteBoard {
         }
     }
 
-    setCursor(width?: number, fillStyle?: string) {
+    setCursor(width?: number, strokeStyle?: string) {
         this.cvs.style.cursor = getCursor(
             width || this.opts.lineWidth,
-            fillStyle || this.opts.fillStyle
+            strokeStyle || this.opts.strokeStyle
         )
     }
 
@@ -414,6 +449,9 @@ export class NoteBoard {
     private _onMousemove(e: MouseEvent) {
         this.customMouseMove?.(e)
 
+        /**
+         * 拖拽
+         */
         if (this.isDragging) {
             const dx = e.offsetX - this.dragStart.x
             const dy = e.offsetY - this.dragStart.y
@@ -422,13 +460,16 @@ export class NoteBoard {
             this.translateY = this.translateY + dy
 
             this.setTransform()
-            this.customOnDrag({
+            this.customOnDrag?.({
                 translateX: this.translateX,
                 translateY: this.translateY,
                 e
             })
         }
 
+        /**
+         * 画笔
+         */
         if (!this.canDraw() || !this.isDrawing) return
 
         const { offsetX, offsetY } = e
@@ -463,12 +504,13 @@ export class NoteBoard {
     }
 
     private _onMouseLeave(e: MouseEvent) {
+        this.customMouseLeave?.(e)
+
         if (this.mode === 'drag') {
             this.isDragging = false
         }
 
         if (!this.canDraw()) return
-        this.customMouseLeave?.(e)
         this.isDrawing = false
     }
 
@@ -488,10 +530,7 @@ export class NoteBoard {
         this.setTransform()
 
         this.customOnWheel?.({
-            zoomX: this.scale,
-            zoomY: this.scale,
-            offsetX: e.offsetX,
-            offsetY: e.offsetY,
+            scale: this.scale,
             e
         })
     }

@@ -16,6 +16,14 @@ export function mergeOpts(
     }
 }
 
+export function setCanvas(canvas: HTMLCanvasElement, width: number, height: number) {
+    canvas.width = width
+    canvas.height = height
+    canvas.style.position = 'absolute'
+    canvas.style.top = '0'
+    canvas.style.left = '0'
+}
+
 /**
  * 获取一个圆形的光标
  */
