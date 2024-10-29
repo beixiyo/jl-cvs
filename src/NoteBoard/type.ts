@@ -1,15 +1,21 @@
 export type MouseEventFn = (e: MouseEvent) => void
 
 export type ZoomFn = (
-    zoomX: number,
-    zoomY: number,
-    offsetX: number,
-    offsetY: number,
+    params: {
+        zoomX: number
+        zoomY: number
+        offsetX: number
+        offsetY: number
+        e: WheelEvent
+    }
 ) => void
 
 export type DragFn = (
-    x: number,
-    y: number
+    params: {
+        dx: number
+        dy: number
+        e: MouseEvent
+    }
 ) => void
 
 export type Mode = 'draw' | 'erase' | 'drag' | 'none'

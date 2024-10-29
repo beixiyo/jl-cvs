@@ -475,10 +475,11 @@ export class NoteBoard {
             const dx = e.offsetX - this.dragStart.x
             const dy = e.offsetY - this.dragStart.y
             this._dragCanvas(dx, dy)
-            this.customOnDrag(
-                this.offsetX + dx,
-                this.offsetY + dy
-            )
+            this.customOnDrag({
+                dx: this.offsetX + dx,
+                dy: this.offsetY + dy,
+                e
+            })
             this.dragStart = { x: e.offsetX, y: e.offsetY }
         }
 
@@ -538,7 +539,13 @@ export class NoteBoard {
         this.zoom = Math.max(this.zoom, .05)
 
         this._zoomTo(this.zoom, this.zoom, e.clientX, e.clientY)
-        this.customOnWheel?.(this.zoom, this.zoom, e.offsetX, e.offsetY)
+        this.customOnWheel?.({
+            zoomX: this.zoom,
+            zoomY: this.zoom,
+            offsetX: e.offsetX,
+            offsetY: e.offsetY,
+            e
+        })
     }
 
     private setDefaultStyle() {

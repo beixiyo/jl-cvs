@@ -108,7 +108,7 @@ const board = new NoteBoard({
     /**
      * 同步缩放
      */
-    onWheel(zoomX, zoomY, offsetX, offsetY) {
+    onWheel({ zoomX, zoomY, offsetX, offsetY }) {
         scaleX = zoomX
         scaleY = zoomY
 
@@ -118,13 +118,12 @@ const board = new NoteBoard({
     /**
      * @bug
      */
-    // onDrag(dx, dy) {
+    // onDrag({ dx, dy }) {
     //     translateX = dx
     //     translateY = dy
 
     //     imgCanvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`
     // }
-    // ...
 })
 
 /**
