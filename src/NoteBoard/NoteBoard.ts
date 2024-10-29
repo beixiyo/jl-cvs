@@ -2,7 +2,7 @@ import type { TransferType } from '@/types'
 import { clearAllCvs, createCvs } from '@/canvasTool/tools'
 import { getCvsImg, type HandleImgReturn } from '@/canvasTool/handleImg'
 import { getCursor, mergeOpts } from './tools'
-import type { NoteBoardOptions, MouseEventFn, RecordItem, CanvasAttrs } from './type'
+import type { NoteBoardOptions, MouseEventFn, RecordItem, CanvasAttrs, Mode } from './type'
 
 
 /**
@@ -21,8 +21,7 @@ export class NoteBoard {
     cvs: HTMLCanvasElement
     private opts: NoteBoardOptions
 
-    /** 开启绘制功能 */
-    private _isEnableDrawing = true
+    mode: Mode = 'none'
     /** 开启鼠标滚轮缩放 */
     isEnableZoom = true
 
@@ -102,23 +101,34 @@ export class NoteBoard {
         this.init()
     }
 
-    /** 是否开启绘制功能 */
-    get isEnableDrawing() {
-        return this._isEnableDrawing
-    }
+    setMode(mode: Mode) {
+        this.mode = mode
 
-    /** 开启绘制功能，设置光标 */
-    set isEnableDrawing(val) {
-        // 恢复正常模式，而非擦除模式
-        this.ctx.globalCompositeOperation = 'source-over'
-        this._isEnableDrawing = val
+        switch (mode) {
+            case 'draw':
+                this.setCursor()
+                this.setDefaultStyle()
+                // 恢复正常模式，而非擦除模式
+                this.ctx.globalCompositeOperation = 'xor'
+                break
 
-        if (val) {
-            this.setDefaultStyle()
-            this.cvs.style.cursor = getCursor(this.opts.lineWidth, this.opts.fillStyle)
-            return
+            case 'erase':
+                this.setCursor()
+                this.ctx.strokeStyle = 'tranparent'
+                this.ctx.globalCompositeOperation = 'destination-out'
+                break
+
+            case 'none':
+                this.cvs.style.cursor = 'unset'
+                break
+
+            case 'drag':
+                this.cvs.style.cursor = 'unset'
+                break
+
+            default:
+                break
         }
-        this.cvs.style.cursor = 'unset'
     }
 
     /**
@@ -198,14 +208,6 @@ export class NoteBoard {
     }
 
     /**
-     * 开启擦除模式
-     */
-    enableErase() {
-        this.ctx.strokeStyle = 'tranparent'
-        this.ctx.globalCompositeOperation = 'destination-out'
-    }
-
-    /**
      * 根据当前配置，用 fillRect 绘制整个背景
      */
     drawBg() {
@@ -251,6 +253,17 @@ export class NoteBoard {
         }
     }
 
+    setCursor(width?: number, fillStyle?: string) {
+        this.cvs.style.cursor = getCursor(
+            width || this.opts.lineWidth,
+            fillStyle || this.opts.fillStyle
+        )
+    }
+
+    private canDraw() {
+        return ['draw', 'erase'].includes(this.mode)
+    }
+
     private init() {
         this.bindEvent()
         this.setDefaultStyle()
@@ -266,7 +279,7 @@ export class NoteBoard {
     }
 
     private _onMousedown(e: MouseEvent) {
-        if (!this.isEnableDrawing) return
+        if (!this.canDraw()) return
         this.customMouseDown?.(e)
         this.addNewRecord()
 
@@ -276,7 +289,7 @@ export class NoteBoard {
     }
 
     private _onMousemove(e: MouseEvent) {
-        if (!this.isEnableDrawing) return
+        if (!this.canDraw()) return
         if (!this.isDrawing) return
 
         this.customMouseMove?.(e)
@@ -297,13 +310,13 @@ export class NoteBoard {
     }
 
     private _onMouseup(e: MouseEvent) {
-        if (!this.isEnableDrawing) return
+        if (!this.canDraw()) return
         this.customMouseUp?.(e)
         this.isDrawing = false
     }
 
     private _onMouseLeave(e: MouseEvent) {
-        if (!this.isEnableDrawing) return
+        if (!this.canDraw()) return
         this.customMouseLeave?.(e)
         this.isDrawing = false
     }
@@ -336,8 +349,6 @@ export class NoteBoard {
             lineCap,
             lineWidth,
         })
-
-        this.ctx.globalCompositeOperation = 'xor'
     }
 
     /**

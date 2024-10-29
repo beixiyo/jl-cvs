@@ -1,10 +1,9 @@
-import { NoteBoard, getCursor } from '@/NoteBoard'
+import { NoteBoard } from '@/NoteBoard'
 import { genBtn } from './tools'
 
 
 const canvas = document.createElement('canvas')
 canvas.style.border = '1px solid'
-canvas.style.cursor = getCursor()
 document.body.appendChild(canvas)
 
 
@@ -59,9 +58,13 @@ genBtn('重做', () => {
 })
 
 genBtn('关闭/ 打开绘制', () => {
-    board.isEnableDrawing = !board.isEnableDrawing
+    board.mode === 'draw'
+        ? board.setMode('none')
+        : board.setMode('draw')
 })
 
-genBtn('开启擦除模式', () => {
-    board.enableErase()
+genBtn('开启/ 关闭擦除模式', () => {
+    board.mode === 'erase'
+        ? board.setMode('none')
+        : board.setMode('erase')
 })

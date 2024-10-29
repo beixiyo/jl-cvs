@@ -1,5 +1,7 @@
 export type MouseEventFn = (e: MouseEvent) => void
 
+export type Mode = 'draw' | 'erase' | 'drag' | 'none'
+
 export type NoteBoardOptions = {
     canvas?: HTMLCanvasElement
 
