@@ -234,13 +234,27 @@ genBtn('撤销', () => {
 genBtn('重做', () => {
     board.redo()
 })
-
-genBtn('关闭/ 打开绘制', () => {
-    board.isEnableDrawing = !board.isEnableDrawing
+genBtn('重置大小', () => {
+    board.reset()
+    imgCanvas.style.transform = 'none'
 })
 
-genBtn('开启擦除模式', () => {
-    board.enableErase()
+genBtn('关闭/ 打开绘制', () => {
+    board.mode === 'draw'
+        ? board.setMode('none')
+        : board.setMode('draw')
+})
+
+genBtn('开启/ 关闭擦除模式', () => {
+    board.mode === 'erase'
+        ? board.setMode('none')
+        : board.setMode('erase')
+})
+
+genBtn('开启/ 关闭拖拽模式', () => {
+    board.mode === 'drag'
+        ? board.setMode('none')
+        : board.setMode('drag')
 })
 ```
 

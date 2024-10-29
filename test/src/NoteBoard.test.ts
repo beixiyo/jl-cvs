@@ -2,8 +2,8 @@ import { NoteBoard } from '@/NoteBoard'
 import { genBtn } from './tools'
 import { cutImg } from '@/canvasTool'
 
-const WIDTH = 400
-const HEIGHT = 300
+const WIDTH = 600
+const HEIGHT = 600
 
 
 /**
