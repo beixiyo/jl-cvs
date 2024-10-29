@@ -17,13 +17,13 @@ const board = new NoteBoard({
     lineWidth: 30,
 
     onMouseDown(e) {
-        console.log('鼠标按下', e)
+        // console.log('鼠标按下', e)
     },
     onMouseMove(e) {
         // console.log('鼠标移动', e)
     },
     onMouseUp(e) {
-        console.log('鼠标抬起', e)
+        // console.log('鼠标抬起', e)
     },
 
     onRedo() {
@@ -34,6 +34,9 @@ const board = new NoteBoard({
     }
     // ...
 })
+
+board.setMode('draw')
+board.isEnableZoom = true
 
 
 /**
@@ -67,4 +70,10 @@ genBtn('开启/ 关闭擦除模式', () => {
     board.mode === 'erase'
         ? board.setMode('none')
         : board.setMode('erase')
+})
+
+genBtn('开启/ 关闭拖拽模式', () => {
+    board.mode === 'drag'
+        ? board.setMode('none')
+        : board.setMode('drag')
 })

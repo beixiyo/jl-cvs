@@ -32,6 +32,11 @@ export class NoteBoard {
     private isDrawing = false
     private start = { x: 0, y: 0 }
 
+    private isDragging = false
+    private dragStart = { x: 0, y: 0 }
+    private offsetX = 0
+    private offsetY = 0
+
     /** 
      * 统一事件，方便解绑
      */
@@ -123,7 +128,7 @@ export class NoteBoard {
                 break
 
             case 'drag':
-                this.cvs.style.cursor = 'unset'
+                this.cvs.style.cursor = 'grab'
                 break
 
             default:
@@ -148,13 +153,29 @@ export class NoteBoard {
     /**
      * 缩放
      */
-    zoomTo(scaleX: number, scaleY: number) {
-        const { ctx } = this
+    zoomTo(scaleX: number, scaleY: number, clientX: number, clientY: number) {
+        const { ctx, cvs } = this
         this.clear()
 
-        ctx.resetTransform()
+        // 获取鼠标在canvas上的坐标
+        const rect = cvs.getBoundingClientRect()
+        const mouseX = clientX - rect.left
+        const mouseY = clientY - rect.top
+
+        // 保存当前状态
+        ctx.save()
+
+        // 将鼠标位置移到画布中心
+        ctx.translate(mouseX, mouseY)
+        // 进行缩放
         ctx.scale(scaleX, scaleY)
+        // 将鼠标位置移回原来的位置
+        ctx.translate(-mouseX, -mouseY)
+
         this.drawRecord()
+
+        // 恢复保存的状态
+        ctx.restore()
     }
 
     /**
@@ -255,7 +276,7 @@ export class NoteBoard {
 
     setCursor(width?: number, fillStyle?: string) {
         this.cvs.style.cursor = getCursor(
-            width || this.opts.lineWidth,
+            this.getZoomOffset(width || this.opts.lineWidth),
             fillStyle || this.opts.fillStyle
         )
     }
@@ -278,17 +299,43 @@ export class NoteBoard {
         cvs.addEventListener('wheel', this.onWheel)
     }
 
+    private dragCanvas(dx: number, dy: number) {
+        this.offsetX += dx
+        this.offsetY += dy
+
+        this.clear()
+        this.ctx.resetTransform()
+        this.ctx.translate(this.offsetX, this.offsetY) // 添加平移
+        this.ctx.scale(this.zoom, this.zoom) // 考虑缩放
+        this.drawRecord()
+    }
+
     private _onMousedown(e: MouseEvent) {
+        if (this.mode === 'drag') {
+            this.isDragging = true
+            this.dragStart = { x: e.offsetX, y: e.offsetY }
+        }
+
         if (!this.canDraw()) return
         this.customMouseDown?.(e)
         this.addNewRecord()
 
         this.isDrawing = true
         const { offsetX, offsetY } = e
-        this.start = { x: offsetX, y: offsetY }
+        this.start = {
+            x: this.getZoomOffset(offsetX),
+            y: this.getZoomOffset(offsetY),
+        }
     }
 
     private _onMousemove(e: MouseEvent) {
+        if (this.isDragging) {
+            const dx = e.offsetX - this.dragStart.x
+            const dy = e.offsetY - this.dragStart.y
+            this.dragCanvas(dx, dy)
+            this.dragStart = { x: e.offsetX, y: e.offsetY }
+        }
+
         if (!this.canDraw()) return
         if (!this.isDrawing) return
 
@@ -299,23 +346,36 @@ export class NoteBoard {
         ctx.beginPath()
         ctx.moveTo(this.getZoomOffset(start.x), this.getZoomOffset(start.y))
         ctx.lineTo(this.getZoomOffset(offsetX), this.getZoomOffset(offsetY))
+
+        ctx.lineWidth = this.getZoomOffset(this.opts.lineWidth)
         ctx.stroke()
 
         this.prevList[this.prevList.length - 1].point.push({
             moveTo: [start.x, start.y],
-            lineTo: [offsetX, offsetY]
+            lineTo: [this.getZoomOffset(offsetX), this.getZoomOffset(offsetY)],
         })
 
-        this.start = { x: offsetX, y: offsetY }
+        this.start = {
+            x: this.getZoomOffset(offsetX),
+            y: this.getZoomOffset(offsetY),
+        }
     }
 
     private _onMouseup(e: MouseEvent) {
+        if (this.mode === 'drag') {
+            this.isDragging = false
+        }
+
         if (!this.canDraw()) return
         this.customMouseUp?.(e)
         this.isDrawing = false
     }
 
     private _onMouseLeave(e: MouseEvent) {
+        if (this.mode === 'drag') {
+            this.isDragging = false
+        }
+
         if (!this.canDraw()) return
         this.customMouseLeave?.(e)
         this.isDrawing = false
@@ -334,7 +394,7 @@ export class NoteBoard {
         }
         this.zoom = Math.max(this.zoom, .05)
 
-        this.zoomTo(this.zoom, this.zoom)
+        this.zoomTo(this.zoom, this.zoom, e.clientX, e.clientY)
     }
 
     private setDefaultStyle() {
@@ -375,7 +435,10 @@ export class NoteBoard {
 
         for (let i = 0; i < this.prevList.length; i++) {
             const item = this.prevList[i]
-            this.setStyle(item.attr)
+            this.setStyle({
+                ...item.attr,
+                lineWidth: this.getZoomOffset(item.attr.lineWidth)
+            })
 
             for (let j = 0; j < item.point.length; j++) {
                 const point = item.point[j]
