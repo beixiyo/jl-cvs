@@ -36,7 +36,6 @@ export class NoteBoard {
     /**
      * 记录缩放、位置等属性
      */
-    private zoom = 1
     private isDrawing = false
     private drawStart = { x: 0, y: 0 }
 
@@ -54,11 +53,6 @@ export class NoteBoard {
     private onMouseup = this._onMouseup.bind(this)
     private onMouseLeave = this._onMouseLeave.bind(this)
     private onWheel = this._onWheel.bind(this)
-
-    /**
-     * 节流函数
-     */
-    private _zoomTo = throttle(this.zoomTo.bind(this), 30)
 
     /**
      * 用户事件
@@ -174,41 +168,11 @@ export class NoteBoard {
     }
 
     /**
-     * 缩放画布
+     * 拖拽、缩放画布
      */
-    async zoomTo(
-        scaleX: number, scaleY: number,
-        clientX: number, clientY: number
-    ) {
-        const { ctx, cvs } = this
-        this.clear()
-
-        // 获取鼠标在canvas上的坐标
-        const rect = cvs.getBoundingClientRect()
-        const mouseX = clientX - rect.left
-        const mouseY = clientY - rect.top
-
-        // 保存当前状态
-        ctx.save()
-
-        // 将鼠标位置移到画布中心
-        ctx.translate(mouseX, mouseY)
-        // 进行缩放
-        ctx.scale(scaleX, scaleY)
-        // 将鼠标位置移回原来的位置
-        ctx.translate(-mouseX, -mouseY)
-
-        await this.drawLast()
-
-        // 恢复保存的状态
-        ctx.restore()
-    }
-
-    /**
-     * 拖拽画布
-     */
-    async dragCanvas() {
+    async setTransform() {
         const { cvs } = this
+        cvs.style.transformOrigin = `${this.dragStart.x}px ${this.dragStart.y}px`
         cvs.style.transform = `scale(${this.scale}, ${this.scale}) translate(${this.translateX}px, ${this.translateY}px)`
     }
 
@@ -457,7 +421,7 @@ export class NoteBoard {
             this.translateX = this.translateX + dx
             this.translateY = this.translateY + dy
 
-            this.dragCanvas()
+            this.setTransform()
             this.customOnDrag({
                 translateX: this.translateX,
                 translateY: this.translateY,
@@ -512,19 +476,20 @@ export class NoteBoard {
         if (!this.isEnableZoom) return
 
         e.preventDefault()
-        this.zoom = e.deltaY > 0
-            ? this.zoom / 1.1
-            : this.zoom * 1.1
+        this.scale = e.deltaY > 0
+            ? this.scale / 1.1
+            : this.scale * 1.1
 
-        if (this.zoom >= 20) {
-            this.zoom = 20
+        if (this.scale >= 20) {
+            this.scale = 20
         }
-        this.zoom = Math.max(this.zoom, .05)
 
-        this._zoomTo(this.zoom, this.zoom, e.clientX, e.clientY)
+        this.scale = Math.max(this.scale, .05)
+        this.setTransform()
+
         this.customOnWheel?.({
-            zoomX: this.zoom,
-            zoomY: this.zoom,
+            zoomX: this.scale,
+            zoomY: this.scale,
             offsetX: e.offsetX,
             offsetY: e.offsetY,
             e
