@@ -2,7 +2,7 @@ import type { TransferType } from '@/types'
 import { clearAllCvs, createCvs, getImg } from '@/canvasTool/tools'
 import { getCvsImg, type HandleImgReturn } from '@/canvasTool/handleImg'
 import { getCursor, mergeOpts } from './tools'
-import type { NoteBoardOptions, MouseEventFn, RecordItem, CanvasAttrs, Mode } from './type'
+import type { NoteBoardOptions, MouseEventFn, RecordItem, CanvasAttrs, Mode, DrawImgOpts, ZoomFn, DragFn } from './type'
 import { createUnReDoList, throttle } from '@/utils'
 
 
@@ -61,6 +61,9 @@ export class NoteBoard {
     customMouseUp?: MouseEventFn
     customMouseLeave?: MouseEventFn
 
+    customOnWheel?: ZoomFn
+    customOnDrag?: DragFn
+
     /**
      * 撤销与重做
      */
@@ -85,6 +88,9 @@ export class NoteBoard {
             onMouseUp,
             onMouseLeave,
 
+            onWheel,
+            onDrag,
+
             onUndo,
             onRedo
         } = this.opts
@@ -93,6 +99,9 @@ export class NoteBoard {
         this.customMouseMove = onMouseMove
         this.customMouseUp = onMouseUp
         this.customMouseLeave = onMouseLeave
+
+        this.customOnWheel = onWheel
+        this.customOnDrag = onDrag
 
         this.onUndo = onUndo
         this.onRedo = onRedo
@@ -313,6 +322,65 @@ export class NoteBoard {
     }
 
     /**
+     * 绘制图片，可调整大小，自适应尺寸等
+     */
+    async drawImg(img: HTMLImageElement | string, {
+        beforeDraw,
+        afterDraw,
+        needClear = false,
+        autoFit,
+        center,
+    }: DrawImgOpts = {}) {
+        needClear && this.clear()
+
+        const newImg = typeof img === 'string'
+            ? await getImg(img)
+            : img
+        if (!newImg) return new Error('Image load failed')
+
+        const {
+            width: canvasWidth,
+            height: canvasHeight
+        } = this.opts
+
+        const imgWidth = newImg.width,
+            imgHeight = newImg.height
+
+        const scaleX = canvasWidth / imgWidth,
+            scaleY = canvasHeight / imgHeight,
+            minScale = Math.min(scaleX, scaleY)
+
+        beforeDraw?.(newImg, minScale, scaleX, scaleY)
+
+        // 这里怎么写？自适应大小autoFit 和居中center
+
+        let drawWidth = imgWidth,
+            drawHeight = imgHeight,
+            x = 0,
+            y = 0
+
+        if (autoFit) {
+            // 保持宽高比的情况下，使图片适应画布
+            drawWidth = imgWidth * minScale
+            drawHeight = imgHeight * minScale
+        }
+        if (center) {
+            // 计算居中位置
+            x = (canvasWidth - drawWidth) / 2
+            y = (canvasHeight - drawHeight) / 2
+        }
+
+        this.ctx.drawImage(
+            newImg,
+            x, y,
+            drawWidth,
+            drawHeight
+        )
+
+        afterDraw?.(newImg, minScale, scaleX, scaleY)
+    }
+
+    /**
      * 设置样式
      */
     setStyle(recordStyle: CanvasAttrs = {}) {
@@ -325,6 +393,7 @@ export class NoteBoard {
                 continue
             }
 
+            this.opts[k] = attr
             if (k === 'width') {
                 cvs.width = attr
                 continue
@@ -393,6 +462,7 @@ export class NoteBoard {
             const dx = e.offsetX - this.dragStart.x
             const dy = e.offsetY - this.dragStart.y
             this._dragCanvas(dx, dy)
+            this.customOnDrag(dx, dy)
             this.dragStart = { x: e.offsetX, y: e.offsetY }
         }
 
@@ -452,6 +522,7 @@ export class NoteBoard {
         this.zoom = Math.max(this.zoom, .05)
 
         this._zoomTo(this.zoom, this.zoom, e.clientX, e.clientY)
+        this.customOnWheel?.(this.zoom, this.zoom, e.clientX, e.clientY)
     }
 
     private setDefaultStyle() {

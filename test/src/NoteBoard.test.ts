@@ -35,8 +35,22 @@ const board = new NoteBoard({
     // ...
 })
 
+/**
+ * 开启绘制和缩放
+ */
 board.setMode('draw')
 board.isEnableZoom = true
+
+/**
+ * 居中绘制图片，并自动拉伸大小
+ */
+board.drawImg(
+    new URL('./PixPin_2024-10-29_14-27-44.png', import.meta.url).href,
+    {
+        center: true,
+        autoFit: true
+    }
+)
 
 
 /**
