@@ -1,8 +1,9 @@
 import type { TransferType } from '@/types'
-import { clearAllCvs, createCvs } from '@/canvasTool/tools'
+import { clearAllCvs, createCvs, getImg } from '@/canvasTool/tools'
 import { getCvsImg, type HandleImgReturn } from '@/canvasTool/handleImg'
 import { getCursor, mergeOpts } from './tools'
 import type { NoteBoardOptions, MouseEventFn, RecordItem, CanvasAttrs, Mode } from './type'
+import { createUnReDoList, throttle } from '@/utils'
 
 
 /**
@@ -47,6 +48,12 @@ export class NoteBoard {
     private onWheel = this._onWheel.bind(this)
 
     /**
+     * 节流函数
+     */
+    private _zoomTo = throttle(this.zoomTo.bind(this), 30)
+    private _dragCanvas = throttle(this.dragCanvas.bind(this), 8)
+
+    /**
      * 用户事件
      */
     customMouseDown?: MouseEventFn
@@ -63,8 +70,7 @@ export class NoteBoard {
     /**
      * 记录
      */
-    private prevList: RecordItem[] = []
-    private nextList: RecordItem[] = []
+    private unReDoList = createUnReDoList<string>()
 
     constructor(opts?: NoteBoardOptions) {
         this.opts = mergeOpts(opts)
@@ -151,9 +157,9 @@ export class NoteBoard {
     }
 
     /**
-     * 缩放
+     * 缩放画布
      */
-    zoomTo(scaleX: number, scaleY: number, clientX: number, clientY: number) {
+    async zoomTo(scaleX: number, scaleY: number, clientX: number, clientY: number) {
         const { ctx, cvs } = this
         this.clear()
 
@@ -172,40 +178,105 @@ export class NoteBoard {
         // 将鼠标位置移回原来的位置
         ctx.translate(-mouseX, -mouseY)
 
-        this.drawRecord()
+        await this.drawLast()
 
         // 恢复保存的状态
         ctx.restore()
     }
 
     /**
+     * 拖拽画布
+     * @param dx 
+     * @param dy 
+     */
+    async dragCanvas(dx: number, dy: number) {
+        const { ctx } = this
+        this.clear()
+
+        // 保存当前的混合模式
+        const currentCompositeOperation = this.ctx.globalCompositeOperation
+        // 临时设置为默认混合模式
+        this.ctx.globalCompositeOperation = 'source-over'
+
+        this.offsetX += dx
+        this.offsetY += dy
+
+        ctx.save()
+
+        ctx.resetTransform()
+        // 应用缩放和平移
+        ctx.transform(
+            this.zoom,
+            0,
+            0,
+            this.zoom,
+            this.offsetX,
+            this.offsetY
+        )
+
+        await this.drawLast()
+        this.ctx.globalCompositeOperation = currentCompositeOperation
+
+        ctx.restore()
+    }
+
+    /**
+     * 重置大小
+     */
+    async reset() {
+        const { ctx } = this
+        this.clear()
+
+        ctx.resetTransform()
+        await this.drawLast()
+    }
+
+    /**
      * 撤销
      */
-    undo() {
-        if (this.prevList.length < 1) {
-            return
-        }
+    async undo() {
+        return new Promise<boolean>((resolve) => {
+            this.unReDoList.undo(async base64 => {
+                this.clear()
+                if (!base64) return resolve(false)
 
-        this.nextList.push(this.prevList.pop())
+                // 保存当前的混合模式
+                const currentCompositeOperation = this.ctx.globalCompositeOperation
+                // 临时设置为默认混合模式
+                this.ctx.globalCompositeOperation = 'source-over'
 
-        this.clear()
-        this.drawRecord()
-        this.onUndo?.()
+                const img = await getImg(base64) as HTMLImageElement
+                this.ctx.drawImage(img, 0, 0)
+                this.ctx.globalCompositeOperation = currentCompositeOperation
+
+                this.onUndo?.()
+                resolve(true)
+            })
+        })
     }
 
     /**
      * 重做
      */
-    redo() {
-        if (!this.nextList.length) {
-            return
-        }
+    async redo() {
+        return new Promise<boolean>((resolve) => {
+            this.unReDoList.redo(async base64 => {
+                this.clear()
+                if (!base64) return resolve(false)
 
-        this.prevList.push(this.nextList.pop())
+                // 保存当前的混合模式
+                const currentCompositeOperation = this.ctx.globalCompositeOperation
+                // 临时设置为默认混合模式
+                this.ctx.globalCompositeOperation = 'source-over'
 
-        this.clear()
-        this.drawRecord()
-        this.onRedo?.()
+                const img = await getImg(base64) as HTMLImageElement
+                this.ctx.drawImage(img, 0, 0)
+                this.ctx.globalCompositeOperation = currentCompositeOperation
+
+                this.onUndo?.()
+                resolve(true)
+            })
+        })
     }
 
     /**
@@ -241,13 +312,6 @@ export class NoteBoard {
         }
     }
 
-    /** 
-     * CanvasRenderingContext2D 原始的 drawImage 方法
-     */
-    drawImage(...params: Parameters<CanvasRenderingContext2D['drawImage']>) {
-        return this.ctx.drawImage(...params)
-    }
-
     /**
      * 设置样式
      */
@@ -281,6 +345,14 @@ export class NoteBoard {
         )
     }
 
+    private async drawLast() {
+        const lastBase64 = this.unReDoList.getLast()
+        if (lastBase64) {
+            const img = await getImg(lastBase64) as HTMLImageElement
+            this.ctx.drawImage(img, 0, 0)
+        }
+    }
+
     private canDraw() {
         return ['draw', 'erase'].includes(this.mode)
     }
@@ -299,23 +371,6 @@ export class NoteBoard {
         cvs.addEventListener('wheel', this.onWheel)
     }
 
-    private dragCanvas(dx: number, dy: number) {
-        const { cvs, ctx } = this
-
-        this.offsetX += dx
-        this.offsetY += dy
-
-        this.clear()
-        ctx.save()
-
-        ctx.resetTransform()
-        ctx.translate(this.offsetX, this.offsetY) // 添加平移
-        ctx.scale(this.zoom, this.zoom) // 考虑缩放
-        this.drawRecord()
-
-        ctx.restore()
-    }
-
     private _onMousedown(e: MouseEvent) {
         if (this.mode === 'drag') {
             this.isDragging = true
@@ -324,7 +379,6 @@ export class NoteBoard {
 
         if (!this.canDraw()) return
         this.customMouseDown?.(e)
-        this.addNewRecord()
 
         this.isDrawing = true
         const { offsetX, offsetY } = e
@@ -338,7 +392,7 @@ export class NoteBoard {
         if (this.isDragging) {
             const dx = e.offsetX - this.dragStart.x
             const dy = e.offsetY - this.dragStart.y
-            this.dragCanvas(dx, dy)
+            this._dragCanvas(dx, dy)
             this.dragStart = { x: e.offsetX, y: e.offsetY }
         }
 
@@ -356,11 +410,6 @@ export class NoteBoard {
         ctx.lineWidth = this.opts.lineWidth
         ctx.stroke()
 
-        this.prevList[this.prevList.length - 1].point.push({
-            moveTo: [start.x, start.y],
-            lineTo: [offsetX, offsetY],
-        })
-
         this.start = {
             x: offsetX,
             y: offsetY,
@@ -373,8 +422,10 @@ export class NoteBoard {
         }
 
         if (!this.canDraw()) return
-        this.customMouseUp?.(e)
+
         this.isDrawing = false
+        this.customMouseUp?.(e)
+        this.addNewRecord()
     }
 
     private _onMouseLeave(e: MouseEvent) {
@@ -400,7 +451,7 @@ export class NoteBoard {
         }
         this.zoom = Math.max(this.zoom, .05)
 
-        this.zoomTo(this.zoom, this.zoom, e.clientX, e.clientY)
+        this._zoomTo(this.zoom, this.zoom, e.clientX, e.clientY)
     }
 
     private setDefaultStyle() {
@@ -418,40 +469,11 @@ export class NoteBoard {
     }
 
     /**
-     * 添加一个新的记录，并删除多余的 redo
+     * 添加一个新的记录
      */
-    private addNewRecord() {
-        const { ctx, opts } = this
-
-        this.nextList.splice(0)
-        this.prevList.push({
-            point: [],
-            attr: {
-                strokeStyle: opts.strokeStyle,
-                lineWidth: opts.lineWidth,
-                fillStyle: opts.fillStyle,
-                lineCap: ctx.lineCap,
-                globalCompositeOperation: ctx.globalCompositeOperation,
-            },
-        })
-    }
-
-    private drawRecord() {
-        const { ctx } = this
-
-        for (let i = 0; i < this.prevList.length; i++) {
-            const item = this.prevList[i]
-            this.setStyle(item.attr)
-
-            for (let j = 0; j < item.point.length; j++) {
-                const point = item.point[j]
-
-                ctx.beginPath()
-                ctx.moveTo(...point.moveTo)
-                ctx.lineTo(...point.lineTo)
-                ctx.stroke()
-            }
-        }
+    private async addNewRecord() {
+        const base64 = await this.shotImg('base64')
+        this.unReDoList.add(base64)
     }
 
 }

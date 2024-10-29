@@ -59,6 +59,9 @@ genBtn('撤销', () => {
 genBtn('重做', () => {
     board.redo()
 })
+genBtn('重置大小', () => {
+    board.reset()
+})
 
 genBtn('关闭/ 打开绘制', () => {
     board.mode === 'draw'
