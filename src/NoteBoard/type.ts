@@ -70,13 +70,9 @@ export type RecordItem = {
 
 export type DrawImgOpts = {
     /**
-     * 绘制之前回调图片给你，你可以设置图片参数
-     */
-    beforeDraw?: (img: HTMLImageElement, minScale: number, scaleX: number, scaleY: number) => void
-    /**
      * 绘制之后回调图片给你，你可以设置图片参数
      */
-    afterDraw?: (img: HTMLImageElement, minScale: number, scaleX: number, scaleY: number) => void
+    afterDraw?: DrawParamsFn
     /**
      * 是否先清除画布
      * @default false
@@ -93,3 +89,18 @@ export type DrawImgOpts = {
      */
     autoFit?: boolean
 }
+
+type DrawParamsFn = (data: {
+    img: HTMLImageElement
+    minScale: number
+    scaleX: number
+    scaleY: number
+
+    x: number
+    y: number
+
+    drawWidth: number
+    drawHeight: number
+    rawWidth: number
+    rawHeight: number
+}) => void

@@ -2,6 +2,7 @@ import { createCvs, setElCrossOrigin } from './tools'
 import { TransferType } from '@/types'
 
 
+
 /**
  * 截取图片的一部分，返回 base64 | blob
  * @param img 图片
@@ -18,14 +19,24 @@ export function cutImg<T extends TransferType = 'base64'>(
         height = img.height,
         x = 0,
         y = 0,
+        scaleX = 1,
+        scaleY = 1,
         mimeType,
         quality,
     } = opts
 
-    const { cvs, ctx } = createCvs(width, height)
-    setElCrossOrigin(img)
-    ctx.drawImage(img, x, y, width, height, 0, 0, width, height)
-    return getCvsImg<T>(cvs, resType, mimeType, quality)
+    const scaledWidth = width * scaleX;
+    const scaledHeight = height * scaleY;
+
+    const { cvs, ctx } = createCvs(scaledWidth, scaledHeight);
+
+    opts.setCrossOrigin && setElCrossOrigin(img);
+
+    // 在绘制之前设置缩放
+    ctx.scale(scaleX, scaleY);
+    ctx.drawImage(img, x, y, width, height, 0, 0, width, height);
+
+    return getCvsImg<T>(cvs, resType, mimeType, quality);
 }
 
 /**
@@ -197,8 +208,13 @@ export type CutImgOpts = {
     y?: number
     width?: number
     height?: number
+    scaleX?: number
+    scaleY?: number
+
     /** 图片的 MIME 格式 */
     mimeType?: string
     /** 图像质量，取值范围 0 ~ 1 */
     quality?: number
+    /** 是否设置 setAttribute('crossOrigin', 'anonymous') */
+    setCrossOrigin?: boolean
 }

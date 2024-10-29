@@ -1,8 +1,9 @@
 import { NoteBoard } from '@/NoteBoard'
 import { genBtn } from './tools'
+import { cutImg } from '@/canvasTool'
 
-const WIDTH = 800
-const HEIGHT = 600
+const WIDTH = 400
+const HEIGHT = 300
 
 
 /**
@@ -34,8 +35,37 @@ imgBoard.drawImg(
     new URL('./PixPin_2024-10-29_14-27-44.png', import.meta.url).href,
     {
         center: true,
-        autoFit: true
-    }
+        autoFit: true,
+        async afterDraw({
+            minScale,
+            img,
+
+            x,
+            y,
+            drawWidth,
+            drawHeight,
+            rawWidth,
+            rawHeight,
+        }) {
+            console.log({ drawHeight, drawWidth, minScale, rawWidth, rawHeight })
+            console.log(`图片原始宽度: ${rawWidth}, ${drawWidth / minScale}`)
+            console.log(`图片原始高度: ${rawHeight}, ${drawHeight / minScale}`)
+
+            /**
+             * 还原原始尺寸图片
+             */
+            const mask = await cutImg(img, {
+                x,
+                y,
+                width: drawWidth,
+                height: drawHeight,
+                scaleX: 1 / minScale,
+                scaleY: 1 / minScale,
+            })
+
+            console.log(mask)
+        },
+    },
 )
 
 

@@ -331,7 +331,6 @@ export class NoteBoard {
      * 绘制图片，可调整大小，自适应尺寸等
      */
     async drawImg(img: HTMLImageElement | string, {
-        beforeDraw,
         afterDraw,
         needClear = false,
         autoFit,
@@ -356,10 +355,6 @@ export class NoteBoard {
             scaleY = canvasHeight / imgHeight,
             minScale = Math.min(scaleX, scaleY)
 
-        beforeDraw?.(newImg, minScale, scaleX, scaleY)
-
-        // 这里怎么写？自适应大小autoFit 和居中center
-
         let drawWidth = imgWidth,
             drawHeight = imgHeight,
             x = 0,
@@ -383,7 +378,19 @@ export class NoteBoard {
             drawHeight
         )
 
-        afterDraw?.(newImg, minScale, scaleX, scaleY)
+        afterDraw?.({
+            minScale,
+            scaleX,
+            scaleY,
+            img: newImg,
+
+            x,
+            y,
+            drawWidth,
+            drawHeight,
+            rawWidth: imgWidth,
+            rawHeight: imgHeight,
+        })
     }
 
     /**
