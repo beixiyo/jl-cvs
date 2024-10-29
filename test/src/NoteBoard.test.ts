@@ -19,7 +19,34 @@ const board = new NoteBoard({
     height: HEIGHT,
     lineWidth: 30,
     strokeStyle: '#409eff55',
-    drawGlobalCompositeOperation: 'xor'
+    drawGlobalCompositeOperation: 'xor',
+
+    onDrag() {
+        console.log('onDrag')
+    },
+    onWheel() {
+        console.log('onWheel')
+    },
+    
+    onMouseDown() {
+        console.log('onMouseDown')
+    },
+    onMouseUp() {
+        console.log('onMouseUp')
+    },
+    onMouseMove() {
+        console.log('onMouseMove')
+    },
+    onMouseLeave() {
+        console.log('onMouseLeave')
+    },
+
+    onRedo() {
+        console.log('onRedo')
+    },
+    onUndo() {
+        console.log('onUndo')
+    }
 })
 
 /**

@@ -30,8 +30,8 @@ export type NoteBoardOptions = {
     onWheel?: ZoomFn
     onDrag?: DragFn
 
-    onRedo?: () => void
-    onUndo?: () => void
+    onRedo?: (base64: string) => void
+    onUndo?: (base64: string) => void
 } & CanvasAttrs
 
 

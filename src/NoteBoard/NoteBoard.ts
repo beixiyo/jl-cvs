@@ -1,14 +1,14 @@
 import { clearAllCvs, getImg } from '@/canvasTool/tools'
-import { cutImg, getCvsImg, type HandleImgReturn } from '@/canvasTool/handleImg'
+import { cutImg, getCvsImg } from '@/canvasTool/handleImg';
 import { getCursor, mergeOpts, setCanvas } from './tools'
-import type { NoteBoardOptions, MouseEventFn, CanvasAttrs, Mode, DrawImgOpts, ZoomFn, DragFn, ImgInfo } from './type'
+import type { NoteBoardOptions, CanvasAttrs, Mode, DrawImgOpts, ImgInfo } from './type';
 import { createUnReDoList } from '@/utils'
 
 
 /**
  * ### 画板，提供如下功能
  * - 签名涂抹
- * - 自适应绘图
+ * - 分层自适应绘图
  * 
  * - 擦除
  * - 撤销
@@ -17,7 +17,6 @@ import { createUnReDoList } from '@/utils'
  * - 缩放
  * - 拖拽
  * 
- * - 颜色等样式处理
  * - 截图
  */
 export class NoteBoard {
@@ -31,7 +30,7 @@ export class NoteBoard {
     imgCtx = this.imgCvs.getContext('2d') as CanvasRenderingContext2D
     imgInfo: ImgInfo
 
-    private opts: NoteBoardOptions
+    opts: NoteBoardOptions
 
     mode: Mode = 'draw'
     /** 开启鼠标滚轮缩放 */
@@ -59,26 +58,9 @@ export class NoteBoard {
     private onWheel = this._onWheel.bind(this)
 
     /**
-     * 用户事件
-     */
-    customMouseDown?: MouseEventFn
-    customMouseMove?: MouseEventFn
-    customMouseUp?: MouseEventFn
-    customMouseLeave?: MouseEventFn
-
-    customOnWheel?: ZoomFn
-    customOnDrag?: DragFn
-
-    /**
-     * 撤销与重做
-     */
-    onUndo?: () => void
-    onRedo?: () => void
-
-    /**
      * 记录
      */
-    private unReDoList = createUnReDoList<string>()
+    unReDoList = createUnReDoList<string>()
 
     constructor(opts?: NoteBoardOptions) {
         this.opts = mergeOpts(opts)
@@ -87,32 +69,7 @@ export class NoteBoard {
             el,
             width,
             height,
-
-            onMouseDown,
-            onMouseMove,
-            onMouseUp,
-            onMouseLeave,
-
-            onWheel,
-            onDrag,
-
-            onUndo,
-            onRedo
         } = this.opts
-
-        /**
-         * 用户事件
-         */
-        this.customMouseDown = onMouseDown
-        this.customMouseMove = onMouseMove
-        this.customMouseUp = onMouseUp
-        this.customMouseLeave = onMouseLeave
-
-        this.customOnWheel = onWheel
-        this.customOnDrag = onDrag
-
-        this.onUndo = onUndo
-        this.onRedo = onRedo
 
         /**
          * 大小设置
@@ -269,7 +226,7 @@ export class NoteBoard {
                 this.ctx.drawImage(img, 0, 0)
                 this.ctx.globalCompositeOperation = currentCompositeOperation
 
-                this.onUndo?.()
+                this.opts.onUndo?.(base64)
                 resolve(true)
             })
         })
@@ -293,7 +250,7 @@ export class NoteBoard {
                 this.ctx.drawImage(img, 0, 0)
                 this.ctx.globalCompositeOperation = currentCompositeOperation
 
-                this.onUndo?.()
+                this.opts.onRedo?.(base64)
                 resolve(true)
             })
         })
@@ -418,9 +375,9 @@ export class NoteBoard {
         }
     }
 
-    setCursor(width?: number, strokeStyle?: string) {
+    setCursor(lineWidth?: number, strokeStyle?: string) {
         this.cvs.style.cursor = getCursor(
-            width || this.opts.lineWidth,
+            lineWidth || this.opts.lineWidth,
             strokeStyle || this.opts.strokeStyle
         )
     }
@@ -445,7 +402,7 @@ export class NoteBoard {
     }
 
     private _onMousedown(e: MouseEvent) {
-        this.customMouseDown?.(e)
+        this.opts.onMouseDown?.(e)
 
         if (this.mode === 'drag') {
             this.isDragging = true
@@ -462,7 +419,7 @@ export class NoteBoard {
     }
 
     private _onMousemove(e: MouseEvent) {
-        this.customMouseMove?.(e)
+        this.opts.onMouseMove?.(e)
 
         /**
          * 拖拽
@@ -475,7 +432,7 @@ export class NoteBoard {
             this.translateY = this.translateY + dy
 
             this.setTransform()
-            this.customOnDrag?.({
+            this.opts.onDrag?.({
                 translateX: this.translateX,
                 translateY: this.translateY,
                 transformOriginX: this.dragStart.x,
@@ -506,7 +463,7 @@ export class NoteBoard {
     }
 
     private _onMouseup(e: MouseEvent) {
-        this.customMouseUp?.(e)
+        this.opts.onMouseUp?.(e)
 
         if (this.mode === 'drag') {
             this.isDragging = false
@@ -521,7 +478,7 @@ export class NoteBoard {
     }
 
     private _onMouseLeave(e: MouseEvent) {
-        this.customMouseLeave?.(e)
+        this.opts.onMouseLeave?.(e)
 
         if (this.mode === 'drag') {
             this.isDragging = false
@@ -546,7 +503,7 @@ export class NoteBoard {
         this.scale = Math.max(this.scale, .05)
         this.setTransform()
 
-        this.customOnWheel?.({
+        this.opts.onWheel?.({
             scale: this.scale,
             e
         })
