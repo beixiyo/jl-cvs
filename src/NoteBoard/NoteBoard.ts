@@ -353,7 +353,8 @@ export class NoteBoard {
                 strokeStyle: opts.strokeStyle,
                 lineWidth: opts.lineWidth,
                 fillStyle: opts.fillStyle,
-                lineCap: ctx.lineCap
+                lineCap: ctx.lineCap,
+                globalCompositeOperation: ctx.globalCompositeOperation,
             },
         })
     }
