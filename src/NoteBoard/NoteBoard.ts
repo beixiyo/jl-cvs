@@ -214,11 +214,12 @@ export class NoteBoard {
      * 重置大小
      */
     async reset() {
-        const { ctx } = this
-        this.clear()
+        const { cvs, imgCvs } = this
+        cvs.style.transformOrigin = 'none'
+        cvs.style.transform = 'none'
 
-        ctx.resetTransform()
-        await this.drawLast()
+        imgCvs.style.transformOrigin = 'none'
+        imgCvs.style.transform = 'none'
     }
 
     /**
@@ -227,7 +228,7 @@ export class NoteBoard {
     async undo() {
         return new Promise<boolean>((resolve) => {
             this.unReDoList.undo(async base64 => {
-                this.clear()
+                this.clear(false)
                 if (!base64) return resolve(false)
 
                 // 保存当前的混合模式
@@ -251,7 +252,7 @@ export class NoteBoard {
     async redo() {
         return new Promise<boolean>((resolve) => {
             this.unReDoList.redo(async base64 => {
-                this.clear()
+                this.clear(false)
                 if (!base64) return resolve(false)
 
                 // 保存当前的混合模式
@@ -272,8 +273,12 @@ export class NoteBoard {
     /**
      * 清空画板
      */
-    clear() {
-        clearAllCvs(this.ctx, this.cvs)
+    clear(
+        clearImg = true,
+        clearMask = true,
+    ) {
+        clearMask && clearAllCvs(this.ctx, this.cvs)
+        clearImg && clearAllCvs(this.imgCtx, this.imgCvs)
     }
 
     /** 
@@ -553,7 +558,7 @@ export class NoteBoard {
      * 添加一个新的记录
      */
     private async addNewRecord() {
-        const base64 = await this.shotImg('base64')
+        const base64 = await this.shotMask('base64')
         this.unReDoList.add(base64)
     }
 
