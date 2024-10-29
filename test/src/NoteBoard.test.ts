@@ -1,19 +1,61 @@
 import { NoteBoard } from '@/NoteBoard'
 import { genBtn } from './tools'
 
+const WIDTH = 800
+const HEIGHT = 600
 
-const canvas = document.createElement('canvas')
-canvas.style.border = '1px solid'
-document.body.appendChild(canvas)
+
+/**
+ * 图片画板 =========================================
+ */
+const imgCanvas = genCanvas(false, canvas => {
+    const div = document.createElement('div')
+    div.style.position = 'absolute'
+    div.style.top = '40px'
+    div.style.left = '0'
+    div.style.overflow = 'hidden'
+
+    div.style.width = WIDTH + 'px'
+    div.style.height = HEIGHT + 'px'
+
+    document.body.appendChild(div)
+    div.appendChild(canvas)
+})
+const imgBoard = new NoteBoard({
+    canvas: imgCanvas,
+    width: WIDTH,
+    height: HEIGHT,
+})
+
+/**
+ * 居中绘制图片，并自动拉伸大小
+ */
+imgBoard.drawImg(
+    new URL('./PixPin_2024-10-29_14-27-44.png', import.meta.url).href,
+    {
+        center: true,
+        autoFit: true
+    }
+)
 
 
 /**
  * 画板 =========================================
  */
+const canvas = genCanvas()
+canvas.style.top = '40px'
+
+let scaleX = 1,
+    scaleY = 1,
+    translateX = 0,
+    translateY = 0
+
 const board = new NoteBoard({
     canvas,
-    fillStyle: '#409eff55',
-    strokeStyle: '#409eff55',
+    width: WIDTH,
+    height: HEIGHT,
+    fillStyle: '#409eff33',
+    strokeStyle: '#409eff33',
     lineWidth: 30,
 
     onMouseDown(e) {
@@ -31,7 +73,27 @@ const board = new NoteBoard({
     },
     onUndo() {
         console.log('撤销')
-    }
+    },
+
+    /**
+     * 同步缩放
+     */
+    onWheel(zoomX, zoomY, offsetX, offsetY) {
+        scaleX = zoomX
+        scaleY = zoomY
+
+        imgCanvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`
+        imgCanvas.style.transformOrigin = `${offsetX}px ${offsetY}px`
+    },
+    /**
+     * @bug
+     */
+    // onDrag(dx, dy) {
+    //     translateX = dx
+    //     translateY = dy
+
+    //     imgCanvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`
+    // }
     // ...
 })
 
@@ -40,17 +102,6 @@ const board = new NoteBoard({
  */
 board.setMode('draw')
 board.isEnableZoom = true
-
-/**
- * 居中绘制图片，并自动拉伸大小
- */
-board.drawImg(
-    new URL('./PixPin_2024-10-29_14-27-44.png', import.meta.url).href,
-    {
-        center: true,
-        autoFit: true
-    }
-)
 
 
 /**
@@ -75,6 +126,7 @@ genBtn('重做', () => {
 })
 genBtn('重置大小', () => {
     board.reset()
+    imgCanvas.style.transform = 'none'
 })
 
 genBtn('关闭/ 打开绘制', () => {
@@ -94,3 +146,21 @@ genBtn('开启/ 关闭拖拽模式', () => {
         ? board.setMode('none')
         : board.setMode('drag')
 })
+
+
+function genCanvas(needBorder = true, appendFn?: (canvas: HTMLCanvasElement) => void) {
+    const canvas = document.createElement('canvas')
+    needBorder && (canvas.style.border = '1px solid')
+    canvas.style.position = 'absolute'
+    canvas.style.top = '0'
+    canvas.style.left = '0'
+
+    if (appendFn) {
+        appendFn(canvas)
+    }
+    else {
+        document.body.appendChild(canvas)
+    }
+
+    return canvas
+}

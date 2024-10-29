@@ -2,8 +2,7 @@ import type { NoteBoardOptions } from './type'
 
 
 export function mergeOpts(
-    opts: NoteBoardOptions = {},
-    rawOpts: NoteBoardOptions = {}
+    opts: NoteBoardOptions,
 ) {
     return {
         ... {
@@ -13,7 +12,6 @@ export function mergeOpts(
             strokeStyle: '#000',
             lineCap: 'round' as CanvasLineCap,
         },
-        ...rawOpts,
         ...opts,
     }
 }

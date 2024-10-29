@@ -2,19 +2,24 @@ import type { TransferType } from '@/types'
 import { clearAllCvs, createCvs, getImg } from '@/canvasTool/tools'
 import { getCvsImg, type HandleImgReturn } from '@/canvasTool/handleImg'
 import { getCursor, mergeOpts } from './tools'
-import type { NoteBoardOptions, MouseEventFn, RecordItem, CanvasAttrs, Mode, DrawImgOpts, ZoomFn, DragFn } from './type'
+import type { NoteBoardOptions, MouseEventFn, CanvasAttrs, Mode, DrawImgOpts, ZoomFn, DragFn } from './type'
 import { createUnReDoList, throttle } from '@/utils'
 
 
 /**
  * ### 画板，提供如下功能
  * - 签名涂抹
+ * - 自适应绘图
+ * 
  * - 擦除
  * - 撤销
  * - 重做
+ * 
  * - 缩放
+ * - 拖拽
+ * 
  * - 颜色等样式处理
- * - 下载图片
+ * - 截图
  */
 export class NoteBoard {
 
@@ -127,8 +132,6 @@ export class NoteBoard {
         switch (mode) {
             case 'draw':
                 this.setCursor()
-                this.setDefaultStyle()
-                // 恢复正常模式，而非擦除模式
                 this.ctx.globalCompositeOperation = 'xor'
                 break
 
@@ -168,7 +171,10 @@ export class NoteBoard {
     /**
      * 缩放画布
      */
-    async zoomTo(scaleX: number, scaleY: number, clientX: number, clientY: number) {
+    async zoomTo(
+        scaleX: number, scaleY: number,
+        clientX: number, clientY: number
+    ) {
         const { ctx, cvs } = this
         this.clear()
 
@@ -462,7 +468,10 @@ export class NoteBoard {
             const dx = e.offsetX - this.dragStart.x
             const dy = e.offsetY - this.dragStart.y
             this._dragCanvas(dx, dy)
-            this.customOnDrag(dx, dy)
+            this.customOnDrag(
+                this.offsetX + dx,
+                this.offsetY + dy
+            )
             this.dragStart = { x: e.offsetX, y: e.offsetY }
         }
 
@@ -522,7 +531,7 @@ export class NoteBoard {
         this.zoom = Math.max(this.zoom, .05)
 
         this._zoomTo(this.zoom, this.zoom, e.clientX, e.clientY)
-        this.customOnWheel?.(this.zoom, this.zoom, e.clientX, e.clientY)
+        this.customOnWheel?.(this.zoom, this.zoom, e.offsetX, e.offsetY)
     }
 
     private setDefaultStyle() {

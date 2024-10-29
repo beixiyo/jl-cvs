@@ -3,8 +3,8 @@ export type MouseEventFn = (e: MouseEvent) => void
 export type ZoomFn = (
     zoomX: number,
     zoomY: number,
-    clientX: number,
-    clientY: number,
+    offsetX: number,
+    offsetY: number,
 ) => void
 
 export type DragFn = (
@@ -15,7 +15,7 @@ export type DragFn = (
 export type Mode = 'draw' | 'erase' | 'drag' | 'none'
 
 export type NoteBoardOptions = {
-    canvas?: HTMLCanvasElement
+    canvas: HTMLCanvasElement
 
     onMouseDown?: MouseEventFn
     onMouseMove?: MouseEventFn
