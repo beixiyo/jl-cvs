@@ -23,7 +23,7 @@ npm i @jl-org/cvs
 - [放烟花](#放烟花)
 - [二段爆炸的烟花](#二段爆炸的烟花)
 - [图片灰飞烟灭效果](#图片灰飞烟灭效果)
-- [签名画板，可绘制、撤销等](#签名画板)
+- [签名画板，可绘画、缩放、撤销等](#签名画板)
 - [拖拽区域截图](#拖拽区域截图)
 - [刮刮乐](#刮刮乐)
 - [黑客科技数字墙](#黑客科技数字墙)
@@ -176,52 +176,55 @@ imgToFade(cvs, {
 
 ## 签名画板
 ```ts
-import { NoteBoard, getCursor } from '@jl-org/cvs'
+import { NoteBoard } from '@jl-org/cvs'
 
 
-const canvas = document.createElement('canvas')
-canvas.style.border = '1px solid'
-canvas.style.cursor = getCursor()
-document.body.appendChild(canvas)
-
+const WIDTH = 600
+const HEIGHT = 600
+document.body.style.padding = '40px'
 
 /**
- * 画板 =========================================
+ * 图片画板 =========================================
  */
+const el = document.createElement('div')
+el.style.border = '1px solid'
+document.body.appendChild(el)
+
 const board = new NoteBoard({
-    canvas,
-    fillStyle: '#409eff55',
-    strokeStyle: '#409eff55',
+    el,
+    width: WIDTH,
+    height: HEIGHT,
     lineWidth: 30,
-
-    onMouseDown(e) {
-        console.log('鼠标按下', e)
-    },
-    onMouseMove(e) {
-        // console.log('鼠标移动', e)
-    },
-    onMouseUp(e) {
-        console.log('鼠标抬起', e)
-    },
-
-    onRedo() {
-        console.log('重做')
-    },
-    onUndo() {
-        console.log('撤销')
-    }
-    // ...
+    strokeStyle: '#409eff55',
+    drawGlobalCompositeOperation: 'xor'
 })
+
+/**
+ * 居中绘制图片，并自动拉伸大小
+ */
+board.drawImg(
+    new URL('./PixPin_2024-10-29_14-27-44.png', import.meta.url).href,
+    {
+        center: true,
+        autoFit: true,
+    },
+)
 
 
 /**
  * 按钮 =========================================
  */
 genBtn('截图', async () => {
-    const src = await board.shotImg('base64')
+    const src = await board.shotImg(true)
     const imgEl = new Image()
     imgEl.src = src
+
+    const mask = await board.shotMask(true)
+    const maskImgEl = new Image()
+    maskImgEl.src = mask
+
     document.body.appendChild(imgEl)
+    document.body.appendChild(maskImgEl)
 })
 
 genBtn('清空', () => {
@@ -236,7 +239,6 @@ genBtn('重做', () => {
 })
 genBtn('重置大小', () => {
     board.reset()
-    imgCanvas.style.transform = 'none'
 })
 
 genBtn('关闭/ 打开绘制', () => {

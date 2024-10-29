@@ -59,23 +59,19 @@ export type CanvasAttrs = {
      */
     height?: number
 
-    [K: string]: any
-}
+    /**
+     * 画笔模式，默认 source-over
+     */
+    drawGlobalCompositeOperation?: GlobalCompositeOperation
 
-export type Position = [x: number, y: number]
-export type RecordItem = {
-    point: {
-        moveTo: Position
-        lineTo: Position
-    }[]
-    attr: CanvasAttrs
+    [K: string]: any
 }
 
 export type DrawImgOpts = {
     /**
      * 绘制之后回调图片给你，你可以设置图片参数
      */
-    afterDraw?: DrawParamsFn
+    afterDraw?: (imgInfo: ImgInfo) => void
     /**
      * 是否先清除画布
      * @default false
@@ -93,7 +89,7 @@ export type DrawImgOpts = {
     autoFit?: boolean
 }
 
-type DrawParamsFn = (data: {
+export type ImgInfo = {
     img: HTMLImageElement
     minScale: number
     scaleX: number
@@ -106,4 +102,4 @@ type DrawParamsFn = (data: {
     drawHeight: number
     rawWidth: number
     rawHeight: number
-}) => void
+}

@@ -1,4 +1,4 @@
-import type { NoteBoardOptions } from './type'
+import type { CanvasAttrs, NoteBoardOptions } from './type'
 
 
 export function mergeOpts(
@@ -11,7 +11,8 @@ export function mergeOpts(
             lineWidth: 1,
             strokeStyle: '#000',
             lineCap: 'round' as CanvasLineCap,
-        },
+            drawGlobalCompositeOperation: 'source-over'
+        } as CanvasAttrs,
         ...opts,
     }
 }

@@ -1,8 +1,8 @@
 import type { TransferType } from '@/types'
 import { clearAllCvs, getImg } from '@/canvasTool/tools'
-import { getCvsImg, type HandleImgReturn } from '@/canvasTool/handleImg'
+import { cutImg, getCvsImg, type HandleImgReturn } from '@/canvasTool/handleImg'
 import { getCursor, mergeOpts, setCanvas } from './tools'
-import type { NoteBoardOptions, MouseEventFn, CanvasAttrs, Mode, DrawImgOpts, ZoomFn, DragFn } from './type'
+import type { NoteBoardOptions, MouseEventFn, CanvasAttrs, Mode, DrawImgOpts, ZoomFn, DragFn, ImgInfo } from './type'
 import { createUnReDoList } from '@/utils'
 
 
@@ -30,15 +30,11 @@ export class NoteBoard {
 
     imgCvs = document.createElement('canvas')
     imgCtx = this.imgCvs.getContext('2d') as CanvasRenderingContext2D
-
-    /**
-     * 画笔模式，默认 source-over
-     */
-    drawGlobalCompositeOperation: GlobalCompositeOperation = 'source-over'
+    imgInfo: ImgInfo
 
     private opts: NoteBoardOptions
 
-    mode: Mode = 'none'
+    mode: Mode = 'draw'
     /** 开启鼠标滚轮缩放 */
     isEnableZoom = true
 
@@ -145,7 +141,7 @@ export class NoteBoard {
         switch (mode) {
             case 'draw':
                 this.setCursor()
-                this.ctx.globalCompositeOperation = this.drawGlobalCompositeOperation
+                this.ctx.globalCompositeOperation = this.opts.drawGlobalCompositeOperation
                 break
 
             case 'erase':
@@ -168,30 +164,64 @@ export class NoteBoard {
 
     /**
      * 获取画板图像内容，默认为 base64
-     * @param resType 需要返回的文件格式，默认 `base64`
-     * @param type 图片的 MIME 格式
+     * @param exportOnlyImgArea 导出时，仅仅把图片区域内容导出，并且还原图片大小
+     * @param mimeType 图片的 MIME 格式
      * @param quality 压缩质量
      */
-    shotImg<T extends TransferType>(
-        resType: T = 'base64' as T,
+    async shotImg(
+        exportOnlyImgArea = false,
         mimeType?: string,
         quality?: number
-    ): HandleImgReturn<T> {
-        return getCvsImg<T>(this.imgCvs, resType, mimeType, quality)
+    ) {
+        if (!exportOnlyImgArea || !this.imgInfo) {
+            return getCvsImg(this.imgCvs, 'base64', mimeType, quality)
+        }
+
+        const rawBase64 = await getCvsImg(this.imgCvs, 'base64', mimeType, quality)
+        const img = await getImg(rawBase64)
+        if (!img) return ''
+
+        const { imgInfo } = this
+
+        return await cutImg(img, {
+            x: imgInfo.x,
+            y: imgInfo.y,
+            width: imgInfo.drawWidth,
+            height: imgInfo.drawHeight,
+            scaleX: 1 / imgInfo.minScale,
+            scaleY: 1 / imgInfo.minScale,
+        })
     }
 
     /**
      * 获取画板遮罩（画笔）内容，默认为 base64
-     * @param resType 需要返回的文件格式，默认 `base64`
-     * @param type 图片的 MIME 格式
+     * @param exportOnlyImgArea 导出时，仅仅把图片区域内容导出，并且还原图片大小（需要调用 drawImg 后才有此区域）
+     * @param mimeType 图片的 MIME 格式
      * @param quality 压缩质量
      */
-    shotMask<T extends TransferType>(
-        resType: T = 'base64' as T,
+    async shotMask(
+        exportOnlyImgArea = false,
         mimeType?: string,
         quality?: number
-    ): HandleImgReturn<T> {
-        return getCvsImg<T>(this.cvs, resType, mimeType, quality)
+    ) {
+        if (!exportOnlyImgArea || !this.imgInfo) {
+            return getCvsImg(this.cvs, 'base64', mimeType, quality)
+        }
+
+        const rawBase64 = await getCvsImg(this.cvs, 'base64', mimeType, quality)
+        const img = await getImg(rawBase64)
+        if (!img) return ''
+
+        const { imgInfo } = this
+
+        return await cutImg(img, {
+            x: imgInfo.x,
+            y: imgInfo.y,
+            width: imgInfo.drawWidth,
+            height: imgInfo.drawHeight,
+            scaleX: 1 / imgInfo.minScale,
+            scaleY: 1 / imgInfo.minScale,
+        })
     }
 
     /**
@@ -358,7 +388,7 @@ export class NoteBoard {
             drawHeight
         )
 
-        afterDraw?.({
+        this.imgInfo = {
             minScale,
             scaleX,
             scaleY,
@@ -370,7 +400,8 @@ export class NoteBoard {
             drawHeight,
             rawWidth: imgWidth,
             rawHeight: imgHeight,
-        })
+        }
+        afterDraw?.(this.imgInfo)
     }
 
     /**
@@ -408,14 +439,6 @@ export class NoteBoard {
         )
     }
 
-    private async drawLast() {
-        const lastBase64 = this.unReDoList.getLast()
-        if (lastBase64) {
-            const img = await getImg(lastBase64) as HTMLImageElement
-            this.ctx.drawImage(img, 0, 0)
-        }
-    }
-
     private canDraw() {
         return ['draw', 'erase'].includes(this.mode)
     }
@@ -423,6 +446,7 @@ export class NoteBoard {
     private init() {
         this.bindEvent()
         this.setDefaultStyle()
+        this.setMode(this.mode)
     }
 
     private bindEvent() {
@@ -558,7 +582,7 @@ export class NoteBoard {
      * 添加一个新的记录
      */
     private async addNewRecord() {
-        const base64 = await this.shotMask('base64')
+        const base64 = await this.shotMask()
         this.unReDoList.add(base64)
     }
 

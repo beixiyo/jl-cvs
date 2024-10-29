@@ -1,6 +1,6 @@
 import { NoteBoard } from '@/NoteBoard'
 import { genBtn } from './tools'
-import { cutImg } from '@/canvasTool'
+
 
 const WIDTH = 600
 const HEIGHT = 600
@@ -18,9 +18,9 @@ const board = new NoteBoard({
     width: WIDTH,
     height: HEIGHT,
     lineWidth: 30,
-    strokeStyle: '#409eff55'
+    strokeStyle: '#409eff55',
+    drawGlobalCompositeOperation: 'xor'
 })
-board.drawGlobalCompositeOperation = 'xor'
 
 /**
  * 居中绘制图片，并自动拉伸大小
@@ -30,35 +30,6 @@ board.drawImg(
     {
         center: true,
         autoFit: true,
-        async afterDraw({
-            minScale,
-            img,
-
-            x,
-            y,
-            drawWidth,
-            drawHeight,
-            rawWidth,
-            rawHeight,
-        }) {
-            console.log({ drawHeight, drawWidth, minScale, rawWidth, rawHeight })
-            console.log(`图片原始宽度: ${rawWidth}, ${drawWidth / minScale}`)
-            console.log(`图片原始高度: ${rawHeight}, ${drawHeight / minScale}`)
-
-            /**
-             * 还原原始尺寸图片
-             */
-            const mask = await cutImg(img, {
-                x,
-                y,
-                width: drawWidth,
-                height: drawHeight,
-                scaleX: 1 / minScale,
-                scaleY: 1 / minScale,
-            })
-
-            console.log(mask)
-        },
     },
 )
 
@@ -67,11 +38,11 @@ board.drawImg(
  * 按钮 =========================================
  */
 genBtn('截图', async () => {
-    const src = await board.shotImg('base64')
+    const src = await board.shotImg(true)
     const imgEl = new Image()
     imgEl.src = src
 
-    const mask = await board.shotMask('base64')
+    const mask = await board.shotMask(true)
     const maskImgEl = new Image()
     maskImgEl.src = mask
 
