@@ -11,6 +11,8 @@ export type DragFn = (
     params: {
         translateX: number
         translateY: number
+        transformOriginX: number
+        transformOriginY: number
         e: MouseEvent
     }
 ) => void

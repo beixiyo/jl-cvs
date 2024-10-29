@@ -1,4 +1,3 @@
-import type { TransferType } from '@/types'
 import { clearAllCvs, getImg } from '@/canvasTool/tools'
 import { cutImg, getCvsImg, type HandleImgReturn } from '@/canvasTool/handleImg'
 import { getCursor, mergeOpts, setCanvas } from './tools'
@@ -325,19 +324,6 @@ export class NoteBoard {
     }
 
     /**
-     * 根据当前配置，用 fillRect 绘制整个背景
-     */
-    drawBg() {
-        const { ctx, cvs } = this
-        const { fillStyle } = this.opts
-
-        if (fillStyle) {
-            ctx.fillStyle = fillStyle
-            ctx.fillRect(0, 0, cvs.width, cvs.height)
-        }
-    }
-
-    /**
      * 绘制图片，可调整大小，自适应尺寸等
      */
     async drawImg(img: HTMLImageElement | string, {
@@ -492,6 +478,8 @@ export class NoteBoard {
             this.customOnDrag?.({
                 translateX: this.translateX,
                 translateY: this.translateY,
+                transformOriginX: this.dragStart.x,
+                transformOriginY: this.dragStart.y,
                 e
             })
         }
