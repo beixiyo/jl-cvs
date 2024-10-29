@@ -276,7 +276,7 @@ export class NoteBoard {
 
     setCursor(width?: number, fillStyle?: string) {
         this.cvs.style.cursor = getCursor(
-            this.getZoomOffset(width || this.opts.lineWidth),
+            width || this.opts.lineWidth,
             fillStyle || this.opts.fillStyle
         )
     }
@@ -300,14 +300,20 @@ export class NoteBoard {
     }
 
     private dragCanvas(dx: number, dy: number) {
+        const { cvs, ctx } = this
+
         this.offsetX += dx
         this.offsetY += dy
 
         this.clear()
-        this.ctx.resetTransform()
-        this.ctx.translate(this.offsetX, this.offsetY) // 添加平移
-        this.ctx.scale(this.zoom, this.zoom) // 考虑缩放
+        ctx.save()
+
+        ctx.resetTransform()
+        ctx.translate(this.offsetX, this.offsetY) // 添加平移
+        ctx.scale(this.zoom, this.zoom) // 考虑缩放
         this.drawRecord()
+
+        ctx.restore()
     }
 
     private _onMousedown(e: MouseEvent) {
@@ -323,8 +329,8 @@ export class NoteBoard {
         this.isDrawing = true
         const { offsetX, offsetY } = e
         this.start = {
-            x: this.getZoomOffset(offsetX),
-            y: this.getZoomOffset(offsetY),
+            x: offsetX,
+            y: offsetY,
         }
     }
 
@@ -344,20 +350,20 @@ export class NoteBoard {
         const { ctx, start } = this
 
         ctx.beginPath()
-        ctx.moveTo(this.getZoomOffset(start.x), this.getZoomOffset(start.y))
-        ctx.lineTo(this.getZoomOffset(offsetX), this.getZoomOffset(offsetY))
+        ctx.moveTo(start.x, start.y)
+        ctx.lineTo(offsetX, offsetY)
 
-        ctx.lineWidth = this.getZoomOffset(this.opts.lineWidth)
+        ctx.lineWidth = this.opts.lineWidth
         ctx.stroke()
 
         this.prevList[this.prevList.length - 1].point.push({
             moveTo: [start.x, start.y],
-            lineTo: [this.getZoomOffset(offsetX), this.getZoomOffset(offsetY)],
+            lineTo: [offsetX, offsetY],
         })
 
         this.start = {
-            x: this.getZoomOffset(offsetX),
-            y: this.getZoomOffset(offsetY),
+            x: offsetX,
+            y: offsetY,
         }
     }
 
@@ -435,10 +441,7 @@ export class NoteBoard {
 
         for (let i = 0; i < this.prevList.length; i++) {
             const item = this.prevList[i]
-            this.setStyle({
-                ...item.attr,
-                lineWidth: this.getZoomOffset(item.attr.lineWidth)
-            })
+            this.setStyle(item.attr)
 
             for (let j = 0; j < item.point.length; j++) {
                 const point = item.point[j]
@@ -449,10 +452,6 @@ export class NoteBoard {
                 ctx.stroke()
             }
         }
-    }
-
-    private getZoomOffset(value: number) {
-        return value / this.zoom
     }
 
 }
