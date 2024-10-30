@@ -89,6 +89,10 @@ export type DrawImgOpts = {
      * @default false
      */
     autoFit?: boolean
+    /** 指定画布上下文，默认背景画布上下文 */
+    context?: CanvasRenderingContext2D
+    /** 是否记录图片信息，后续导出图片时调整大小需要 */
+    needRecordImgInfo?: boolean
 }
 
 export type ImgInfo = {

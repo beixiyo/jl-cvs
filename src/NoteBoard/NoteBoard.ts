@@ -1,7 +1,7 @@
 import { clearAllCvs, getImg } from '@/canvasTool/tools'
-import { cutImg, getCvsImg } from '@/canvasTool/handleImg';
+import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
 import { getCursor, mergeOpts, setCanvas } from './tools'
-import type { NoteBoardOptions, CanvasAttrs, Mode, DrawImgOpts, ImgInfo } from './type';
+import type { NoteBoardOptions, CanvasAttrs, Mode, DrawImgOpts, ImgInfo } from './type'
 import { createUnReDoList } from '@/utils'
 
 
@@ -120,20 +120,20 @@ export class NoteBoard {
 
     /**
      * 获取画板图像内容，默认为 base64
-     * @param exportOnlyImgArea 导出时，仅仅把图片区域内容导出，并且还原图片大小
-     * @param mimeType 图片的 MIME 格式
-     * @param quality 压缩质量
      */
     async shotImg(
-        exportOnlyImgArea = false,
-        mimeType?: string,
-        quality?: number
+        {
+            exportOnlyImgArea = false,
+            mimeType,
+            quality,
+            canvas = this.imgCvs
+        }: ShotParams = {}
     ) {
         if (!exportOnlyImgArea || !this.imgInfo) {
-            return getCvsImg(this.imgCvs, 'base64', mimeType, quality)
+            return getCvsImg(canvas, 'base64', mimeType, quality)
         }
 
-        const rawBase64 = await getCvsImg(this.imgCvs, 'base64', mimeType, quality)
+        const rawBase64 = await getCvsImg(canvas, 'base64', mimeType, quality)
         const img = await getImg(rawBase64)
         if (!img) return ''
 
@@ -151,20 +151,20 @@ export class NoteBoard {
 
     /**
      * 获取画板遮罩（画笔）内容，默认为 base64
-     * @param exportOnlyImgArea 导出时，仅仅把图片区域内容导出，并且还原图片大小（需要调用 drawImg 后才有此区域）
-     * @param mimeType 图片的 MIME 格式
-     * @param quality 压缩质量
      */
     async shotMask(
-        exportOnlyImgArea = false,
-        mimeType?: string,
-        quality?: number
+        {
+            exportOnlyImgArea = false,
+            mimeType,
+            quality,
+            canvas = this.cvs
+        }: ShotParams = {}
     ) {
         if (!exportOnlyImgArea || !this.imgInfo) {
-            return getCvsImg(this.cvs, 'base64', mimeType, quality)
+            return getCvsImg(canvas, 'base64', mimeType, quality)
         }
 
-        const rawBase64 = await getCvsImg(this.cvs, 'base64', mimeType, quality)
+        const rawBase64 = await getCvsImg(canvas, 'base64', mimeType, quality)
         const img = await getImg(rawBase64)
         if (!img) return ''
 
@@ -283,12 +283,17 @@ export class NoteBoard {
     /**
      * 绘制图片，可调整大小，自适应尺寸等
      */
-    async drawImg(img: HTMLImageElement | string, {
-        afterDraw,
-        needClear = false,
-        autoFit,
-        center,
-    }: DrawImgOpts = {}) {
+    async drawImg(
+        img: HTMLImageElement | string,
+        {
+            afterDraw,
+            needClear = false,
+            autoFit,
+            center,
+            context = this.imgCtx,
+            needRecordImgInfo = true
+        }: DrawImgOpts = {}
+    ) {
         needClear && this.clear()
 
         const newImg = typeof img === 'string'
@@ -324,25 +329,27 @@ export class NoteBoard {
             y = (canvasHeight - drawHeight) / 2
         }
 
-        this.imgCtx.drawImage(
+        context.drawImage(
             newImg,
             x, y,
             drawWidth,
             drawHeight
         )
 
-        this.imgInfo = {
-            minScale,
-            scaleX,
-            scaleY,
-            img: newImg,
+        if (needRecordImgInfo) {
+            this.imgInfo = {
+                minScale,
+                scaleX,
+                scaleY,
+                img: newImg,
 
-            x,
-            y,
-            drawWidth,
-            drawHeight,
-            rawWidth: imgWidth,
-            rawHeight: imgHeight,
+                x,
+                y,
+                drawWidth,
+                drawHeight,
+                rawWidth: imgWidth,
+                rawHeight: imgHeight,
+            }
         }
         afterDraw?.(this.imgInfo)
     }
@@ -531,4 +538,24 @@ export class NoteBoard {
         this.unReDoList.add(base64)
     }
 
+}
+
+
+type ShotParams = {
+    /**
+     * 导出时，仅仅把图片区域内容导出，并且还原图片大小（需要记录 imgInfo 后才有此区域）
+     */
+    exportOnlyImgArea?: boolean
+    /**
+     * 图片的 MIME 格式
+     */
+    mimeType?: string
+    /**
+     * 压缩质量
+     */
+    quality?: number
+    /**
+     * 指定导出的画布
+     */
+    canvas?: HTMLCanvasElement
 }

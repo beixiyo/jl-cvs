@@ -215,11 +215,11 @@ board.drawImg(
  * 按钮 =========================================
  */
 genBtn('截图', async () => {
-    const src = await board.shotImg(true)
+    const src = await board.shotImg({ exportOnlyImgArea: true })
     const imgEl = new Image()
     imgEl.src = src
 
-    const mask = await board.shotMask(true)
+    const mask = await board.shotMask({ exportOnlyImgArea: true })
     const maskImgEl = new Image()
     maskImgEl.src = mask
 
