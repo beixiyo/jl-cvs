@@ -44,6 +44,8 @@ export class NoteBoard {
 
     private isDragging = false
     private dragStart = { x: 0, y: 0 }
+    private mousePoint = { x: 0, y: 0 }
+
     scale = 1
     translateX = 0
     translateY = 0
@@ -186,7 +188,7 @@ export class NoteBoard {
     async setTransform() {
         const { cvs, imgCvs } = this
 
-        const transformOrigin = `${this.dragStart.x}px ${this.dragStart.y}px`,
+        const transformOrigin = `${this.mousePoint.x}px ${this.mousePoint.y}px`,
             transform = `scale(${this.scale}, ${this.scale}) translate(${this.translateX}px, ${this.translateY}px)`
 
         cvs.style.transformOrigin = transformOrigin
@@ -427,6 +429,10 @@ export class NoteBoard {
 
     private _onMousemove(e: MouseEvent) {
         this.opts.onMouseMove?.(e)
+        this.mousePoint = {
+            x: e.offsetX,
+            y: e.offsetY,
+        }
 
         /**
          * 拖拽
