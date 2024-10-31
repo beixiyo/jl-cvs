@@ -28,6 +28,7 @@ npm i @jl-org/cvs
 - [刮刮乐](#刮刮乐)
 - [黑客科技数字墙](#黑客科技数字墙)
 - [图像处理](#图像处理)
+- [ImageData 处理，灰度、对比度、二值化等](#ImageData-处理)
 - [辅助函数](#canvas-辅助函数)
 - [颜色处理](#颜色处理)
 - [svg](#svg)
@@ -443,30 +444,37 @@ export declare function getCvsImg<T extends TransferType = 'base64'>(cvs: HTMLCa
 
 /** Blob 转 Base64 */
 export declare function blobToBase64(blob: Blob): Promise<string>;
+```
 
-/** ======================= Type ========================= */
-export type HandleImgReturn<T extends TransferType> = T extends 'blob' ? Promise<Blob> : Promise<string>;
-export type WaterMarkOpts = {
-    text?: string;
-    fontSize?: number;
-    gap?: number;
-    color?: string;
-    rotate?: number;
-};
-export type CvsToDataOpts = {
-    type?: string;
-    quality?: number;
-};
-export type CutImgOpts = {
-    x?: number;
-    y?: number;
-    width?: number;
-    height?: number;
-    /** 图片的 MIME 格式 */
-    mimeType?: string;
-    /** 图像质量，取值范围 0 ~ 1 */
-    quality?: number;
-};
+---
+
+
+## #ImageData 处理
+```ts
+/**
+ * 灰度化算法：加权灰度化
+ * @returns
+ */
+export declare const adaptiveGrayscale: (imageData: ImageData) => ImageData;
+
+/**
+ * 对比度增强
+ * @param factor 因数，默认 1.2
+ * @returns
+ */
+export declare const enhanceContrast: (imageData: ImageData, factor?: number) => ImageData;
+
+/**
+ * 二值化处理，请先调用
+ * - adaptiveGrayscale
+ * - enhanceContrast
+ *
+ * 最后再调用此函数，以获得最好的图像效果
+ *
+ * @param threshold 阈值边界，默认 128
+ * @returns
+ */
+export declare const adaptiveBinarize: (imageData: ImageData, threshold?: number) => ImageData;
 ```
 
 ---
@@ -529,8 +537,9 @@ export declare function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLC
 /**
  * 判断图片的 src 是否可用，可用则返回图片
  * @param src 图片
+ * @param setCrossOrigin 是否设置 setAttribute('crossOrigin', 'anonymous')
  */
-export declare const getImg: (src: string) => Promise<false | HTMLImageElement>;
+export declare const getImg: (src: string, setCrossOrigin?: boolean) => Promise<false | HTMLImageElement>;
 ```
 
 ---

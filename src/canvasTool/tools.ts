@@ -120,11 +120,12 @@ export function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEle
 /**
  * 判断图片的 src 是否可用，可用则返回图片
  * @param src 图片
+ * @param setCrossOrigin 是否设置 setAttribute('crossOrigin', 'anonymous')
  */
-export const getImg = (src: string) => {
+export const getImg = (src: string, setCrossOrigin?: boolean) => {
     const img = new Image()
     img.src = src
-    setElCrossOrigin(img)
+    setCrossOrigin && setElCrossOrigin(img)
 
     return new Promise<false | HTMLImageElement>((resolve) => {
         img.onload = () => resolve(img)
