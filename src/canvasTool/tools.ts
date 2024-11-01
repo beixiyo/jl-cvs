@@ -16,9 +16,9 @@ export function calcCoord(r: number, deg: number) {
     return [x, y]
 }
 
-/** 设置元素的 crossOrigin 为 anonymous */
+/** 设置元素的 crossorigin 为 anonymous */
 export function setElCrossOrigin(el: HTMLElement) {
-    el.setAttribute('crossOrigin', 'anonymous')
+    (el as any).crossorigin = 'anonymous'
 }
 
 /**
@@ -56,7 +56,7 @@ export function getPixel(x: number, y: number, imgData: ImageData['data'], width
      * 然后加上 `i` 就是 `R` `G` `B` `A` 的位置
      */
     const index = (width * 4 * y) + (x * 4)
-    
+
     for (let i = 0; i < 4; i++) {
         arr[i] = imgData[index + i]
     }
@@ -120,12 +120,18 @@ export function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEle
 /**
  * 判断图片的 src 是否可用，可用则返回图片
  * @param src 图片
- * @param setCrossOrigin 是否设置 setAttribute('crossOrigin', 'anonymous')
+ * @param setCrossOrigin 是否设置元素的 crossorigin 为 anonymous
+ * @param setImg 图片加载前执行的回调函数
  */
-export const getImg = (src: string, setCrossOrigin?: boolean) => {
+export const getImg = (
+    src: string,
+    setCrossOrigin?: boolean,
+    setImg?: (img: HTMLImageElement) => void
+) => {
     const img = new Image()
     img.src = src
     setCrossOrigin && setElCrossOrigin(img)
+    setImg?.(img)
 
     return new Promise<false | HTMLImageElement>((resolve) => {
         img.onload = () => resolve(img)

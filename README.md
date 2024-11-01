@@ -489,7 +489,7 @@ export declare const adaptiveBinarize: (imageData: ImageData, threshold?: number
  */
 export declare function calcCoord(r: number, deg: number): number[];
 
-/** 设置元素的 crossOrigin 为 anonymous */
+/** 设置元素的 crossorigin 为 anonymous */
 export declare function setElCrossOrigin(el: HTMLElement): void;
 
 /**
@@ -537,9 +537,10 @@ export declare function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLC
 /**
  * 判断图片的 src 是否可用，可用则返回图片
  * @param src 图片
- * @param setCrossOrigin 是否设置 setAttribute('crossOrigin', 'anonymous')
+ * @param setCrossOrigin 是否设置元素的 crossorigin 为 anonymous
+ * @param setImg 图片加载前执行的回调函数
  */
-export declare const getImg: (src: string, setCrossOrigin?: boolean) => Promise<false | HTMLImageElement>;
+export declare const getImg: (src: string, setCrossOrigin?: boolean, setImg?: (img: HTMLImageElement) => void) => Promise<false | HTMLImageElement>;
 ```
 
 ---
