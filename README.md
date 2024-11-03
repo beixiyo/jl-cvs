@@ -23,7 +23,7 @@ npm i @jl-org/cvs
 - [放烟花](#放烟花)
 - [二段爆炸的烟花](#二段爆炸的烟花)
 - [图片灰飞烟灭效果](#图片灰飞烟灭效果)
-- [签名画板，可绘画、缩放、撤销等](#签名画板)
+- [签名画板，可绘画、擦除、缩放、撤销等](#签名画板)
 - [拖拽区域截图](#拖拽区域截图)
 - [刮刮乐](#刮刮乐)
 - [黑客科技数字墙](#黑客科技数字墙)
@@ -192,23 +192,23 @@ el.style.border = '1px solid'
 document.body.appendChild(el)
 
 const board = new NoteBoard({
-    el,
-    width: WIDTH,
-    height: HEIGHT,
-    lineWidth: 30,
-    strokeStyle: '#409eff55',
-    drawGlobalCompositeOperation: 'xor'
+  el,
+  width: WIDTH,
+  height: HEIGHT,
+  lineWidth: 30,
+  strokeStyle: '#409eff55',
+  drawGlobalCompositeOperation: 'xor'
 })
 
 /**
  * 居中绘制图片，并自动拉伸大小
  */
 board.drawImg(
-    new URL('./PixPin_2024-10-29_14-27-44.png', import.meta.url).href,
-    {
-        center: true,
-        autoFit: true,
-    },
+  new URL('./PixPin_2024-10-29_14-27-44.png', import.meta.url).href,
+  {
+    center: true,
+    autoFit: true,
+  },
 )
 
 
@@ -216,48 +216,48 @@ board.drawImg(
  * 按钮 =========================================
  */
 genBtn('截图', async () => {
-    const src = await board.shotImg({ exportOnlyImgArea: true })
-    const imgEl = new Image()
-    imgEl.src = src
+  const src = await board.shotImg({ exportOnlyImgArea: true })
+  const imgEl = new Image()
+  imgEl.src = src
 
-    const mask = await board.shotMask({ exportOnlyImgArea: true })
-    const maskImgEl = new Image()
-    maskImgEl.src = mask
+  const mask = await board.shotMask({ exportOnlyImgArea: true })
+  const maskImgEl = new Image()
+  maskImgEl.src = mask
 
-    document.body.appendChild(imgEl)
-    document.body.appendChild(maskImgEl)
+  document.body.appendChild(imgEl)
+  document.body.appendChild(maskImgEl)
 })
 
 genBtn('清空', () => {
-    board.clear()
+  board.clear()
 })
 
 genBtn('撤销', () => {
-    board.undo()
+  board.undo()
 })
 genBtn('重做', () => {
-    board.redo()
+  board.redo()
 })
 genBtn('重置大小', () => {
-    board.reset()
+  board.reset()
 })
 
 genBtn('关闭/ 打开绘制', () => {
-    board.mode === 'draw'
-        ? board.setMode('none')
-        : board.setMode('draw')
+  board.mode === 'draw'
+    ? board.setMode('none')
+    : board.setMode('draw')
 })
 
 genBtn('开启/ 关闭擦除模式', () => {
-    board.mode === 'erase'
-        ? board.setMode('none')
-        : board.setMode('erase')
+  board.mode === 'erase'
+    ? board.setMode('none')
+    : board.setMode('erase')
 })
 
 genBtn('开启/ 关闭拖拽模式', () => {
-    board.mode === 'drag'
-        ? board.setMode('none')
-        : board.setMode('drag')
+  board.mode === 'drag'
+    ? board.setMode('none')
+    : board.setMode('drag')
 })
 ```
 
@@ -489,7 +489,7 @@ export declare const adaptiveBinarize: (imageData: ImageData, threshold?: number
  */
 export declare function calcCoord(r: number, deg: number): number[];
 
-/** 设置元素的 crossorigin 为 anonymous */
+/** 设置元素的 crossorigin 和 crossOrigin 为 anonymous */
 export declare function setElCrossOrigin(el: HTMLElement): void;
 
 /**
@@ -537,7 +537,7 @@ export declare function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLC
 /**
  * 判断图片的 src 是否可用，可用则返回图片
  * @param src 图片
- * @param setCrossOrigin 是否设置元素的 crossorigin 为 anonymous
+ * @param setCrossOrigin 是否设置元素的 crossorigin 和 crossOrigin 为 anonymous
  * @param setImg 图片加载前执行的回调函数
  */
 export declare const getImg: (src: string, setCrossOrigin?: boolean, setImg?: (img: HTMLImageElement) => void) => Promise<false | HTMLImageElement>;

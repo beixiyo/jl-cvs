@@ -2,43 +2,43 @@ import type { CanvasAttrs, NoteBoardOptions } from './type'
 
 
 export function mergeOpts(
-    opts: NoteBoardOptions,
+  opts: NoteBoardOptions,
 ) {
-    return {
-        ... {
-            width: 800,
-            height: 600,
-            lineWidth: 1,
-            strokeStyle: '#000',
-            lineCap: 'round' as CanvasLineCap,
-            drawGlobalCompositeOperation: 'source-over'
-        } as CanvasAttrs,
-        ...opts,
-    }
+  return {
+    ... {
+      width: 800,
+      height: 600,
+      lineWidth: 1,
+      strokeStyle: '#000',
+      lineCap: 'round' as CanvasLineCap,
+      drawGlobalCompositeOperation: 'source-over'
+    } as CanvasAttrs,
+    ...opts,
+  }
 }
 
 export function setCanvas(canvas: HTMLCanvasElement, width: number, height: number) {
-    canvas.width = width
-    canvas.height = height
-    canvas.style.position = 'absolute'
-    canvas.style.top = '0'
-    canvas.style.left = '0'
+  canvas.width = width
+  canvas.height = height
+  canvas.style.position = 'absolute'
+  canvas.style.top = '0'
+  canvas.style.left = '0'
 }
 
 /**
  * 获取一个圆形的光标
  */
 export const getCursor = (
-    size = 30,
-    color = '#409eff55'
+  size = 30,
+  color = '#409eff55'
 ) => {
-    const circle = `
+  const circle = `
     <svg
-        xmlns='http://www.w3.org/2000/svg'
-        width='${size}'
-        height='${size}'
-        fill='${color}'
-        viewBox='0 0 ${size * 2} ${size * 2}'
+      xmlns='http://www.w3.org/2000/svg'
+      width='${size}'
+      height='${size}'
+      fill='${color}'
+      viewBox='0 0 ${size * 2} ${size * 2}'
     >
       <circle
         r='${size}'
@@ -47,7 +47,7 @@ export const getCursor = (
       />
     </svg>`
 
-    const cursorData = `data:image/svg+xml;base64,${window.btoa(circle)}`
+  const cursorData = `data:image/svg+xml;base64,${window.btoa(circle)}`
 
-    return `url(${cursorData}) ${size / 2} ${size / 2}, crosshair`
+  return `url(${cursorData}) ${size / 2} ${size / 2}, crosshair`
 }

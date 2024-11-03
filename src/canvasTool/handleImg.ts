@@ -215,6 +215,6 @@ export type CutImgOpts = {
     mimeType?: string
     /** 图像质量，取值范围 0 ~ 1 */
     quality?: number
-    /** 是否设置元素的 crossorigin 为 anonymous */
+    /** 设置元素的 crossorigin 和 crossOrigin 为 anonymous */
     setCrossOrigin?: boolean
 }
