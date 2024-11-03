@@ -4,6 +4,7 @@ import { genBtn } from './tools'
 
 const WIDTH = 600
 const HEIGHT = 600
+const LINE_WIDTH = 30
 document.body.style.padding = '40px'
 
 /**
@@ -13,40 +14,47 @@ const el = document.createElement('div')
 el.style.border = '1px solid'
 document.body.appendChild(el)
 
+
 const board = new NoteBoard({
   el,
   width: WIDTH,
   height: HEIGHT,
-  lineWidth: 30,
+  lineWidth: LINE_WIDTH,
   strokeStyle: '#409eff55',
   drawGlobalCompositeOperation: 'xor',
 
   onDrag() {
     console.log('onDrag')
   },
-  onWheel() {
-    console.log('onWheel')
+  onWheel({ scale }) {
+    console.log('onWheel 同步笔刷大小')
+    if (scale < 1) return
+
+    board.setStyle({
+      lineWidth: LINE_WIDTH / scale
+    })
+    board.setCursor()
   },
 
-  onMouseDown() {
-    console.log('onMouseDown')
-  },
-  onMouseUp() {
-    console.log('onMouseUp')
-  },
-  onMouseMove() {
-    console.log('onMouseMove')
-  },
-  onMouseLeave() {
-    console.log('onMouseLeave')
-  },
+  // onMouseDown() {
+  //   console.log('onMouseDown')
+  // },
+  // onMouseUp() {
+  //   console.log('onMouseUp')
+  // },
+  // onMouseMove() {
+  //   console.log('onMouseMove')
+  // },
+  // onMouseLeave() {
+  //   console.log('onMouseLeave')
+  // },
 
-  onRedo() {
-    console.log('onRedo')
-  },
-  onUndo() {
-    console.log('onUndo')
-  }
+  // onRedo() {
+  //   console.log('onRedo')
+  // },
+  // onUndo() {
+  //   console.log('onUndo')
+  // }
 })
 
 /**

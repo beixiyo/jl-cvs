@@ -1,4 +1,4 @@
-import type { CanvasAttrs, NoteBoardOptions } from './type'
+import type { NoteBoardOptions } from './type'
 
 
 export function mergeOpts(
@@ -8,11 +8,14 @@ export function mergeOpts(
     ... {
       width: 800,
       height: 600,
+      minScale: 0.5,
+      maxScale: 8,
+
       lineWidth: 1,
       strokeStyle: '#000',
       lineCap: 'round' as CanvasLineCap,
       drawGlobalCompositeOperation: 'source-over'
-    } as CanvasAttrs,
+    } as NoteBoardOptions,
     ...opts,
   }
 }
@@ -38,10 +41,10 @@ export const getCursor = (
       width='${size}'
       height='${size}'
       fill='${color}'
-      viewBox='0 0 ${size * 2} ${size * 2}'
+      viewBox='0 0 ${size} ${size}'
     >
       <circle
-        r='${size}'
+        r='${size / 2}'
         cy='50%'
         cx='50%'
       />

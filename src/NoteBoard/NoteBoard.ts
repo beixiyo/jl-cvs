@@ -548,11 +548,7 @@ export class NoteBoard {
       ? this.scale / 1.1
       : this.scale * 1.1
 
-    if (this.scale >= 20) {
-      this.scale = 20
-    }
-
-    this.scale = Math.max(this.scale, .05)
+    this.scale = Math.min(Math.max(this.scale, this.opts.minScale), this.opts.maxScale)
     this.setTransform()
 
     this.opts.onWheel?.({
