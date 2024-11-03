@@ -16,12 +16,6 @@ export function calcCoord(r: number, deg: number) {
   return [x, y]
 }
 
-/** 设置元素的 crossorigin 和 crossOrigin 为 anonymous */
-export function setElCrossOrigin(el: HTMLElement) {
-  (el as any).crossorigin = 'anonymous';
-  (el as any).crossOrigin = 'anonymous'
-}
-
 /**
  * 创建一个指定宽高的画布
  * @param width 画布的宽度
@@ -121,17 +115,14 @@ export function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEle
 /**
  * 判断图片的 src 是否可用，可用则返回图片
  * @param src 图片
- * @param setCrossOrigin 是否设置元素的 crossorigin 和 crossOrigin 为 anonymous
  * @param setImg 图片加载前执行的回调函数
  */
 export const getImg = (
   src: string,
-  setCrossOrigin?: boolean,
   setImg?: (img: HTMLImageElement) => void
 ) => {
   const img = new Image()
   img.src = src
-  setCrossOrigin && setElCrossOrigin(img)
   setImg?.(img)
 
   return new Promise<false | HTMLImageElement>((resolve) => {
