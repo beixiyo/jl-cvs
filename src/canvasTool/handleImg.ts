@@ -24,8 +24,8 @@ export function cutImg<T extends TransferType = 'base64'>(
     quality,
   } = opts
 
-  const scaledWidth = width * scaleX
-  const scaledHeight = height * scaleY
+  const scaledWidth = Math.round(width * scaleX)
+  const scaledHeight = Math.round(height * scaleY)
 
   const { cvs, ctx } = createCvs(scaledWidth, scaledHeight)
 

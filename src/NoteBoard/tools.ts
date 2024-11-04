@@ -24,8 +24,13 @@ export function setCanvas(canvas: HTMLCanvasElement, width: number, height: numb
   canvas.width = width
   canvas.height = height
   canvas.style.position = 'absolute'
-  canvas.style.top = '0'
-  canvas.style.left = '0'
+
+  const parent = canvas.parentElement,
+    { offsetHeight, offsetWidth } = parent
+
+  // 居中
+  canvas.style.top = `${(offsetHeight - height) / 2}px`
+  canvas.style.left = `${(offsetWidth - width) / 2}px`
 }
 
 /**

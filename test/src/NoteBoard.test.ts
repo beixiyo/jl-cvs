@@ -12,6 +12,11 @@ document.body.style.padding = '40px'
  */
 const el = document.createElement('div')
 el.style.border = '1px solid'
+el.style.width = `${WIDTH * 1.2}px`
+el.style.height = `${HEIGHT * 1.2}px`
+el.style.display = 'flex'
+el.style.justifyContent = 'center'
+el.style.alignItems = 'center'
 document.body.appendChild(el)
 
 

@@ -100,13 +100,11 @@ export class NoteBoard {
      * 大小属性等设置
      */
     for (const item of this.canvasList) {
-      setCanvas(item.canvas, width, height)
       el.appendChild(item.canvas)
+      setCanvas(item.canvas, width, height)
     }
 
     el.style.overflow = 'hidden'
-    el.style.width = `${width}px`
-    el.style.height = `${height}px`
     el.style.position = 'relative'
     this.el = el
 
