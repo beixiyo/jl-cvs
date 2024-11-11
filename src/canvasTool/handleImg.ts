@@ -12,7 +12,7 @@ export function cutImg<T extends TransferType = 'base64'>(
   img: HTMLImageElement,
   opts: CutImgOpts = {},
   resType: T = 'base64' as T,
-): HandleImgReturn<T> {
+): Promise<HandleImgReturn<T>> {
   const {
     width = img.width,
     height = img.height,
@@ -48,7 +48,7 @@ export function compressImg<T extends TransferType = 'base64'>(
   resType: T = 'base64' as T,
   quality = .5,
   mimeType: 'image/jpeg' | 'image/webp' = 'image/webp'
-): HandleImgReturn<T> {
+): Promise<HandleImgReturn<T>> {
   const { cvs, ctx } = createCvs(img.width, img.height)
   ctx.drawImage(img, 0, 0)
 
@@ -144,10 +144,10 @@ export function getCvsImg<T extends TransferType = 'base64'>(
   resType: T = 'base64' as T,
   mimeType?: string,
   quality?: number
-): HandleImgReturn<T> {
+): Promise<HandleImgReturn<T>> {
   switch (resType) {
     case 'base64':
-      return Promise.resolve(cvs.toDataURL(mimeType, quality)) as HandleImgReturn<T>
+      return Promise.resolve(cvs.toDataURL(mimeType, quality)) as Promise<HandleImgReturn<T>>
     case 'blob':
       return new Promise<Blob>((resolve) => {
         cvs.toBlob(
@@ -157,7 +157,7 @@ export function getCvsImg<T extends TransferType = 'base64'>(
           mimeType,
           quality
         )
-      }) as HandleImgReturn<T>
+      }) as Promise<HandleImgReturn<T>>
 
     default:
       const data: never = resType
@@ -179,12 +179,10 @@ export function blobToBase64(blob: Blob) {
 }
 
 
-/** ======================= Type ========================= */
-
 export type HandleImgReturn<T extends TransferType> =
   T extends 'blob'
-  ? Promise<Blob>
-  : Promise<string>
+  ? Blob
+  : string
 
 export type WaterMarkOpts = {
   text?: string

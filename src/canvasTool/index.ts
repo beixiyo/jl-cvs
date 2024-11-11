@@ -1,6 +1,7 @@
 export * from './tools'
 export * from './handleImg'
 export * from './handleImgData'
+export * from './captureVideoFrame'
 export * from './color'
 export * from './Ball'
 export * from './timeFunc'

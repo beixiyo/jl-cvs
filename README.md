@@ -28,6 +28,7 @@ npm i @jl-org/cvs
 - [刮刮乐](#刮刮乐)
 - [黑客科技数字墙](#黑客科技数字墙)
 - [图像处理](#图像处理)
+- [截取视频某一帧](#截取视频某一帧)
 - [ImageData 处理，灰度、对比度、二值化等](#ImageData-处理)
 - [辅助函数](#canvas-辅助函数)
 - [颜色处理](#颜色处理)
@@ -455,6 +456,30 @@ export declare function getCvsImg<T extends TransferType = 'base64'>(cvs: HTMLCa
 
 /** Blob 转 Base64 */
 export declare function blobToBase64(blob: Blob): Promise<string>;
+```
+
+---
+
+
+## 截取视频某一帧
+```ts
+/**
+ * 截取视频某一帧图片，大于总时长则用最后一秒
+ * @param fileOrUrl 文件或者链接
+ * @param time 时间，可以是数组
+ * @param resType 返回类型
+ */
+export declare function captureVideoFrame<N extends number | number[], T extends TransferType = 'base64'>(fileOrUrl: File | string, time: N, resType?: T, options?: Options): Promise<N extends number ? HandleImgReturn<T> : HandleImgReturn<T>[]>;
+
+type Options = {
+    /**
+     * 传入视频文件给你，你需要指定尺寸大小
+     */
+    setSize(video: HTMLVideoElement): {
+        width: number;
+        height: number;
+    };
+};
 ```
 
 ---
