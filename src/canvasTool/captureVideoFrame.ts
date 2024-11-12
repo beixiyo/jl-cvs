@@ -59,7 +59,12 @@ export async function captureVideoFrame<
     const { ctx, cvs } = createCvs(w, h)
 
     ctx.drawImage(video, 0, 0, cvs.width, cvs.height)
-    return getCvsImg(cvs, resType)
+    return getCvsImg(
+      cvs,
+      resType,
+      options.mimeType,
+      options.quality
+    )
   }
 
   /**
@@ -94,4 +99,6 @@ type Options = {
    * 传入视频文件给你，你需要指定尺寸大小
    */
   setSize(video: HTMLVideoElement): { width: number, height: number }
+  mimeType?: string
+  quality?: number
 }
