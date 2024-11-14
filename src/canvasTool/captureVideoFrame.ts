@@ -16,11 +16,16 @@ export async function captureVideoFrame<
   fileOrUrl: File | string,
   time: N,
   resType: T = 'base64' as T,
-  options?: Options
+  options: Options = {}
 ): Promise<N extends number
   ? HandleImgReturn<T>
   : HandleImgReturn<T>[]
 > {
+  const src = typeof fileOrUrl === 'string'
+    ? fileOrUrl
+    : URL.createObjectURL(fileOrUrl)
+
+  const { ctx, cvs } = createCvs()
 
   if (typeof time === 'number') {
     return await genFrame(time) as unknown as Promise<N extends number
@@ -56,9 +61,10 @@ export async function captureVideoFrame<
       h = video.videoHeight / window.devicePixelRatio
     }
 
-    const { ctx, cvs } = createCvs(w, h)
-
+    cvs.width = w
+    cvs.height = h
     ctx.drawImage(video, 0, 0, cvs.width, cvs.height)
+
     return getCvsImg(
       cvs,
       resType,
@@ -71,15 +77,11 @@ export async function captureVideoFrame<
    * 生成指定秒画面
    */
   async function genFrame(time: number): Promise<HandleImgReturn<T>> {
-    const video = document.createElement('video'),
-      src = typeof fileOrUrl === 'string'
-        ? fileOrUrl
-        : URL.createObjectURL(fileOrUrl)
-
+    const video = document.createElement('video')
     video.currentTime = time
     video.muted = true
-    video.autoplay = true
     video.src = src
+    video.autoplay = true
 
     return new Promise<HandleImgReturn<T>>((resolve, reject) => {
       video.oncanplay = () => {
@@ -96,9 +98,9 @@ export async function captureVideoFrame<
 
 type Options = {
   /**
-   * 传入视频文件给你，你需要指定尺寸大小
+   * 传入视频文件给你，你可以指定尺寸大小
    */
-  setSize(video: HTMLVideoElement): { width: number, height: number }
+  setSize?: (video: HTMLVideoElement) => { width: number, height: number }
   mimeType?: string
   quality?: number
 }
