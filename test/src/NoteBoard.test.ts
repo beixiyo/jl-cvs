@@ -3,7 +3,7 @@ import { genBtn } from './tools'
 
 
 const WIDTH = 600
-const HEIGHT = 600
+const HEIGHT = 400
 const LINE_WIDTH = 30
 document.body.style.padding = '40px'
 
@@ -12,8 +12,8 @@ document.body.style.padding = '40px'
  */
 const el = document.createElement('div')
 el.style.border = '1px solid'
-el.style.width = `${WIDTH * 1.2}px`
-el.style.height = `${HEIGHT * 1.2}px`
+el.style.width = `${WIDTH * 1.05}px`
+el.style.height = `${HEIGHT * 1.05}px`
 el.style.display = 'flex'
 el.style.justifyContent = 'center'
 el.style.alignItems = 'center'

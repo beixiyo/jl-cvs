@@ -79,7 +79,21 @@ export type CanvasAttrs = {
 
 export type DrawImgOpts = {
   /**
-   * 绘制之后回调图片给你，你可以设置图片参数
+   * 图片宽度
+   * @default Image.width
+   */
+  imgWidth?: number
+  /**
+   * 图片高度
+   * @default Image.height
+   */
+  imgHeight?: number
+  /**
+   * 绘制之前的回调
+   */
+  beforeDraw?: () => void
+  /**
+   * 绘制之后回调图片信息给你
    */
   afterDraw?: (imgInfo: ImgInfo) => void
   /**
@@ -93,7 +107,7 @@ export type DrawImgOpts = {
    */
   center?: boolean
   /**
-   * 自适应大小
+   * 自适应大小，保持宽高比的情况下，使图片适应画布大小
    * @default false
    */
   autoFit?: boolean

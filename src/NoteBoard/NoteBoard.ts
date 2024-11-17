@@ -308,15 +308,19 @@ export class NoteBoard {
    */
   async drawImg(
     img: HTMLImageElement | string,
-    {
+    options: DrawImgOpts = {}
+  ) {
+    const {
       afterDraw,
+      beforeDraw,
       needClear = false,
       autoFit,
       center,
       context = this.imgCtx,
       needRecordImgInfo = true
-    }: DrawImgOpts = {}
-  ) {
+    } = options
+
+    beforeDraw?.()
     needClear && this.clear()
 
     const newImg = typeof img === 'string'
@@ -329,8 +333,8 @@ export class NoteBoard {
       height: canvasHeight
     } = this.opts
 
-    const imgWidth = newImg.width,
-      imgHeight = newImg.height
+    const imgWidth = options.imgWidth ?? newImg.width,
+      imgHeight = options.imgHeight ?? newImg.height
 
     const scaleX = canvasWidth / imgWidth,
       scaleY = canvasHeight / imgHeight,
@@ -389,7 +393,7 @@ export class NoteBoard {
   }
 
   /**
-   * 设置样式
+   * 设置画布和上下文样式
    * @param recordStyle 样式
    * @param ctx 指定某个画布上下文，不指定则设置全部
    */
@@ -426,6 +430,19 @@ export class NoteBoard {
       strokeStyle || this.opts.strokeStyle
     )
   }
+
+  /**
+   * 添加一个新的历史记录
+   * @param data 图片数据 base64，默认从画笔画布提取
+   */
+  async addNewRecord(data?: string) {
+    const base64 = data || await this.shotMask()
+    this.unReDoList.add(base64)
+  }
+
+  /***************************************************
+   *                    Private
+   ***************************************************/
 
   private canDraw() {
     return ['draw', 'erase'].includes(this.mode)
@@ -567,14 +584,6 @@ export class NoteBoard {
       lineCap,
       lineWidth,
     })
-  }
-
-  /**
-   * 添加一个新的记录
-   */
-  private async addNewRecord() {
-    const base64 = await this.shotMask()
-    this.unReDoList.add(base64)
   }
 
 }

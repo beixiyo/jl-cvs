@@ -1,11 +1,11 @@
 /**
  * 从数组删除某一项
  * @param arr 
- * @param target 
+ * @param target 要删除的目标
  */
 export const delFromItem = <T>(arr: T[], target: T) => {
-    const index = arr.indexOf(target)
-    index !== -1 && arr.splice(index, 1)
+  const index = arr.indexOf(target)
+  index !== -1 && arr.splice(index, 1)
 }
 
 /**
@@ -15,14 +15,14 @@ export const delFromItem = <T>(arr: T[], target: T) => {
  * @param enableFloat 是否返回浮点数，默认 false
  */
 export function getRandomNum(min: number, max: number, enableFloat = false) {
-    const r = Math.random()
+  const r = Math.random()
 
-    if (!enableFloat) {
-        return Math.floor(r * (max - min) + min)
-    }
+  if (!enableFloat) {
+    return Math.floor(r * (max - min) + min)
+  }
 
-    if (r < .01) return min
-    return r * (max - min) + min
+  if (r < .01) return min
+  return r * (max - min) + min
 }
 
 /**
@@ -35,53 +35,53 @@ export function getRandomNum(min: number, max: number, enableFloat = false) {
  * @param precision 精度 默认 2
  */
 export function numFixed(num: number, precision = 2) {
-    const scale = 10 ** precision
-    return Math.round(num * scale) / scale
+  const scale = 10 ** precision
+  return Math.round(num * scale) / scale
 }
 
 /** 获取一个随机字符串 */
 export function getRandomStr() {
-    return Math.random().toString(36)[2]
+  return Math.random().toString(36)[2]
 }
 
 /**
  * 创建撤销、重做列表
  */
 export function createUnReDoList<T>() {
-    const undoList = [] as T[],
-        redoList = [] as T[]
+  const undoList = [] as T[],
+    redoList = [] as T[]
 
-    return {
-        undoList,
-        redoList,
-        /** 添加一项 */
-        add: (item: T) => {
-            undoList.push(item)
-            redoList.splice(0)
-        },
-        /** 获取最后一项 */
-        getLast: () => undoList[undoList.length - 1],
-        /** 清空 */
-        clear: () => {
-            undoList.splice(0)
-            redoList.splice(0)
-        },
+  return {
+    undoList,
+    redoList,
+    /** 添加一项 */
+    add: (item: T) => {
+      undoList.push(item)
+      redoList.splice(0)
+    },
+    /** 获取最后一项 */
+    getLast: () => undoList[undoList.length - 1],
+    /** 清空 */
+    clear: () => {
+      undoList.splice(0)
+      redoList.splice(0)
+    },
 
-        /** 撤销 */
-        undo: (callback: (item: T) => void) => {
-            if (undoList.length <= 0) return
+    /** 撤销 */
+    undo: (callback: (item: T) => void) => {
+      if (undoList.length <= 0) return
 
-            redoList.push(undoList.pop()!)
-            callback(undoList[undoList.length - 1])
-        },
-        /** 重做 */
-        redo: (callback: (item: T) => void) => {
-            if (redoList.length <= 0) return
+      redoList.push(undoList.pop()!)
+      callback(undoList[undoList.length - 1])
+    },
+    /** 重做 */
+    redo: (callback: (item: T) => void) => {
+      if (redoList.length <= 0) return
 
-            undoList.push(redoList.pop()!)
-            callback(undoList[undoList.length - 1])
-        }
+      undoList.push(redoList.pop()!)
+      callback(undoList[undoList.length - 1])
     }
+  }
 }
 
 
@@ -90,18 +90,18 @@ export function createUnReDoList<T>() {
  * @param delay 延迟时间（ms），@default 200
  */
 export function throttle<R, P extends any[]>(
-    fn: (...args: P) => R,
-    delay = 200
+  fn: (...args: P) => R,
+  delay = 200
 ) {
-    let st = 0
+  let st = 0
 
-    return function (this: any, ...args: P) {
-        const now = Date.now()
-        if (now - st > delay) {
-            st = now
-            return fn.apply(this, args) as R
-        }
+  return function (this: any, ...args: P) {
+    const now = Date.now()
+    if (now - st > delay) {
+      st = now
+      return fn.apply(this, args) as R
     }
+  }
 }
 
 /**
@@ -109,15 +109,15 @@ export function throttle<R, P extends any[]>(
  * @param delay 延迟时间（ms），@default 200
  */
 export function debounce<R, P extends any[]>(
-    fn: (...args: P) => R,
-    delay = 200
+  fn: (...args: P) => R,
+  delay = 200
 ) {
-    let id: number
+  let id: number
 
-    return function (this: any, ...args: P) {
-        id && clearTimeout(id)
-        id = window.setTimeout(() => {
-            return fn.apply(this, args) as R
-        }, delay)
-    }
+  return function (this: any, ...args: P) {
+    id && clearTimeout(id)
+    id = window.setTimeout(() => {
+      return fn.apply(this, args) as R
+    }, delay)
+  }
 }
