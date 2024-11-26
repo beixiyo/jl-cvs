@@ -1,3 +1,4 @@
+import { getDPR } from '@/canvasTool'
 import type { NoteBoardOptions } from './type'
 
 
@@ -6,8 +7,8 @@ export function mergeOpts(
 ) {
   return {
     ... {
-      width: 800,
-      height: 600,
+      width: 800 * getDPR(),
+      height: 600 * getDPR(),
       minScale: 0.5,
       maxScale: 8,
 

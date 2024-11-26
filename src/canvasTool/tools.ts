@@ -144,6 +144,11 @@ export function getWinHeight() {
     document.body.clientHeight
 }
 
+/**
+ * 获取设备像素比，最大值为 2
+ */
+export const getDPR = (max = 2) => 1
+//  Math.min(window.devicePixelRatio, max)
 
 export type CtxFontOpt = {
   /** 字体大小，默认 16 */

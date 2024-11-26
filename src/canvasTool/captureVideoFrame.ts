@@ -1,6 +1,6 @@
 import type { TransferType } from '@/types'
 import { getCvsImg, type HandleImgReturn } from './handleImg'
-import { createCvs } from './tools'
+import { createCvs, getDPR } from './tools'
 
 
 /**
@@ -57,8 +57,8 @@ export async function captureVideoFrame<
       h = height
     }
     else {
-      w = video.videoWidth / window.devicePixelRatio
-      h = video.videoHeight / window.devicePixelRatio
+      w = video.videoWidth / getDPR()
+      h = video.videoHeight / getDPR()
     }
 
     cvs.width = w

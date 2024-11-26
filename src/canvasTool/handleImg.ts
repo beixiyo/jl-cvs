@@ -1,4 +1,4 @@
-import { createCvs } from './tools'
+import { createCvs, getDPR } from './tools'
 import { TransferType } from '@/types'
 
 
@@ -105,13 +105,13 @@ export function waterMark({
   rotate = 35
 }: WaterMarkOpts) {
   const { cvs, ctx } = createCvs(0, 0),
-    _fontSize = fontSize * devicePixelRatio,
+    _fontSize = fontSize * getDPR(),
     font = _fontSize + 'px serif'
 
   // 获取文字宽度
   ctx.font = font
   const { width } = ctx.measureText(text)
-  const canvasSize = Math.max(100, width) + gap * devicePixelRatio
+  const canvasSize = Math.max(100, width) + gap * getDPR()
 
   cvs.width = canvasSize
   cvs.height = canvasSize
@@ -127,7 +127,7 @@ export function waterMark({
 
   return {
     base64: cvs.toDataURL(),
-    size: canvasSize / devicePixelRatio,
+    size: canvasSize / getDPR(),
   }
 }
 

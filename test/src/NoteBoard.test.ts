@@ -5,7 +5,6 @@ import { genBtn } from './tools'
 const WIDTH = 600
 const HEIGHT = 400
 const LINE_WIDTH = 30
-document.body.style.padding = '40px'
 
 /**
  * 图片画板 =========================================
@@ -66,7 +65,7 @@ const board = new NoteBoard({
  * 居中绘制图片，并自动拉伸大小
  */
 board.drawImg(
-  new URL('./PixPin_2024-10-29_14-27-44.png', import.meta.url).href,
+  new URL('../assets/umr.jpg', import.meta.url).href,
   {
     center: true,
     autoFit: true,
