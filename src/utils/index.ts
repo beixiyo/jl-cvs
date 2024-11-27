@@ -1,3 +1,5 @@
+import { isObj } from './is'
+
 /**
  * 从数组删除某一项
  * @param arr 
@@ -120,4 +122,49 @@ export function debounce<R, P extends any[]>(
       return fn.apply(this, args) as R
     }, delay)
   }
+}
+
+/** 深拷贝 */
+export function deepClone<T>(data: T, map = new WeakMap): T {
+  if (!isObj(data)) return data
+  if (data instanceof Date) return new Date(data) as T
+  if (data instanceof RegExp) return new RegExp(data) as T
+
+  if (map.has(data)) return map.get(data)
+
+  const tar = new (data as any).constructor()
+  map.set(data, tar)
+  for (const key in data) {
+    if (!data.hasOwnProperty(key)) continue
+    tar[key] = deepClone(data[key], map)
+  }
+
+  return tar as T
+}
+
+/**
+ * - 从 `keys` 数组中排除属性，返回一个对象
+ * - 例如：从对象中排除 `name` 属性，返回一个对象
+ * @example
+ * ```ts
+ * excludeKeys(data, ['name'])
+ * ```
+ * @param data 目标对象
+ * @param keys 需要提取的属性
+ */
+export function excludeKeys<T extends object, K extends keyof T>(
+  data: T,
+  keys: K[]
+) {
+  const _data: any = {}
+
+  for (const k in data) {
+    if (!Object.hasOwnProperty.call(data, k)) continue
+
+    if (!keys.includes(k as unknown as K)) {
+      const item = data[k]
+      _data[k] = item
+    }
+  }
+  return _data as Omit<T, Extract<keyof T, K>>
 }

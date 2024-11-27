@@ -38,8 +38,8 @@ export type NoteBoardOptions = {
   onWheel?: ZoomFn
   onDrag?: DragFn
 
-  onRedo?: (base64: string) => void
-  onUndo?: (base64: string) => void
+  onRedo?: (data?: string) => void
+  onUndo?: (data?: string) => void
 } & CanvasAttrs
 
 
@@ -130,4 +130,37 @@ export type ImgInfo = {
   drawHeight: number
   rawWidth: number
   rawHeight: number
+}
+
+export type RecordPath = {
+  path: {
+    moveTo: [number, number]
+    lineTo: [number, number]
+  }[]
+  canvasAttrs: Omit<CanvasAttrs, 'width' | 'height'>
+}
+
+export type ShotParams = {
+  /**
+   * 导出时，仅仅把图片区域内容导出，并且还原图片大小（需要记录 imgInfo 后才有此区域）
+   */
+  exportOnlyImgArea?: boolean
+  /**
+   * 图片的 MIME 格式
+   */
+  mimeType?: string
+  /**
+   * 压缩质量
+   */
+  quality?: number
+  /**
+   * 指定导出的画布
+   */
+  canvas?: HTMLCanvasElement
+}
+
+export type CanvasItem = {
+  canvas: HTMLCanvasElement
+  ctx: CanvasRenderingContext2D
+  name: string
 }
