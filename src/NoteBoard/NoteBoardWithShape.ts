@@ -2,24 +2,15 @@ import { clearAllCvs, getImg } from '@/canvasTool/tools'
 import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
 import { getCursor, mergeOpts, setCanvas } from './tools'
 import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions } from './type'
-import { createUnReDoList, excludeKeys } from '@/utils'
+import { createUnReDoList, deepClone, excludeKeys } from '@/utils'
+import { DrawShape } from '@/Shapes'
 
 
 /**
- * ### 画板，提供如下功能
- * - 签名涂抹
- * - 分层自适应绘图
- * 
- * - 擦除
- * - 撤销
- * - 重做
- * 
- * - 缩放
- * - 拖拽
- * 
- * - 截图
+ * 扩展了绘制图形的 NoteBoard
+ * @bug 尚未完成
  */
-export class NoteBoard {
+export class NoteBoardWithShape extends DrawShape {
 
   /** 容器 */
   el: HTMLElement
@@ -52,6 +43,11 @@ export class NoteBoard {
   opts: NoteBoardOptions
 
   mode: Mode = 'draw'
+  /**
+   * 记录用户操作，用来实现 undo、redo 判断
+   */
+  actions: Mode[] = []
+
   /** 开启鼠标滚轮缩放 */
   isEnableZoom = true
 
@@ -85,6 +81,12 @@ export class NoteBoard {
   private recordPath: RecordPath[] = []
 
   constructor(opts?: NoteBoardOptions) {
+    super()
+    super.initial({
+      canvas: this.canvas,
+      context: this.ctx,
+      drawExtra: this.drawRecord.bind(this, this.recordPath)
+    })
     this.opts = mergeOpts(opts)
 
     const {
@@ -119,21 +121,31 @@ export class NoteBoard {
 
     switch (mode) {
       case 'draw':
+        this.drawShapeDiable = true
         this.setCursor()
         this.ctx.globalCompositeOperation = this.opts.globalCompositeOperation
         break
 
       case 'erase':
+        this.drawShapeDiable = true
         this.setCursor()
         this.ctx.globalCompositeOperation = 'destination-out'
         break
 
       case 'none':
+        this.drawShapeDiable = true
         this.canvas.style.cursor = 'unset'
         break
 
       case 'drag':
+        this.drawShapeDiable = true
         this.canvas.style.cursor = 'grab'
+        break
+
+      case 'rect':
+        this.canvas.style.cursor = 'unset'
+        this.drawShapeDiable = false
+        this.shape = 'rect'
         break
 
       default:
@@ -235,32 +247,70 @@ export class NoteBoard {
    * 撤销
    */
   undo() {
-    this.unReDoList.undo(recordPath => {
-      this.clear(false)
-      if (!recordPath) return
+    const curAction = this.actions.pop()
 
-      this.drawRecord(recordPath)
-      this.opts.onUndo?.({
-        recordPath,
-        mode: this.mode
-      })
-    })
+    switch (curAction) {
+      case 'rect':
+        const shape = this.drawShapeUndo()
+        this.opts.onUndo?.({
+          mode: this.mode,
+          shape
+        })
+        break
+
+      case 'draw':
+      case 'erase':
+        this.unReDoList.undo(recordPath => {
+          this.clear(false)
+          if (!recordPath) return
+
+          this.drawRecord(recordPath)
+          this.recordPath.pop()
+          this.opts.onUndo?.({
+            mode: this.mode,
+            recordPath
+          })
+        })
+        break
+
+      default:
+        break
+    }
   }
 
   /**
    * 重做
    */
   redo() {
-    this.unReDoList.redo(recordPath => {
-      this.clear(false)
-      if (!recordPath) return
+    const curAction = this.actions.pop()
 
-      this.drawRecord(recordPath)
-      this.opts.onRedo?.({
-        recordPath,
-        mode: this.mode
-      })
-    })
+    switch (curAction) {
+      case 'rect':
+        const shape = this.drawShapeRedo()
+        this.opts.onRedo?.({
+          mode: this.mode,
+          shape
+        })
+        break
+
+      case 'draw':
+      case 'erase':
+        this.unReDoList.redo(recordPath => {
+          this.clear(false)
+          if (!recordPath) return
+
+          this.drawRecord(recordPath)
+          this.recordPath.push(recordPath[recordPath.length - 1] as RecordPath)
+          this.opts.onRedo?.({
+            mode: this.mode,
+            recordPath
+          })
+        })
+        break
+
+      default:
+        break
+    }
   }
 
   /**
@@ -459,6 +509,7 @@ export class NoteBoard {
   }
 
   private _onMousedown(e: MouseEvent) {
+    this.actions.push(this.mode)
     this.opts.onMouseDown?.(e)
 
     // 拖拽模式
@@ -559,7 +610,7 @@ export class NoteBoard {
     if (!this.canDraw()) return
 
     this.isDrawing = false
-    this.unReDoList.add([...this.recordPath])
+    this.unReDoList.add(deepClone(this.recordPath))
   }
 
   private _onMouseLeave(e: MouseEvent) {

@@ -99,6 +99,12 @@ genBtn('撤销', () => {
 genBtn('重做', () => {
   board.redo()
 })
+
+genBtn('矩形', () => {
+  board.setMode('rect')
+})
+
+
 genBtn('重置大小', () => {
   board.reset()
 })

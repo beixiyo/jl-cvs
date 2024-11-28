@@ -1,3 +1,6 @@
+import type { ShapeType } from '@/Shapes'
+import type { BaseShape } from '@/Shapes/BaseShape'
+
 export type MouseEventFn = (e: MouseEvent) => void
 
 export type ZoomFn = (
@@ -17,7 +20,13 @@ export type DragFn = (
   }
 ) => void
 
-export type Mode = 'draw' | 'erase' | 'drag' | 'none'
+export type Mode = 'draw' | 'erase' | 'drag' | 'none' | ShapeType
+
+type OnUnRedoParams = {
+  recordPath?: RecordPath[]
+  mode: Mode
+  shape?: BaseShape
+}
 
 export type NoteBoardOptions = {
   el: HTMLElement
@@ -38,8 +47,8 @@ export type NoteBoardOptions = {
   onWheel?: ZoomFn
   onDrag?: DragFn
 
-  onRedo?: (recordPath: RecordPath[]) => void
-  onUndo?: (recordPath: RecordPath[]) => void
+  onRedo?: (params: OnUnRedoParams) => void
+  onUndo?: (params: OnUnRedoParams) => void
 } & CanvasAttrs
 
 

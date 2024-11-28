@@ -1,7 +1,12 @@
 import { clearAllCvs } from '@/canvasTool'
 import { Rect } from './libs/Rect'
 import type { ShapeAttrs } from './type'
+import type { BaseShape } from './BaseShape'
 
+
+const ShapeMap = {
+  rect: Rect
+}
 
 /**
  * 绘制图形与拖拽，目前支持
@@ -9,42 +14,55 @@ import type { ShapeAttrs } from './type'
  */
 export class DrawShape {
 
-  shapes: Rect[] = []
+  drawShapeOpts: DrawShapeOpts
+  drawShapeDiable = false
+
+  /**
+   * 当前绘制的图形
+   */
+  shape: ShapeType = 'rect'
+  shapes: BaseShape[] = []
+  /**
+   * 撤销的图形
+   */
+  undoShapes: BaseShape[] = []
   shapeAttrs: ShapeAttrs = {}
 
-  /** 
-   * 统一事件，方便解绑
-   */
-  private onMousedown = this._onMousedown.bind(this)
-  private onMousemove = this._onMousemove.bind(this)
-  private onMouseup = this._onMouseup.bind(this)
-  private onMouseLeave = this._onMouseLeave.bind(this)
-
-  private fps = this._fps.bind(this)
-
-  isDrawing = false
+  drawShapeCanvas: HTMLCanvasElement
+  drawShapeContext: CanvasRenderingContext2D
+  /** 是否在绘制 */
+  drawShapeIsDrawing = false
 
   /**
    * 上次的坐标，用于拖动等
    */
-  dragX = 0
-  dragY = 0
+  drawShapeDragX = 0
+  drawShapeDragY = 0
   /**
    * 当前拖动的矩形
    */
-  curShape: Rect
+  curShape: BaseShape
 
-  constructor(
-    public canvas: HTMLCanvasElement,
-    public context: CanvasRenderingContext2D
-  ) {
+  /** 
+   * 统一事件，方便解绑
+   */
+  private onDrawShapeMousedown = this._onDrawShapeMousedown.bind(this)
+  private onDrawShapeMousemove = this._onDrawShapeMousemove.bind(this)
+  private onDrawShapeMouseup = this._onDrawShapeMouseup.bind(this)
+  private onDrawShapeMouseLeave = this._onDrawShapeMouseLeave.bind(this)
+
+  initial(drawShapeOpts: DrawShapeOpts) {
+    this.drawShapeCanvas = drawShapeOpts.canvas
+    this.drawShapeContext = drawShapeOpts.context
+    this.drawShapeOpts = drawShapeOpts
     this.addEvent()
-    // this.fps()
   }
 
-  draw(needClear = true) {
-    needClear && clearAllCvs(this.context, this.canvas)
-    this.shapes.forEach(shape => shape.draw())
+  draw(needClear = true, shapes?: BaseShape[]) {
+    needClear && clearAllCvs(this.drawShapeContext, this.drawShapeCanvas);
+    (shapes || this.shapes).forEach(shape => shape.draw())
+
+    this.drawShapeOpts.drawExtra?.()
   }
 
   /**
@@ -59,51 +77,81 @@ export class DrawShape {
     }
   }
 
+  /**
+   * 撤销
+   */
+  drawShapeUndo(needClear = true): BaseShape | undefined {
+    const shape = this.shapes.pop()
+    if (shape) {
+      this.undoShapes.push(shape)
+      this.draw(needClear)
+    }
+    return shape
+  }
+
+  /**
+   * 重做
+   */
+  drawShapeRedo(needClear = true): BaseShape | undefined {
+    const shape = this.undoShapes.pop()
+    if (shape) {
+      this.shapes.push(shape)
+      this.draw(needClear)
+    }
+    return shape
+  }
+
   addEvent() {
-    this.canvas.addEventListener('mousedown', this.onMousedown)
-    this.canvas.addEventListener('mousemove', this.onMousemove)
-    this.canvas.addEventListener('mouseup', this.onMouseup)
-    this.canvas.addEventListener('mouseleave', this.onMouseLeave)
+    this.drawShapeCanvas.addEventListener('mousedown', this.onDrawShapeMousedown)
+    this.drawShapeCanvas.addEventListener('mousemove', this.onDrawShapeMousemove)
+    this.drawShapeCanvas.addEventListener('mouseup', this.onDrawShapeMouseup)
+    this.drawShapeCanvas.addEventListener('mouseleave', this.onDrawShapeMouseLeave)
   }
 
   rmEvent() {
-    this.canvas.removeEventListener('mousedown', this.onMousedown)
-    this.canvas.removeEventListener('mousemove', this.onMousemove)
-    this.canvas.removeEventListener('mouseup', this.onMouseup)
-    this.canvas.removeEventListener('mouseleave', this.onMouseLeave)
+    this.drawShapeCanvas.removeEventListener('mousedown', this.onDrawShapeMousedown)
+    this.drawShapeCanvas.removeEventListener('mousemove', this.onDrawShapeMousemove)
+    this.drawShapeCanvas.removeEventListener('mouseup', this.onDrawShapeMouseup)
+    this.drawShapeCanvas.removeEventListener('mouseleave', this.onDrawShapeMouseLeave)
   }
 
-  private _fps() {
-    this.draw()
-    requestAnimationFrame(this.fps)
-  }
+  /***************************************************
+   *                    private
+   ***************************************************/
 
-  private _onMousedown(e: MouseEvent) {
-    this.isDrawing = true
+  private _onDrawShapeMousedown(e: MouseEvent) {
+    if (this.drawShapeDiable) return
+
+    /**
+     * 重画代表废弃撤销里的图形
+     */
+    this.undoShapes = []
+    this.drawShapeIsDrawing = true
 
     const { offsetX, offsetY } = e
     const shape = this.getShape(offsetX, offsetY)
 
     // 拖动
     if (shape) {
-      this.dragX = offsetX
-      this.dragY = offsetY
+      this.drawShapeDragX = offsetX
+      this.drawShapeDragY = offsetY
       this.curShape = shape
       return
     }
 
-    const rect = new Rect({
+    const Cls = ShapeMap[this.shape]
+    const rect = new Cls({
       startX: offsetX,
       startY: offsetY,
-      ctx: this.context,
+      ctx: this.drawShapeContext,
     })
 
     rect.setShapeAttrs(this.shapeAttrs)
     this.shapes.push(rect)
   }
 
-  private _onMousemove(e: MouseEvent) {
-    if (!this.isDrawing) return
+  private _onDrawShapeMousemove(e: MouseEvent) {
+    if (!this.drawShapeIsDrawing) return
 
     const { curShape } = this
     /**
@@ -111,16 +159,16 @@ export class DrawShape {
      */
     if (curShape) {
       const { startX, startY, endX, endY } = curShape
-      const disX = e.offsetX - this.dragX
-      const disY = e.offsetY - this.dragY
+      const disX = e.offsetX - this.drawShapeDragX
+      const disY = e.offsetY - this.drawShapeDragY
 
       curShape.startX = startX + disX
       curShape.startY = startY + disY
       curShape.endX = endX + disX
       curShape.endY = endY + disY
 
-      this.dragX = e.offsetX
-      this.dragY = e.offsetY
+      this.drawShapeDragX = e.offsetX
+      this.drawShapeDragY = e.offsetY
 
       this.draw()
       return
@@ -129,21 +177,30 @@ export class DrawShape {
     /**
      * 初次绘制
      */
-    const rect = this.shapes[this.shapes.length - 1]
-    if (!rect) return
+    const shape = this.shapes[this.shapes.length - 1]
+    if (!shape) return
 
-    rect.endX = e.offsetX
-    rect.endY = e.offsetY
+    shape.endX = e.offsetX
+    shape.endY = e.offsetY
     this.draw()
   }
 
-  private _onMouseup(e: MouseEvent) {
-    this.isDrawing = false
+  private _onDrawShapeMouseup(e: MouseEvent) {
+    this.drawShapeIsDrawing = false
     this.curShape = undefined
   }
 
-  private _onMouseLeave(e: MouseEvent) {
-    this.isDrawing = false
+  private _onDrawShapeMouseLeave(e: MouseEvent) {
+    this.drawShapeIsDrawing = false
     this.curShape = undefined
   }
+}
+
+
+export type ShapeType = keyof typeof ShapeMap
+
+export type DrawShapeOpts = {
+  canvas: HTMLCanvasElement
+  context: CanvasRenderingContext2D
+  drawExtra?: () => void
 }
