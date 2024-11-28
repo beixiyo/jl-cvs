@@ -15,7 +15,7 @@ export function mergeOpts(
       lineWidth: 1,
       strokeStyle: '#000',
       lineCap: 'round' as CanvasLineCap,
-      drawGlobalCompositeOperation: 'source-over'
+      globalCompositeOperation: 'source-over'
     } as NoteBoardOptions,
     ...opts,
   }

@@ -199,7 +199,7 @@ const board = new NoteBoard({
   height: HEIGHT,
   lineWidth: LINE_WIDTH,
   strokeStyle: '#409eff55',
-  drawGlobalCompositeOperation: 'xor',
+  globalCompositeOperation: 'xor',
 
   onWheel({ scale }) {
     console.log('onWheel 同步笔刷大小')

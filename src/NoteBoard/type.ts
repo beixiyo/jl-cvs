@@ -38,8 +38,8 @@ export type NoteBoardOptions = {
   onWheel?: ZoomFn
   onDrag?: DragFn
 
-  onRedo?: (data?: string) => void
-  onUndo?: (data?: string) => void
+  onRedo?: (recordPath: RecordPath[]) => void
+  onUndo?: (recordPath: RecordPath[]) => void
 } & CanvasAttrs
 
 
@@ -72,7 +72,7 @@ export type CanvasAttrs = {
   /**
    * 画笔模式，默认 source-over
    */
-  drawGlobalCompositeOperation?: GlobalCompositeOperation
+  globalCompositeOperation?: GlobalCompositeOperation
 
   [K: string]: any
 }
@@ -138,6 +138,7 @@ export type RecordPath = {
     lineTo: [number, number]
   }[]
   canvasAttrs: Omit<CanvasAttrs, 'width' | 'height'>
+  mode: Mode
 }
 
 export type ShotParams = {

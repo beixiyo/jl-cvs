@@ -25,7 +25,7 @@ const board = new NoteBoard({
   height: HEIGHT,
   lineWidth: LINE_WIDTH,
   strokeStyle: '#409eff55',
-  drawGlobalCompositeOperation: 'xor',
+  globalCompositeOperation: 'xor',
 
   onDrag() {
     console.log('onDrag')
@@ -65,7 +65,7 @@ const board = new NoteBoard({
  * 居中绘制图片，并自动拉伸大小
  */
 board.drawImg(
-  new URL('../assets/umr.jpg', import.meta.url).href,
+  'http://localhost:8510/src/refactor/Photog/Workbench/assets/step2.webp',
   {
     center: true,
     autoFit: true,

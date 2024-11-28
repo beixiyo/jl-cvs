@@ -1,8 +1,8 @@
-import { clearAllCvs, getImg } from '@/canvasTool/tools'
+import { clearAllCvs, getDPR, getImg } from '@/canvasTool/tools'
 import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
 import { getCursor, mergeOpts, setCanvas } from './tools'
-import type { NoteBoardOptions, CanvasAttrs, Mode, DrawImgOpts, ImgInfo, CanvasItem, ShotParams } from './type'
-import { createUnReDoList } from '@/utils'
+import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions } from './type'
+import { createUnReDoList, excludeKeys } from '@/utils'
 
 
 /**
@@ -58,8 +58,8 @@ export class NoteBoard {
   /**
    * 记录缩放、位置等属性
    */
-  private isDrawing = false
   private drawStart = { x: 0, y: 0 }
+  private isDrawing = false
 
   private isDragging = false
   private dragStart = { x: 0, y: 0 }
@@ -81,7 +81,8 @@ export class NoteBoard {
   /**
    * 历史记录
    */
-  unReDoList = createUnReDoList<string>()
+  unReDoList = createUnReDoList<RecordPath[]>()
+  private recordPath: RecordPath[] = []
 
   constructor(opts?: NoteBoardOptions) {
     this.opts = mergeOpts(opts)
@@ -92,9 +93,8 @@ export class NoteBoard {
       height,
     } = this.opts
 
-    // 设置画笔画板置顶，透明
+    // 设置画笔画板置顶
     this.canvas.style.zIndex = '99'
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0)'
 
     /**
      * 大小属性等设置
@@ -120,7 +120,7 @@ export class NoteBoard {
     switch (mode) {
       case 'draw':
         this.setCursor()
-        this.ctx.globalCompositeOperation = this.opts.drawGlobalCompositeOperation
+        this.ctx.globalCompositeOperation = this.opts.globalCompositeOperation
         break
 
       case 'erase':
@@ -142,7 +142,7 @@ export class NoteBoard {
   }
 
   /**
-   * 获取画板图像内容，默认为 base64
+   * 获取画板图像内容
    */
   async shotImg(
     {
@@ -173,7 +173,7 @@ export class NoteBoard {
   }
 
   /**
-   * 获取画板遮罩（画笔）内容，默认为 base64
+   * 获取画板遮罩（画笔）内容
    */
   async shotMask(
     {
@@ -207,16 +207,16 @@ export class NoteBoard {
    * 拖拽、缩放画布
    */
   async setTransform() {
-    const { canvas: cvs, imgCanvas: imgCvs } = this
+    const { canvas, imgCanvas } = this
 
     const transformOrigin = `${this.mousePoint.x}px ${this.mousePoint.y}px`,
       transform = `scale(${this.scale}, ${this.scale}) translate(${this.translateX}px, ${this.translateY}px)`
 
-    cvs.style.transformOrigin = transformOrigin
-    cvs.style.transform = transform
+    canvas.style.transformOrigin = transformOrigin
+    canvas.style.transform = transform
 
-    imgCvs.style.transformOrigin = transformOrigin
-    imgCvs.style.transform = transform
+    imgCanvas.style.transformOrigin = transformOrigin
+    imgCanvas.style.transform = transform
   }
 
   /**
@@ -234,48 +234,26 @@ export class NoteBoard {
   /**
    * 撤销
    */
-  async undo() {
-    return new Promise<boolean>((resolve) => {
-      this.unReDoList.undo(async base64 => {
-        this.clear(false)
-        if (!base64) return resolve(false)
+  undo() {
+    this.unReDoList.undo(record => {
+      this.clear(false)
+      if (!record) return
 
-        // 保存当前的混合模式
-        const currentCompositeOperation = this.ctx.globalCompositeOperation
-        // 临时设置为默认混合模式
-        this.ctx.globalCompositeOperation = 'source-over'
-
-        const img = await getImg(base64) as HTMLImageElement
-        this.ctx.drawImage(img, 0, 0)
-        this.ctx.globalCompositeOperation = currentCompositeOperation
-
-        this.opts.onUndo?.(base64)
-        resolve(true)
-      })
+      this.drawRecord(record)
+      this.opts.onUndo?.(record)
     })
   }
 
   /**
    * 重做
    */
-  async redo() {
-    return new Promise<boolean>((resolve) => {
-      this.unReDoList.redo(async base64 => {
-        this.clear(false)
-        if (!base64) return resolve(false)
+  redo() {
+    this.unReDoList.redo(record => {
+      this.clear(false)
+      if (!record) return
 
-        // 保存当前的混合模式
-        const currentCompositeOperation = this.ctx.globalCompositeOperation
-        // 临时设置为默认混合模式
-        this.ctx.globalCompositeOperation = 'source-over'
-
-        const img = await getImg(base64) as HTMLImageElement
-        this.ctx.drawImage(img, 0, 0)
-        this.ctx.globalCompositeOperation = currentCompositeOperation
-
-        this.opts.onRedo?.(base64)
-        resolve(true)
-      })
+      this.drawRecord(record)
+      this.opts.onRedo?.(record)
     })
   }
 
@@ -324,7 +302,7 @@ export class NoteBoard {
     needClear && this.clear()
 
     const newImg = typeof img === 'string'
-      ? await getImg(img)
+      ? await getImg(img, img => img.crossOrigin = 'anonymous')
       : img
     if (!newImg) return new Error('Image load failed')
 
@@ -431,19 +409,29 @@ export class NoteBoard {
     )
   }
 
-  /**
-   * 添加一个新的历史记录
-   * @param data 图片数据 base64，默认从画笔画布提取
-   */
-  async addNewRecord(data?: string) {
-    const base64 = data || await this.shotMask()
-    this.unReDoList.add(base64)
-  }
-
   /***************************************************
    *                    Private
    ***************************************************/
 
+  private drawRecord(recordPath: RecordPath[]) {
+    const { ctx } = this
+
+    for (const item of recordPath) {
+      this.setStyle(item.canvasAttrs, this.ctx)
+      this.setMode(item.mode)
+      ctx.beginPath()
+      
+      for (const point of item.path) {
+        ctx.moveTo(...point.moveTo)
+        ctx.lineTo(...point.lineTo)
+        ctx.stroke()
+      }
+    }
+  }
+
+  /**
+   * 是否为绘制模式
+   */
   private canDraw() {
     return ['draw', 'erase'].includes(this.mode)
   }
@@ -456,7 +444,7 @@ export class NoteBoard {
 
   private bindEvent() {
     const { canvas } = this
-    
+
     canvas.addEventListener('mousedown', this.onMousedown)
     canvas.addEventListener('mousemove', this.onMousemove)
     canvas.addEventListener('mouseup', this.onMouseup)
@@ -479,6 +467,23 @@ export class NoteBoard {
     // 画笔模式
     this.isDrawing = true
     this.ctx.beginPath()
+
+    this.recordPath.push({
+      canvasAttrs: excludeKeys(
+        { ...this.opts },
+        [
+          'el',
+          'minScale', 'maxScale',
+          'onMouseDown', 'onMouseMove',
+          'onMouseUp', 'onMouseLeave',
+          'onWheel', 'onDrag',
+          'onRedo', 'onUndo',
+          'height', 'width',
+        ]
+      ),
+      path: [],
+      mode: this.mode
+    })
 
     this.drawStart = {
       x: e.offsetX,
@@ -517,14 +522,18 @@ export class NoteBoard {
     if (!this.canDraw() || !this.isDrawing) return
 
     const { offsetX, offsetY } = e
-    const { ctx, drawStart: start } = this
+    const { ctx, drawStart, recordPath } = this
 
-    ctx.moveTo(start.x, start.y)
+    ctx.moveTo(drawStart.x, drawStart.y)
     ctx.lineTo(offsetX, offsetY)
 
     ctx.lineWidth = this.opts.lineWidth
     ctx.stroke()
 
+    recordPath[recordPath.length - 1].path.push({
+      moveTo: [drawStart.x, drawStart.y],
+      lineTo: [offsetX, offsetY]
+    })
     this.drawStart = {
       x: offsetX,
       y: offsetY,
@@ -542,9 +551,9 @@ export class NoteBoard {
     }
 
     if (!this.canDraw()) return
-
+    
     this.isDrawing = false
-    this.addNewRecord()
+    this.unReDoList.add([...this.recordPath])
   }
 
   private _onMouseLeave(e: MouseEvent) {
