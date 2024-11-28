@@ -2,6 +2,7 @@ import { clearAllCvs } from '@/canvasTool'
 import { Rect } from './libs/Rect'
 import type { ShapeAttrs } from './type'
 import type { BaseShape } from './BaseShape'
+import { DRAW_MAP } from '@/NoteBoard'
 
 
 const ShapeMap = {
@@ -14,7 +15,6 @@ const ShapeMap = {
  */
 export class DrawShape {
 
-  drawShapeOpts: DrawShapeOpts
   drawShapeDiable = false
 
   /**
@@ -54,15 +54,12 @@ export class DrawShape {
   initial(drawShapeOpts: DrawShapeOpts) {
     this.drawShapeCanvas = drawShapeOpts.canvas
     this.drawShapeContext = drawShapeOpts.context
-    this.drawShapeOpts = drawShapeOpts
-    this.addEvent()
+    this.drawShapeBindEvent()
   }
 
-  draw(needClear = true, shapes?: BaseShape[]) {
+  drawShapes(needClear = true, shapes?: BaseShape[]) {
     needClear && clearAllCvs(this.drawShapeContext, this.drawShapeCanvas);
     (shapes || this.shapes).forEach(shape => shape.draw())
-
-    this.drawShapeOpts.drawExtra?.()
   }
 
   /**
@@ -84,7 +81,7 @@ export class DrawShape {
     const shape = this.shapes.pop()
     if (shape) {
       this.undoShapes.push(shape)
-      this.draw(needClear)
+      this.drawShapes(needClear)
     }
     return shape
   }
@@ -96,19 +93,19 @@ export class DrawShape {
     const shape = this.undoShapes.pop()
     if (shape) {
       this.shapes.push(shape)
-      this.draw(needClear)
+      this.drawShapes(needClear)
     }
     return shape
   }
 
-  addEvent() {
+  drawShapeBindEvent() {
     this.drawShapeCanvas.addEventListener('mousedown', this.onDrawShapeMousedown)
     this.drawShapeCanvas.addEventListener('mousemove', this.onDrawShapeMousemove)
     this.drawShapeCanvas.addEventListener('mouseup', this.onDrawShapeMouseup)
     this.drawShapeCanvas.addEventListener('mouseleave', this.onDrawShapeMouseLeave)
   }
 
-  rmEvent() {
+  drawShapeRmEvent() {
     this.drawShapeCanvas.removeEventListener('mousedown', this.onDrawShapeMousedown)
     this.drawShapeCanvas.removeEventListener('mousemove', this.onDrawShapeMousemove)
     this.drawShapeCanvas.removeEventListener('mouseup', this.onDrawShapeMouseup)
@@ -170,7 +167,7 @@ export class DrawShape {
       this.drawShapeDragX = e.offsetX
       this.drawShapeDragY = e.offsetY
 
-      this.draw()
+      this.drawShapes()
       return
     }
 
@@ -182,7 +179,14 @@ export class DrawShape {
 
     shape.endX = e.offsetX
     shape.endY = e.offsetY
-    this.draw()
+
+    const fn = this.drawFn
+    if (fn) {
+      fn.draw()
+    }
+    else {
+      this.drawShapes()
+    }
   }
 
   private _onDrawShapeMouseup(e: MouseEvent) {
@@ -194,6 +198,10 @@ export class DrawShape {
     this.drawShapeIsDrawing = false
     this.curShape = undefined
   }
+
+  protected get drawFn() {
+    return DRAW_MAP.get(this)
+  }
 }
 
 
@@ -202,5 +210,4 @@ export type ShapeType = keyof typeof ShapeMap
 export type DrawShapeOpts = {
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D
-  drawExtra?: () => void
 }

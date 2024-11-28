@@ -174,3 +174,12 @@ export type CanvasItem = {
   ctx: CanvasRenderingContext2D
   name: string
 }
+
+export type DrawMapVal = {
+  unRedo: (options: {
+    recordPath?: RecordPath[]
+    type?: 'undo' | 'redo'
+  }) => BaseShape | undefined
+
+  draw: VoidFunction
+}

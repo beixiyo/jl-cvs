@@ -56,6 +56,7 @@ export function createUnReDoList<T>() {
   return {
     undoList,
     redoList,
+    
     /** 添加一项 */
     add: (item: T) => {
       undoList.push(item)
@@ -70,18 +71,22 @@ export function createUnReDoList<T>() {
     },
 
     /** 撤销 */
-    undo: (callback: (item: T) => void) => {
+    undo: (callback?: (item: T) => void) => {
       if (undoList.length <= 0) return
 
       redoList.push(undoList.pop()!)
-      callback(undoList[undoList.length - 1])
+      const item = undoList[undoList.length - 1]
+      callback?.(item)
+      return item
     },
     /** 重做 */
-    redo: (callback: (item: T) => void) => {
+    redo: (callback?: (item: T) => void) => {
       if (redoList.length <= 0) return
 
       undoList.push(redoList.pop()!)
-      callback(undoList[undoList.length - 1])
+      const item = undoList[undoList.length - 1]
+      callback?.(item)
+      return item
     }
   }
 }
