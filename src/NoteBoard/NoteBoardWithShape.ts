@@ -2,8 +2,9 @@ import { clearAllCvs, getImg } from '@/canvasTool/tools'
 import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
 import { getCursor, mergeOpts, setCanvas } from './tools'
 import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions, DrawMapVal } from './type'
-import { createUnReDoList, excludeKeys } from '@/utils';
+import { createUnReDoList, excludeKeys } from '@/utils'
 import { DrawShape } from '@/Shapes'
+import type { BaseShape } from '@/Shapes/BaseShape'
 
 
 /**
@@ -85,28 +86,26 @@ export class NoteBoardWithShape extends DrawShape {
     this.opts = mergeOpts(opts)
     DRAW_MAP.set(this, {
       unRedo: ({ recordPath, type }) => {
-        if (type === 'undo') {
-          const { shapes, shape } = this.drawShapeUndo(false)
-          this.clear(false)
-
-          this.drawRecord(recordPath)
-          return { shapes, shape }
-
+        const fnMap = {
+          undo: 'drawShapeUndo' as const,
+          redo: 'drawShapeRedo' as const,
         }
-        else if (type === 'redo') {
-          const { shapes, shape } = this.drawShapeRedo(false)
-          this.clear(false)
+        /**
+         * 这里无论如何都执行图形的 undo 方法
+         * 但是 onMousedown 时 addRecord 会记录所有图形的记录
+         * 下面的 drawRecord 又会复原，所以不会造成异常
+         */
+        const { shape, shapes } = this[fnMap[type]](false)
 
-          this.drawRecord(recordPath)
-          return { shapes, shape }
-
-        }
+        this.clear(false)
+        this.drawRecord(recordPath)
+        return { shapes, shape }
       },
 
       draw: () => {
         this.clear(false)
-        this.drawShapes(false)
         this.drawRecord(this.recordPath)
+        this.drawShapes(false)
       },
 
       addRecord: () => {
@@ -175,7 +174,7 @@ export class NoteBoardWithShape extends DrawShape {
         break
 
       case 'rect':
-        this.canvas.style.cursor = 'unset'
+        this.canvas.style.cursor = 'crosshair'
         this.drawShapeDiable = false
         this.shape = 'rect'
         break
@@ -509,6 +508,13 @@ export class NoteBoardWithShape extends DrawShape {
     return ['draw', 'erase'].includes(this.mode)
   }
 
+  /**
+   * 能否添加记录
+   */
+  private canAddRecord() {
+    return ['draw', 'erase', 'rect'].includes(this.mode)
+  }
+
   private init() {
     this.bindEvent()
     this.setStyle(this.opts)
@@ -538,7 +544,7 @@ export class NoteBoardWithShape extends DrawShape {
     /**
      * 添加记录
      */
-    if (this.canDraw() || this.mode === 'rect') {
+    if (this.canAddRecord()) {
       this.setToLastUndoPath()
       this.recordPath.push({
         canvasAttrs: excludeKeys(
@@ -554,8 +560,8 @@ export class NoteBoardWithShape extends DrawShape {
           ]
         ),
         path: [],
+        shapes: [],
         mode: this.mode,
-        shapes: []
       })
     }
 
@@ -629,7 +635,7 @@ export class NoteBoardWithShape extends DrawShape {
       return
     }
 
-    if (this.canDraw() || this.mode === 'rect') {
+    if (this.canAddRecord()) {
       this.drawFn?.addRecord()
     }
     if (!this.canDraw()) return
