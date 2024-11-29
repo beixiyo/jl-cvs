@@ -77,25 +77,25 @@ export class DrawShape {
   /**
    * 撤销
    */
-  drawShapeUndo(needClear = true): BaseShape | undefined {
+  drawShapeUndo(needClear = true): UnRedoReturn {
     const shape = this.shapes.pop()
     if (shape) {
       this.undoShapes.push(shape)
       this.drawShapes(needClear)
     }
-    return shape
+    return { shape, shapes: [...this.shapes] }
   }
 
   /**
    * 重做
    */
-  drawShapeRedo(needClear = true): BaseShape | undefined {
+  drawShapeRedo(needClear = true): UnRedoReturn {
     const shape = this.undoShapes.pop()
     if (shape) {
       this.shapes.push(shape)
       this.drawShapes(needClear)
     }
-    return shape
+    return { shape, shapes: [...this.shapes] }
   }
 
   drawShapeBindEvent() {
@@ -145,6 +145,7 @@ export class DrawShape {
 
     rect.setShapeAttrs(this.shapeAttrs)
     this.shapes.push(rect)
+    this.drawFn?.addShapes()
   }
 
   private _onDrawShapeMousemove(e: MouseEvent) {
@@ -167,7 +168,13 @@ export class DrawShape {
       this.drawShapeDragX = e.offsetX
       this.drawShapeDragY = e.offsetY
 
-      this.drawShapes()
+      const drawFn = this.drawFn
+      if (drawFn) {
+        drawFn.draw()
+      }
+      else {
+        this.drawShapes()
+      }
       return
     }
 
@@ -206,6 +213,11 @@ export class DrawShape {
 
 
 export type ShapeType = keyof typeof ShapeMap
+
+export type UnRedoReturn = {
+  shape?: BaseShape
+  shapes: BaseShape[]
+}
 
 export type DrawShapeOpts = {
   canvas: HTMLCanvasElement

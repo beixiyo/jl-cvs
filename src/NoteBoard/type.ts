@@ -1,4 +1,4 @@
-import type { ShapeType } from '@/Shapes'
+import type { ShapeType, UnRedoReturn } from '@/Shapes'
 import type { BaseShape } from '@/Shapes/BaseShape'
 
 export type MouseEventFn = (e: MouseEvent) => void
@@ -26,6 +26,7 @@ type OnUnRedoParams = {
   recordPath?: RecordPath[]
   mode: Mode
   shape?: BaseShape
+  shapes?: BaseShape[]
 }
 
 export type NoteBoardOptions = {
@@ -148,6 +149,7 @@ export type RecordPath = {
   }[]
   canvasAttrs: Omit<CanvasAttrs, 'width' | 'height'>
   mode: Mode
+  shapes: BaseShape[]
 }
 
 export type ShotParams = {
@@ -179,7 +181,9 @@ export type DrawMapVal = {
   unRedo: (options: {
     recordPath?: RecordPath[]
     type?: 'undo' | 'redo'
-  }) => BaseShape | undefined
+  }) => UnRedoReturn | undefined
 
   draw: VoidFunction
+
+  addShapes: () => void
 }

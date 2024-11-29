@@ -4,6 +4,7 @@ import { getCursor, mergeOpts, setCanvas } from './tools'
 import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions, DrawMapVal } from './type'
 import { createUnReDoList, deepClone, excludeKeys } from '@/utils'
 import { DrawShape } from '@/Shapes'
+import type { BaseShape } from '@/Shapes/BaseShape'
 
 
 /**
@@ -51,10 +52,6 @@ export class NoteBoardWithShape extends DrawShape {
   opts: NoteBoardOptions
 
   mode: Mode = 'draw'
-  /**
-   * 记录用户操作，用来实现 undo、redo 判断
-   */
-  unRedoAction = createUnReDoList<Mode>()
 
   /** 开启鼠标滚轮缩放 */
   isEnableZoom = true
@@ -87,10 +84,6 @@ export class NoteBoardWithShape extends DrawShape {
    */
   unReDoList = createUnReDoList<RecordPath[]>()
   private recordPath: RecordPath[] = []
-  /**
-   * 执行 undo 时，放入的记录
-   */
-  private undoRecordPath: RecordPath[] = []
 
   constructor(opts?: NoteBoardOptions) {
     super()
@@ -102,21 +95,32 @@ export class NoteBoardWithShape extends DrawShape {
     this.opts = mergeOpts(opts)
     DRAW_MAP.set(this, {
       unRedo: ({ recordPath, type }) => {
-        this.clear(false)
-
         if (type === 'undo') {
-          this.drawRecord(recordPath || this.recordPath)
-          return this.drawShapeUndo(false)
+          const { shapes, shape } = this.drawShapeUndo(false)
+          this.clear(false)
+
+          this.drawRecord(recordPath || this.recordPath, shapes)
+          return { shapes, shape }
+
         }
         else if (type === 'redo') {
-          this.drawRecord(recordPath || this.recordPath)
-          return this.drawShapeRedo(false)
+          const { shapes, shape } = this.drawShapeRedo(false)
+          this.clear(false)
+
+          this.drawRecord(recordPath || this.recordPath, shapes)
+          return { shapes, shape }
+
         }
       },
+
       draw: () => {
         this.clear(false)
         this.drawShapes(false)
         this.drawRecord(this.recordPath)
+      },
+
+      addShapes: () => {
+        this.recordPath[this.recordPath.length - 1].shapes.push(...this.shapes)
       }
     })
 
@@ -278,79 +282,32 @@ export class NoteBoardWithShape extends DrawShape {
    * 撤销
    */
   undo() {
-    const action = this.unRedoAction.undo()
-
     const drawFn = this.drawFn.unRedo
-    switch (action) {
-      case 'rect':
-        const shape = drawFn({ type: 'undo' })
-        this.opts.onUndo?.({
-          mode: this.mode,
-          shape
-        })
-        break
 
-      case 'draw':
-      case 'erase':
-        this.unReDoList.undo(recordPath => {
-          this.clear(false)
-          if (!recordPath) return
+    const recordPath = this.unReDoList.undo()
+    const { shapes, shape } = drawFn({ type: 'undo', recordPath })
 
-          drawFn({ recordPath, type: 'undo' })
-          this.undoRecordPath.push(this.recordPath.pop())
-          this.opts.onUndo?.({
-            mode: this.mode,
-            recordPath
-          })
-        })
-        break
-
-      default:
-        break
-    }
+    this.opts.onUndo?.({
+      mode: this.mode,
+      shape,
+      shapes,
+    })
   }
 
   /**
    * 重做
    */
   redo() {
-    const action = this.unRedoAction.redo()
     const drawFn = this.drawFn.unRedo
 
-    /**
-     * 复原上次记录
-     */
-    const lastUndoRecord = this.undoRecordPath.pop()
-    if (lastUndoRecord) {
-      this.recordPath.push(lastUndoRecord)
-    }
+    const recordPath = this.unReDoList.redo()
+    const { shapes, shape } = drawFn({ type: 'redo', recordPath })
 
-    switch (action) {
-      case 'rect':
-        const shape = drawFn({ type: 'redo' })
-        this.opts.onRedo?.({
-          mode: this.mode,
-          shape
-        })
-        break
-
-      case 'draw':
-      case 'erase':
-        this.unReDoList.redo(recordPath => {
-          this.clear(false)
-          if (!recordPath) return
-
-          this.opts.onRedo?.({
-            mode: this.mode,
-            recordPath
-          })
-          drawFn({ recordPath, type: 'redo' })
-        })
-        break
-
-      default:
-        break
-    }
+    this.opts.onRedo?.({
+      mode: this.mode,
+      shape,
+      shapes,
+    })
   }
 
   /**
@@ -510,8 +467,12 @@ export class NoteBoardWithShape extends DrawShape {
    *                    Private
    ***************************************************/
 
-  private drawRecord(recordPath: RecordPath[]) {
+  private drawRecord(
+    recordPath: RecordPath[],
+    shapes?: BaseShape[]
+  ) {
     const { ctx } = this
+    const currentMode = this.mode
 
     for (const item of recordPath) {
       this.setStyle(item.canvasAttrs, this.ctx)
@@ -524,6 +485,9 @@ export class NoteBoardWithShape extends DrawShape {
         ctx.stroke()
       }
     }
+
+    shapes?.length && this.drawShapes(false, shapes)
+    this.setMode(currentMode)
   }
 
   /**
@@ -550,8 +514,6 @@ export class NoteBoardWithShape extends DrawShape {
   }
 
   private _onMousedown(e: MouseEvent) {
-    this.unRedoAction.add(this.mode)
-    this.undoRecordPath.splice(0)
     this.opts.onMouseDown?.(e)
 
     // 拖拽模式
@@ -561,28 +523,33 @@ export class NoteBoardWithShape extends DrawShape {
       return
     }
 
-    if (!this.canDraw()) return
+    /**
+     * 添加记录
+     */
+    if (this.canDraw() || this.mode === 'rect') {
+      this.recordPath.push({
+        canvasAttrs: excludeKeys(
+          { ...this.opts },
+          [
+            'el',
+            'minScale', 'maxScale',
+            'onMouseDown', 'onMouseMove',
+            'onMouseUp', 'onMouseLeave',
+            'onWheel', 'onDrag',
+            'onRedo', 'onUndo',
+            'height', 'width',
+          ]
+        ),
+        path: [],
+        mode: this.mode,
+        shapes: []
+      })
+    }
 
+    if (!this.canDraw()) return
     // 画笔模式
     this.isDrawing = true
     this.ctx.beginPath()
-
-    this.recordPath.push({
-      canvasAttrs: excludeKeys(
-        { ...this.opts },
-        [
-          'el',
-          'minScale', 'maxScale',
-          'onMouseDown', 'onMouseMove',
-          'onMouseUp', 'onMouseLeave',
-          'onWheel', 'onDrag',
-          'onRedo', 'onUndo',
-          'height', 'width',
-        ]
-      ),
-      path: [],
-      mode: this.mode
-    })
 
     this.drawStart = {
       x: e.offsetX,

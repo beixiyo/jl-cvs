@@ -1,4 +1,4 @@
-import { NoteBoard } from '@/NoteBoard'
+import { NoteBoardWithShape } from '@/NoteBoard/NoteBoardWithShape'
 import { genBtn } from './tools'
 
 
@@ -19,7 +19,7 @@ el.style.alignItems = 'center'
 document.body.appendChild(el)
 
 
-const board = new NoteBoard({
+const board = new NoteBoardWithShape({
   el,
   width: WIDTH,
   height: HEIGHT,

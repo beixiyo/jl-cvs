@@ -488,7 +488,8 @@ export class NoteBoard {
         ]
       ),
       path: [],
-      mode: this.mode
+      mode: this.mode,
+      shapes: []
     })
 
     this.drawStart = {
