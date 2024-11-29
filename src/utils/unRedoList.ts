@@ -1,4 +1,113 @@
 /**
+ * 创建撤销、重做链表
+ */
+export class UnRedoLinkedList<T> {
+
+  /** 头节点 */
+  head: UnRedoNode<T> | null = null
+  /** 尾节点 */
+  tail: UnRedoNode<T> | null = null
+  /** 当前节点 */
+  currentNode: UnRedoNode<T> | null = null
+
+  private nextIndex = 0;
+  private nodeMap: Map<number, UnRedoNode<T>> = new Map()
+
+  /**
+   * 添加新元素
+   */
+  add(item: T): UnRedoNode<T> {
+    const newNode: UnRedoNode<T> = {
+      index: this.nextIndex++,
+      value: item,
+      prev: this.currentNode,
+      next: null
+    }
+
+    // 如果当前节点存在，截断后续链接
+    if (this.currentNode) {
+      this.currentNode.next = newNode
+    }
+
+    // 更新尾节点和当前节点
+    this.tail = newNode
+    this.currentNode = newNode
+
+    // 首次设置头节点
+    if (!this.head) {
+      this.head = newNode
+    }
+
+    // 缓存节点
+    this.nodeMap.set(newNode.index, newNode)
+
+    return newNode
+  }
+
+  undo(): T | null {
+    if (!this.currentNode || !this.currentNode.prev) return null
+
+    this.currentNode = this.currentNode.prev
+    return this.currentNode.value
+  }
+
+  redo(): T | null {
+    if (!this.currentNode || !this.currentNode.next) return null
+
+    this.currentNode = this.currentNode.next
+    return this.currentNode.value
+  }
+
+  /**
+   * 获取当前元素
+   */
+  get currentValue(): T | null {
+    return this.currentNode?.value ?? null
+  }
+
+  get length(): number {
+    return this.nodeMap.size
+  }
+
+  /**
+   * 获取指定索引的节点
+   */
+  findByIndex(index: number): UnRedoNode<T> | null {
+    return this.nodeMap.get(index) ?? null
+  }
+
+  forEach(callback: (node: UnRedoNode<T>) => void) {
+    let current = this.head
+    while (current) {
+      callback(current)
+      current = current.next
+    }
+  }
+
+  /**
+   * 清理不再需要的节点
+   */
+  cleanUnusedNodes() {
+    const keepIndices = new Set<number>()
+
+    // 标记需要保留的节点
+    let current = this.currentNode
+    while (current) {
+      keepIndices.add(current.index)
+      current = current.prev
+    }
+
+    // 移除不再需要的节点
+    for (const [index] of this.nodeMap.entries()) {
+      if (!keepIndices.has(index)) {
+        this.nodeMap.delete(index)
+      }
+    }
+  }
+
+}
+
+/**
  * 创建撤销、重做列表
  */
 export function createUnReDoList<T>() {
@@ -43,101 +152,9 @@ export function createUnReDoList<T>() {
   }
 }
 
-
-export function createUnRedoLinked<T>() {
-  let index = 0
-
-  const data = {
-    index: index++,
-    prev: undefined,
-    next: undefined,
-    current: undefined
-  } as UnRedoLink<T>
-
-  function add(item: T): UnRedoLinkReturn<T> {
-    if (!data.current) {
-      data.current = item
-      return data
-    }
-
-    const lastNode = getLast()
-    if (lastNode) {
-      const newNode: UnRedoLink<T> = {
-        index: index++,
-        current: item,
-        prev: lastNode,
-        next: undefined
-      }
-      lastNode.next = newNode
-
-      return newNode
-    }
-  }
-
-  function pop(): UnRedoLinkReturn<T> {
-    const last = getLast()
-    if (!last || !last.prev) return undefined
-
-    last.prev.next = undefined
-    index--
-    return last
-  }
-
-  function findByIndex(index: number): UnRedoLinkReturn<T> {
-    let current: UnRedoLinkReturn<T> = data
-    while (current) {
-      if (current.index === index) return current
-      current = current.next
-    }
-    return undefined
-  }
-
-  function findByItem(item: T): UnRedoLinkReturn<T> {
-    let current: UnRedoLinkReturn<T> = data
-    while (current) {
-      if (current.current === item) return current
-      current = current.next
-    }
-    return undefined
-  }
-
-  function getLast(): UnRedoLinkReturn<T> {
-    let current: UnRedoLinkReturn<T> = data
-    while (current?.next) {
-      current = current.next
-    }
-    return current === data && !data.current
-      ? undefined
-      : current
-  }
-
-  function walk(cb: (item: UnRedoLink<T>) => void) {
-    let current: UnRedoLinkReturn<T> = data
-    while (current) {
-      cb(current)
-      current = current.next
-    }
-  }
-
-  return {
-    data,
-
-    add,
-    pop,
-    walk,
-
-    findByItem,
-    findByIndex,
-    getLast,
-  }
-}
-
-
-export type UnRedoLink<T> = {
+export interface UnRedoNode<T> {
   index: number
-  current: T
-  next?: UnRedoLink<T>
-  prev?: UnRedoLink<T>
+  value: T
+  prev: UnRedoNode<T> | null
+  next: UnRedoNode<T> | null
 }
-
-type UnRedoLinkReturn<T> = UnRedoLink<T> | undefined
