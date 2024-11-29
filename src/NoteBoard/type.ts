@@ -179,7 +179,6 @@ export type CanvasItem = {
 
 export type DrawMapVal = {
   unRedo: (options: {
-    recordPath: RecordPath[]
     type: 'undo' | 'redo'
   }) => UnRedoReturn | undefined
 

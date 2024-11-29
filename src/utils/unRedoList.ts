@@ -8,7 +8,7 @@ export class UnRedoLinkedList<T> {
   /** 尾节点 */
   tail: UnRedoNode<T> | null = null
   /** 当前节点 */
-  currentNode: UnRedoNode<T> | null = null
+  curNode: UnRedoNode<T> | null = null
 
   private nextIndex = 0;
   private nodeMap: Map<number, UnRedoNode<T>> = new Map()
@@ -18,20 +18,20 @@ export class UnRedoLinkedList<T> {
    */
   add(item: T): UnRedoNode<T> {
     const newNode: UnRedoNode<T> = {
-      index: this.nextIndex++,
+      id: this.nextIndex++,
       value: item,
-      prev: this.currentNode,
+      prev: this.curNode,
       next: null
     }
 
     // 如果当前节点存在，截断后续链接
-    if (this.currentNode) {
-      this.currentNode.next = newNode
+    if (this.curNode) {
+      this.curNode.next = newNode
     }
 
     // 更新尾节点和当前节点
     this.tail = newNode
-    this.currentNode = newNode
+    this.curNode = newNode
 
     // 首次设置头节点
     if (!this.head) {
@@ -39,30 +39,44 @@ export class UnRedoLinkedList<T> {
     }
 
     // 缓存节点
-    this.nodeMap.set(newNode.index, newNode)
+    this.nodeMap.set(newNode.id, newNode)
 
     return newNode
   }
 
-  undo(): T | null {
-    if (!this.currentNode || !this.currentNode.prev) return null
+  undo(): UnRedoNode<T> | null {
+    if (!this.curNode || !this.curNode.prev) return null
 
-    this.currentNode = this.currentNode.prev
-    return this.currentNode.value
+    this.curNode = this.curNode.prev
+    return this.curNode
   }
 
-  redo(): T | null {
-    if (!this.currentNode || !this.currentNode.next) return null
+  redo(): UnRedoNode<T> | null {
+    if (!this.curNode || !this.curNode.next) return null
 
-    this.currentNode = this.currentNode.next
-    return this.currentNode.value
+    this.curNode = this.curNode.next
+    return this.curNode
   }
 
   /**
    * 获取当前元素
    */
-  get currentValue(): T | null {
-    return this.currentNode?.value ?? null
+  get curValue(): T | null {
+    return this.curNode?.value ?? null
+  }
+
+  /**
+   * 获取尾元素
+   */
+  get tailValue(): T | null {
+    return this.tail?.value ?? null
+  }
+
+  /**
+   * 获取头元素
+   */
+  get headValue(): T | null {
+    return this.head?.value ?? null
   }
 
   get length(): number {
@@ -72,13 +86,24 @@ export class UnRedoLinkedList<T> {
   /**
    * 获取指定索引的节点
    */
-  findByIndex(index: number): UnRedoNode<T> | null {
-    return this.nodeMap.get(index) ?? null
+  findById(id: number): UnRedoNode<T> | null {
+    return this.nodeMap.get(id) ?? null
   }
 
-  forEach(callback: (node: UnRedoNode<T>) => void) {
+  /**
+   * 遍历整个链表
+   * @param endId 结束节点 id
+   */
+  forEach(
+    callback: (node: UnRedoNode<T>) => void,
+    endCondition?: (node: UnRedoNode<T>) => boolean,
+  ) {
     let current = this.head
     while (current) {
+      if (endCondition?.(current)) {
+        return
+      }
+
       callback(current)
       current = current.next
     }
@@ -91,16 +116,16 @@ export class UnRedoLinkedList<T> {
     const keepIndices = new Set<number>()
 
     // 标记需要保留的节点
-    let current = this.currentNode
+    let current = this.curNode
     while (current) {
-      keepIndices.add(current.index)
+      keepIndices.add(current.id)
       current = current.prev
     }
 
     // 移除不再需要的节点
-    for (const [index] of this.nodeMap.entries()) {
-      if (!keepIndices.has(index)) {
-        this.nodeMap.delete(index)
+    for (const [id] of this.nodeMap.entries()) {
+      if (!keepIndices.has(id)) {
+        this.nodeMap.delete(id)
       }
     }
   }
@@ -153,7 +178,7 @@ export function createUnReDoList<T>() {
 }
 
 export interface UnRedoNode<T> {
-  index: number
+  id: number
   value: T
   prev: UnRedoNode<T> | null
   next: UnRedoNode<T> | null
