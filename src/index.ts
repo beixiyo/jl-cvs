@@ -1,15 +1,16 @@
-export * from '@/imgToTxt'
-export * from '@/firework'
-
-export * from '@/svg/genBoard'
-export * from '@/NoteBoard'
-
-export * from '@/ShotImg'
-export * from '@/scratch'
-export * from '@/techNum'
-export * from '@/imgToFade'
-
 export * from '@/canvasTool'
-export * from '@/utils'
 
+export * from '@/firework'
+export * from '@/imgToFade'
+export * from '@/imgToTxt'
+
+export * from '@/NoteBoard'
+export * from '@/scratch'
+export * from '@/ShotImg'
+
+export * from '@/svg'
+
+export * from '@/techNum'
 export { Pixel } from '@/types'
+
+export * from '@/utils'
