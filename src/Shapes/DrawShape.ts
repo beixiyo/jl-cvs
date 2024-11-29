@@ -43,14 +43,6 @@ export class DrawShape {
    */
   curShape: BaseShape
 
-  /** 
-   * 统一事件，方便解绑
-   */
-  private onDrawShapeMousedown = this._onDrawShapeMousedown.bind(this)
-  private onDrawShapeMousemove = this._onDrawShapeMousemove.bind(this)
-  private onDrawShapeMouseup = this._onDrawShapeMouseup.bind(this)
-  private onDrawShapeMouseLeave = this._onDrawShapeMouseLeave.bind(this)
-
   initial(drawShapeOpts: DrawShapeOpts) {
     this.drawShapeCanvas = drawShapeOpts.canvas
     this.drawShapeContext = drawShapeOpts.context
@@ -116,7 +108,7 @@ export class DrawShape {
    *                    private
    ***************************************************/
 
-  private _onDrawShapeMousedown(e: MouseEvent) {
+  private onDrawShapeMousedown = (e: MouseEvent) => {
     if (this.drawShapeDiable) return
 
     /**
@@ -145,10 +137,9 @@ export class DrawShape {
 
     rect.setShapeAttrs(this.shapeAttrs)
     this.shapes.push(rect)
-    this.drawFn?.addShapes()
   }
 
-  private _onDrawShapeMousemove(e: MouseEvent) {
+  private onDrawShapeMousemove = (e: MouseEvent) => {
     if (!this.drawShapeIsDrawing) return
 
     const { curShape } = this
@@ -196,12 +187,12 @@ export class DrawShape {
     }
   }
 
-  private _onDrawShapeMouseup(e: MouseEvent) {
+  private onDrawShapeMouseup = (e: MouseEvent) => {
     this.drawShapeIsDrawing = false
     this.curShape = undefined
   }
 
-  private _onDrawShapeMouseLeave(e: MouseEvent) {
+  private onDrawShapeMouseLeave = (e: MouseEvent) => {
     this.drawShapeIsDrawing = false
     this.curShape = undefined
   }

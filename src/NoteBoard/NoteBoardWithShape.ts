@@ -2,9 +2,8 @@ import { clearAllCvs, getImg } from '@/canvasTool/tools'
 import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
 import { getCursor, mergeOpts, setCanvas } from './tools'
 import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions, DrawMapVal } from './type'
-import { createUnReDoList, deepClone, excludeKeys } from '@/utils'
+import { createUnReDoList, excludeKeys } from '@/utils';
 import { DrawShape } from '@/Shapes'
-import type { BaseShape } from '@/Shapes/BaseShape'
 
 
 /**
@@ -17,7 +16,7 @@ export const DRAW_MAP = new WeakMap<
 
 /**
  * 扩展了绘制图形的 NoteBoard
- * @bug 尚未完成
+ * @bug 尚未完成 撤销与重做
  */
 export class NoteBoardWithShape extends DrawShape {
 
@@ -70,15 +69,6 @@ export class NoteBoardWithShape extends DrawShape {
   translateX = 0
   translateY = 0
 
-  /** 
-   * 统一事件，方便解绑
-   */
-  private onMousedown = this._onMousedown.bind(this)
-  private onMousemove = this._onMousemove.bind(this)
-  private onMouseup = this._onMouseup.bind(this)
-  private onMouseLeave = this._onMouseLeave.bind(this)
-  private onWheel = this._onWheel.bind(this)
-
   /**
    * 历史记录
    */
@@ -99,7 +89,7 @@ export class NoteBoardWithShape extends DrawShape {
           const { shapes, shape } = this.drawShapeUndo(false)
           this.clear(false)
 
-          this.drawRecord(recordPath || this.recordPath, shapes)
+          this.drawRecord(recordPath)
           return { shapes, shape }
 
         }
@@ -107,7 +97,7 @@ export class NoteBoardWithShape extends DrawShape {
           const { shapes, shape } = this.drawShapeRedo(false)
           this.clear(false)
 
-          this.drawRecord(recordPath || this.recordPath, shapes)
+          this.drawRecord(recordPath)
           return { shapes, shape }
 
         }
@@ -119,9 +109,16 @@ export class NoteBoardWithShape extends DrawShape {
         this.drawRecord(this.recordPath)
       },
 
-      addShapes: () => {
-        this.recordPath[this.recordPath.length - 1].shapes.push(...this.shapes)
-      }
+      addRecord: () => {
+        /**
+         * 确保有数组后再执行
+         */
+        setTimeout(() => {
+          const lastRecord = this.recordPath[this.recordPath.length - 1]
+          lastRecord?.shapes.push(...this.shapes)
+          this.unReDoList.add([...this.recordPath])
+        })
+      },
     })
 
     const {
@@ -282,9 +279,17 @@ export class NoteBoardWithShape extends DrawShape {
    * 撤销
    */
   undo() {
-    const drawFn = this.drawFn.unRedo
-
     const recordPath = this.unReDoList.undo()
+    if (!recordPath) {
+      this.clear(false)
+      return
+    }
+
+    this.setToLastUndoPath = () => {
+      this.recordPath = [...recordPath]
+    }
+
+    const drawFn = this.drawFn.unRedo
     const { shapes, shape } = drawFn({ type: 'undo', recordPath })
 
     this.opts.onUndo?.({
@@ -298,9 +303,10 @@ export class NoteBoardWithShape extends DrawShape {
    * 重做
    */
   redo() {
-    const drawFn = this.drawFn.unRedo
-
     const recordPath = this.unReDoList.redo()
+    if (!recordPath) return
+
+    const drawFn = this.drawFn.unRedo
     const { shapes, shape } = drawFn({ type: 'redo', recordPath })
 
     this.opts.onRedo?.({
@@ -467,9 +473,14 @@ export class NoteBoardWithShape extends DrawShape {
    *                    Private
    ***************************************************/
 
+  /**
+   * 当点击撤回时，再进行点击操作，则撤回到之前的 path 路径
+   * 确保 shapes 绘制时，不会把上次多余的 path 画出来
+   */
+  private setToLastUndoPath = () => { }
+
   private drawRecord(
-    recordPath: RecordPath[],
-    shapes?: BaseShape[]
+    recordPath: RecordPath[] = []
   ) {
     const { ctx } = this
     const currentMode = this.mode
@@ -486,6 +497,7 @@ export class NoteBoardWithShape extends DrawShape {
       }
     }
 
+    const shapes = recordPath[recordPath.length - 1]?.shapes
     shapes?.length && this.drawShapes(false, shapes)
     this.setMode(currentMode)
   }
@@ -513,7 +525,7 @@ export class NoteBoardWithShape extends DrawShape {
     canvas.addEventListener('wheel', this.onWheel)
   }
 
-  private _onMousedown(e: MouseEvent) {
+  private onMousedown = (e: MouseEvent) => {
     this.opts.onMouseDown?.(e)
 
     // 拖拽模式
@@ -527,6 +539,7 @@ export class NoteBoardWithShape extends DrawShape {
      * 添加记录
      */
     if (this.canDraw() || this.mode === 'rect') {
+      this.setToLastUndoPath()
       this.recordPath.push({
         canvasAttrs: excludeKeys(
           { ...this.opts },
@@ -557,7 +570,7 @@ export class NoteBoardWithShape extends DrawShape {
     }
   }
 
-  private _onMousemove(e: MouseEvent) {
+  private onMousemove = (e: MouseEvent) => {
     this.opts.onMouseMove?.(e)
 
     /**
@@ -606,7 +619,7 @@ export class NoteBoardWithShape extends DrawShape {
     }
   }
 
-  private _onMouseup(e: MouseEvent) {
+  private onMouseup = (e: MouseEvent) => {
     this.opts.onMouseUp?.(e)
 
     if (this.mode === 'drag') {
@@ -616,13 +629,15 @@ export class NoteBoardWithShape extends DrawShape {
       return
     }
 
+    if (this.canDraw() || this.mode === 'rect') {
+      this.drawFn?.addRecord()
+    }
     if (!this.canDraw()) return
 
     this.isDrawing = false
-    this.unReDoList.add(deepClone(this.recordPath))
   }
 
-  private _onMouseLeave(e: MouseEvent) {
+  private onMouseLeave = (e: MouseEvent) => {
     this.opts.onMouseLeave?.(e)
 
     if (this.mode === 'drag') {
@@ -634,7 +649,7 @@ export class NoteBoardWithShape extends DrawShape {
     this.isDrawing = false
   }
 
-  private _onWheel(e: WheelEvent) {
+  private onWheel = (e: WheelEvent) => {
     e.preventDefault()
     if (!this.isEnableZoom) return
 

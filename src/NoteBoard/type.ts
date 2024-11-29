@@ -179,11 +179,14 @@ export type CanvasItem = {
 
 export type DrawMapVal = {
   unRedo: (options: {
-    recordPath?: RecordPath[]
-    type?: 'undo' | 'redo'
+    recordPath: RecordPath[]
+    type: 'undo' | 'redo'
   }) => UnRedoReturn | undefined
 
   draw: VoidFunction
 
-  addShapes: () => void
+  /**
+   * 添加一条记录，包含笔划和图形
+   */
+  addRecord: () => void
 }

@@ -60,6 +60,7 @@ const board = new NoteBoardWithShape({
   //   console.log('onUndo')
   // }
 })
+window.b=board
 
 /**
  * 居中绘制图片，并自动拉伸大小
