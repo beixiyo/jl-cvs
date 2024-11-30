@@ -198,7 +198,7 @@ export type DrawMapVal = {
   draw: VoidFunction
 
   /**
-   * 添加一条记录，包含笔划和图形
+   * 同步图形绘制记录到 NoteBoard 类
    */
-  addRecord: () => void
+  syncShapeRecord: (shapes: BaseShape[]) => void
 }

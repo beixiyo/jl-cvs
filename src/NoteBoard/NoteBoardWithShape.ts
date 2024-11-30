@@ -4,6 +4,7 @@ import { mergeOpts, setCanvas } from './tools'
 import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions, DrawMapVal, NoteBoardOptionsRequired } from './type'
 import { excludeKeys, getCircleCursor, UnRedoLinkedList } from '@/utils'
 import { DrawShape } from '@/Shapes'
+import type { BaseShape } from '@/Shapes/BaseShape'
 
 
 /**
@@ -73,7 +74,6 @@ export class NoteBoardWithShape extends DrawShape {
    * 历史记录
    */
   history = new UnRedoLinkedList<RecordPath[]>()
-  recordPath: RecordPath[] | null = null
 
   constructor(opts: NoteBoardOptions) {
     super()
@@ -114,34 +114,31 @@ export class NoteBoardWithShape extends DrawShape {
    */
   setMode(mode: Mode) {
     this.mode = mode
+    this.drawShapeDiable = true
+    this.ctx.globalCompositeOperation = this.opts.globalCompositeOperation
 
     switch (mode) {
       case 'draw':
-        this.drawShapeDiable = true
         this.setCursor()
-        this.ctx.globalCompositeOperation = this.opts.globalCompositeOperation
         break
 
       case 'erase':
-        this.drawShapeDiable = true
         this.setCursor()
         this.ctx.globalCompositeOperation = 'destination-out'
         break
 
       case 'none':
-        this.drawShapeDiable = true
         this.canvas.style.cursor = 'unset'
         break
 
       case 'drag':
-        this.drawShapeDiable = true
         this.canvas.style.cursor = 'grab'
         break
 
       case 'rect':
-        this.canvas.style.cursor = 'crosshair'
-        this.drawShapeDiable = false
         this.shape = 'rect'
+        this.drawShapeDiable = false
+        this.canvas.style.cursor = 'crosshair'
         break
 
       default:
@@ -249,8 +246,7 @@ export class NoteBoardWithShape extends DrawShape {
       return
     }
 
-    this.recordPath = recordPath.value
-    const drawFn = this.drawFn?.unRedo
+    const drawFn = this.drawMap?.unRedo
     if (!drawFn) return
     const data = drawFn({ type: 'undo' })
 
@@ -269,8 +265,7 @@ export class NoteBoardWithShape extends DrawShape {
       return
     }
 
-    this.recordPath = recordPath.value
-    const drawFn = this.drawFn?.unRedo
+    const drawFn = this.drawMap?.unRedo
     if (!drawFn) return
 
     const data = drawFn({ type: 'redo' })
@@ -428,6 +423,11 @@ export class NoteBoardWithShape extends DrawShape {
     }
   }
 
+  /**
+   * 设置光标样式
+   * @param lineWidth 大小 
+   * @param strokeStyle 颜色
+   */
   setCursor(lineWidth?: number, strokeStyle?: string) {
     this.canvas.style.cursor = getCircleCursor(
       lineWidth || this.opts.lineWidth,
@@ -491,28 +491,8 @@ export class NoteBoardWithShape extends DrawShape {
      */
     if (this.canAddRecord) {
       this.history.cleanUnusedNodes()
-      const lastRecord = this.history.tailValue
-
-      this.history.add([
-        ...(lastRecord || []),
-        {
-          canvasAttrs: excludeKeys(
-            { ...this.opts },
-            [
-              'el',
-              'minScale', 'maxScale',
-              'onMouseDown', 'onMouseMove',
-              'onMouseUp', 'onMouseLeave',
-              'onWheel', 'onDrag',
-              'onRedo', 'onUndo',
-              'height', 'width',
-            ]
-          ),
-          path: [],
-          shapes: [],
-          mode: this.mode,
-        }
-      ])
+      this.addHistory()
+      this.drawMap?.syncShapeRecord(this.shapes)
     }
 
     if (!this.canDraw) return
@@ -562,8 +542,6 @@ export class NoteBoardWithShape extends DrawShape {
 
     ctx.moveTo(drawStart.x, drawStart.y)
     ctx.lineTo(offsetX, offsetY)
-
-    ctx.lineWidth = this.opts.lineWidth
     ctx.stroke()
 
     this.drawStart = {
@@ -588,12 +566,7 @@ export class NoteBoardWithShape extends DrawShape {
       return
     }
 
-    if (this.canAddRecord) {
-      this.drawFn?.addRecord()
-      this.recordPath = this.history.tailValue
-    }
     if (!this.canDraw) return
-
     this.isDrawing = false
   }
 
@@ -630,13 +603,38 @@ export class NoteBoardWithShape extends DrawShape {
       e
     })
   }
-  
+
+  private addHistory() {
+    const lastRecord = this.history.tailValue
+    this.history.add([
+      ...(lastRecord || []),
+      {
+        canvasAttrs: excludeKeys(
+          { ...this.opts },
+          [
+            'el',
+            'minScale', 'maxScale',
+            'onMouseDown', 'onMouseMove',
+            'onMouseUp', 'onMouseLeave',
+            'onWheel', 'onDrag',
+            'onRedo', 'onUndo',
+            'height', 'width',
+          ]
+        ),
+        path: [],
+        shapes: [],
+        mode: this.mode,
+      }
+    ])
+  }
+
   private drawRecord() {
-    if (!this.recordPath) return
+    const lastRecord = this.history.curValue
+    if (!lastRecord) return
     const { ctx } = this
     const currentMode = this.mode
 
-    for (const item of this.recordPath) {
+    for (const item of lastRecord) {
       this.setStyle(item.canvasAttrs, this.ctx)
       this.setMode(item.mode)
       ctx.beginPath()
@@ -655,7 +653,13 @@ export class NoteBoardWithShape extends DrawShape {
     const draw = () => {
       this.clear(false)
       this.drawRecord()
-      this.drawShapes(false)
+
+      const lastRecord = this.history.curValue
+      if (!lastRecord) return
+
+      lastRecord[lastRecord.length - 1].shapes.forEach(shape => {
+        shape.draw()
+      })
     }
 
     DRAW_MAP.set(this, {
@@ -668,22 +672,20 @@ export class NoteBoardWithShape extends DrawShape {
         }
         /**
          * 这里无论如何都执行图形的 undo 方法
-         * 但是 onMousedown 时 addRecord 会记录所有图形的记录
-         * 下面的 drawRecord 又会复原，所以不会造成异常
+         * onDrawShapeMousedown 时 syncShapeRecord 会记录所有图形的记录
          */
         const { shape, shapes } = this[fnMap[type]](false)
         draw()
         return { shapes, shape }
       },
 
-      addRecord: () => {
+      syncShapeRecord: (shapes: BaseShape[]) => {
         /**
-         * 确保有数组后再执行
+         * 确保有记录后执行
          */
         setTimeout(() => {
           const lastRecord = this.history.tailValue
-          if (!lastRecord) return
-          lastRecord[lastRecord.length - 1]?.shapes.push(...this.shapes)
+          lastRecord![lastRecord!.length - 1]?.shapes.push(...shapes)
         })
       },
     })

@@ -47,10 +47,11 @@ export class Rect implements BaseShape {
       ctx.lineWidth = this.shapeAttrs.lineWidth
       ctx.stroke()
     }
-
+    
     if (this.shapeAttrs.fillStyle) {
       ctx.fillStyle = this.shapeAttrs.fillStyle
     }
+    
     ctx.fill()
   }
 

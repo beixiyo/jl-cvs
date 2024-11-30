@@ -167,7 +167,7 @@ export class DrawShape {
       this.drawShapeDragX = e.offsetX
       this.drawShapeDragY = e.offsetY
 
-      const drawFn = this.drawFn
+      const drawFn = this.drawMap
       if (drawFn) {
         drawFn.draw()
       }
@@ -184,9 +184,9 @@ export class DrawShape {
     shape.endX = e.offsetX
     shape.endY = e.offsetY
 
-    const fn = this.drawFn
-    if (fn) {
-      fn.draw()
+    const drawMap = this.drawMap
+    if (drawMap) {
+      drawMap.draw()
     }
     else {
       this.drawShapes()
@@ -203,7 +203,7 @@ export class DrawShape {
     this.curDragShape = null
   }
 
-  protected get drawFn() {
+  protected get drawMap() {
     return DRAW_MAP.get(this)
   }
 }
