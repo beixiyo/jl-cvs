@@ -490,10 +490,7 @@ export class NoteBoardWithShape extends DrawShape {
       }
     }
 
-    const lastRecord = this.history.tailValue
-    if (!lastRecord) return
-
-    const shapes = lastRecord[lastRecord.length - 1]?.shapes
+    const shapes = this.recordPath[this.recordPath.length - 1]?.shapes
     shapes?.length && this.drawShapes(false, shapes)
     this.setMode(currentMode)
   }
