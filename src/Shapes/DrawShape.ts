@@ -35,6 +35,9 @@ export class DrawShape {
   /** 是否在绘制 */
   drawShapeIsDrawing = false
 
+  /** 是否需要清除所有历史记录 */
+  needCleanAllShapeHistory = false
+
   /**
    * 上次的坐标，用于拖动等
    */
@@ -73,6 +76,11 @@ export class DrawShape {
     if (shape) {
       this.drawShapes(needClear)
     }
+    else {
+      this.needCleanAllShapeHistory = true
+      this.drawShapes(true, [])
+    }
+
     return { shape: this.lastShape, shapes: [...this.shapes] }
   }
 
@@ -80,6 +88,7 @@ export class DrawShape {
    * 重做
    */
   drawShapeRedo(needClear = true): UnRedoReturn {
+    this.needCleanAllShapeHistory = false
     const shape = this.shapeHistory.redo()
     if (shape) {
       this.drawShapes(needClear)
@@ -116,12 +125,19 @@ export class DrawShape {
 
   private onDrawShapeMousedown = (e: MouseEvent) => {
     if (this.drawShapeDiable) return
+    this.drawShapeIsDrawing = true
 
     /**
      * 重画代表废弃撤销里的图形
      */
-    this.shapeHistory.cleanUnusedNodes()
-    this.drawShapeIsDrawing = true
+    if (this.needCleanAllShapeHistory) {
+      this.needCleanAllShapeHistory = false
+      this.shapeHistory.cleanAll()
+      this.drawMap?.cleanShapeRecord()
+    }
+    else {
+      this.shapeHistory.cleanUnusedNodes()
+    }
 
     const { offsetX, offsetY } = e
     const shape = this.getShape(offsetX, offsetY)

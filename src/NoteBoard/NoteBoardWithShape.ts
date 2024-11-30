@@ -243,6 +243,8 @@ export class NoteBoardWithShape extends DrawShape {
     const recordPath = this.history.undo()
     if (!recordPath?.value) {
       this.clear(false)
+      // 清理图形里不要的记录
+      this.drawShapeUndo()
       return
     }
 
@@ -450,14 +452,14 @@ export class NoteBoardWithShape extends DrawShape {
    * 能否添加记录
    */
   private get canAddRecord() {
-    return this.canDraw || this.isShapeMode
+    return this.canDraw || this.isShapeMode()
   }
 
   /**
    * 是图形模式
    */
-  private get isShapeMode() {
-    return ['rect'].includes(this.mode)
+  private isShapeMode(mode?: Mode) {
+    return ['rect'].includes(mode ?? this.mode)
   }
 
   private init() {
@@ -670,13 +672,18 @@ export class NoteBoardWithShape extends DrawShape {
           undo: 'drawShapeUndo' as const,
           redo: 'drawShapeRedo' as const,
         }
-        /**
-         * 这里无论如何都执行图形的 undo 方法
-         * onDrawShapeMousedown 时 syncShapeRecord 会记录所有图形的记录
-         */
-        const { shape, shapes } = this[fnMap[type]](false)
+
+        const { curValue } = this.history
+        if (this.isShapeMode(curValue?.[curValue.length - 1].mode)) {
+          this[fnMap[type]](false)
+        }
+
         draw()
-        return { shapes, shape }
+
+        return {
+          shape: this.lastShape,
+          shapes: this.shapes,
+        }
       },
 
       syncShapeRecord: (shapes: BaseShape[]) => {
@@ -684,10 +691,15 @@ export class NoteBoardWithShape extends DrawShape {
          * 确保有记录后执行
          */
         setTimeout(() => {
-          const lastRecord = this.history.tailValue
-          lastRecord![lastRecord!.length - 1]?.shapes.push(...shapes)
+          const lastRecord = this.history.curValue
+          lastRecord?.[lastRecord!.length - 1]?.shapes.push(...shapes)
         })
       },
+
+      cleanShapeRecord: () => {
+        const lastRecord = this.history.curValue
+        lastRecord?.[lastRecord!.length - 1]?.shapes?.splice(0)
+      }
     })
   }
 }

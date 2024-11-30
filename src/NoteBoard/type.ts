@@ -201,4 +201,5 @@ export type DrawMapVal = {
    * 同步图形绘制记录到 NoteBoard 类
    */
   syncShapeRecord: (shapes: BaseShape[]) => void
+  cleanShapeRecord: VoidFunction
 }

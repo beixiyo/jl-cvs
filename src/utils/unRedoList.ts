@@ -147,6 +147,16 @@ export class UnRedoLinkedList<T> {
     }
   }
 
+  /**
+   * 清空所有节点
+   */
+  cleanAll() {
+    this.nodeMap.clear()
+    this.head = null
+    this.tail = null
+    this.curNode = null
+  }
+
 }
 
 /**
