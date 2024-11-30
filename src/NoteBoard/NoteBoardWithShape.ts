@@ -243,8 +243,10 @@ export class NoteBoardWithShape extends DrawShape {
     const recordPath = this.history.undo()
     if (!recordPath?.value) {
       this.clear(false)
+
       // 清理图形里不要的记录
       this.drawShapeUndo()
+
       return
     }
 
@@ -494,7 +496,7 @@ export class NoteBoardWithShape extends DrawShape {
     if (this.canAddRecord) {
       this.history.cleanUnusedNodes()
       this.addHistory()
-      this.drawMap?.syncShapeRecord(this.shapes)
+      this.drawMap?.syncShapeRecord()
     }
 
     if (!this.canDraw) return
@@ -664,8 +666,27 @@ export class NoteBoardWithShape extends DrawShape {
       })
     }
 
+    const syncShapeRecord = () => {
+      /**
+       * 确保有记录后执行
+       */
+      setTimeout(() => {
+        const lastRecord = this.history.curValue
+        if (lastRecord?.[lastRecord!.length - 1]?.shapes) {
+          lastRecord[lastRecord!.length - 1].shapes = [...this.shapes]
+        }
+      })
+    }
+
+    const cleanShapeRecord = () => {
+      const lastRecord = this.history.curValue
+      lastRecord?.[lastRecord!.length - 1]?.shapes?.splice(0)
+    }
+
     DRAW_MAP.set(this, {
       draw,
+      syncShapeRecord,
+      cleanShapeRecord,
 
       unRedo: ({ type }) => {
         const fnMap = {
@@ -679,27 +700,13 @@ export class NoteBoardWithShape extends DrawShape {
         }
 
         draw()
+        syncShapeRecord()
 
         return {
           shape: this.lastShape,
           shapes: this.shapes,
         }
       },
-
-      syncShapeRecord: (shapes: BaseShape[]) => {
-        /**
-         * 确保有记录后执行
-         */
-        setTimeout(() => {
-          const lastRecord = this.history.curValue
-          lastRecord?.[lastRecord!.length - 1]?.shapes.push(...shapes)
-        })
-      },
-
-      cleanShapeRecord: () => {
-        const lastRecord = this.history.curValue
-        lastRecord?.[lastRecord!.length - 1]?.shapes?.splice(0)
-      }
     })
   }
 }

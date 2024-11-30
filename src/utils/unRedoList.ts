@@ -16,6 +16,11 @@ export class UnRedoLinkedList<T> {
    * 下次 redo 时，返回第一个节点
    */
   private isInit = false
+  /**
+   * 是否需要清空所有节点
+   */
+  private needCleanAll = false
+
   private nodeMap: Map<number, UnRedoNode<T>> = new Map()
 
   /**
@@ -52,6 +57,7 @@ export class UnRedoLinkedList<T> {
   undo(): UnRedoNode<T> | null {
     if (!this.curNode || !this.curNode.prev) {
       this.isInit = true
+      this.needCleanAll = true
       return null
     }
 
@@ -60,6 +66,8 @@ export class UnRedoLinkedList<T> {
   }
 
   redo(): UnRedoNode<T> | null {
+    this.needCleanAll = false
+
     if (this.isInit) {
       this.isInit = false
       return this.head
@@ -124,7 +132,15 @@ export class UnRedoLinkedList<T> {
   /**
    * 清理不再需要的节点
    */
-  cleanUnusedNodes() {
+  cleanUnusedNodes(callback?: (isCleanAll: boolean) => void) {
+    if (this.needCleanAll) {
+      this.needCleanAll = false
+      this.cleanAll()
+      callback?.(true)
+      return
+    }
+
+    callback?.(false)
     const keepIndices = new Set<number>()
 
     // 标记需要保留的节点
