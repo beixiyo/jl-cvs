@@ -1,8 +1,8 @@
 import { clearAllCvs, getImg } from '@/canvasTool/tools'
 import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
-import { getCursor, mergeOpts, setCanvas } from './tools'
+import { mergeOpts, setCanvas } from './tools'
 import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions } from './type'
-import { createUnReDoList, excludeKeys } from '@/utils'
+import { createUnReDoList, excludeKeys, getCircleCursor } from '@/utils'
 
 
 /**
@@ -409,7 +409,7 @@ export class NoteBoard {
   }
 
   setCursor(lineWidth?: number, strokeStyle?: string) {
-    this.canvas.style.cursor = getCursor(
+    this.canvas.style.cursor = getCircleCursor(
       lineWidth || this.opts.lineWidth,
       strokeStyle || this.opts.strokeStyle
     )
