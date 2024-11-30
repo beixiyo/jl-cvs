@@ -3,6 +3,7 @@ import { Rect } from './libs/Rect'
 import type { ShapeAttrs } from './type'
 import type { BaseShape } from './BaseShape'
 import { DRAW_MAP } from '@/NoteBoard'
+import { UnRedoLinkedList } from '@/utils'
 
 
 const ShapeMap = {
@@ -18,14 +19,15 @@ export class DrawShape {
   drawShapeDiable = false
 
   /**
-   * 当前绘制的图形
+   * 当前绘制的图形类型
    */
   shape: ShapeType = 'rect'
-  shapes: BaseShape[] = []
+  shapeHistory = new UnRedoLinkedList<BaseShape[]>()
+
   /**
-   * 撤销的图形
+   * 当前拖动的矩形
    */
-  undoShapes: BaseShape[] = []
+  curDragShape: BaseShape | null = null
   shapeAttrs: ShapeAttrs = {}
 
   declare drawShapeCanvas: HTMLCanvasElement
@@ -38,10 +40,6 @@ export class DrawShape {
    */
   drawShapeDragX = 0
   drawShapeDragY = 0
-  /**
-   * 当前拖动的矩形
-   */
-  curShape?: BaseShape
 
   initial(drawShapeOpts: DrawShapeOpts) {
     this.drawShapeCanvas = drawShapeOpts.canvas
@@ -58,8 +56,9 @@ export class DrawShape {
    * 根据坐标获取图形
    */
   getShape(x: number, y: number) {
-    for (let i = this.shapes.length - 1; i >= 0; i--) {
-      const shape = this.shapes[i]
+    const shapes = this.shapes
+    for (let i = shapes.length - 1; i >= 0; i--) {
+      const shape = shapes[i]
       if (shape.isInPath(x, y)) {
         return shape
       }
@@ -70,24 +69,31 @@ export class DrawShape {
    * 撤销
    */
   drawShapeUndo(needClear = true): UnRedoReturn {
-    const shape = this.shapes.pop()
+    const shape = this.shapeHistory.undo()
     if (shape) {
-      this.undoShapes.push(shape)
       this.drawShapes(needClear)
     }
-    return { shape, shapes: [...this.shapes] }
+    return { shape: this.lastShape, shapes: [...this.shapes] }
   }
 
   /**
    * 重做
    */
   drawShapeRedo(needClear = true): UnRedoReturn {
-    const shape = this.undoShapes.pop()
+    const shape = this.shapeHistory.redo()
     if (shape) {
-      this.shapes.push(shape)
       this.drawShapes(needClear)
     }
-    return { shape, shapes: [...this.shapes] }
+    return { shape: this.lastShape, shapes: [...this.shapes] }
+  }
+
+  get shapes() {
+    return this.shapeHistory.curValue || []
+  }
+
+  get lastShape() {
+    const shapes = this.shapes
+    return shapes[shapes.length - 1]
   }
 
   drawShapeBindEvent() {
@@ -114,7 +120,7 @@ export class DrawShape {
     /**
      * 重画代表废弃撤销里的图形
      */
-    this.undoShapes = []
+    this.shapeHistory.cleanUnusedNodes()
     this.drawShapeIsDrawing = true
 
     const { offsetX, offsetY } = e
@@ -124,7 +130,7 @@ export class DrawShape {
     if (shape) {
       this.drawShapeDragX = offsetX
       this.drawShapeDragY = offsetY
-      this.curShape = shape
+      this.curDragShape = shape
       return
     }
 
@@ -136,25 +142,27 @@ export class DrawShape {
     })
 
     rect.setShapeAttrs(this.shapeAttrs)
-    this.shapes.push(rect)
+
+    const lastRecord = (this.shapeHistory.curValue || []) as BaseShape[]
+    this.shapeHistory.add([...lastRecord, rect])
   }
 
   private onDrawShapeMousemove = (e: MouseEvent) => {
     if (!this.drawShapeIsDrawing) return
 
-    const { curShape } = this
+    const { curDragShape } = this
     /**
      * 拖动
      */
-    if (curShape) {
-      const { startX, startY, endX, endY } = curShape
+    if (curDragShape) {
+      const { startX, startY, endX, endY } = curDragShape
       const disX = e.offsetX - this.drawShapeDragX
       const disY = e.offsetY - this.drawShapeDragY
 
-      curShape.startX = startX + disX
-      curShape.startY = startY + disY
-      curShape.endX = endX + disX
-      curShape.endY = endY + disY
+      curDragShape.startX = startX + disX
+      curDragShape.startY = startY + disY
+      curDragShape.endX = endX + disX
+      curDragShape.endY = endY + disY
 
       this.drawShapeDragX = e.offsetX
       this.drawShapeDragY = e.offsetY
@@ -166,13 +174,11 @@ export class DrawShape {
       else {
         this.drawShapes()
       }
+
       return
     }
 
-    /**
-     * 初次绘制
-     */
-    const shape = this.shapes[this.shapes.length - 1]
+    const shape = this.lastShape
     if (!shape) return
 
     shape.endX = e.offsetX
@@ -189,12 +195,12 @@ export class DrawShape {
 
   private onDrawShapeMouseup = (e: MouseEvent) => {
     this.drawShapeIsDrawing = false
-    this.curShape = undefined
+    this.curDragShape = null
   }
 
   private onDrawShapeMouseLeave = (e: MouseEvent) => {
     this.drawShapeIsDrawing = false
-    this.curShape = undefined
+    this.curDragShape = null
   }
 
   protected get drawFn() {
@@ -206,7 +212,7 @@ export class DrawShape {
 export type ShapeType = keyof typeof ShapeMap
 
 export type UnRedoReturn = {
-  shape?: BaseShape
+  shape: BaseShape | null
   shapes: BaseShape[]
 }
 

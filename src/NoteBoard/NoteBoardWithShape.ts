@@ -73,7 +73,7 @@ export class NoteBoardWithShape extends DrawShape {
    * 历史记录
    */
   history = new UnRedoLinkedList<RecordPath[]>()
-  recordPath?: RecordPath[]
+  recordPath: RecordPath[] | null = null
 
   constructor(opts: NoteBoardOptions) {
     super()
@@ -439,28 +439,6 @@ export class NoteBoardWithShape extends DrawShape {
    *                    Private
    ***************************************************/
 
-  private drawRecord() {
-    if (!this.recordPath) return
-    const { ctx } = this
-    const currentMode = this.mode
-
-    for (const item of this.recordPath) {
-      this.setStyle(item.canvasAttrs, this.ctx)
-      this.setMode(item.mode)
-      ctx.beginPath()
-
-      for (const point of item.path) {
-        ctx.moveTo(...point.moveTo)
-        ctx.lineTo(...point.lineTo)
-        ctx.stroke()
-      }
-    }
-
-    const shapes = this.recordPath[this.recordPath.length - 1]?.shapes
-    shapes?.length && this.drawShapes(false, shapes)
-    this.setMode(currentMode)
-  }
-
   /**
    * 是否为绘制模式
    */
@@ -612,6 +590,7 @@ export class NoteBoardWithShape extends DrawShape {
 
     if (this.canAddRecord) {
       this.drawFn?.addRecord()
+      this.recordPath = this.history.tailValue
     }
     if (!this.canDraw) return
 
@@ -651,9 +630,37 @@ export class NoteBoardWithShape extends DrawShape {
       e
     })
   }
+  
+  private drawRecord() {
+    if (!this.recordPath) return
+    const { ctx } = this
+    const currentMode = this.mode
+
+    for (const item of this.recordPath) {
+      this.setStyle(item.canvasAttrs, this.ctx)
+      this.setMode(item.mode)
+      ctx.beginPath()
+
+      for (const point of item.path) {
+        ctx.moveTo(...point.moveTo)
+        ctx.lineTo(...point.lineTo)
+        ctx.stroke()
+      }
+    }
+
+    this.setMode(currentMode)
+  }
 
   private setDrawMap() {
+    const draw = () => {
+      this.clear(false)
+      this.drawRecord()
+      this.drawShapes(false)
+    }
+
     DRAW_MAP.set(this, {
+      draw,
+
       unRedo: ({ type }) => {
         const fnMap = {
           undo: 'drawShapeUndo' as const,
@@ -665,16 +672,8 @@ export class NoteBoardWithShape extends DrawShape {
          * 下面的 drawRecord 又会复原，所以不会造成异常
          */
         const { shape, shapes } = this[fnMap[type]](false)
-
-        this.clear(false)
-        this.drawRecord()
+        draw()
         return { shapes, shape }
-      },
-
-      draw: () => {
-        this.clear(false)
-        this.drawRecord()
-        this.drawShapes(false)
       },
 
       addRecord: () => {
