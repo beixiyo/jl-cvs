@@ -137,6 +137,13 @@ export class DrawShape {
       this.drawShapeDragX = offsetX
       this.drawShapeDragY = offsetY
       this.curDragShape = shape
+
+      // 不记录矩形位移的历史记录
+      const history = this.drawMap?.getHistory()
+      if (!history) return
+      history.undo()
+      history.cleanUnusedNodes()
+
       return
     }
 
