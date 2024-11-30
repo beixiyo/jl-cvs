@@ -243,7 +243,6 @@ export class NoteBoardWithShape extends DrawShape {
     const recordPath = this.history.undo()
     if (!recordPath?.value) {
       this.clear(false)
-
       // 清理图形里不要的记录
       this.drawShapeUndo()
 
@@ -694,8 +693,8 @@ export class NoteBoardWithShape extends DrawShape {
           redo: 'drawShapeRedo' as const,
         }
 
-        const { curValue } = this.history
-        if (this.isShapeMode(curValue?.[curValue.length - 1].mode)) {
+        const lastRecord = this.history.curNode?.next?.value
+        if (this.isShapeMode(lastRecord?.[lastRecord.length - 1].mode)) {
           this[fnMap[type]](false)
         }
 
