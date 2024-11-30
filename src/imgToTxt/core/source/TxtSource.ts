@@ -2,42 +2,42 @@ import { setFont } from '@/canvasTool/tools'
 import { BaseSource } from './BaseSource'
 
 export class TxtSource extends BaseSource {
-    option: TxtSourceOption
+  option: TxtSourceOption
 
-    constructor(isDynamic: boolean, option: TxtSourceOption) {
-        super(isDynamic)
-        this.option = option
-    }
+  constructor(isDynamic: boolean, option: TxtSourceOption) {
+    super(isDynamic)
+    this.option = option
+  }
 
-    protected override setCvsSize() {
-        const { canvas, ctx, option } = this
+  protected override setCvsSize() {
+    const { canvas, ctx, option } = this
 
-        canvas.width = option.txt.length * option.size
-        canvas.height = option.size
+    canvas.width = option.txt.length * option.size
+    canvas.height = option.size
 
-        setFont(ctx, {
-            size: option.size,
-            family: option.family,
-            weight: 'bold',
-            color: option.color,
-            textAlign: 'center',
-            textBaseline: 'middle'
-        })
-    }
+    setFont(ctx, {
+      size: option.size,
+      family: option.family,
+      weight: 'bold',
+      color: option.color,
+      textAlign: 'center',
+      textBaseline: 'middle'
+    })
+  }
 
-    /** 绘制大文字 */
-    protected override draw(): void {
-        this.ctx.fillText(
-            this.option.txt,
-            this.canvas.width / 2,
-            this.canvas.height / 2
-        )
-    }
+  /** 绘制大文字 */
+  protected override draw(): void {
+    this.ctx.fillText(
+      this.option.txt,
+      this.canvas.width / 2,
+      this.canvas.height / 2
+    )
+  }
 }
 
 export type TxtSourceOption = {
-    txt: string
-    size: number
-    family: string
-    color: string
+  txt: string
+  size: number
+  family: string
+  color: string
 }

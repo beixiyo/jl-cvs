@@ -8,18 +8,18 @@ export type { TxtSourceOption, ImgSourceOption, VideoSourceOption }
 
 
 export function createSource(
-    isDynamic: boolean,
-    sourceOption: TxtSourceOption | ImgSourceOption | VideoSourceOption
+  isDynamic: boolean,
+  sourceOption: TxtSourceOption | ImgSourceOption | VideoSourceOption
 ): BaseSource {
-    if ((sourceOption as TxtSourceOption).txt) {
-        return new TxtSource(isDynamic, sourceOption as TxtSourceOption)
-    }
-    if ((sourceOption as ImgSourceOption).img) {
-        return new ImgSource(isDynamic, sourceOption as ImgSourceOption)
-    }
-    if ((sourceOption as VideoSourceOption).video) {
-        return new VideoSource(isDynamic, sourceOption as VideoSourceOption)
-    }
+  if ((sourceOption as TxtSourceOption).txt) {
+    return new TxtSource(isDynamic, sourceOption as TxtSourceOption)
+  }
+  if ((sourceOption as ImgSourceOption).img) {
+    return new ImgSource(isDynamic, sourceOption as ImgSourceOption)
+  }
+  if ((sourceOption as VideoSourceOption).video) {
+    return new VideoSource(isDynamic, sourceOption as VideoSourceOption)
+  }
 
-    throw new TypeError('invalid source options')
+  throw new TypeError('invalid source options')
 }

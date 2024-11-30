@@ -1,22 +1,25 @@
 import { getDPR } from '@/canvasTool'
-import type { NoteBoardOptions } from './type'
+import type { NoteBoardOptions, NoteBoardOptionsRequired } from './type'
 
 
 export function mergeOpts(
   opts: NoteBoardOptions,
-) {
-  return {
-    ... {
-      width: 800 * getDPR(),
-      height: 600 * getDPR(),
-      minScale: 0.5,
-      maxScale: 8,
+): NoteBoardOptionsRequired {
 
-      lineWidth: 1,
-      strokeStyle: '#000',
-      lineCap: 'round' as CanvasLineCap,
-      globalCompositeOperation: 'source-over'
-    } as NoteBoardOptions,
+  const defaultOpts: NoteBoardOptionsRequired = {
+    width: 800 * getDPR(),
+    height: 600 * getDPR(),
+    minScale: 0.5,
+    maxScale: 8,
+
+    lineWidth: 1,
+    strokeStyle: '#000',
+    lineCap: 'round' as CanvasLineCap,
+    globalCompositeOperation: 'source-over'
+  }
+
+  return {
+    ...defaultOpts,
     ...opts,
   }
 }
@@ -26,7 +29,7 @@ export function setCanvas(canvas: HTMLCanvasElement, width: number, height: numb
   canvas.height = height
   canvas.style.position = 'absolute'
 
-  const parent = canvas.parentElement,
+  const parent = canvas.parentElement!,
     { offsetHeight, offsetWidth } = parent
 
   // 居中

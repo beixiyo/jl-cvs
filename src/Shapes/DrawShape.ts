@@ -28,8 +28,8 @@ export class DrawShape {
   undoShapes: BaseShape[] = []
   shapeAttrs: ShapeAttrs = {}
 
-  drawShapeCanvas: HTMLCanvasElement
-  drawShapeContext: CanvasRenderingContext2D
+  declare drawShapeCanvas: HTMLCanvasElement
+  declare drawShapeContext: CanvasRenderingContext2D
   /** 是否在绘制 */
   drawShapeIsDrawing = false
 
@@ -41,7 +41,7 @@ export class DrawShape {
   /**
    * 当前拖动的矩形
    */
-  curShape: BaseShape
+  curShape?: BaseShape
 
   initial(drawShapeOpts: DrawShapeOpts) {
     this.drawShapeCanvas = drawShapeOpts.canvas

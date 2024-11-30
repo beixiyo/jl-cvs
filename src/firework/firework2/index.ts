@@ -5,79 +5,79 @@ import { delFromItem } from '@/utils'
  * 二段爆炸的烟花
  */
 export function createFirework2(
-    cvs: HTMLCanvasElement,
-    opts: Options
+  cvs: HTMLCanvasElement,
+  opts: Options
 ) {
-    let id: number
-    const fireworkArr: Firework2[] = []
-    const ctx = cvs.getContext('2d')!
-    const {
-        width = cvs.width,
-        height = cvs.height
-    } = opts
+  let id: number
+  const fireworkArr: Firework2[] = []
+  const ctx = cvs.getContext('2d')!
+  const {
+    width = cvs.width,
+    height = cvs.height
+  } = opts
 
-    setOpts()
-    draw()
-
-
-    return {
-        /**
-         * 添加一个烟花
-         */
-        addFirework,
-        /**
-         * 停止所有
-         */
-        stop,
-        /**
-         * 恢复烟花
-         */
-        resume: draw
-    }
+  setOpts()
+  draw()
 
 
-    function addFirework() {
-        const firework = new Firework2(opts)
-        firework.launch()
-        fireworkArr.push(firework)
-    }
-
+  return {
     /**
-     * 绘制烟花
+     * 添加一个烟花
      */
-    function draw() {
-        // 使用半透明清空画布，形成拖尾效果
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'
-        ctx.fillRect(0, 0, width, height)
+    addFirework,
+    /**
+     * 停止所有
+     */
+    stop,
+    /**
+     * 恢复烟花
+     */
+    resume: draw
+  }
 
-        const list = [...fireworkArr]
-        list.forEach(firework => {
-            firework.update()
-            if (firework.isEnd()) {
-                delFromItem(fireworkArr, firework)
-            }
-        })
 
-        id = requestAnimationFrame(draw)
-    }
+  function addFirework() {
+    const firework = new Firework2(opts)
+    firework.launch()
+    fireworkArr.push(firework)
+  }
 
-    function stop() {
-        cancelAnimationFrame(id)
-    }
+  /**
+   * 绘制烟花
+   */
+  function draw() {
+    // 使用半透明清空画布，形成拖尾效果
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'
+    ctx.fillRect(0, 0, width, height)
 
-    function setOpts() {
-        cvs.width = width
-        cvs.height = height
+    const list = [...fireworkArr]
+    list.forEach(firework => {
+      firework.update()
+      if (firework.isEnd()) {
+        delFromItem(fireworkArr, firework)
+      }
+    })
 
-        // 修改坐标系
-        ctx.translate(0, height)
-        ctx.scale(1, -1)
-    }
+    id = requestAnimationFrame(draw)
+  }
+
+  function stop() {
+    cancelAnimationFrame(id)
+  }
+
+  function setOpts() {
+    cvs.width = width
+    cvs.height = height
+
+    // 修改坐标系
+    ctx.translate(0, height)
+    ctx.scale(1, -1)
+  }
 }
 
 
 export type Options = {
-    width?: number
-    height?: number
+  width?: number
+  height?: number
 }
-    & Firework2Opts
+  & Firework2Opts

@@ -152,7 +152,7 @@ export function getCvsImg<T extends TransferType = 'base64'>(
       return new Promise<Blob>((resolve) => {
         cvs.toBlob(
           blob => {
-            resolve(blob)
+            resolve(blob!)
           },
           mimeType,
           quality

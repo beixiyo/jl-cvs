@@ -48,7 +48,9 @@ export class Rect implements BaseShape {
       ctx.stroke()
     }
 
-    ctx.fillStyle = this.shapeAttrs.fillStyle
+    if (this.shapeAttrs.fillStyle) {
+      ctx.fillStyle = this.shapeAttrs.fillStyle
+    }
     ctx.fill()
   }
 
@@ -65,10 +67,10 @@ export class Rect implements BaseShape {
     return false
   }
 
-  setShapeAttrs(shapeAttrs: ShapeAttrs) {
+  setShapeAttrs(shapeAttrs: ShapeAttrs = {}) {
     for (const k in shapeAttrs) {
-      const item = shapeAttrs[k]
-      this.shapeAttrs[k] = item
+      // @ts-ignore
+      this.shapeAttrs[k] = shapeAttrs[k]
     }
   }
 

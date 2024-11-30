@@ -25,7 +25,7 @@ export function calcCoord(r: number, deg: number) {
  */
 export function createCvs(width?: number, height?: number, options?: CanvasRenderingContext2DSettings) {
   const cvs = document.createElement('canvas'),
-    ctx = cvs.getContext('2d', options)
+    ctx = cvs.getContext('2d', options)!
   width && (cvs.width = width)
   height && (cvs.height = height)
 

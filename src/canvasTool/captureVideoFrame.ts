@@ -34,7 +34,7 @@ export async function captureVideoFrame<
     >
   }
   else {
-    const arr = []
+    const arr: Promise<HandleImgReturn<T>>[] = []
     time.forEach((t) => {
       arr.push(genFrame(t))
     })

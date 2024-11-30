@@ -10,7 +10,12 @@ export class UnRedoLinkedList<T> {
   /** 当前节点 */
   curNode: UnRedoNode<T> | null = null
 
-  private nextIndex = 0;
+  private nextIndex = 0
+  /**
+   * 当 undo 退无可退时，需要标记
+   * 下次 redo 时，返回第一个节点
+   */
+  private isInit = false
   private nodeMap: Map<number, UnRedoNode<T>> = new Map()
 
   /**
@@ -45,13 +50,20 @@ export class UnRedoLinkedList<T> {
   }
 
   undo(): UnRedoNode<T> | null {
-    if (!this.curNode || !this.curNode.prev) return null
+    if (!this.curNode || !this.curNode.prev) {
+      this.isInit = true
+      return null
+    }
 
     this.curNode = this.curNode.prev
     return this.curNode
   }
 
   redo(): UnRedoNode<T> | null {
+    if (this.isInit) {
+      this.isInit = false
+      return this.head
+    }
     if (!this.curNode || !this.curNode.next) return null
 
     this.curNode = this.curNode.next

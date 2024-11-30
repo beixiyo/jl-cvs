@@ -1,7 +1,7 @@
 import { clearAllCvs, getImg } from '@/canvasTool/tools'
 import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
 import { mergeOpts, setCanvas } from './tools'
-import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions } from './type'
+import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
 import { createUnReDoList, excludeKeys, getCircleCursor } from '@/utils'
 
 
@@ -33,7 +33,7 @@ export class NoteBoard {
   /** 图片画板 上下文 */
   imgCtx = this.imgCanvas.getContext('2d') as CanvasRenderingContext2D
   /** 绘制的图片尺寸信息 */
-  imgInfo: ImgInfo
+  imgInfo?: ImgInfo
 
   /** 存储的所有 Canvas 信息 */
   canvasList: CanvasItem[] = [
@@ -49,7 +49,7 @@ export class NoteBoard {
     }
   ]
 
-  opts: NoteBoardOptions
+  opts: NoteBoardOptionsRequired
 
   mode: Mode = 'draw'
   /** 开启鼠标滚轮缩放 */
@@ -84,7 +84,7 @@ export class NoteBoard {
   unReDoList = createUnReDoList<RecordPath[]>()
   private recordPath: RecordPath[] = []
 
-  constructor(opts?: NoteBoardOptions) {
+  constructor(opts: NoteBoardOptions) {
     this.opts = mergeOpts(opts)
 
     const {
@@ -398,10 +398,12 @@ export class NoteBoard {
       }
 
       if (ctx) {
+        // @ts-ignore
         ctx[k] = attr
       }
       else {
         for (const item of this.canvasList) {
+          // @ts-ignore
           item.ctx[k] = attr
         }
       }

@@ -1,5 +1,6 @@
 import type { ShapeType, UnRedoReturn } from '@/Shapes'
 import type { BaseShape } from '@/Shapes/BaseShape'
+import type { PartRequired } from '@jl-org/ts-tool'
 
 export type MouseEventFn = (e: MouseEvent) => void
 
@@ -51,6 +52,18 @@ export type NoteBoardOptions = {
   onRedo?: (params: OnUnRedoParams) => void
   onUndo?: (params: OnUnRedoParams) => void
 } & CanvasAttrs
+
+export type NoteBoardOptionsRequired = PartRequired<
+  NoteBoardOptions,
+  'width' |
+  'height' |
+  'minScale' |
+  'maxScale' |
+  'lineWidth' |
+  'strokeStyle' |
+  'lineCap' |
+  'globalCompositeOperation'
+>
 
 
 export type CanvasAttrs = {
@@ -105,7 +118,7 @@ export type DrawImgOpts = {
   /**
    * 绘制之后回调图片信息给你
    */
-  afterDraw?: (imgInfo: ImgInfo) => void
+  afterDraw?: (imgInfo?: ImgInfo) => void
   /**
    * 是否先清除画布
    * @default false
