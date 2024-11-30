@@ -2,7 +2,7 @@ import { clearAllCvs, getImg } from '@/canvasTool/tools'
 import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
 import { mergeOpts, setCanvas } from './tools'
 import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions, DrawMapVal } from './type'
-import { createUnReDoList, excludeKeys, getCircleCursor, UnRedoLinkedList } from '@/utils'
+import { excludeKeys, getCircleCursor, UnRedoLinkedList } from '@/utils'
 import { DrawShape } from '@/Shapes'
 
 
