@@ -21,7 +21,7 @@ export class DrawShape {
   /**
    * 当前绘制的图形类型
    */
-  shape: ShapeType = 'rect'
+  shapeType: ShapeType = 'rect'
   shapeHistory = new UnRedoLinkedList<BaseShape[]>()
 
   /**
@@ -140,7 +140,7 @@ export class DrawShape {
       return
     }
 
-    const Cls = ShapeMap[this.shape]
+    const Cls = ShapeMap[this.shapeType]
     const rect = new Cls({
       startX: offsetX,
       startY: offsetY,

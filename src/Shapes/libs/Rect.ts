@@ -25,6 +25,7 @@ export class Rect implements BaseShape {
     this.endX = opts.startX
     this.endY = opts.startY
 
+    this.shapeAttrs = opts.shapeAttrs || {}
     this.setShapeAttrs(opts.shapeAttrs)
   }
 

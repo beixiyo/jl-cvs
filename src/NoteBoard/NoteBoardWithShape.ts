@@ -136,7 +136,7 @@ export class NoteBoardWithShape extends DrawShape {
         break
 
       case 'rect':
-        this.shape = 'rect'
+        this.shapeType = 'rect'
         this.drawShapeDiable = false
         this.canvas.style.cursor = 'crosshair'
         break
@@ -541,7 +541,7 @@ export class NoteBoardWithShape extends DrawShape {
 
     const { offsetX, offsetY } = e
     const { ctx, drawStart } = this
-    const lastRecord = this.history.tailValue
+    const lastRecord = this.history.curValue
 
     ctx.moveTo(drawStart.x, drawStart.y)
     ctx.lineTo(offsetX, offsetY)
@@ -608,7 +608,7 @@ export class NoteBoardWithShape extends DrawShape {
   }
 
   private addHistory() {
-    const lastRecord = this.history.tailValue
+    const lastRecord = this.history.curValue
     this.history.add([
       ...(lastRecord || []),
       {
@@ -655,14 +655,15 @@ export class NoteBoardWithShape extends DrawShape {
   private setDrawMap() {
     const draw = () => {
       this.clear(false)
-      this.drawRecord()
 
       const lastRecord = this.history.curValue
-      if (!lastRecord) return
+      if (lastRecord) {
+        lastRecord[lastRecord.length - 1].shapes.forEach(shape => {
+          shape.draw()
+        })
+      }
 
-      lastRecord[lastRecord.length - 1].shapes.forEach(shape => {
-        shape.draw()
-      })
+      this.drawRecord()
     }
 
     const syncShapeRecord = () => {
@@ -686,6 +687,8 @@ export class NoteBoardWithShape extends DrawShape {
       draw,
       syncShapeRecord,
       cleanShapeRecord,
+
+      getHistory: () => this.history,
 
       unRedo: ({ type }) => {
         const fnMap = {

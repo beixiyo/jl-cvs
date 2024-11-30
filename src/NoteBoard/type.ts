@@ -1,5 +1,6 @@
 import type { ShapeType, UnRedoReturn } from '@/Shapes'
 import type { BaseShape } from '@/Shapes/BaseShape'
+import type { UnRedoLinkedList } from '@/utils'
 import type { PartRequired } from '@jl-org/ts-tool'
 
 export type MouseEventFn = (e: MouseEvent) => void
@@ -196,6 +197,7 @@ export type DrawMapVal = {
   }) => UnRedoReturn | undefined
 
   draw: VoidFunction
+  getHistory: () => UnRedoLinkedList<RecordPath[]>
 
   /**
    * 同步图形绘制记录到 NoteBoard 类
