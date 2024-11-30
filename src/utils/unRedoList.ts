@@ -140,6 +140,11 @@ export class UnRedoLinkedList<T> {
         this.nodeMap.delete(id)
       }
     }
+
+    if (this.curNode) {
+      this.curNode.next = null
+      this.tail = this.curNode
+    }
   }
 
 }

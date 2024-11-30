@@ -83,41 +83,7 @@ export class NoteBoardWithShape extends DrawShape {
     })
 
     this.opts = mergeOpts(opts)
-    DRAW_MAP.set(this, {
-      unRedo: ({ type }) => {
-        const fnMap = {
-          undo: 'drawShapeUndo' as const,
-          redo: 'drawShapeRedo' as const,
-        }
-        /**
-         * 这里无论如何都执行图形的 undo 方法
-         * 但是 onMousedown 时 addRecord 会记录所有图形的记录
-         * 下面的 drawRecord 又会复原，所以不会造成异常
-         */
-        const { shape, shapes } = this[fnMap[type]](false)
-
-        this.clear(false)
-        this.drawRecord()
-        return { shapes, shape }
-      },
-
-      draw: () => {
-        this.clear(false)
-        this.drawRecord()
-        this.drawShapes(false)
-      },
-
-      addRecord: () => {
-        /**
-         * 确保有数组后再执行
-         */
-        setTimeout(() => {
-          const lastRecord = this.history.tailValue
-          if (!lastRecord) return
-          lastRecord[lastRecord.length - 1]?.shapes.push(...this.shapes)
-        })
-      },
-    })
+    this.setDrawMap()
 
     const {
       el,
@@ -546,6 +512,7 @@ export class NoteBoardWithShape extends DrawShape {
      * 添加记录
      */
     if (this.canAddRecord) {
+      this.history.cleanUnusedNodes()
       const lastRecord = this.history.tailValue
 
       this.history.add([
@@ -682,6 +649,44 @@ export class NoteBoardWithShape extends DrawShape {
     this.opts.onWheel?.({
       scale: this.scale,
       e
+    })
+  }
+
+  private setDrawMap() {
+    DRAW_MAP.set(this, {
+      unRedo: ({ type }) => {
+        const fnMap = {
+          undo: 'drawShapeUndo' as const,
+          redo: 'drawShapeRedo' as const,
+        }
+        /**
+         * 这里无论如何都执行图形的 undo 方法
+         * 但是 onMousedown 时 addRecord 会记录所有图形的记录
+         * 下面的 drawRecord 又会复原，所以不会造成异常
+         */
+        const { shape, shapes } = this[fnMap[type]](false)
+
+        this.clear(false)
+        this.drawRecord()
+        return { shapes, shape }
+      },
+
+      draw: () => {
+        this.clear(false)
+        this.drawRecord()
+        this.drawShapes(false)
+      },
+
+      addRecord: () => {
+        /**
+         * 确保有数组后再执行
+         */
+        setTimeout(() => {
+          const lastRecord = this.history.tailValue
+          if (!lastRecord) return
+          lastRecord[lastRecord.length - 1]?.shapes.push(...this.shapes)
+        })
+      },
     })
   }
 }
