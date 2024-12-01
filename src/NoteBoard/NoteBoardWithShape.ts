@@ -631,6 +631,9 @@ export class NoteBoardWithShape extends DrawShape {
     ])
   }
 
+  /**
+   * 绘制笔画
+   */
   private drawRecord() {
     const lastRecord = this.history.curValue
     if (!lastRecord) return
@@ -656,8 +659,12 @@ export class NoteBoardWithShape extends DrawShape {
     const draw = () => {
       this.clear(false)
 
+      /**
+       * 绘制图形
+       */
       const lastRecord = this.history.curValue
       if (lastRecord) {
+        this.ctx.globalCompositeOperation = this.opts.globalCompositeOperation
         lastRecord[lastRecord.length - 1].shapes.forEach(shape => {
           shape.draw()
         })
