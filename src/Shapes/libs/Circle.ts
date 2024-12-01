@@ -6,7 +6,7 @@ import type { ShapeStyle } from '../type'
  * 绘制圆形
  */
 export class Circle implements BaseShape {
-  
+
   ctx: CanvasRenderingContext2D
 
   startX: number
@@ -34,8 +34,8 @@ export class Circle implements BaseShape {
 
     ctx.beginPath()
     ctx.arc(
-      this.minX,
-      this.minY,
+      this.startX * getDPR(),
+      this.startY * getDPR(),
       this.radius,
       0,
       2 * Math.PI
@@ -58,10 +58,10 @@ export class Circle implements BaseShape {
   }
 
   isInPath(x: number, y: number): boolean {
-    const dx = x - this.minX
-    const dy = y - this.minY
+    const dx = x - this.startX * getDPR()
+    const dy = y - this.startY * getDPR()
     const distance = Math.sqrt(dx * dx + dy * dy)
-    
+
     return distance <= this.radius
   }
 
@@ -72,26 +72,10 @@ export class Circle implements BaseShape {
     Object.assign(this.shapeStyle, shapeStyle)
   }
 
-  get minX() {
-    return Math.min(this.startX, this.endX) * getDPR()
-  }
-
-  get minY() {
-    return Math.min(this.startY, this.endY) * getDPR()
-  }
-
-  get maxX() {
-    return Math.max(this.startX, this.endX) * getDPR()
-  }
-
-  get maxY() {
-    return Math.max(this.startY, this.endY) * getDPR()
-  }
-
   get radius() {
-    const dx = this.maxX - this.minX
-    const dy = this.maxY - this.minY
-    return Math.sqrt(dx * dx + dy * dy)
+    const dx = this.endX - this.startX
+    const dy = this.endY - this.startY
+    return Math.sqrt(dx * dx + dy * dy) * getDPR()
   }
 }
 
