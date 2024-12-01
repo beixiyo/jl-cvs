@@ -1,6 +1,6 @@
 import type { TransferType } from '@/types'
 import { getCvsImg, type HandleImgReturn } from './handleImg'
-import { createCvs, getDPR } from './tools'
+import { createCvs, getDPR } from './'
 
 
 /**

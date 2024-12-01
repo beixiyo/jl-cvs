@@ -5,7 +5,7 @@ export {
   throttle,
   debounce,
   deepClone,
-  excludeKeys,
+  excludeKeys
 } from '@jl-org/tool'
 
 /**

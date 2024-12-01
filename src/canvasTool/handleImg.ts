@@ -1,4 +1,4 @@
-import { createCvs, getDPR } from './tools'
+import { createCvs, getDPR } from './'
 import { TransferType } from '@/types'
 
 export {
@@ -11,7 +11,7 @@ export {
   blobToStream,
   getImg,
   downloadByUrl,
-  downloadByData,
+  downloadByData
 } from '@jl-org/tool'
  
 

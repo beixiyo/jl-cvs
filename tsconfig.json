@@ -18,7 +18,8 @@
     "declaration": true,
     "declarationDir": "./dist/typings",
     "emitDeclarationOnly": true,
-    "strict": true
+    "strict": true,
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*.ts",

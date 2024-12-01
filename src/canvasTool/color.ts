@@ -6,5 +6,5 @@ export {
   hexToRGB,
   rgbToHex,
   lightenColor,
-  colorAddOpacity,
+  colorAddOpacity
 } from '@jl-org/tool'

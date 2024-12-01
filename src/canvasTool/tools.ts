@@ -5,21 +5,26 @@ export {
   parseImgData,
   fillPixel,
   getWinWidth,
-  getWinHeight,
+  getWinHeight
 } from '@jl-org/tool'
 
 
 /**
  * 设置字体，默认居中
  */
-export function setFont(ctx: CanvasRenderingContext2D, {
-  size = 16,
-  family = 'sans-serif',
-  weight = 'normal',
-  textAlign = 'center',
-  textBaseline = 'middle',
-  color = '#000'
-}: CtxFontOpt) {
+export function setFont(
+  ctx: CanvasRenderingContext2D,
+  options: CtxFontOpt
+) {
+  const {
+    size = 16,
+    family = 'sans-serif',
+    weight = 'normal',
+    textAlign = 'center',
+    textBaseline = 'middle',
+    color = '#000'
+  } = options
+
   ctx.font = `${weight} ${size}px ${family}`
   ctx.textAlign = textAlign
   ctx.textBaseline = textBaseline

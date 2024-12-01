@@ -5,5 +5,5 @@ export {
   isFn,
   isObj,
   isArr,
-  isSame,
+  isSame
 } from '@jl-org/tool'
