@@ -205,7 +205,19 @@ export class NoteBoard extends DrawShape {
     ])
     if (!img || !maskImg) return ''
 
-    const { ctx, cvs } = createCvs(this.opts.width, this.opts.height)
+    let width: number,
+      height: number
+
+    if (options.exportOnlyImgArea) {
+      width = img.width
+      height = img.height
+    }
+    else {
+      width = this.opts.width
+      height = this.opts.height
+    }
+
+    const { ctx, cvs } = createCvs(width, height)
     ctx.drawImage(img, 0, 0)
     ctx.drawImage(maskImg, 0, 0)
 
@@ -344,7 +356,7 @@ export class NoteBoard extends DrawShape {
   /**
    * 重置大小
    */
-  async reset() {
+  async resetSize() {
     const { canvas, imgCanvas } = this
     canvas.style.transformOrigin = 'none'
     canvas.style.transform = 'none'

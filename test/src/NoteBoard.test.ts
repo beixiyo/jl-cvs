@@ -10,14 +10,10 @@ const LINE_WIDTH = 30
  * 图片画板 =========================================
  */
 const el = document.createElement('div')
+el.style.width = `${WIDTH}px`
+el.style.height = `${HEIGHT}px`
 el.style.border = '1px solid'
-el.style.width = `${WIDTH * 1}px`
-el.style.height = `${HEIGHT * 1}px`
-el.style.display = 'flex'
-el.style.justifyContent = 'center'
-el.style.alignItems = 'center'
 document.body.appendChild(el)
-
 
 const board = new NoteBoard({
   el,
@@ -27,9 +23,6 @@ const board = new NoteBoard({
   strokeStyle: '#409eff55',
   globalCompositeOperation: 'xor',
 
-  onDrag() {
-    console.log('onDrag')
-  },
   onWheel({ scale }) {
     console.log('onWheel 同步笔刷大小')
     if (scale < 1) return
@@ -39,36 +32,13 @@ const board = new NoteBoard({
     })
     board.setCursor()
   },
-
-  // onMouseDown() {
-  //   console.log('onMouseDown')
-  // },
-  // onMouseUp() {
-  //   console.log('onMouseUp')
-  // },
-  // onMouseMove() {
-  //   console.log('onMouseMove')
-  // },
-  // onMouseLeave() {
-  //   console.log('onMouseLeave')
-  // },
-
-  // onRedo() {
-  //   console.log('onRedo')
-  // },
-  // onUndo() {
-  //   console.log('onUndo')
-  // }
 })
-
-// @ts-ignore
-window.b = board
 
 /**
  * 居中绘制图片，并自动拉伸大小
  */
 board.drawImg(
-  new URL('../assets/umr.jpg', import.meta.url).href,
+  'http://localhost:8510/src/refactor/Photog/LeftSider/assets/1.webp',
   {
     center: true,
     autoFit: true,
@@ -110,6 +80,9 @@ genBtn('撤销', () => {
 genBtn('重做', () => {
   board.redo()
 })
+genBtn('重置大小', () => {
+  board.resetSize()
+})
 
 genBtn('矩形', () => {
   board.setShapeStyle({
@@ -127,11 +100,6 @@ genBtn('圆形', () => {
     strokeStyle: '#000',
   })
   board.setMode('circle')
-})
-
-
-genBtn('重置大小', () => {
-  board.reset()
 })
 
 genBtn('关闭/ 打开绘制', () => {
