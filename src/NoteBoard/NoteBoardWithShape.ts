@@ -1,4 +1,4 @@
-import { clearAllCvs, getImg } from '@/canvasTool/tools'
+import { clearAllCvs, createCvs, getImg } from '@/canvasTool/tools'
 import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
 import { mergeOpts, setCanvas } from './tools'
 import type { CanvasAttrs, Mode, DrawImgOptions, ImgInfo, RecordPath, CanvasItem, ExportOptions, NoteBoardOptions, DrawMapVal, NoteBoardOptionsRequired } from './type'
@@ -169,6 +169,28 @@ export class NoteBoardWithShape extends DrawShape {
       ...options,
       canvas
     })
+  }
+
+  /**
+   * 导出整个图层
+   */
+  async exportAllLayer(
+    options: Omit<ExportOptions, 'canvas'> = {}
+  ) {
+    const imgSrc = await this.exportImg(options)
+    const maskSrc = await this.exportMask(options)
+
+    const [img, maskImg] = await Promise.all([
+      await getImg(imgSrc),
+      await getImg(maskSrc)
+    ])
+    if (!img || !maskImg) return ''
+
+    const { ctx, cvs } = createCvs(this.opts.width, this.opts.height)
+    ctx.drawImage(img, 0, 0)
+    ctx.drawImage(maskImg, 0, 0)
+
+    return await getCvsImg(cvs, 'base64')
   }
 
   /**

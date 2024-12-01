@@ -77,7 +77,7 @@ board.drawImg(
 /**
  * 按钮 =========================================
  */
-genBtn('截图', async () => {
+genBtn('单独导出', async () => {
   const src = await board.exportImg({ exportOnlyImgArea: true })
   const imgEl = new Image()
   imgEl.src = src
@@ -88,6 +88,14 @@ genBtn('截图', async () => {
 
   document.body.appendChild(imgEl)
   document.body.appendChild(maskImgEl)
+})
+
+genBtn('导出所有', async () => {
+  const src = await board.exportAllLayer({ exportOnlyImgArea: true })
+  const imgEl = new Image()
+  imgEl.src = src
+
+  document.body.appendChild(imgEl)
 })
 
 genBtn('清空', () => {
