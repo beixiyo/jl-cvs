@@ -1,4 +1,4 @@
-import { Pixel } from '@/types'
+import { Pixel } from '@jl-org/tool'
 import { BaseSource } from './source'
 
 

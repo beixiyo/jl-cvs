@@ -11,6 +11,5 @@ export * from '@/ShotImg'
 export * from '@/svg'
 
 export * from '@/techNum'
-export { Pixel } from '@/types'
 
 export * from '@/utils'

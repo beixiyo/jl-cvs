@@ -1,4 +1,4 @@
-import type { TransferType } from '@/types'
+import type { TransferType } from '@jl-org/tool'
 import { getCvsImg, type HandleImgReturn } from './handleImg'
 import { createCvs, getDPR } from './'
 

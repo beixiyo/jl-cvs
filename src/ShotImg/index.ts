@@ -1,5 +1,5 @@
-import { TransferType } from '@/types'
-import { HandleImgReturn, cutImg } from '../canvasTool/handleImg'
+import { TransferType } from '@jl-org/tool'
+import { HandleImgReturn, cutImg } from '@/canvasTool'
 
 
 export class ShotImg {

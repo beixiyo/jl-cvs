@@ -1,5 +1,5 @@
 import { createCvs, getDPR } from './'
-import { TransferType } from '@/types'
+import { TransferType } from '@jl-org/tool'
 
 export {
   cutImg,
@@ -13,7 +13,7 @@ export {
   downloadByUrl,
   downloadByData
 } from '@jl-org/tool'
- 
+
 
 /**
  * 图片噪点化

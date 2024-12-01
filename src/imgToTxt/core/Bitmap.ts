@@ -1,5 +1,5 @@
 import { getPixel } from '@/canvasTool'
-import { Pixel } from '@/types'
+import { Pixel } from '@jl-org/tool'
 
 
 export class Bitmap {
