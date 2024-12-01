@@ -1,4 +1,4 @@
-export type ShapeAttrs = {
+export type ShapeStyle = {
   /**
    * 画笔颜色
    * @default '#000'

@@ -1,4 +1,4 @@
-import type { ShapeAttrs } from './type'
+import type { ShapeStyle } from './type'
 
 export interface BaseShape {
 
@@ -9,8 +9,8 @@ export interface BaseShape {
   endX: number
   endY: number
 
-  shapeAttrs: ShapeAttrs
-  setShapeAttrs(shapeAttrs: ShapeAttrs): void
+  shapeStyle: ShapeStyle
+  setShapeStyle(shapeStyle: ShapeStyle): void
 
   draw(): void
 

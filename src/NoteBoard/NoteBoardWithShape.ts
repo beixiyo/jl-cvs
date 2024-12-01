@@ -4,7 +4,6 @@ import { mergeOpts, setCanvas } from './tools'
 import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions, DrawMapVal, NoteBoardOptionsRequired } from './type'
 import { excludeKeys, getCircleCursor, UnRedoLinkedList } from '@/utils'
 import { DrawShape } from '@/Shapes'
-import type { BaseShape } from '@/Shapes/BaseShape'
 
 
 /**
@@ -49,7 +48,7 @@ export class NoteBoardWithShape extends DrawShape {
     }
   ]
 
-  opts: NoteBoardOptionsRequired
+  private opts: NoteBoardOptionsRequired
 
   mode: Mode = 'draw'
 

@@ -1,6 +1,6 @@
 import { clearAllCvs } from '@/canvasTool'
 import { Rect } from './libs/Rect'
-import type { ShapeAttrs } from './type'
+import type { ShapeStyle } from './type'
 import type { BaseShape } from './BaseShape'
 import { DRAW_MAP } from '@/NoteBoard'
 import { UnRedoLinkedList } from '@/utils'
@@ -28,7 +28,7 @@ export class DrawShape {
    * 当前拖动的矩形
    */
   curDragShape: BaseShape | null = null
-  shapeAttrs: ShapeAttrs = {}
+  private shapeStyle: ShapeStyle = {}
 
   declare drawShapeCanvas: HTMLCanvasElement
   declare drawShapeContext: CanvasRenderingContext2D
@@ -63,6 +63,13 @@ export class DrawShape {
         return shape
       }
     }
+  }
+
+  /**
+   * 设置图形样式
+   */
+  setShapeStyle(style: ShapeStyle) {
+    Object.assign(this.shapeStyle, style)
   }
 
   /**
@@ -154,7 +161,7 @@ export class DrawShape {
       ctx: this.drawShapeContext,
     })
 
-    rect.setShapeAttrs(this.shapeAttrs)
+    rect.setShapeStyle(this.shapeStyle)
 
     const lastRecord = (this.shapeHistory.curValue || []) as BaseShape[]
     this.shapeHistory.add([...lastRecord, rect])

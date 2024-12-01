@@ -73,7 +73,6 @@ board.drawImg(
   },
 )
 
-board.setMode('rect')
 
 /**
  * 按钮 =========================================
@@ -103,6 +102,11 @@ genBtn('重做', () => {
 })
 
 genBtn('矩形', () => {
+  board.setShapeStyle({
+    fillStyle: '#fff',
+    lineWidth: 2,
+    strokeStyle: '#409eff',
+  })
   board.setMode('rect')
 })
 

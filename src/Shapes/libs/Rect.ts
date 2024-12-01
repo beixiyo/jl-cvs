@@ -1,6 +1,6 @@
 import { getDPR } from '@/canvasTool'
 import { BaseShape } from '../BaseShape'
-import type { ShapeAttrs } from '../type'
+import type { ShapeStyle } from '../type'
 
 /**
  * 绘制矩形
@@ -14,7 +14,7 @@ export class Rect implements BaseShape {
   endX: number
   endY: number
 
-  shapeAttrs: ShapeAttrs = {}
+  shapeStyle: ShapeStyle = {}
 
   constructor(opts: RectOpts) {
     this.ctx = opts.ctx
@@ -25,8 +25,8 @@ export class Rect implements BaseShape {
     this.endX = opts.startX
     this.endY = opts.startY
 
-    this.shapeAttrs = opts.shapeAttrs || {}
-    this.setShapeAttrs(opts.shapeAttrs)
+    this.shapeStyle = opts.shapeStyle || {}
+    this.setShapeStyle(opts.shapeStyle)
   }
 
   draw() {
@@ -43,14 +43,14 @@ export class Rect implements BaseShape {
     /**
      * 绘制边框
      */
-    if (this.shapeAttrs.lineWidth && this.shapeAttrs.strokeStyle) {
-      ctx.strokeStyle = this.shapeAttrs.strokeStyle
-      ctx.lineWidth = this.shapeAttrs.lineWidth
+    if (this.shapeStyle.lineWidth && this.shapeStyle.strokeStyle) {
+      ctx.strokeStyle = this.shapeStyle.strokeStyle
+      ctx.lineWidth = this.shapeStyle.lineWidth
       ctx.stroke()
     }
     
-    if (this.shapeAttrs.fillStyle) {
-      ctx.fillStyle = this.shapeAttrs.fillStyle
+    if (this.shapeStyle.fillStyle) {
+      ctx.fillStyle = this.shapeStyle.fillStyle
     }
     
     ctx.fill()
@@ -69,11 +69,11 @@ export class Rect implements BaseShape {
     return false
   }
 
-  setShapeAttrs(shapeAttrs: ShapeAttrs = {}) {
-    for (const k in shapeAttrs) {
-      // @ts-ignore
-      this.shapeAttrs[k] = shapeAttrs[k]
-    }
+  /**
+   * 设置样式
+   */
+  setShapeStyle(shapeStyle: ShapeStyle = {}) {
+    Object.assign(this.shapeStyle, shapeStyle)
   }
 
   get minX() {
@@ -102,5 +102,5 @@ export type RectOpts = {
 }
   &
 {
-  shapeAttrs?: ShapeAttrs
+  shapeStyle?: ShapeStyle
 }
