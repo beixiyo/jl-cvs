@@ -53,6 +53,10 @@ function genBtn(txt: string, cb: Function) {
 
 ## 图像编辑画板
 
+**请到 Github 查看图片示例**
+
+https://github.com/beixiyo/jl-cvs
+
 ![效果展示](./docAssets/editor.gif)
 
 ```ts
