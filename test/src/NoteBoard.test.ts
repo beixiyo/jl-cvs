@@ -60,7 +60,7 @@ const board = new NoteBoardWithShape({
   //   console.log('onUndo')
   // }
 })
-window.b=board
+window.b = board
 
 /**
  * 居中绘制图片，并自动拉伸大小
@@ -116,6 +116,15 @@ genBtn('矩形', () => {
     strokeStyle: '#409eff',
   })
   board.setMode('rect')
+})
+
+genBtn('圆形', () => {
+  board.setShapeStyle({
+    fillStyle: '#f405',
+    lineWidth: 2,
+    strokeStyle: '#000',
+  })
+  board.setMode('circle')
 })
 
 

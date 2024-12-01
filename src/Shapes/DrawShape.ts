@@ -4,10 +4,12 @@ import type { ShapeStyle } from './type'
 import type { BaseShape } from './BaseShape'
 import { DRAW_MAP } from '@/NoteBoard'
 import { UnRedoLinkedList } from '@/utils'
+import { Circle } from './libs/Circle'
 
 
 const ShapeMap = {
-  rect: Rect
+  rect: Rect,
+  circle: Circle
 }
 
 /**

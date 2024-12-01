@@ -140,6 +140,12 @@ export class NoteBoardWithShape extends DrawShape {
         this.canvas.style.cursor = 'crosshair'
         break
 
+      case 'circle':
+        this.shapeType = 'circle'
+        this.drawShapeDiable = false
+        this.canvas.style.cursor = 'crosshair'
+        break
+
       default:
         break
     }
@@ -480,7 +486,7 @@ export class NoteBoardWithShape extends DrawShape {
    * 是图形模式
    */
   private isShapeMode(mode?: Mode) {
-    return ['rect'].includes(mode ?? this.mode)
+    return ['rect', 'circle'].includes(mode ?? this.mode)
   }
 
   private init() {

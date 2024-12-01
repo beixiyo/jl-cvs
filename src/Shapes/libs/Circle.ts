@@ -3,10 +3,10 @@ import { BaseShape } from '../BaseShape'
 import type { ShapeStyle } from '../type'
 
 /**
- * 绘制矩形
+ * 绘制圆形
  */
-export class Rect implements BaseShape {
-
+export class Circle implements BaseShape {
+  
   ctx: CanvasRenderingContext2D
 
   startX: number
@@ -16,9 +16,9 @@ export class Rect implements BaseShape {
 
   shapeStyle: ShapeStyle = {}
 
-  constructor(opts: RectOpts) {
+  constructor(opts: CircleOpts) {
     this.ctx = opts.ctx
-    this.ctx.lineCap = 'square'
+    this.ctx.lineCap = 'round'
 
     this.startX = opts.startX
     this.startY = opts.startY
@@ -33,12 +33,13 @@ export class Rect implements BaseShape {
     const { ctx } = this
 
     ctx.beginPath()
-
-    ctx.moveTo(this.minX, this.minY)
-    ctx.lineTo(this.maxX, this.minY)
-    ctx.lineTo(this.maxX, this.maxY)
-    ctx.lineTo(this.minX, this.maxY)
-    ctx.lineTo(this.minX, this.minY)
+    ctx.arc(
+      this.minX,
+      this.minY,
+      this.radius,
+      0,
+      2 * Math.PI
+    )
 
     /**
      * 绘制边框
@@ -57,16 +58,11 @@ export class Rect implements BaseShape {
   }
 
   isInPath(x: number, y: number): boolean {
-    if (
-      x > this.minX &&
-      x < this.maxX &&
-      y > this.minY &&
-      y < this.maxY
-    ) {
-      return true
-    }
-
-    return false
+    const dx = x - this.minX
+    const dy = y - this.minY
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    
+    return distance <= this.radius
   }
 
   /**
@@ -92,10 +88,14 @@ export class Rect implements BaseShape {
     return Math.max(this.startY, this.endY) * getDPR()
   }
 
+  get radius() {
+    const dx = this.maxX - this.minX
+    const dy = this.maxY - this.minY
+    return Math.sqrt(dx * dx + dy * dy)
+  }
 }
 
-
-export type RectOpts = {
+export type CircleOpts = {
   startX: number
   startY: number
   ctx: CanvasRenderingContext2D
