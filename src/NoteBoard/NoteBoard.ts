@@ -1,7 +1,7 @@
 import { clearAllCvs, getImg } from '@/canvasTool/tools'
 import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
 import { mergeOpts, setCanvas } from './tools'
-import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
+import type { CanvasAttrs, Mode, DrawImgOptions, ImgInfo, RecordPath, CanvasItem, ExportOptions, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
 import { createUnReDoList, excludeKeys, getCircleCursor } from '@/utils'
 
 
@@ -150,7 +150,7 @@ export class NoteBoard {
       mimeType,
       quality,
       canvas = this.imgCanvas
-    }: ShotParams = {}
+    }: ExportOptions = {}
   ) {
     if (!exportOnlyImgArea || !this.imgInfo) {
       return getCvsImg(canvas, 'base64', mimeType, quality)
@@ -181,7 +181,7 @@ export class NoteBoard {
       mimeType,
       quality,
       canvas = this.canvas
-    }: ShotParams = {}
+    }: ExportOptions = {}
   ) {
     if (!exportOnlyImgArea || !this.imgInfo) {
       return getCvsImg(canvas, 'base64', mimeType, quality)
@@ -292,7 +292,7 @@ export class NoteBoard {
    */
   async drawImg(
     img: HTMLImageElement | string,
-    options: DrawImgOpts = {}
+    options: DrawImgOptions = {}
   ) {
     const {
       afterDraw,

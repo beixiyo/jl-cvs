@@ -66,7 +66,7 @@ window.b=board
  * 居中绘制图片，并自动拉伸大小
  */
 board.drawImg(
-  'http://localhost:8510/src/refactor/Photog/Workbench/assets/step2.webp',
+  new URL('../assets/umr.jpg', import.meta.url).href,
   {
     center: true,
     autoFit: true,
@@ -78,11 +78,11 @@ board.drawImg(
  * 按钮 =========================================
  */
 genBtn('截图', async () => {
-  const src = await board.shotImg({ exportOnlyImgArea: true })
+  const src = await board.exportImg({ exportOnlyImgArea: true })
   const imgEl = new Image()
   imgEl.src = src
 
-  const mask = await board.shotMask({ exportOnlyImgArea: true })
+  const mask = await board.exportMask({ exportOnlyImgArea: true })
   const maskImgEl = new Image()
   maskImgEl.src = mask
 

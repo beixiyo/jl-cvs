@@ -101,7 +101,7 @@ export type CanvasAttrs = {
   [K: string]: any
 }
 
-export type DrawImgOpts = {
+export type DrawImgOptions = {
   /**
    * 图片宽度
    * @default Image.width
@@ -137,7 +137,10 @@ export type DrawImgOpts = {
   autoFit?: boolean
   /** 指定画布上下文，默认背景画布上下文 */
   context?: CanvasRenderingContext2D
-  /** 是否记录图片信息，后续导出图片时调整大小需要 */
+  /** 
+   * 是否记录图片信息，后续导出图片时调整大小需要
+   * @default true
+   */
   needRecordImgInfo?: boolean
 }
 
@@ -166,9 +169,10 @@ export type RecordPath = {
   shapes: BaseShape[]
 }
 
-export type ShotParams = {
+export type ExportOptions = {
   /**
-   * 导出时，仅仅把图片区域内容导出，并且还原图片大小（需要记录 imgInfo 后才有此区域）
+   * 导出时，仅仅把图片区域内容导出，而不是整个画布，并且还原图片大小
+   * ### 需要在 drawImg 时记录 imgInfo 后才有此区域
    */
   exportOnlyImgArea?: boolean
   /**

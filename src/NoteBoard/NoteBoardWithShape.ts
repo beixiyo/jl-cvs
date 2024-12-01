@@ -1,7 +1,7 @@
 import { clearAllCvs, getImg } from '@/canvasTool/tools'
 import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
 import { mergeOpts, setCanvas } from './tools'
-import type { CanvasAttrs, Mode, DrawImgOpts, ImgInfo, RecordPath, CanvasItem, ShotParams, NoteBoardOptions, DrawMapVal, NoteBoardOptionsRequired } from './type'
+import type { CanvasAttrs, Mode, DrawImgOptions, ImgInfo, RecordPath, CanvasItem, ExportOptions, NoteBoardOptions, DrawMapVal, NoteBoardOptionsRequired } from './type'
 import { excludeKeys, getCircleCursor, UnRedoLinkedList } from '@/utils'
 import { DrawShape } from '@/Shapes'
 
@@ -109,7 +109,7 @@ export class NoteBoardWithShape extends DrawShape {
   }
 
   /**
-   * 设置模式
+   * 设置绘制模式
    */
   setMode(mode: Mode) {
     this.mode = mode
@@ -148,14 +148,43 @@ export class NoteBoardWithShape extends DrawShape {
   /**
    * 获取画板图像内容
    */
-  async shotImg(
+  async exportImg(
+    options: Omit<ExportOptions, 'canvas'> = {}
+  ) {
+    const canvas = this.imgCanvas
+    return this.exportLayer({
+      ...options,
+      canvas
+    })
+  }
+
+  /**
+   * 获取画板遮罩（画笔）内容
+   */
+  async exportMask(
+    options: Omit<ExportOptions, 'canvas'> = {}
+  ) {
+    const canvas = this.canvas
+    return this.exportLayer({
+      ...options,
+      canvas
+    })
+  }
+
+  /**
+   * 导出指定图层
+   */
+  async exportLayer(
     {
       exportOnlyImgArea = false,
       mimeType,
       quality,
-      canvas = this.imgCanvas
-    }: ShotParams = {}
+      canvas = this.canvas
+    }: ExportOptions = {}
   ) {
+    /**
+     * 没有记录图像信息，或者不仅仅导出图像区域
+     */
     if (!exportOnlyImgArea || !this.imgInfo) {
       return getCvsImg(canvas, 'base64', mimeType, quality)
     }
@@ -177,34 +206,82 @@ export class NoteBoardWithShape extends DrawShape {
   }
 
   /**
-   * 获取画板遮罩（画笔）内容
+   * 绘制图片，可调整大小，自适应尺寸等
+   * ### 图片默认使用单独的画布绘制，置于底层
    */
-  async shotMask(
-    {
-      exportOnlyImgArea = false,
-      mimeType,
-      quality,
-      canvas = this.canvas
-    }: ShotParams = {}
+  async drawImg(
+    img: HTMLImageElement | string,
+    options: DrawImgOptions = {}
   ) {
-    if (!exportOnlyImgArea || !this.imgInfo) {
-      return getCvsImg(canvas, 'base64', mimeType, quality)
+    const {
+      afterDraw,
+      beforeDraw,
+      needClear = false,
+      autoFit,
+      center,
+      context = this.imgCtx,
+      needRecordImgInfo = true
+    } = options
+
+    beforeDraw?.()
+    needClear && this.clear()
+
+    const newImg = typeof img === 'string'
+      ? await getImg(img, img => img.crossOrigin = 'anonymous')
+      : img
+    if (!newImg) return new Error('Image load failed')
+
+    const {
+      width: canvasWidth,
+      height: canvasHeight
+    } = this.opts
+
+    const imgWidth = options.imgWidth ?? newImg.width,
+      imgHeight = options.imgHeight ?? newImg.height
+
+    const scaleX = canvasWidth / imgWidth,
+      scaleY = canvasHeight / imgHeight,
+      minScale = Math.min(scaleX, scaleY)
+
+    let drawWidth = imgWidth,
+      drawHeight = imgHeight,
+      x = 0,
+      y = 0
+
+    if (autoFit) {
+      // 保持宽高比的情况下，使图片适应画布
+      drawWidth = imgWidth * minScale
+      drawHeight = imgHeight * minScale
+    }
+    if (center) {
+      // 计算居中位置
+      x = (canvasWidth - drawWidth) / 2
+      y = (canvasHeight - drawHeight) / 2
     }
 
-    const rawBase64 = await getCvsImg(canvas, 'base64', mimeType, quality)
-    const img = await getImg(rawBase64)
-    if (!img) return ''
+    context.drawImage(
+      newImg,
+      x, y,
+      drawWidth,
+      drawHeight
+    )
 
-    const { imgInfo } = this
+    if (needRecordImgInfo) {
+      this.imgInfo = {
+        minScale,
+        scaleX,
+        scaleY,
+        img: newImg,
 
-    return await cutImg(img, {
-      x: imgInfo.x,
-      y: imgInfo.y,
-      width: imgInfo.drawWidth,
-      height: imgInfo.drawHeight,
-      scaleX: 1 / imgInfo.minScale,
-      scaleY: 1 / imgInfo.minScale,
-    })
+        x,
+        y,
+        drawWidth,
+        drawHeight,
+        rawWidth: imgWidth,
+        rawHeight: imgHeight,
+      }
+    }
+    afterDraw?.(this.imgInfo)
   }
 
   /**
@@ -300,84 +377,6 @@ export class NoteBoardWithShape extends DrawShape {
     canvas.removeEventListener('mouseup', this.onMouseup)
     canvas.removeEventListener('mouseleave', this.onMouseLeave)
     canvas.removeEventListener('wheel', this.onWheel)
-  }
-
-  /**
-   * 绘制图片，可调整大小，自适应尺寸等
-   */
-  async drawImg(
-    img: HTMLImageElement | string,
-    options: DrawImgOpts = {}
-  ) {
-    const {
-      afterDraw,
-      beforeDraw,
-      needClear = false,
-      autoFit,
-      center,
-      context = this.imgCtx,
-      needRecordImgInfo = true
-    } = options
-
-    beforeDraw?.()
-    needClear && this.clear()
-
-    const newImg = typeof img === 'string'
-      ? await getImg(img, img => img.crossOrigin = 'anonymous')
-      : img
-    if (!newImg) return new Error('Image load failed')
-
-    const {
-      width: canvasWidth,
-      height: canvasHeight
-    } = this.opts
-
-    const imgWidth = options.imgWidth ?? newImg.width,
-      imgHeight = options.imgHeight ?? newImg.height
-
-    const scaleX = canvasWidth / imgWidth,
-      scaleY = canvasHeight / imgHeight,
-      minScale = Math.min(scaleX, scaleY)
-
-    let drawWidth = imgWidth,
-      drawHeight = imgHeight,
-      x = 0,
-      y = 0
-
-    if (autoFit) {
-      // 保持宽高比的情况下，使图片适应画布
-      drawWidth = imgWidth * minScale
-      drawHeight = imgHeight * minScale
-    }
-    if (center) {
-      // 计算居中位置
-      x = (canvasWidth - drawWidth) / 2
-      y = (canvasHeight - drawHeight) / 2
-    }
-
-    context.drawImage(
-      newImg,
-      x, y,
-      drawWidth,
-      drawHeight
-    )
-
-    if (needRecordImgInfo) {
-      this.imgInfo = {
-        minScale,
-        scaleX,
-        scaleY,
-        img: newImg,
-
-        x,
-        y,
-        drawWidth,
-        drawHeight,
-        rawWidth: imgWidth,
-        rawHeight: imgHeight,
-      }
-    }
-    afterDraw?.(this.imgInfo)
   }
 
   /**
