@@ -1,4 +1,4 @@
-import { clearAllCvs, createCvs, getImg } from '@/canvasTool/tools'
+import { clearAllCvs, createCvs, getImg } from '@/canvasTool'
 import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
 import { mergeOpts, setCanvas } from './tools'
 import type { CanvasAttrs, Mode, DrawImgOptions, ImgInfo, RecordPath, CanvasItem, ExportOptions, NoteBoardOptions, DrawMapVal, NoteBoardOptionsRequired } from './type'

@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@jl-org/tool':
+        specifier: ^1.7.87
+        version: 1.7.87
     devDependencies:
       '@jl-org/ts-tool':
         specifier: ^0.0.8
@@ -43,6 +47,9 @@ importers:
         version: 5.3.3
 
 packages:
+
+  '@jl-org/tool@1.7.87':
+    resolution: {integrity: sha512-S55X8dFT4M0WrwmN1Bwx1TkHl4v0UoLkC478/QRmGPiqT+EoqlAa1ZTHDf5GVadXbp1TOR6WUHtKA6n3s8zaoQ==}
 
   '@jl-org/ts-tool@0.0.8':
     resolution: {integrity: sha512-2YwGmzod5LBOi7cKknRXn2H9xcp99OhokZJ55t+kg7wvPST4obcwLxO03ji0gVuFoHp5BgrkwzDICV+z1a3TDg==}
@@ -474,6 +481,8 @@ packages:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
 snapshots:
+
+  '@jl-org/tool@1.7.87': {}
 
   '@jl-org/ts-tool@0.0.8': {}
 

@@ -1,4 +1,4 @@
-import { clearAllCvs, getWinHeight, getWinWidth } from '@/canvasTool/tools'
+import { clearAllCvs, getWinHeight, getWinWidth } from '@/canvasTool'
 import { Firework } from './Firework'
 import { getColor } from '@/canvasTool/color'
 

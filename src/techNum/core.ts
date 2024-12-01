@@ -1,7 +1,6 @@
-import { getWinHeight, getWinWidth } from '@/canvasTool/tools'
+import { getWinHeight, getWinWidth, getColor as _getColor } from '@/canvasTool'
 import type { TechNumOpts } from './types'
-import { getColor as _getColor } from '@/canvasTool/color'
-import { getRandomStr } from '@/utils'
+import { randomStr } from '@/utils'
 
 
 /**
@@ -19,7 +18,7 @@ export function createTechNum(canvas: HTMLCanvasElement, opts: TechNumOpts = {})
     font = 'Roboto Mono',
     maskColor = 'rgba(12, 12, 12, .1)',
     gapRate = 0.85,
-    getStr = getRandomStr,
+    getStr = randomStr,
     getColor = _getColor,
     durationMS = 30
   } = opts

@@ -60,6 +60,8 @@ const board = new NoteBoardWithShape({
   //   console.log('onUndo')
   // }
 })
+
+// @ts-ignore
 window.b = board
 
 /**

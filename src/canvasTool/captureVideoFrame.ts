@@ -21,6 +21,7 @@ export async function captureVideoFrame<
   ? HandleImgReturn<T>
   : HandleImgReturn<T>[]
 > {
+
   const src = typeof fileOrUrl === 'string'
     ? fileOrUrl
     : URL.createObjectURL(fileOrUrl)
@@ -38,12 +39,17 @@ export async function captureVideoFrame<
     time.forEach((t) => {
       arr.push(genFrame(t))
     })
+
     return Promise.all(arr) as unknown as Promise<N extends number
       ? HandleImgReturn<T>
       : HandleImgReturn<T>[]
     >
   }
 
+
+  /***************************************************
+   *                    Function
+   ***************************************************/
 
   function videoToCanvas(
     video: HTMLVideoElement,

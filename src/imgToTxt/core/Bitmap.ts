@@ -1,4 +1,4 @@
-import { getPixel } from '@/canvasTool/tools'
+import { getPixel } from '@/canvasTool'
 import { Pixel } from '@/types'
 
 

@@ -42,5 +42,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://github.com/beixiyo/jl-cvs"
+  "homepage": "https://github.com/beixiyo/jl-cvs",
+  "dependencies": {
+    "@jl-org/tool": "^1.7.87"
+  }
 }

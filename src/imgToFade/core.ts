@@ -1,4 +1,4 @@
-import { createCvs, getImg, getPixel } from '@/canvasTool/tools'
+import { createCvs, getImg, getPixel } from '@/canvasTool'
 import type { ImgToFadeOpts } from './types'
 import { Ball } from '@/canvasTool/Ball'
 
@@ -160,7 +160,7 @@ async function checkAndInit(opts: ImgToFadeOpts) {
     throw new Error('图片大小不能大于容器')
   }
 
-  const img = await getImg(src)
+  const img = await getImg(src, img => img.crossOrigin = 'anonymous')
   if (!img) {
     throw new Error('图片不可用')
   }

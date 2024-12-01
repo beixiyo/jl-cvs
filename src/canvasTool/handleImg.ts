@@ -1,60 +1,19 @@
 import { createCvs, getDPR } from './tools'
 import { TransferType } from '@/types'
 
-
-/**
- * 截取图片的一部分，返回 base64 | blob
- * @param img 图片
- * @param opts 配置
- * @param resType 需要返回的文件格式，默认 `base64`
- */
-export function cutImg<T extends TransferType = 'base64'>(
-  img: HTMLImageElement,
-  opts: CutImgOpts = {},
-  resType: T = 'base64' as T,
-): Promise<HandleImgReturn<T>> {
-  const {
-    width = img.width,
-    height = img.height,
-    x = 0,
-    y = 0,
-    scaleX = 1,
-    scaleY = 1,
-    mimeType,
-    quality,
-  } = opts
-
-  const scaledWidth = Math.round(width * scaleX)
-  const scaledHeight = Math.round(height * scaleY)
-
-  const { cvs, ctx } = createCvs(scaledWidth, scaledHeight)
-
-  // 在绘制之前设置缩放
-  ctx.scale(scaleX, scaleY)
-  ctx.drawImage(img, x, y, width, height, 0, 0, width, height)
-
-  return getCvsImg<T>(cvs, resType, mimeType, quality)
-}
-
-/**
- * 压缩图片
- * @param img 图片
- * @param resType 需要返回的文件格式，默认 `base64`
- * @param quality 压缩质量，默认 0.5
- * @param mimeType 图片类型，默认 `image/webp`。`image/jpeg | image/webp` 才能压缩，
- */
-export function compressImg<T extends TransferType = 'base64'>(
-  img: HTMLImageElement,
-  resType: T = 'base64' as T,
-  quality = .5,
-  mimeType: 'image/jpeg' | 'image/webp' = 'image/webp'
-): Promise<HandleImgReturn<T>> {
-  const { cvs, ctx } = createCvs(img.width, img.height)
-  ctx.drawImage(img, 0, 0)
-
-  return getCvsImg<T>(cvs, resType, mimeType, quality)
-}
-
+export {
+  cutImg,
+  compressImg,
+  getCvsImg,
+  blobToBase64,
+  base64ToBlob,
+  urlToBlob,
+  blobToStream,
+  getImg,
+  downloadByUrl,
+  downloadByData,
+} from '@jl-org/tool'
+ 
 
 /**
  * 图片噪点化
@@ -131,52 +90,6 @@ export function waterMark({
   }
 }
 
-
-/**
- * 把 canvas 上的图像转成 base64 | blob
- * @param cvs canvas
- * @param resType 需要返回的文件格式，默认 `base64`
- * @param mimeType 图片类型，`image/jpeg | image/webp` 才能压缩
- * @param quality 压缩质量
- */
-export function getCvsImg<T extends TransferType = 'base64'>(
-  cvs: HTMLCanvasElement,
-  resType: T = 'base64' as T,
-  mimeType?: string,
-  quality?: number
-): Promise<HandleImgReturn<T>> {
-  switch (resType) {
-    case 'base64':
-      return Promise.resolve(cvs.toDataURL(mimeType, quality)) as Promise<HandleImgReturn<T>>
-    case 'blob':
-      return new Promise<Blob>((resolve) => {
-        cvs.toBlob(
-          blob => {
-            resolve(blob!)
-          },
-          mimeType,
-          quality
-        )
-      }) as Promise<HandleImgReturn<T>>
-
-    default:
-      const data: never = resType
-      throw new Error(`未知的返回类型：${data}`)
-  }
-}
-
-
-/** Blob 转 Base64 */
-export function blobToBase64(blob: Blob) {
-  const fr = new FileReader()
-  fr.readAsDataURL(blob)
-
-  return new Promise<string>((resolve) => {
-    fr.onload = function () {
-      resolve(this.result as string)
-    }
-  })
-}
 
 
 export type HandleImgReturn<T extends TransferType> =
