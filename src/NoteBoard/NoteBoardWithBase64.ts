@@ -1,25 +1,17 @@
 import { clearAllCvs, createCvs, getImg } from '@/canvasTool'
 import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
 import { mergeOpts, setCanvas } from './tools'
-import type { CanvasAttrs, Mode, DrawImgOptions, ImgInfo, RecordPath, CanvasItem, ExportOptions, NoteBoardOptions, DrawMapVal, NoteBoardOptionsRequired } from './type'
-import { excludeKeys, getCircleCursor, UnRedoLinkedList } from '@/utils'
-import { DrawShape } from '@/Shapes'
+import type { NoteBoardOptions, CanvasAttrs, Mode, ImgInfo, NoteBoardOptionsRequired, DrawImgOptions, CanvasItem, ExportOptions } from './type'
+import { createUnReDoList, getCircleCursor } from '@/utils'
+import type { ShapeType } from '@/Shapes'
 
 
 /**
- * 统一绘图函数
- */
-export const DRAW_MAP = new WeakMap<
-  DrawShape,
-  DrawMapVal
->()
-
-/**
- * 画板，提供如下功能
- * - 签名涂抹
- * - 绘制矩形
- * - 绘制圆形
+ * 使用 base64 实现历史记录的画板
+ * ### 如需使用绘制图像，请使用 NoteBoard
  * 
+ * 提供如下功能
+ * - 签名涂抹
  * - 分层自适应绘图
  * 
  * - 擦除
@@ -31,7 +23,7 @@ export const DRAW_MAP = new WeakMap<
  * 
  * - 截图
  */
-export class NoteBoard extends DrawShape {
+export class NoteBoardWithBase64 {
 
   /** 容器 */
   el: HTMLElement
@@ -63,7 +55,7 @@ export class NoteBoard extends DrawShape {
 
   private opts: NoteBoardOptionsRequired
 
-  mode: Mode = 'draw'
+  mode: NoteBoardWithBase64Mode = 'draw'
 
   /** 开启鼠标滚轮缩放 */
   isEnableZoom = true
@@ -71,8 +63,8 @@ export class NoteBoard extends DrawShape {
   /**
    * 记录缩放、位置等属性
    */
-  private drawStart = { x: 0, y: 0 }
   private isDrawing = false
+  private drawStart = { x: 0, y: 0 }
 
   private isDragging = false
   private dragStart = { x: 0, y: 0 }
@@ -85,17 +77,10 @@ export class NoteBoard extends DrawShape {
   /**
    * 历史记录
    */
-  history = new UnRedoLinkedList<RecordPath[]>()
+  history = createUnReDoList<string>()
 
   constructor(opts: NoteBoardOptions) {
-    super()
-    super.initial({
-      canvas: this.canvas,
-      context: this.ctx,
-    })
-
     this.opts = mergeOpts(opts)
-    this.setDrawMap()
 
     const {
       el,
@@ -122,16 +107,15 @@ export class NoteBoard extends DrawShape {
   }
 
   /**
-   * 设置绘制模式
+   * 设置模式
    */
-  setMode(mode: Mode) {
+  setMode(mode: NoteBoardWithBase64Mode) {
     this.mode = mode
-    this.drawShapeDiable = true
-    this.ctx.globalCompositeOperation = this.opts.globalCompositeOperation
 
     switch (mode) {
       case 'draw':
         this.setCursor()
+        this.ctx.globalCompositeOperation = this.opts.drawGlobalCompositeOperation
         break
 
       case 'erase':
@@ -145,18 +129,6 @@ export class NoteBoard extends DrawShape {
 
       case 'drag':
         this.canvas.style.cursor = 'grab'
-        break
-
-      case 'rect':
-        this.shapeType = 'rect'
-        this.drawShapeDiable = false
-        this.canvas.style.cursor = 'crosshair'
-        break
-
-      case 'circle':
-        this.shapeType = 'circle'
-        this.drawShapeDiable = false
-        this.canvas.style.cursor = 'crosshair'
         break
 
       default:
@@ -257,6 +229,7 @@ export class NoteBoard extends DrawShape {
       scaleY: 1 / imgInfo.minScale,
     })
   }
+
 
   /**
    * 绘制图片，可调整大小，自适应尺寸等
@@ -368,42 +341,48 @@ export class NoteBoard extends DrawShape {
   /**
    * 撤销
    */
-  undo() {
-    const recordPath = this.history.undo()
-    if (!recordPath?.value) {
-      this.clear(false)
-      // 清理图形里不要的记录
-      this.drawShapeUndo()
+  async undo() {
+    return new Promise<boolean>((resolve) => {
+      this.history.undo(async base64 => {
+        this.clear(false)
+        if (!base64) return resolve(false)
 
-      return
-    }
+        // 保存当前的混合模式
+        const currentCompositeOperation = this.ctx.globalCompositeOperation
+        // 临时设置为默认混合模式
+        this.ctx.globalCompositeOperation = 'source-over'
 
-    const drawFn = this.drawMap?.unRedo
-    if (!drawFn) return
-    const data = drawFn({ type: 'undo' })
+        const img = await getImg(base64, img => img.crossOrigin = 'anonymous') as HTMLImageElement
+        this.ctx.drawImage(img, 0, 0)
+        this.ctx.globalCompositeOperation = currentCompositeOperation
 
-    this.opts.onUndo?.({
-      mode: this.mode,
-      ...data,
+        this.opts.onUndo?.(base64)
+        resolve(true)
+      })
     })
   }
 
   /**
    * 重做
    */
-  redo() {
-    const recordPath = this.history.redo()
-    if (!recordPath?.value) {
-      return
-    }
+  async redo() {
+    return new Promise<boolean>((resolve) => {
+      this.history.redo(async base64 => {
+        this.clear(false)
+        if (!base64) return resolve(false)
 
-    const drawFn = this.drawMap?.unRedo
-    if (!drawFn) return
+        // 保存当前的混合模式
+        const currentCompositeOperation = this.ctx.globalCompositeOperation
+        // 临时设置为默认混合模式
+        this.ctx.globalCompositeOperation = 'source-over'
 
-    const data = drawFn({ type: 'redo' })
-    this.opts.onRedo?.({
-      mode: this.mode,
-      ...data,
+        const img = await getImg(base64, img => img.crossOrigin = 'anonymous') as HTMLImageElement
+        this.ctx.drawImage(img, 0, 0)
+        this.ctx.globalCompositeOperation = currentCompositeOperation
+
+        this.opts.onRedo?.(base64)
+        resolve(true)
+      })
     })
   }
 
@@ -422,7 +401,6 @@ export class NoteBoard extends DrawShape {
    * 移除所有事件
    */
   rmEvent() {
-    this.drawShapeRmEvent()
     const { canvas } = this
 
     canvas.removeEventListener('mousedown', this.onMousedown)
@@ -489,29 +467,21 @@ export class NoteBoard extends DrawShape {
     )
   }
 
+  /**
+   * 添加一个新的历史记录
+   * @param data 图片数据 base64，默认从画笔画布提取
+   */
+  async addNewRecord(data?: string) {
+    const base64 = data || await this.exportMask()
+    this.history.add(base64)
+  }
+
   /***************************************************
    *                    Private
    ***************************************************/
 
-  /**
-   * 是否为绘制模式
-   */
   private get canDraw() {
     return ['draw', 'erase'].includes(this.mode)
-  }
-
-  /**
-   * 能否添加记录
-   */
-  private get canAddRecord() {
-    return this.canDraw || this.isShapeMode()
-  }
-
-  /**
-   * 是图形模式
-   */
-  private isShapeMode(mode?: Mode) {
-    return ['rect', 'circle'].includes(mode ?? this.mode)
   }
 
   private init() {
@@ -521,40 +491,27 @@ export class NoteBoard extends DrawShape {
   }
 
   private bindEvent() {
-    const { canvas } = this
-
-    canvas.addEventListener('mousedown', this.onMousedown)
-    canvas.addEventListener('mousemove', this.onMousemove)
-    canvas.addEventListener('mouseup', this.onMouseup)
-    canvas.addEventListener('mouseleave', this.onMouseLeave)
-    canvas.addEventListener('wheel', this.onWheel)
+    const { canvas: cvs } = this
+    cvs.addEventListener('mousedown', this.onMousedown)
+    cvs.addEventListener('mousemove', this.onMousemove)
+    cvs.addEventListener('mouseup', this.onMouseup)
+    cvs.addEventListener('mouseleave', this.onMouseLeave)
+    cvs.addEventListener('wheel', this.onWheel)
   }
 
   private onMousedown = (e: MouseEvent) => {
     this.opts.onMouseDown?.(e)
 
-    // 拖拽模式
     if (this.mode === 'drag') {
       this.isDragging = true
       this.dragStart = { x: e.offsetX, y: e.offsetY }
-      return
-    }
-
-    /**
-     * 添加记录
-     */
-    if (this.canAddRecord) {
-      this.history.cleanUnusedNodes()
-      this.addHistory()
-      this.drawMap?.syncShapeRecord()
     }
 
     if (!this.canDraw) return
-    
+
     // 画笔模式
     this.isDrawing = true
     this.ctx.beginPath()
-
     this.drawStart = {
       x: e.offsetX,
       y: e.offsetY,
@@ -582,8 +539,6 @@ export class NoteBoard extends DrawShape {
         transformOriginY: this.dragStart.y,
         e
       })
-
-      return
     }
 
     /**
@@ -592,23 +547,18 @@ export class NoteBoard extends DrawShape {
     if (!this.canDraw || !this.isDrawing) return
 
     const { offsetX, offsetY } = e
-    const { ctx, drawStart } = this
-    const lastRecord = this.history.curValue
+    const { ctx, drawStart: start } = this
 
-    ctx.moveTo(drawStart.x, drawStart.y)
+    ctx.moveTo(start.x, start.y)
     ctx.lineTo(offsetX, offsetY)
+
+    ctx.lineWidth = this.opts.lineWidth
     ctx.stroke()
 
     this.drawStart = {
       x: offsetX,
       y: offsetY,
     }
-
-    if (!lastRecord) return
-    lastRecord[lastRecord.length - 1].path.push({
-      moveTo: [drawStart.x, drawStart.y],
-      lineTo: [offsetX, offsetY]
-    })
   }
 
   private onMouseup = (e: MouseEvent) => {
@@ -618,11 +568,12 @@ export class NoteBoard extends DrawShape {
       this.isDragging = false
       this.translateX += e.offsetX - this.dragStart.x
       this.translateY += e.offsetY - this.dragStart.y
-      return
     }
 
     if (!this.canDraw) return
+
     this.isDrawing = false
+    this.addNewRecord()
   }
 
   private onMouseLeave = (e: MouseEvent) => {
@@ -630,7 +581,6 @@ export class NoteBoard extends DrawShape {
 
     if (this.mode === 'drag') {
       this.isDragging = false
-      return
     }
 
     if (!this.canDraw) return
@@ -659,115 +609,7 @@ export class NoteBoard extends DrawShape {
     })
   }
 
-  private addHistory() {
-    const lastRecord = this.history.curValue
-    this.history.add([
-      ...(lastRecord || []),
-      {
-        canvasAttrs: excludeKeys(
-          { ...this.opts },
-          [
-            'el',
-            'minScale', 'maxScale',
-            'onMouseDown', 'onMouseMove',
-            'onMouseUp', 'onMouseLeave',
-            'onWheel', 'onDrag',
-            'onRedo', 'onUndo',
-            'height', 'width',
-          ]
-        ),
-        path: [],
-        shapes: [],
-        mode: this.mode,
-      }
-    ])
-  }
-
-  /**
-   * 绘制笔画
-   */
-  private drawRecord() {
-    const lastRecord = this.history.curValue
-    if (!lastRecord) return
-    const { ctx } = this
-    const currentMode = this.mode
-
-    for (const item of lastRecord) {
-      this.setStyle(item.canvasAttrs, this.ctx)
-      this.setMode(item.mode)
-      ctx.beginPath()
-
-      for (const point of item.path) {
-        ctx.moveTo(...point.moveTo)
-        ctx.lineTo(...point.lineTo)
-        ctx.stroke()
-      }
-    }
-
-    this.setMode(currentMode)
-  }
-
-  private setDrawMap() {
-    const draw = () => {
-      this.clear(false)
-
-      /**
-       * 绘制图形
-       */
-      const lastRecord = this.history.curValue
-      if (lastRecord) {
-        this.ctx.globalCompositeOperation = this.opts.globalCompositeOperation
-        lastRecord[lastRecord.length - 1].shapes.forEach(shape => {
-          shape.draw()
-        })
-      }
-
-      this.drawRecord()
-    }
-
-    const syncShapeRecord = () => {
-      /**
-       * 确保有记录后执行
-       */
-      setTimeout(() => {
-        const lastRecord = this.history.curValue
-        if (lastRecord?.[lastRecord!.length - 1]?.shapes) {
-          lastRecord[lastRecord!.length - 1].shapes = [...this.shapes]
-        }
-      })
-    }
-
-    const cleanShapeRecord = () => {
-      const lastRecord = this.history.curValue
-      lastRecord?.[lastRecord!.length - 1]?.shapes?.splice(0)
-    }
-
-    DRAW_MAP.set(this, {
-      draw,
-      syncShapeRecord,
-      cleanShapeRecord,
-
-      getHistory: () => this.history,
-
-      unRedo: ({ type }) => {
-        const fnMap = {
-          undo: 'drawShapeUndo' as const,
-          redo: 'drawShapeRedo' as const,
-        }
-
-        const lastRecord = this.history.curNode?.next?.value
-        if (this.isShapeMode(lastRecord?.[lastRecord.length - 1].mode)) {
-          this[fnMap[type]](false)
-        }
-
-        draw()
-        syncShapeRecord()
-
-        return {
-          shape: this.lastShape,
-          shapes: this.shapes,
-        }
-      },
-    })
-  }
 }
+
+
+export type NoteBoardWithBase64Mode = Exclude<Mode, ShapeType>

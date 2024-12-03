@@ -186,6 +186,9 @@ genBtn('开启/ 关闭拖拽模式', () => {
 
 ![https://photog.art](./docAssets/editor.webp)
 
+
+**如需使用旧版，请使用 *NoteBoardWithBase64***
+
 ---
 
 

@@ -3,6 +3,7 @@
 // import './firework2.test'
 // import './imgToFade.test'
 import './NoteBoard.test'
+// import './NoteBoardWithBase64.test'
 // import './captureVideoFrame.test'
 // import './shotImg.test'
 // import './handleImg.test'
