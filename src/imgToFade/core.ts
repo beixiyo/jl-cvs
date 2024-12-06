@@ -32,10 +32,10 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
   imgCtx.drawImage(img, 0, 0, imgWidth, imgHeight)
 
   const destroyBalls: Ball[] = [],
-    { data } = imgCtx.getImageData(0, 0, imgWidth, imgHeight),
+    imgData = imgCtx.getImageData(0, 0, imgWidth, imgHeight),
     pixelIndexs: number[] = []
 
-  for (let i = 0; i < data.length / 4; i++) {
+  for (let i = 0; i < imgData.data.length / 4; i++) {
     pixelIndexs.push(i)
   }
 
@@ -73,7 +73,7 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
   function createAndDelParticle(size: number) {
     for (let i = 0; i < size; i++) {
       const [x, y, index] = getXY()
-      const [R, G, B, A] = getPixel(x, y, data, imgWidth)
+      const [R, G, B, A] = getPixel(x, y, imgData)
       const color = `rgba(${R}, ${G}, ${B}, ${A})`
 
       const [centerX, centerY] = getCenterPos()

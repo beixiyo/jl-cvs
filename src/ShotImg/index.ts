@@ -46,8 +46,8 @@ export class ShotImg {
 
   /** 设置 Canvas 图片 */
   setImg(img: HTMLImageElement) {
-    const { width, height } = img
-    this.setSize(width, height)
+    const { naturalWidth, naturalHeight } = img
+    this.setSize(naturalWidth, naturalHeight)
 
     this.img = img
     this.drawImg()
@@ -66,7 +66,7 @@ export class ShotImg {
     quality?: number
   ): Promise<HandleImgReturn<T>> {
     if (!this.img) {
-      console.warn('请调用 setImg 先设置图片 (plase call setImg first)')
+      console.warn('请调用 setImg 先设置图片')
       return Promise.resolve(new Blob([])) as Promise<HandleImgReturn<T>>
     }
 

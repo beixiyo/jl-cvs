@@ -39,7 +39,7 @@ export abstract class BaseSource {
 
     /** 这里的大小，已经在 setCvsSize 设置过了 */
     const { width, height } = this.canvas
-    const imgData = this.ctx.getImageData(0, 0, width, height).data
-    return new Bitmap(width, height, imgData)
+    const imgData = this.ctx.getImageData(0, 0, width, height)
+    return new Bitmap(imgData)
   }
 }

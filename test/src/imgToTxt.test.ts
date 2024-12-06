@@ -29,7 +29,7 @@ const replaceText = '6';
     gap: 8,
     isGray: false,
     opts: {
-      img: './assets/1.png',
+      img: new URL('../assets/umr.jpg', import.meta.url).href,
       height: 500,
     },
     replaceText
@@ -47,7 +47,7 @@ const replaceText = '6';
     gap: 10,
     isGray: false,
     opts: {
-      video: './assets/1.mp4',
+      video: new URL('../assets/umr.mp4', import.meta.url).href,
       height: 500,
     },
     replaceText

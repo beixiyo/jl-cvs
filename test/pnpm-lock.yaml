@@ -7,13 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@jl-org/cvs':
-        specifier: ^0.0.5
-        version: 0.0.5
-      '@jl-org/tool':
-        specifier: ^1.3.6
-        version: 1.3.6
     devDependencies:
       vite:
         specifier: ^5.1.5
@@ -158,12 +151,6 @@ packages:
     engines: {node: '>=12'}
     cpu: [x64]
     os: [win32]
-
-  '@jl-org/cvs@0.0.5':
-    resolution: {integrity: sha512-Nci220jnfYcbARZpL365NqWUUlnQaMdVEv7V2f7PxZy0IWHaIZZhni/Y6C3orGYsVSrFfK7ZwBu/Cp+NSMLMYA==}
-
-  '@jl-org/tool@1.3.6':
-    resolution: {integrity: sha512-VNddovVx0agjWzJd4Wj6DcC/GJ/zWUIww4DnARzWXEaglvFrKl8s5yVXWlZnLvZKy/XS4/II7NEUJN7EDl4KpQ==}
 
   '@rollup/rollup-android-arm-eabi@4.12.1':
     resolution: {integrity: sha512-iU2Sya8hNn1LhsYyf0N+L4Gf9Qc+9eBTJJJsaOGUp+7x4n2M9dxTt8UvhJl3oeftSjblSlpCfvjA/IfP3g5VjQ==}
@@ -367,10 +354,6 @@ snapshots:
 
   '@esbuild/win32-x64@0.19.12':
     optional: true
-
-  '@jl-org/cvs@0.0.5': {}
-
-  '@jl-org/tool@1.3.6': {}
 
   '@rollup/rollup-android-arm-eabi@4.12.1':
     optional: true
