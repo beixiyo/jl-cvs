@@ -450,23 +450,6 @@ onMounted(() => {
 
 ```ts
 /**
- * 截取图片的一部分，返回 base64 | blob
- * @param img 图片
- * @param opts 配置
- * @param resType 需要返回的文件格式，默认 `base64`
- */
-export declare function cutImg<T extends TransferType = 'base64'>(img: HTMLImageElement, opts?: CutImgOpts, resType?: T): HandleImgReturn<T>;
-
-/**
- * 压缩图片
- * @param img 图片
- * @param resType 需要返回的文件格式，默认 `base64`
- * @param quality 压缩质量，默认 0.5
- * @param mimeType 图片类型，默认 `image/webp`。`image/jpeg | image/webp` 才能压缩，
- */
-export declare function compressImg<T extends TransferType = 'base64'>(img: HTMLImageElement, resType?: T, quality?: number, mimeType?: 'image/jpeg' | 'image/webp'): HandleImgReturn<T>;
-
-/**
  * 图片噪点化
  * @param img 图片
  * @param level 噪点等级，默认 100
@@ -486,16 +469,60 @@ export declare function waterMark({ fontSize, gap, text, color, rotate }: WaterM
 };
 
 /**
+ * 裁剪图片指定区域，可设置缩放，返回 base64 | blob
+ * @param img 图片
+ * @param opts 配置
+ * @param resType 需要返回的文件格式，默认 `base64`
+ */
+export declare function cutImg<T extends TransferType = 'base64'>(img: HTMLImageElement, opts?: CutImgOpts, resType?: T): Promise<HandleImgReturn<T>>;
+
+/**
+ * 压缩图片
+ * @param img 图片
+ * @param resType 需要返回的文件格式，默认 `base64`
+ * @param quality 压缩质量，默认 0.5
+ * @param mimeType 图片类型，默认 `image/webp`。`image/jpeg | image/webp` 才能压缩
+ * @returns base64 | blob
+ */
+export declare function compressImg<T extends TransferType = 'base64'>(img: HTMLImageElement, resType?: T, quality?: number, mimeType?: 'image/jpeg' | 'image/webp'): Promise<HandleImgReturn<T>>;
+
+/**
  * 把 canvas 上的图像转成 base64 | blob
  * @param cvs canvas
  * @param resType 需要返回的文件格式，默认 `base64`
- * @param type 图片的 MIME 格式
+ * @param mimeType 图片的 MIME 格式
  * @param quality 压缩质量
  */
-export declare function getCvsImg<T extends TransferType = 'base64'>(cvs: HTMLCanvasElement, resType?: T, mimeType?: string, quality?: number): HandleImgReturn<T>;
+export declare function getCvsImg<T extends TransferType = 'base64'>(cvs: HTMLCanvasElement, resType?: T, mimeType?: string, quality?: number): Promise<HandleImgReturn<T>>;
 
-/** Blob 转 Base64 */
+/**
+ * Blob 转 Base64
+ */
 export declare function blobToBase64(blob: Blob): Promise<string>;
+
+/**
+ * Base64 转 Blob
+ * @param base64Str base64
+ * @param mimeType 文件类型，默认 application/octet-stream
+ */
+export declare function base64ToBlob(base64Str: string, mimeType?: string): Blob;
+
+/**
+ * 把 http url 转 blob
+ */
+export declare function urlToBlob(url: string): Promise<Blob>;
+
+/**
+ * blob 转成 Stream，方便浏览器和 Node 互操作
+ */
+export declare function blobToStream(blob: Blob): Promise<ReadableStream>;
+
+/**
+ * 判断图片的 src 是否可用，可用则返回图片
+ * @param src 图片
+ * @param setImg 图片加载前执行的回调函数
+ */
+export declare const getImg: (src: string, setImg?: ((img: HTMLImageElement) => void) | undefined) => Promise<false | HTMLImageElement>;
 ```
 
 ---
@@ -525,7 +552,7 @@ type Options = {
 ---
 
 
-## #ImageData 处理
+## ImageData 处理
 ```ts
 /**
  * 灰度化算法：加权灰度化
@@ -551,6 +578,25 @@ export declare const enhanceContrast: (imageData: ImageData, factor?: number) =>
  * @returns
  */
 export declare const adaptiveBinarize: (imageData: ImageData, threshold?: number) => ImageData;
+
+/**
+ * 放大 ImageData 到指定倍数
+ * @returns 返回一个新的 ImageData
+ */
+export declare function scaleImgData(imgData: ImageData, scale: number): ImageData;
+
+/**
+ * 传入图片地址，返回 ImageData
+ */
+export declare function getImgData(src: string, setImg?: (img: HTMLImageElement) => string): Promise<{
+    ctx: CanvasRenderingContext2D;
+    cvs: HTMLCanvasElement;
+    imgData: ImageData;
+    width: number;
+    height: number;
+    naturalWidth: number;
+    naturalHeight: number;
+}>;
 ```
 
 ---
@@ -559,11 +605,19 @@ export declare const adaptiveBinarize: (imageData: ImageData, threshold?: number
 ## Canvas 辅助函数
 ```ts
 /**
- * 根据半径和角度获取坐标
+ * 设置字体，默认居中
+ */
+export declare function setFont(ctx: CanvasRenderingContext2D, options: CtxFontOpt): void;
+
+/** 清除 canvas 整个画布的内容 */
+export declare function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void;
+
+/**
+ * 根据半径和角度获取 DOM 坐标
  * @param r 半径
  * @param deg 角度
  */
-export declare function calcCoord(r: number, deg: number): number[];
+export declare function calcCoord(r: number, deg: number): readonly [number, number];
 
 /**
  * 创建一个指定宽高的画布
@@ -578,41 +632,25 @@ export declare function createCvs(width?: number, height?: number, options?: Can
 };
 
 /**
- * 取出`canvas`用一维数组描述的颜色中，某个坐标的`RGBA`数组
- * 注意坐标从 0 开始
+ * 取出 `canvas` 用一维数组描述的颜色中，某个坐标的`RGBA`数组
+ * ### 注意坐标从 0 开始
  * @param x 宽度中的第几列
  * @param y 高度中的第几行
- * @param imgData ctx.getImageData 方法获取的 ImageData 对象的 data 属性
- * @param width 图像区域宽度
+ * @param imgData ctx.getImageData 方法获取的 ImageData
  * @returns `RGBA`数组
  */
-export declare function getPixel(x: number, y: number, imgData: ImageData['data'], width: number): Pixel;
+export declare function getPixel(x: number, y: number, imgData: ImageData): Pixel;
 
 /**
  * 美化 ctx.getImageData.data 属性
  * 每一行为一个大数组，每个像素点为一个小数组
- * @param imgData ctx.getImageData 方法获取的 ImageData 对象的 data 属性
- * @param width 图像区域宽度
+ * @param imgData ctx.getImageData 方法获取的 ImageData
  */
-export declare function parseImgData(imgData: ImageData['data'], width: number, height: number): number[][][];
+export declare function parseImgData(imgData: ImageData): Pixel[][];
 
 /** 给 canvas 某个像素点填充颜色的函数 */
 export declare function fillPixel(ctx: CanvasRenderingContext2D, x: number, y: number, color: string): void;
 
-/**
- * 设置字体，默认居中
- */
-export declare function setFont(ctx: CanvasRenderingContext2D, { size, family, weight, textAlign, textBaseline, color }: CtxFontOpt): void;
-
-/** 清除 canvas 整个画布的内容 */
-export declare function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void;
-
-/**
- * 判断图片的 src 是否可用，可用则返回图片
- * @param src 图片
- * @param setImg 图片加载前执行的回调函数
- */
-export declare const getImg: (src: string, setImg?: (img: HTMLImageElement) => void) => Promise<false | HTMLImageElement>;
 ```
 
 ---
@@ -640,6 +678,7 @@ export declare function getColorInfo(color: string): {
 
 /** 获取十六进制随机颜色 */
 export declare function getColor(): string;
+
 /** 随机十六进制颜色数组 */
 export declare function getColorArr(size: number): string[];
 
@@ -653,11 +692,11 @@ export declare function hexColorToRaw(color: string): string;
 /** 十六进制 转 RGB */
 export declare function hexToRGB(color: string): string;
 
-/** rgb转十六进制 */
-export declare function rgbToHex(color: string): string;
+/** RGB 转十六进制 */
+export declare function rgbToHex(color: string): string | undefined;
 
 /**
- * 淡化颜色透明度 支持`rgb`和十六进制
+ * 淡化颜色透明度，支持 `RGB` 和 `十六进制`
  * @param color rgba(0, 239, 255, 1)
  * @param strength 淡化的强度
  * @returns 返回 RGBA 类似如下格式的颜色 `rgba(0, 0, 0, 0.1)`
@@ -665,7 +704,7 @@ export declare function rgbToHex(color: string): string;
 export declare function lightenColor(color: string, strength?: number): string;
 
 /**
- * 颜色添加透明度 支持`rgb`和十六进制
+ * 颜色添加透明度，支持 `RGB` 和 `十六进制`
  * @param color 颜色
  * @param opacity 透明度
  * @returns 返回十六进制 类似如下格式的颜色 `#ffffff11`

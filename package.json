@@ -1,6 +1,6 @@
 {
   "name": "@jl-org/cvs",
-  "version": "1.0.1",
+  "version": "1.0.11",
   "description": "利用 Canvas 创造令人惊叹的效果",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -37,6 +37,6 @@
   },
   "homepage": "https://github.com/beixiyo/jl-cvs",
   "dependencies": {
-    "@jl-org/tool": "^1.7.87"
+    "@jl-org/tool": "^1.7.9"
   }
 }
