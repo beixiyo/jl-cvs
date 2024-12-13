@@ -5,7 +5,9 @@ import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   plugins: [
-    dts()
+    dts({
+      root: fileURLToPath(new URL('./src', import.meta.url)),
+    })
   ],
   resolve: {
     alias: {
@@ -23,4 +25,6 @@ export default defineConfig({
       name: '_jlCvs',
     },
   },
+  // index.html 入口文件
+  root: fileURLToPath(new URL('./test', import.meta.url)),
 })

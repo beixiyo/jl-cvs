@@ -1,5 +1,5 @@
 import { createCvs, getDPR } from './'
-import { TransferType } from '@jl-org/tool'
+import { blobToBase64, getImg, isStr, TransferType } from '@jl-org/tool'
 
 export {
   cutImg,
@@ -90,6 +90,33 @@ export function waterMark({
   }
 }
 
+/**
+ * 用 Canvas 层层叠加图片，支持 base64 | blob
+ */
+export async function composeImg(
+  srcs: Array<{
+    src: string | Blob
+    left?: number
+    top?: number
+  }>,
+  width: number,
+  height: number
+) {
+  const { cvs, ctx } = createCvs(width, height)
+  for (const item of srcs) {
+    const url = isStr(item.src)
+      ? item.src
+      : await blobToBase64(item.src)
+    const img = await getImg(url)
+    if (!img) {
+      throw new Error('图片不可用')
+    }
+
+    ctx.drawImage(img, item.left ?? 0, item.top ?? 0)
+  }
+
+  return cvs.toDataURL()
+}
 
 export type HandleImgReturn<T extends TransferType> =
   T extends 'blob'

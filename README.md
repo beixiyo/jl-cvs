@@ -469,6 +469,15 @@ export declare function waterMark({ fontSize, gap, text, color, rotate }: WaterM
 };
 
 /**
+ * 用 Canvas 层层叠加图片，支持 base64 | blob
+ */
+export declare function composeImg(srcs: Array<{
+    src: string | Blob;
+    left?: number;
+    top?: number;
+}>, width: number, height: number): Promise<string>;
+
+/**
  * 裁剪图片指定区域，可设置缩放，返回 base64 | blob
  * @param img 图片
  * @param opts 配置

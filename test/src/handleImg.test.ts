@@ -10,7 +10,7 @@ document.body.appendChild(input)
  * 压缩图片测试
  */
 input.onchange = async () => {
-  const file = input.files[0]
+  const file = input.files![0]
   if (!file) return
 
   const base64 = await blobToBase64(file)

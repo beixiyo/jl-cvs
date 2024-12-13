@@ -6,7 +6,7 @@ input.type = 'file'
 document.body.appendChild(input)
 
 input.onchange = async () => {
-  const file = input.files[0]
+  const file = input.files![0]
   if (!file) return
 
   const base64 = await blobToBase64(file)

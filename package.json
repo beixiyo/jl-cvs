@@ -1,6 +1,6 @@
 {
   "name": "@jl-org/cvs",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "利用 Canvas 创造令人惊叹的效果",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "vite build",
-    "test": "pnpm -C ./test dev"
+    "test": "vite"
   },
   "keywords": [
     "canvas",
