@@ -2,9 +2,9 @@
   "name": "@jl-org/cvs",
   "version": "1.0.12",
   "description": "利用 Canvas 创造令人惊叹的效果",
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
-  "type": "module",
   "types": "dist/index.d.ts",
   "files": [
     "/dist"
@@ -19,24 +19,24 @@
     "build": "vite build",
     "test": "vite"
   },
-  "keywords": [
-    "canvas",
-    "jl-canvas",
-    "jl-cvs"
-  ],
-  "author": "CJL",
-  "license": "MIT",
+  "dependencies": {
+    "@jl-org/tool": "^1.7.9"
+  },
   "devDependencies": {
     "@jl-org/ts-tool": "^0.0.8",
     "@types/node": "^20.11.20",
     "vite": "^5.1.5",
     "vite-plugin-dts": "^4.3.0"
   },
+  "keywords": [
+    "canvas",
+    "jl-canvas",
+    "jl-cvs"
+  ],
+  "author": "CJL <2662442385@qq.com>",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://github.com/beixiyo/jl-cvs",
-  "dependencies": {
-    "@jl-org/tool": "^1.7.9"
-  }
+  "homepage": "https://github.com/beixiyo/jl-cvs"
 }
