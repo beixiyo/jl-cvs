@@ -5,6 +5,7 @@ export * from '@/imgToFade'
 export * from '@/imgToTxt'
 
 export * from '@/NoteBoard'
+export * from '@/Ripple'
 export * from '@/scratch'
 export * from '@/ShotImg'
 
