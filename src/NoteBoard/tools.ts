@@ -1,5 +1,5 @@
 import { getDPR } from '@/canvasTool'
-import type { NoteBoardOptions, NoteBoardOptionsRequired } from './type'
+import type { AddCanvasOpts, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
 
 
 export function mergeOpts(
@@ -24,15 +24,18 @@ export function mergeOpts(
   }
 }
 
-export function setCanvas(canvas: HTMLCanvasElement, width: number, height: number) {
+export function setCanvas(opts: Required<AddCanvasOpts> & { parentEl: HTMLElement }) {
+  const { width, height, center, canvas, parentEl } = opts
+  const { offsetHeight, offsetWidth } = parentEl
+  parentEl.appendChild(canvas)
+
   canvas.width = width
   canvas.height = height
   canvas.style.position = 'absolute'
 
-  const parent = canvas.parentElement!,
-    { offsetHeight, offsetWidth } = parent
-
   // 居中
-  canvas.style.top = `${(offsetHeight - height) / 2}px`
-  canvas.style.left = `${(offsetWidth - width) / 2}px`
+  if (center) {
+    canvas.style.top = `${(offsetHeight - height) / 2}px`
+    canvas.style.left = `${(offsetWidth - width) / 2}px`
+  }
 }

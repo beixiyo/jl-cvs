@@ -159,6 +159,25 @@ export type ImgInfo = {
   rawHeight: number
 }
 
+export type AddCanvasOpts = {
+  canvas: HTMLCanvasElement
+  /**
+   * 宽度
+   * @default 同构造器默认配置
+   */
+  width?: number
+  /**
+   * 高度
+   * @default 同构造器默认配置
+   */
+  height?: number
+  /**
+   * 剧中于父元素中
+   * @default true
+   */
+  center?: boolean
+}
+
 export type RecordPath = {
   path: {
     moveTo: [number, number]

@@ -1,5 +1,6 @@
 import { NoteBoardWithBase64 } from '@/NoteBoard'
 import { genBtn } from './tools'
+import { createCvs } from '@/canvasTool'
 
 
 const WIDTH = 600
@@ -38,7 +39,7 @@ const board = new NoteBoardWithBase64({
  * 居中绘制图片，并自动拉伸大小
  */
 board.drawImg(
-  'http://localhost:8510/src/refactor/Photog/LeftSider/assets/1.webp',
+  new URL('../assets/umr.jpg', import.meta.url).href,
   {
     center: true,
     autoFit: true,
@@ -100,4 +101,14 @@ genBtn('开启/ 关闭拖拽模式', () => {
   board.mode === 'drag'
     ? board.setMode('none')
     : board.setMode('drag')
+})
+
+genBtn('添加红色画板', () => {
+  const { ctx, cvs } = createCvs()
+  board.addCanvas('redCanvs', {
+    canvas: cvs,
+  })
+
+  ctx.fillStyle = '#f405'
+  ctx.fillRect(0, 0, cvs.width, cvs.height)
 })

@@ -1,7 +1,6 @@
-import { clearAllCvs, createCvs, getImg } from '@/canvasTool'
-import { cutImg, getCvsImg } from '@/canvasTool/handleImg'
+import { clearAllCvs, createCvs, getImg, cutImg, getCvsImg } from '@/canvasTool'
 import { mergeOpts, setCanvas } from './tools'
-import type { CanvasAttrs, Mode, DrawImgOptions, ImgInfo, RecordPath, CanvasItem, ExportOptions, NoteBoardOptions, DrawMapVal, NoteBoardOptionsRequired } from './type'
+import type { CanvasAttrs, Mode, DrawImgOptions, ImgInfo, RecordPath, CanvasItem, ExportOptions, NoteBoardOptions, DrawMapVal, NoteBoardOptionsRequired, AddCanvasOpts } from './type'
 import { excludeKeys, getCircleCursor, UnRedoLinkedList } from '@/utils'
 import { DrawShape } from '@/Shapes'
 
@@ -22,9 +21,9 @@ export const DRAW_MAP = new WeakMap<
  * 
  * - 分层自适应绘图
  * 
- * - 擦除
- * - 撤销
- * - 重做
+ * - 擦除（仅针对 brushCanvas 画板）
+ * - 撤销（仅针对 brushCanvas 画板）
+ * - 重做（仅针对 brushCanvas 画板）
  * 
  * - 缩放
  * - 拖拽
@@ -48,19 +47,7 @@ export class NoteBoard extends DrawShape {
   imgInfo?: ImgInfo
 
   /** 存储的所有 Canvas 信息 */
-  canvasList: CanvasItem[] = [
-    {
-      canvas: this.canvas,
-      ctx: this.ctx,
-      name: 'brushCanvas'
-    },
-    {
-      canvas: this.imgCanvas,
-      ctx: this.imgCtx,
-      name: 'imgCanvas'
-    }
-  ]
-
+  canvasList: CanvasItem[] = []
   private opts: NoteBoardOptionsRequired
 
   mode: Mode = 'draw'
@@ -95,28 +82,21 @@ export class NoteBoard extends DrawShape {
     })
 
     this.opts = mergeOpts(opts)
-    this.setDrawMap()
-
-    const {
-      el,
-      width,
-      height,
-    } = this.opts
+    this.initDrawMap()
 
     // 设置画笔画板置顶
     this.canvas.style.zIndex = '99'
+    this.el = opts.el
 
-    /**
-     * 大小属性等设置
-     */
-    for (const item of this.canvasList) {
-      el.appendChild(item.canvas)
-      setCanvas(item.canvas, width, height)
-    }
+    this.addCanvas('imgCanvas', {
+      canvas: this.imgCanvas,
+    })
+    this.addCanvas('brushCanvas', {
+      canvas: this.canvas,
+    })
 
-    el.style.overflow = 'hidden'
-    el.style.position = 'relative'
-    this.el = el
+    this.el.style.overflow = 'hidden'
+    this.el.style.position = 'relative'
 
     this.init()
   }
@@ -191,19 +171,25 @@ export class NoteBoard extends DrawShape {
   }
 
   /**
-   * 导出整个图层
+   * 导出整个图层，或者指定多个 canvas 图层
    */
   async exportAllLayer(
-    options: Omit<ExportOptions, 'canvas'> = {}
+    options: Omit<ExportOptions, 'canvas'> = {},
+    canvasList: HTMLCanvasElement[] = this.canvasList.map((item) => item.canvas)
   ) {
-    const imgSrc = await this.exportImg(options)
-    const maskSrc = await this.exportMask(options)
+    const canvasDataUrls = []
+    for (const canvas of canvasList) {
+      canvasDataUrls.push(await this.exportLayer({
+        ...options,
+        canvas
+      }))
+    }
 
-    const [img, maskImg] = await Promise.all([
-      await getImg(imgSrc),
-      await getImg(maskSrc)
-    ])
-    if (!img || !maskImg) return ''
+    const imgs = await Promise.all(canvasDataUrls.map((item) => getImg(item))) as HTMLImageElement[]
+    for (const item of imgs) {
+      if (!item) return ''
+    }
+    const img = imgs[0]
 
     let width: number,
       height: number
@@ -218,8 +204,9 @@ export class NoteBoard extends DrawShape {
     }
 
     const { ctx, cvs } = createCvs(width, height)
-    ctx.drawImage(img, 0, 0)
-    ctx.drawImage(maskImg, 0, 0)
+    for (const img of imgs) {
+      ctx.drawImage(img, 0, 0)
+    }
 
     return await getCvsImg(cvs, 'base64')
   }
@@ -435,12 +422,15 @@ export class NoteBoard extends DrawShape {
   /**
    * 添加新的画布到 canvasList 中
    */
-  addCanvas(canvas: HTMLCanvasElement, name: string) {
+  addCanvas(name: string, opts: AddCanvasOpts) {
+    const options = this.getAddcanvasOpts(opts)
     this.canvasList.push({
-      canvas,
-      ctx: canvas.getContext('2d') as CanvasRenderingContext2D,
+      canvas: options.canvas,
+      ctx: options.canvas.getContext('2d') as CanvasRenderingContext2D,
       name
     })
+
+    setCanvas(options)
   }
 
   /**
@@ -492,6 +482,18 @@ export class NoteBoard extends DrawShape {
   /***************************************************
    *                    Private
    ***************************************************/
+
+  private getAddcanvasOpts(opts: AddCanvasOpts) {
+    return {
+      width: this.opts.width,
+      height: this.opts.height,
+      center: true,
+      parentEl: this.el,
+      ...opts,
+    } satisfies Required<AddCanvasOpts> & {
+      parentEl: HTMLElement
+    }
+  }
 
   /**
    * 是否为绘制模式
@@ -550,7 +552,7 @@ export class NoteBoard extends DrawShape {
     }
 
     if (!this.canDraw) return
-    
+
     // 画笔模式
     this.isDrawing = true
     this.ctx.beginPath()
@@ -707,7 +709,7 @@ export class NoteBoard extends DrawShape {
     this.setMode(currentMode)
   }
 
-  private setDrawMap() {
+  private initDrawMap() {
     const draw = () => {
       this.clear(false)
 
