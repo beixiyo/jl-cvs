@@ -86,7 +86,7 @@ genBtn('重置大小', () => {
 })
 
 genBtn('矩形', () => {
-  board.setShapeStyle({
+  board.drawShape.setShapeStyle({
     fillStyle: '#fff',
     lineWidth: 2,
     strokeStyle: '#409eff',
@@ -95,7 +95,7 @@ genBtn('矩形', () => {
 })
 
 genBtn('圆形', () => {
-  board.setShapeStyle({
+  board.drawShape.setShapeStyle({
     fillStyle: '#f405',
     lineWidth: 2,
     strokeStyle: '#000',

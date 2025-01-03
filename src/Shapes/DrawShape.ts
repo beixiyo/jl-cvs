@@ -43,7 +43,7 @@ export class DrawShape {
   drawShapeDragX = 0
   drawShapeDragY = 0
 
-  initial(drawShapeOpts: DrawShapeOpts) {
+  init(drawShapeOpts: DrawShapeOpts) {
     this.drawShapeCanvas = drawShapeOpts.canvas
     this.drawShapeContext = drawShapeOpts.context
     this.drawShapeBindEvent()
@@ -225,7 +225,7 @@ export class DrawShape {
     this.curDragShape = null
   }
 
-  protected get drawMap() {
+  get drawMap() {
     return DRAW_MAP.get(this)
   }
 }
