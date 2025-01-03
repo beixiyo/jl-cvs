@@ -24,7 +24,7 @@
     "test": "vite"
   },
   "dependencies": {
-    "@jl-org/tool": "^1.7.9"
+    "@jl-org/tool": "^1.7.96"
   },
   "devDependencies": {
     "@jl-org/ts-tool": "^0.0.8",

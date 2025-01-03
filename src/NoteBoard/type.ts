@@ -145,17 +145,27 @@ export type DrawImgOptions = {
 }
 
 export type ImgInfo = {
+  /** 图片 */
   img: HTMLImageElement
+  /** 最小缩放 */
   minScale: number
+  /** X 轴缩放 */
   scaleX: number
+  /** Y 轴缩放 */
   scaleY: number
 
+  /** 绘制图片居中后，和左边的距离 */
   x: number
+  /** 绘制图片居中后，和顶部的距离 */
   y: number
 
+  /** 绘制图片实际宽度 */
   drawWidth: number
+  /** 绘制图片实际高度 */
   drawHeight: number
+  /** 原始图片宽度 */
   rawWidth: number
+  /** 原始图片高度 */
   rawHeight: number
 }
 
@@ -206,6 +216,10 @@ export type ExportOptions = {
    * 指定导出的画布
    */
   canvas?: HTMLCanvasElement
+  /**
+   * 可手动提供图片尺寸信息
+   */
+  imgInfo?: ImgInfo
 }
 
 export type CanvasItem = {

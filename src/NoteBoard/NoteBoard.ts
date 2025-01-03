@@ -43,7 +43,10 @@ export class NoteBoard extends DrawShape {
   imgCanvas = document.createElement('canvas')
   /** 图片画板 上下文 */
   imgCtx = this.imgCanvas.getContext('2d') as CanvasRenderingContext2D
-  /** 绘制的图片尺寸信息 */
+  /** 
+   * 记录绘制的图片尺寸信息
+   * 有了它才能自适应尺寸和居中绘制
+   */
   imgInfo?: ImgInfo
 
   /** 存储的所有 Canvas 信息 */
@@ -58,8 +61,8 @@ export class NoteBoard extends DrawShape {
   /**
    * 记录缩放、位置等属性
    */
-  private drawStart = { x: 0, y: 0 }
   private isDrawing = false
+  private drawStart = { x: 0, y: 0 }
 
   private isDragging = false
   private dragStart = { x: 0, y: 0 }
@@ -219,21 +222,21 @@ export class NoteBoard extends DrawShape {
       exportOnlyImgArea = false,
       mimeType,
       quality,
-      canvas = this.canvas
+      canvas = this.canvas,
+      imgInfo = this.imgInfo
     }: ExportOptions = {}
   ) {
     /**
      * 没有记录图像信息，或者不仅仅导出图像区域
+     * 则不做任何处理，直接导出整个画布
      */
-    if (!exportOnlyImgArea || !this.imgInfo) {
+    if (!exportOnlyImgArea || !imgInfo) {
       return getCvsImg(canvas, 'base64', mimeType, quality)
     }
 
     const rawBase64 = await getCvsImg(canvas, 'base64', mimeType, quality)
     const img = await getImg(rawBase64)
     if (!img) return ''
-
-    const { imgInfo } = this
 
     return await cutImg(img, {
       x: imgInfo.x,
@@ -276,8 +279,8 @@ export class NoteBoard extends DrawShape {
       height: canvasHeight
     } = this.opts
 
-    const imgWidth = options.imgWidth ?? newImg.width,
-      imgHeight = options.imgHeight ?? newImg.height
+    const imgWidth = options.imgWidth ?? newImg.naturalWidth,
+      imgHeight = options.imgHeight ?? newImg.naturalHeight
 
     const scaleX = canvasWidth / imgWidth,
       scaleY = canvasHeight / imgHeight,
