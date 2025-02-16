@@ -5,15 +5,15 @@ import type { BinaryRow } from './type'
 /**
  * ### 卷积比对
  * 返回是否匹配，匹配个数，匹配位置
- * @param binData 
- * @param threshold 
- * @returns 
+ * @param binData
+ * @param threshold
+ * @returns
  */
 export function convolution(binData: BinaryRow[], threshold = 1) {
   const codes = Object.keys(CODE_TEMPLATES)
   const h = binData.length
   const w = binData[0].length
-  const matches = []
+  const matches: any[] = []
 
   let code: string,
     tplData: BinaryRow[],
@@ -22,7 +22,7 @@ export function convolution(binData: BinaryRow[], threshold = 1) {
 
   function doConvolution() {
     // 返回1的个数，重合个数，重合百分比(相似度)
-    const compare = (x, y, code) => {
+    const compare = (x: number, y: number, code: string) => {
       let effectivePointNum = 0
       for (let i = 0; i < tplH; i++) {
         for (let j = 0; j < tplW; j++) {
@@ -61,4 +61,4 @@ export function convolution(binData: BinaryRow[], threshold = 1) {
   // 按位置(x轴)排序
   matches.sort((a, b) => a.x - b.x)
   return matches
-} 
+}

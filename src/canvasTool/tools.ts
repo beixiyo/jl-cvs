@@ -1,11 +1,15 @@
 export {
   calcCoord,
   createCvs,
+  getImgDataIndex,
   getPixel,
   parseImgData,
   fillPixel,
+  eachPixel,
+  scaleImgData,
+  getImgData,
   getWinWidth,
-  getWinHeight
+  getWinHeight,
 } from '@jl-org/tool'
 
 

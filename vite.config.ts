@@ -24,6 +24,9 @@ export default defineConfig({
       formats: ['es', 'cjs', 'iife'],
       name: '_jlCvs',
     },
+    rollupOptions: {
+      external: ['@jl-org/tool']
+    }
   },
   // index.html 入口文件
   root: fileURLToPath(new URL('./test', import.meta.url)),
