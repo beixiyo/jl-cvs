@@ -614,23 +614,18 @@ export declare const enhanceContrast: (imageData: ImageData, factor?: number) =>
 export declare const adaptiveBinarize: (imageData: ImageData, threshold?: number) => ImageData;
 
 /**
- * 放大 ImageData 到指定倍数
- * @returns 返回一个新的 ImageData
+ * 传入一张参考图，返回另一张图片，其中参考图的非透明区域将被裁剪掉
+ * @param rawImg 原图
+ * @param referenceImg 参考图
  */
-export declare function scaleImgData(imgData: ImageData, scale: number): ImageData;
+export declare function pickImgArea(rawImg: string, referenceImg: string): Promise<ImageData>;
 
 /**
- * 传入图片地址，返回 ImageData
+ * 传入一张参考图，返回另一张图片，其中参考图的透明区域将被裁剪掉
+ * @param rawImg 原图
+ * @param referenceImg 参考图
  */
-export declare function getImgData(src: string, setImg?: (img: HTMLImageElement) => string): Promise<{
-    ctx: CanvasRenderingContext2D;
-    cvs: HTMLCanvasElement;
-    imgData: ImageData;
-    width: number;
-    height: number;
-    naturalWidth: number;
-    naturalHeight: number;
-}>;
+export declare function invertImgArea(rawImg: string, referenceImg: string): Promise<ImageData>;
 ```
 
 ---

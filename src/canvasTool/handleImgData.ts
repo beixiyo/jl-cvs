@@ -55,9 +55,11 @@ export const adaptiveBinarize = (imageData: ImageData, threshold = 128): ImageDa
  * @param referenceImg 参考图
  */
 export async function pickImgArea(
-  rawImgData: ImageData,
+  rawImg: string,
   referenceImg: string
 ) {
+  const rawImgDataObj = await getImgData(rawImg)
+  const rawImgData = rawImgDataObj.imgData
   const referenceImgData = await getImgData(referenceImg)
 
   eachPixel(referenceImgData.imgData, (pixel, x, y, index) => {
@@ -78,9 +80,11 @@ export async function pickImgArea(
  * @param referenceImg 参考图
  */
 export async function invertImgArea(
-  rawImgData: ImageData,
+  rawImg: string,
   referenceImg: string
 ) {
+  const rawImgDataObj = await getImgData(rawImg)
+  const rawImgData = rawImgDataObj.imgData
   const referenceImgData = await getImgData(referenceImg)
 
   eachPixel(referenceImgData.imgData, (pixel, x, y, index) => {
