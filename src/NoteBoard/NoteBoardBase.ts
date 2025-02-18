@@ -18,7 +18,7 @@ export abstract class NoteBoardBase {
   imgCanvas = document.createElement('canvas')
   /** 图片画板 上下文 */
   imgCtx = this.imgCanvas.getContext('2d') as CanvasRenderingContext2D
-  /** 
+  /**
    * 记录绘制的图片尺寸信息
    * 有了它才能自适应尺寸和居中绘制
    */
@@ -61,7 +61,7 @@ export abstract class NoteBoardBase {
    */
   abstract redo(): void
 
-  /** 
+  /**
    * 移除所有事件
    */
   abstract rmEvent(): void
@@ -95,7 +95,9 @@ export abstract class NoteBoardBase {
     })
 
     this.el.style.overflow = 'hidden'
-    this.el.style.position = 'relative'
+    if (this.el.style.position === 'static') {
+      this.el.style.position = 'relative'
+    }
     this.setStyle(this.opts)
   }
 
@@ -373,7 +375,7 @@ export abstract class NoteBoardBase {
 
   /**
    * 设置光标样式
-   * @param lineWidth 大小 
+   * @param lineWidth 大小
    * @param strokeStyle 颜色
    */
   setCursor(lineWidth?: number, strokeStyle?: string) {
