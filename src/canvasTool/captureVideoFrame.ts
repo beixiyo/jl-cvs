@@ -5,7 +5,7 @@ import { createCvs, getDPR } from './'
 
 /**
  * 截取视频某一帧图片，大于总时长则用最后一秒
- * @param fileOrUrl 文件或者链接 
+ * @param fileOrUrl 文件或者链接
  * @param time 时间，可以是数组
  * @param resType 返回类型
  */
@@ -88,6 +88,7 @@ export async function captureVideoFrame<
     video.muted = true
     video.src = src
     video.autoplay = true
+    video.crossOrigin = 'anonymous'
 
     return new Promise<HandleImgReturn<T>>((resolve, reject) => {
       video.oncanplay = () => {
