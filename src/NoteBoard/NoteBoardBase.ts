@@ -95,7 +95,7 @@ export abstract class NoteBoardBase {
     })
 
     this.el.style.overflow = 'hidden'
-    if (this.el.style.position === 'static') {
+    if (getComputedStyle(this.el).position === 'static') {
       this.el.style.position = 'relative'
     }
     this.setStyle(this.opts)

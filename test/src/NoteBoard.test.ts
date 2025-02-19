@@ -39,7 +39,7 @@ const board = new NoteBoard({
  * 居中绘制图片，并自动拉伸大小
  */
 board.drawImg(
-  new URL('../assets/umr.jpg', import.meta.url).href,
+  'http://localhost:8510/src/pages/Photog/Free/assets/try1.webp',
   {
     center: true,
     autoFit: true,
