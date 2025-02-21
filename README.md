@@ -500,6 +500,7 @@ export declare function composeImg(srcs: Array<{
     src: string | Blob;
     left?: number;
     top?: number;
+    setImg?: (img: HTMLImageElement) => void;
 }>, width: number, height: number): Promise<string>;
 
 /**

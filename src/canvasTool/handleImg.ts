@@ -50,7 +50,7 @@ export function imgToNoise(img: HTMLImageElement, level = 100) {
 
 
 /**
- * 添加水印  
+ * 添加水印
  * 返回 base64 和图片大小，你可以用 CSS 设置上
  * @example
  * background-image: url(${base64});
@@ -98,6 +98,7 @@ export async function composeImg(
     src: string | Blob
     left?: number
     top?: number
+    setImg?: (img: HTMLImageElement) => void
   }>,
   width: number,
   height: number
@@ -107,7 +108,8 @@ export async function composeImg(
     const url = isStr(item.src)
       ? item.src
       : await blobToBase64(item.src)
-    const img = await getImg(url)
+
+    const img = await getImg(url, item.setImg)
     if (!img) {
       throw new Error('图片不可用')
     }
