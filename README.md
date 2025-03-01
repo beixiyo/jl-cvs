@@ -627,6 +627,13 @@ export declare function pickImgArea(rawImg: string, referenceImg: string): Promi
  * @param referenceImg 参考图
  */
 export declare function invertImgArea(rawImg: string, referenceImg: string): Promise<ImageData>;
+
+/**
+ * 把图片的非透明区域，换成指定颜色
+ * @param imgUrl 图片
+ * @param replaceColor 替换的颜色
+ */
+export declare function cutoutImgToMask(imgUrl: string, replaceColor: string): Promise<string>;
 ```
 
 ---

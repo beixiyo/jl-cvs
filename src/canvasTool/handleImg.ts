@@ -1,5 +1,5 @@
 import { createCvs, getDPR } from './'
-import { blobToBase64, getImg, isStr, TransferType } from '@jl-org/tool'
+import { blobToBase64, eachPixel, getColorInfo, getCvsImg, getImg, getImgData, isStr, TransferType } from '@jl-org/tool'
 
 export {
   cutImg,
@@ -118,6 +118,29 @@ export async function composeImg(
   }
 
   return cvs.toDataURL()
+}
+
+/**
+ * 把图片的非透明区域，换成指定颜色
+ * @param imgUrl 图片
+ * @param replaceColor 替换的颜色
+ */
+export async function cutoutImgToMask(imgUrl: string, replaceColor: string) {
+  const imgData = await getImgData(imgUrl)
+  const { r, g, b, a } = getColorInfo(replaceColor)
+  eachPixel(imgData.imgData, ([R, G, B, A], x, y, index) => {
+    const data = imgData.imgData.data
+    if (A !== 0) {
+      data[index] = r
+      data[index + 1] = g
+      data[index + 2] = b
+      data[index + 3] = a * 255
+    }
+  })
+
+  const { cvs, ctx } = createCvs(imgData.width, imgData.height)
+  ctx.putImageData(imgData.imgData, 0, 0)
+  return getCvsImg(cvs, 'base64')
 }
 
 export type HandleImgReturn<T extends TransferType> =
