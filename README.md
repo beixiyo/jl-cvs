@@ -20,17 +20,26 @@ npm i @jl-org/cvs
 ## 全部函数
 
 - [图像编辑画板，可绘画、擦除、缩放、撤销、重做、绘制形状等](#图像编辑画板)
+<br />
+
 - [文本绘制 (图片 | 视频 | 文字)](#文本绘制-图片--视频--文字)
 - [放烟花](#放烟花)
 - [二段爆炸的烟花](#二段爆炸的烟花)
 - [图片灰飞烟灭效果](#图片灰飞烟灭效果)
+<br />
+
 - [拖拽区域截图](#拖拽区域截图)
 - [水波纹](水波纹)
 - [刮刮乐](#刮刮乐)
 - [黑客科技数字墙](#黑客科技数字墙)
+<br />
+
 - [图像处理](#图像处理)
+- [提取图像边缘](#提取图像边缘)
 - [截取视频某一帧](#截取视频某一帧)
 - [ImageData 处理，灰度、对比度、二值化等](#ImageData-处理)
+<br />
+
 - [辅助函数](#canvas-辅助函数)
 - [颜色处理](#颜色处理)
 - [svg](#svg)
@@ -558,6 +567,21 @@ export declare function blobToStream(blob: Blob): Promise<ReadableStream>;
  * @param setImg 图片加载前执行的回调函数
  */
 export declare const getImg: (src: string, setImg?: ((img: HTMLImageElement) => void) | undefined) => Promise<false | HTMLImageElement>;
+```
+
+---
+
+
+# 提取图像边缘
+```ts
+/**
+ * 提取图片边缘
+ * @param source 图片URL或ImageData对象
+ * @param options 配置项
+ */
+export declare function getImgEdge(source: string | ImageData, options?: {
+    threshold?: number;
+}): Promise<ImageData>;
 ```
 
 ---

@@ -2,13 +2,12 @@ import { eachPixel, getImgData } from '@jl-org/tool'
 
 /**
  * 灰度化算法：加权灰度化
- * @returns
  */
 export const adaptiveGrayscale = (imageData: ImageData): ImageData => {
   const data = imageData.data
   for (let i = 0; i < data.length; i += 4) {
-    // 使用加权公式，更符合人眼感知的亮度
-    const gray = 0.3 * data[i] + 0.5 * data[i + 1] + 0.2 * data[i + 2]
+    // 灰度公式: Y = 0.299*R + 0.587*G + 0.114*B
+    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
     data[i] = data[i + 1] = data[i + 2] = gray
   }
   return imageData
@@ -17,7 +16,6 @@ export const adaptiveGrayscale = (imageData: ImageData): ImageData => {
 /**
  * 对比度增强
  * @param factor 因数，默认 1.2
- * @returns
  */
 export const enhanceContrast = (imageData: ImageData, factor: number = 1.2): ImageData => {
   const data = imageData.data
@@ -37,7 +35,6 @@ export const enhanceContrast = (imageData: ImageData, factor: number = 1.2): Ima
  * 最后再调用此函数，以获得最好的图像效果
  *
  * @param threshold 阈值边界，默认 128
- * @returns
  */
 export const adaptiveBinarize = (imageData: ImageData, threshold = 128): ImageData => {
   const data = imageData.data
