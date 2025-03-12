@@ -1,4 +1,4 @@
-import { clearAllCvs, createCvs, getImg, cutImg, getCvsImg } from '@/canvasTool'
+import { clearAllCvs, createCvs, getImg, cutImg, getCvsImg, getDPR } from '@/canvasTool'
 import { mergeOpts, setCanvas } from './tools'
 import type { NoteBoardOptions, CanvasAttrs, Mode, ImgInfo, NoteBoardOptionsRequired, DrawImgOptions, CanvasItem, ExportOptions, AddCanvasOpts } from './type'
 import { getCircleCursor } from '@/utils'
@@ -6,6 +6,8 @@ import type { ShapeType } from '@/Shapes'
 
 
 export abstract class NoteBoardBase {
+
+  static dpr = getDPR()
 
   /** 容器 */
   el: HTMLElement
@@ -81,24 +83,29 @@ export abstract class NoteBoardBase {
   abstract setMode(mode: any): void
 
   constructor(opts: NoteBoardOptions) {
-    this.opts = mergeOpts(opts)
+    this.opts = mergeOpts(opts, NoteBoardBase.dpr)
 
     // 设置画笔画板置顶
     this.canvas.style.zIndex = '99'
     this.el = opts.el
 
-    this.addCanvas('imgCanvas', {
-      canvas: this.imgCanvas,
-    })
-    this.addCanvas('brushCanvas', {
-      canvas: this.canvas,
-    })
-
     this.el.style.overflow = 'hidden'
     if (getComputedStyle(this.el).position === 'static') {
       this.el.style.position = 'relative'
     }
+
+    this.addCanvas(
+      'imgCanvas',
+      { canvas: this.imgCanvas }
+    )
+    this.addCanvas(
+      'brushCanvas',
+      { canvas: this.canvas }
+    )
     this.setStyle(this.opts)
+
+    this.ctx.scale(NoteBoardBase.dpr, NoteBoardBase.dpr)
+    this.imgCtx.scale(NoteBoardBase.dpr, NoteBoardBase.dpr)
   }
 
   protected get canDraw() {
@@ -263,9 +270,10 @@ export abstract class NoteBoardBase {
 
     context.drawImage(
       newImg,
-      x, y,
+      x,
+      y,
       drawWidth,
-      drawHeight
+      drawHeight,
     )
 
     if (needRecordImgInfo) {
@@ -336,7 +344,8 @@ export abstract class NoteBoardBase {
       name
     })
 
-    setCanvas(options)
+    options.parentEl.appendChild(options.canvas)
+    setCanvas(options, NoteBoardBase.dpr)
   }
 
   /**
@@ -355,7 +364,7 @@ export abstract class NoteBoardBase {
       this.opts[k] = attr
       if (k === 'width' || k === 'height') {
         for (const item of this.canvasList) {
-          item.canvas[k] = attr
+          item.canvas[k] = attr * NoteBoardBase.dpr
         }
         continue
       }

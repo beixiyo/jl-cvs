@@ -1,14 +1,14 @@
-import { getDPR } from '@/canvasTool'
 import type { AddCanvasOpts, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
 
 
 export function mergeOpts(
   opts: NoteBoardOptions,
+  dpr: number
 ): NoteBoardOptionsRequired {
 
   const defaultOpts: NoteBoardOptionsRequired = {
-    width: 800 * getDPR(),
-    height: 600 * getDPR(),
+    width: 800 * dpr,
+    height: 600 * dpr,
     minScale: 0.5,
     maxScale: 8,
 
@@ -24,14 +24,21 @@ export function mergeOpts(
   }
 }
 
-export function setCanvas(opts: Required<AddCanvasOpts> & { parentEl: HTMLElement }) {
+export function setCanvas(
+  opts: Required<AddCanvasOpts> & {
+    parentEl: HTMLElement
+  },
+  dpr: number
+) {
   const { width, height, center, canvas, parentEl } = opts
   const { offsetHeight, offsetWidth } = parentEl
-  parentEl.appendChild(canvas)
 
-  canvas.width = width
-  canvas.height = height
+  canvas.width = width * dpr
+  canvas.height = height * dpr
+
   canvas.style.position = 'absolute'
+  canvas.style.width = '100%'
+  canvas.style.height = '100%'
 
   // 居中
   if (center) {
