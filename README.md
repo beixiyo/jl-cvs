@@ -670,7 +670,10 @@ export declare function invertImgArea(rawImg: string, referenceImg: string): Pro
  * @param imgUrl 图片
  * @param replaceColor 替换的颜色
  */
-export declare function cutoutImgToMask(imgUrl: string, replaceColor: string): Promise<string>;
+export declare function cutoutImgToMask(imgUrl: string, replaceColor: string, { smoothEdge, smoothRadius, }?: CutImgToMaskOpts): Promise<{
+    base64: string;
+    imgData: ImageData;
+}>;
 ```
 
 ---
