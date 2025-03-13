@@ -35,6 +35,7 @@ npm i @jl-org/cvs
 <br />
 
 - [图像处理](#图像处理)
+- [抠图](#抠图)
 - [提取图像边缘](#提取图像边缘)
 - [截取视频某一帧](#截取视频某一帧)
 - [ImageData 处理，灰度、对比度、二值化等](#ImageData-处理)
@@ -567,6 +568,18 @@ export declare function blobToStream(blob: Blob): Promise<ReadableStream>;
  * @param setImg 图片加载前执行的回调函数
  */
 export declare const getImg: (src: string, setImg?: ((img: HTMLImageElement) => void) | undefined) => Promise<false | HTMLImageElement>;
+```
+
+---
+
+# 抠图
+```ts
+/**
+ * 传入一张原始图片和一张遮罩图片，返回另一张图片，其中遮罩图的非透明区域将被裁剪掉，并应用边缘平滑
+ * @param rawImg 原图
+ * @param maskImg 遮罩图
+ */
+export declare function cutoutImgSmoothed(rawImg: string, maskImg: string, { blurRadius, featherAmount, }?: CutoutImgOpts): Promise<ImageData>;
 ```
 
 ---

@@ -2,6 +2,8 @@ export * from './tools'
 export * from './handleImg'
 export * from './handleImgData'
 export * from './getImgEdge'
+export * from './cutoutImgSmoothed'
+
 export * from './captureVideoFrame'
 export * from './color'
 export * from './Ball'
