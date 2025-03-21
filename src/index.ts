@@ -1,6 +1,7 @@
 export * from '@/canvasTool'
 
 export * from '@/firework'
+export * from '@/StarField'
 export * from '@/imgToFade'
 export * from '@/imgToTxt'
 

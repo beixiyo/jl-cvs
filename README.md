@@ -23,6 +23,7 @@ npm i @jl-org/cvs
 <br />
 
 - [文本绘制 (图片 | 视频 | 文字)](#文本绘制-图片--视频--文字)
+- [闪烁星空](#闪烁星空)
 - [放烟花](#放烟花)
 - [二段爆炸的烟花](#二段爆炸的烟花)
 - [图片灰飞烟灭效果](#图片灰飞烟灭效果)
@@ -258,6 +259,30 @@ const replaceText = '6';
     replaceText
   })
 })()
+```
+
+---
+
+## 闪烁星空
+
+```ts
+import { StarField } from '@jl-org/cvs'
+
+Object.assign(document.body.style, {
+  overflow: 'hidden',
+  margin: 0,
+  padding: 0,
+})
+
+const canvas = document.createElement('canvas')
+document.body.appendChild(canvas)
+const starField = new StarField(canvas, {
+  flickerSpeed: 0.02
+})
+
+window.addEventListener('resize', () => {
+  starField.onResize(window.innerWidth, window.innerHeight)
+})
 ```
 
 ---
