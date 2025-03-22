@@ -37,7 +37,7 @@ export class StarField {
       flickerSpeed: 0.01,
       width: window.innerWidth,
       height: window.innerHeight,
-      debounceTime: 80
+      resizeDebounceTime: 80
     }
 
     /** 合并用户配置和默认配置 */
@@ -47,7 +47,7 @@ export class StarField {
     this.canvas.width = this.config.width
     this.canvas.height = this.config.height
 
-    this.onResizeDebounce = debounce(this._onResize.bind(this), this.config.debounceTime)
+    this.onResizeDebounce = debounce(this._onResize.bind(this), this.config.resizeDebounceTime)
 
     /** 初始化星星 */
     this.initStars()
@@ -233,7 +233,7 @@ export interface StarFieldConfig {
    * 改变大小时的防抖时间
    * @default  80
    */
-  debounceTime?: number
+  resizeDebounceTime?: number
 
   width?: number
   height?: number
