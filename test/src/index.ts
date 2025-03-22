@@ -7,7 +7,8 @@
 // import './NoteBoardWithBase64.test'
 
 // import './Ripple.test'
-import './StarField.test'
+// import './StarField.test'
+import './Grid.test'
 
 // import './verifyCode'
 // import './captureVideoFrame.test'
