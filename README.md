@@ -24,7 +24,11 @@ npm i @jl-org/cvs
 
 - [文本绘制 (图片 | 视频 | 文字)](#文本绘制-图片--视频--文字)
 - [闪烁星空](#闪烁星空)
-- [网格动画](#网格动画)
+- [网格](#网格)
+- [小点网格](#小点网格)
+
+<br />
+
 - [放烟花](#放烟花)
 - [二段爆炸的烟花](#二段爆炸的烟花)
 - [图片灰飞烟灭效果](#图片灰飞烟灭效果)
@@ -288,7 +292,7 @@ window.addEventListener('resize', () => {
 
 ---
 
-## 网格动画
+## 网格
 
 ```ts
 import { Grid } from '@jl-org/cvs'
@@ -302,6 +306,29 @@ Object.assign(document.body.style, {
 })
 
 const grid = new Grid(canvas)
+
+window.addEventListener('resize', () => {
+  grid.onResize(window.innerWidth, window.innerHeight)
+})
+```
+
+---
+
+## 小点网格
+```ts
+import { DotGrid } from '@jl-org/cvs'
+
+const canvas = document.createElement('canvas')
+document.body.appendChild(canvas)
+
+Object.assign(document.body.style, {
+  overflow: 'hidden',
+  margin: '0',
+  padding: '0',
+  background: '#000',
+})
+
+const grid = new DotGrid(canvas)
 
 window.addEventListener('resize', () => {
   grid.onResize(window.innerWidth, window.innerHeight)

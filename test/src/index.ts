@@ -8,7 +8,8 @@
 
 // import './Ripple.test'
 // import './StarField.test'
-import './Grid.test'
+// import './Grid.test'
+import './DotGrid.test'
 
 // import './verifyCode'
 // import './captureVideoFrame.test'
