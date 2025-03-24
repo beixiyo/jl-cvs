@@ -13,6 +13,9 @@ export class Grid {
   private cols: number = 0
   private rect: DOMRect | null = null
 
+  private dashedLines: boolean
+  private dashPattern: number[]
+
   private cellWidth: number
   private cellHeight: number
 
@@ -58,12 +61,15 @@ export class Grid {
     this.mouseMoveThrottleTime = options.mouseMoveThrottleTime || 16
     this.onResizeDebounce = debounce(this._onResize.bind(this), this.resizeDebounceTime)
 
-    this.cellWidth = options.cellWidth || 20
-    this.cellHeight = options.cellHeight || 20
+    this.cellWidth = options.cellWidth || 35
+    this.cellHeight = options.cellHeight || 35
+    this.dashedLines = options.dashedLines || false
+    this.dashPattern = options.dashPattern || [2, 2]
+
     this.backgroundColor = options.backgroundColor || '#1a1a1a'
-    this.borderColor = options.borderColor || '#333'
+    this.borderColor = options.borderColor || '#666'
     this.borderWidth = options.borderWidth || 0.3
-    this.highlightGradientColors = options.highlightGradientColors || ['#fefefe22', 'transparent']
+    this.highlightGradientColors = options.highlightGradientColors || ['#fefefe55', 'transparent']
     this.highlightRange = options.highlightRange || 1
     this.transitionTime = options.transitionTime || 200
     this.glowIntensity = options.glowIntensity || 10
@@ -255,6 +261,14 @@ export class Grid {
     this.ctx.strokeStyle = this.borderColor
     this.ctx.lineWidth = this.borderWidth
 
+    // 添加虚线样式控制
+    if (this.dashedLines) {
+      this.ctx.setLineDash(this.dashPattern)
+    }
+    else {
+      this.ctx.setLineDash([])
+    }
+
     for (let row = 0; row <= this.rows; row++) {
       const y = row * this.cellHeight
       this.ctx.beginPath()
@@ -288,14 +302,25 @@ export interface GridOptions {
   height?: number
 
   /**
+   * 是否使用虚线绘制网格线
+   * @default false
+   */
+  dashedLines?: boolean
+  /**
+   * 虚线样式，例如 [5, 5] 表示 5像素实线和5像素空白
+   * @default [2, 2]
+   */
+  dashPattern?: number[]
+
+  /**
    * 每个单元格的宽度（像素）
-   * @default 20
+   * @default 35
    */
   cellWidth?: number
 
   /**
    * 每个单元格的高度（像素）
-   * @default 20
+   * @default 35
    */
   cellHeight?: number
 
@@ -307,7 +332,7 @@ export interface GridOptions {
 
   /**
    * 网格边框颜色
-   * @default '#333'
+   * @default '#666'
    */
   borderColor?: string
 
@@ -319,7 +344,7 @@ export interface GridOptions {
 
   /**
    * 高亮边框的渐变颜色，从内到外
-   * @default ['#fefefe22', 'transparent']
+   * @default ['#fefefe55', 'transparent']
    */
   highlightGradientColors?: [string, string]
 

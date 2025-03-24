@@ -8,7 +8,9 @@ Object.assign(document.body.style, {
   padding: 0,
 })
 
-const grid = new Grid(canvas)
+const grid = new Grid(canvas, {
+  dashedLines: true,          // 启用虚线网格
+})
 
 window.addEventListener('resize', () => {
   grid.onResize(window.innerWidth, window.innerHeight)
