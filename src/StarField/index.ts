@@ -31,7 +31,7 @@ export class StarField {
     const defaultConfig: Required<StarFieldConfig> = {
       starCount: 300,
       sizeRange: [0.5, 2],
-      speedRange: 0.05,
+      speedRange: 0.1,
       colors: ['#ffffff', '#ffe9c4', '#d4fbff'],
       backgroundColor: '#001122',
       flickerSpeed: 0.01,
@@ -131,6 +131,7 @@ export class StarField {
    */
   private draw(): void {
     /** 绘制背景 */
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
     this.context.fillStyle = this.config.backgroundColor
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height)
 
@@ -206,7 +207,7 @@ export interface StarFieldConfig {
   /**
    * 速度范围，
    * 星星速度在 [-speedRange, speedRange]
-   * @default  0.05
+   * @default  0.1
    */
   speedRange?: number
 

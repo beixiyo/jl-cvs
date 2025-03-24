@@ -9,7 +9,9 @@ Object.assign(document.body.style, {
 const canvas = document.createElement('canvas')
 document.body.appendChild(canvas)
 const starField = new StarField(canvas, {
-  flickerSpeed: 0.02
+  flickerSpeed: 0.02,
+  speedRange: 0.1
+  // backgroundColor: 'transparent'
 })
 
 window.addEventListener('resize', () => {
