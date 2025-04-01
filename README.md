@@ -26,6 +26,7 @@ npm i @jl-org/cvs
 - [闪烁星空](#闪烁星空)
 - [网格](#网格)
 - [小点网格](#小点网格)
+- [旋转球体](#旋转球体)
 
 <br />
 
@@ -332,6 +333,29 @@ const grid = new DotGrid(canvas)
 
 window.addEventListener('resize', () => {
   grid.onResize(window.innerWidth, window.innerHeight)
+})
+```
+
+---
+
+## #旋转球体
+```ts
+import { GlobeSphere } from '@jl-org/cvs'
+
+const canvas = document.createElement('canvas')
+document.body.appendChild(canvas)
+
+Object.assign(document.body.style, {
+  overflow: 'hidden',
+  margin: '0',
+  padding: '0',
+  background: '#181818',
+})
+
+const globe = new GlobeSphere(canvas)
+
+window.addEventListener('resize', () => {
+  globe.onResize(window.innerWidth, window.innerHeight)
 })
 ```
 
