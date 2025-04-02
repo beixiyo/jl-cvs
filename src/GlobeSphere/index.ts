@@ -34,10 +34,10 @@ export class GlobeSphere {
     this.ctx = ctx
 
     const defaultOpts: Required<GlobeSphereOpts> = {
-      width: window.innerWidth,
-      height: window.innerHeight,
+      width: 400,
+      height: 400,
       pointCount: 1000,
-      radius: 180,
+      radius: 120,
       rotationSpeed: 0.001,
       pointSize: 1,
       pointColor: 'rgb(100, 150, 255)',

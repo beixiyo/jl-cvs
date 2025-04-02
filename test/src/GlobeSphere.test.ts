@@ -11,7 +11,3 @@ Object.assign(document.body.style, {
 })
 
 const globe = new GlobeSphere(canvas)
-
-window.addEventListener('resize', () => {
-  globe.onResize(window.innerWidth, window.innerHeight)
-})

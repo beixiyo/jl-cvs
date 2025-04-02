@@ -27,6 +27,7 @@ npm i @jl-org/cvs
 - [网格](#网格)
 - [小点网格](#小点网格)
 - [旋转球体](#旋转球体)
+- [动感波浪](#动感波浪)
 
 <br />
 
@@ -338,7 +339,7 @@ window.addEventListener('resize', () => {
 
 ---
 
-## #旋转球体
+## 旋转球体
 ```ts
 import { GlobeSphere } from '@jl-org/cvs'
 
@@ -353,9 +354,26 @@ Object.assign(document.body.style, {
 })
 
 const globe = new GlobeSphere(canvas)
+```
+
+---
+
+## 动感波浪
+```ts
+import { HalftoneWave } from '@jl-org/cvs'
+
+const canvas = document.createElement('canvas')
+document.body.appendChild(canvas)
+Object.assign(document.body.style, {
+  overflow: 'hidden',
+  margin: 0,
+  padding: 0,
+})
+
+const halftoneWave = new HalftoneWave(canvas)
 
 window.addEventListener('resize', () => {
-  globe.onResize(window.innerWidth, window.innerHeight)
+  halftoneWave.onResize(window.innerWidth, window.innerHeight)
 })
 ```
 
