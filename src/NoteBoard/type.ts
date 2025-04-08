@@ -63,7 +63,8 @@ export type NoteBoardOptionsRequired = PartRequired<
   'lineWidth' |
   'strokeStyle' |
   'lineCap' |
-  'globalCompositeOperation'
+  'globalCompositeOperation' |
+  'drawGlobalCompositeOperation'
 >
 
 
@@ -137,7 +138,7 @@ export type DrawImgOptions = {
   autoFit?: boolean
   /** 指定画布上下文，默认背景画布上下文 */
   context?: CanvasRenderingContext2D
-  /** 
+  /**
    * 是否记录图片信息，后续导出图片时调整大小需要
    * @default true
    */
