@@ -692,11 +692,32 @@ export declare const getImg: (src: string, setImg?: ((img: HTMLImageElement) => 
 # 抠图
 ```ts
 /**
- * 传入一张原始图片和一张遮罩图片，返回另一张图片，其中遮罩图的非透明区域将被裁剪掉，并应用边缘平滑
- * @param rawImg 原图
+ * 抠图转遮罩（把图片的非透明区域，换成指定颜色）
+ * @param imgUrl 图片
+ * @param replaceColor 替换的颜色
+ */
+export declare function cutoutImgToMask(imgUrl: string, replaceColor: string, { smoothEdge, smoothRadius, alphaThreshold, ignoreAlpha }?: CutImgToMaskOpts): Promise<{
+    base64: string;
+    imgData: ImageData;
+}>;
+
+/**
+ * 传入一张原始图片和一张遮罩图片，将遮罩图不透明的区域提取出来。
+ * 使用 **globalCompositeOperation** 实现
+ *
+ * @param originalImageSource 原图
+ * @param maskImageSource 遮罩图
+ */
+export declare function cutoutImg(originalImageSource: string | HTMLImageElement, maskImageSource: string | HTMLImageElement): Promise<string>;
+
+/**
+ * 传入一张原始图片和一张遮罩图片，将遮罩图不透明的区域提取出来，并对提取出的区域进行平滑处理。
+ * 遍历处理每个像素实现
+ *
+ * @param originalImg 原图
  * @param maskImg 遮罩图
  */
-export declare function cutoutImgSmoothed(rawImg: string, maskImg: string, { blurRadius, featherAmount, }?: CutoutImgOpts): Promise<ImageData>;
+export declare function cutoutImgSmoothed(originalImg: string, maskImg: string, { blurRadius, featherAmount, }?: CutoutImgOpts): Promise<ImageData>;
 ```
 
 ---
@@ -781,16 +802,6 @@ export declare function pickImgArea(rawImg: string, referenceImg: string): Promi
  * @param referenceImg 参考图
  */
 export declare function invertImgArea(rawImg: string, referenceImg: string): Promise<ImageData>;
-
-/**
- * 把图片的非透明区域，换成指定颜色
- * @param imgUrl 图片
- * @param replaceColor 替换的颜色
- */
-export declare function cutoutImgToMask(imgUrl: string, replaceColor: string, { smoothEdge, smoothRadius, }?: CutImgToMaskOpts): Promise<{
-    base64: string;
-    imgData: ImageData;
-}>;
 ```
 
 ---
