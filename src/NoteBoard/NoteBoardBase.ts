@@ -191,26 +191,54 @@ export abstract class NoteBoardBase {
       imgInfo = this.imgInfo
     }: ExportOptions = {}
   ) {
+    const rawBase64 = await getCvsImg(canvas, 'base64', mimeType, quality)
+
     /**
      * 没有记录图像信息，或者不仅仅导出图像区域
      * 则不做任何处理，直接导出整个画布
      */
     if (!exportOnlyImgArea || !imgInfo) {
-      return getCvsImg(canvas, 'base64', mimeType, quality)
+      return rawBase64
     }
 
-    const rawBase64 = await getCvsImg(canvas, 'base64', mimeType, quality)
     const img = await getImg(rawBase64)
     if (!img) return ''
 
+    /**
+     * 缩放回原始大小的计算过程
+     */
+    const dpr = NoteBoardBase.dpr
+
+    // 1. 计算源图像（物理像素图像）上的裁剪区域（物理像素）
+    const physicalX = imgInfo.x * dpr
+    const physicalY = imgInfo.y * dpr
+    const physicalWidth = imgInfo.drawWidth * dpr // 这是图像在画布上绘制的物理宽度
+    const physicalHeight = imgInfo.drawHeight * dpr // 这是图像在画布上绘制的物理高度
+
+    // 2. 计算目标尺寸：图像的原始的尺寸
+    const { rawWidth, rawHeight } = imgInfo
+
+    // 3. 计算 cutImg 需要的 scaleX 和 scaleY
+    const scaleXNeeded = rawWidth / physicalWidth
+    const scaleYNeeded = rawHeight / physicalHeight
+
+    if (physicalWidth === 0 || physicalHeight === 0) {
+      console.warn('Cannot export image area with zero dimensions.')
+      return ''
+    }
+
+    // 4. 调用 cutImg，传入物理坐标/尺寸和计算出的缩放因子
     return await cutImg(img, {
-      x: imgInfo.x,
-      y: imgInfo.y,
-      width: imgInfo.drawWidth,
-      height: imgInfo.drawHeight,
-      scaleX: 1 / imgInfo.minScale,
-      scaleY: 1 / imgInfo.minScale,
+      x: physicalX,
+      y: physicalY,
+      width: physicalWidth,
+      height: physicalHeight,
+      scaleX: scaleXNeeded,
+      scaleY: scaleYNeeded,
+      mimeType,
+      quality,
     })
+
   }
 
 
