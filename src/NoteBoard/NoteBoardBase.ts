@@ -204,6 +204,34 @@ export abstract class NoteBoardBase {
     const img = await getImg(rawBase64)
     if (!img) return ''
 
+    const {
+      x,
+      y,
+      width,
+      height,
+      scaleX,
+      scaleY,
+    } = this.calcImgInfoWithDPR(imgInfo)
+
+    return await cutImg(img, {
+      x,
+      y,
+      width,
+      height,
+      scaleX,
+      scaleY,
+      mimeType,
+      quality,
+    })
+
+  }
+
+  /**
+   * 根据 dpr 计算图片信息
+   */
+  calcImgInfoWithDPR(imgInfo = this.imgInfo) {
+    if (!imgInfo) throw new Error('imgInfo is undefined')
+
     /**
      * 缩放回原始大小的计算过程
      */
@@ -221,26 +249,19 @@ export abstract class NoteBoardBase {
     // 3. 计算 cutImg 需要的 scaleX 和 scaleY
     const scaleXNeeded = rawWidth / physicalWidth
     const scaleYNeeded = rawHeight / physicalHeight
+    const minScale = Math.min(scaleXNeeded, scaleYNeeded)
 
-    if (physicalWidth === 0 || physicalHeight === 0) {
-      console.warn('Cannot export image area with zero dimensions.')
-      return ''
-    }
+    return {
+      minScale,
+      scaleX: scaleXNeeded,
+      scaleY: scaleYNeeded,
 
-    // 4. 调用 cutImg，传入物理坐标/尺寸和计算出的缩放因子
-    return await cutImg(img, {
       x: physicalX,
       y: physicalY,
       width: physicalWidth,
       height: physicalHeight,
-      scaleX: scaleXNeeded,
-      scaleY: scaleYNeeded,
-      mimeType,
-      quality,
-    })
-
+    }
   }
-
 
   /**
    * 绘制图片，可调整大小，自适应尺寸等
