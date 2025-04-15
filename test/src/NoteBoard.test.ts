@@ -103,6 +103,15 @@ genBtn('圆形', () => {
   board.setMode('circle')
 })
 
+genBtn('箭头', () => {
+  board.drawShape.setShapeStyle({
+    fillStyle: '#000',
+    lineWidth: 2,
+    strokeStyle: '#000',
+  })
+  board.setMode('arrow')
+})
+
 genBtn('关闭/ 打开绘制', () => {
   board.mode === 'draw'
     ? board.setMode('none')

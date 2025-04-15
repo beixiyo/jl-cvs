@@ -17,16 +17,16 @@ export const DRAW_MAP = new WeakMap<
  * - 签名涂抹
  * - 绘制矩形
  * - 绘制圆形
- * 
+ *
  * - 分层自适应绘图
- * 
+ *
  * - 擦除（仅针对 brushCanvas 画板）
  * - 撤销（仅针对 brushCanvas 画板）
  * - 重做（仅针对 brushCanvas 画板）
- * 
+ *
  * - 缩放
  * - 拖拽
- * 
+ *
  * - 截图
  */
 export class NoteBoard extends NoteBoardBase {
@@ -47,7 +47,7 @@ export class NoteBoard extends NoteBoardBase {
       canvas: this.canvas,
       context: this.ctx,
     })
-    
+
     this.initDrawMap()
     this.bindEvent()
     this.setMode(this.mode)
@@ -59,7 +59,7 @@ export class NoteBoard extends NoteBoardBase {
   setMode(mode: Mode) {
     const { drawShape } = this
     this.mode = mode
-    drawShape.drawShapeDiable = true
+    drawShape.disable = true
     this.ctx.globalCompositeOperation = this.opts.globalCompositeOperation
 
     switch (mode) {
@@ -82,13 +82,19 @@ export class NoteBoard extends NoteBoardBase {
 
       case 'rect':
         drawShape.shapeType = 'rect'
-        drawShape.drawShapeDiable = false
+        drawShape.disable = false
         this.canvas.style.cursor = 'crosshair'
         break
 
       case 'circle':
         drawShape.shapeType = 'circle'
-        drawShape.drawShapeDiable = false
+        drawShape.disable = false
+        this.canvas.style.cursor = 'crosshair'
+        break
+
+      case 'arrow':
+        drawShape.shapeType = 'arrow'
+        drawShape.disable = false
         this.canvas.style.cursor = 'crosshair'
         break
 
@@ -105,7 +111,7 @@ export class NoteBoard extends NoteBoardBase {
     if (!recordPath?.value) {
       this.clear(false)
       // 清理图形里不要的记录
-      this.drawShape.drawShapeUndo()
+      this.drawShape.undo()
 
       return
     }
@@ -139,11 +145,11 @@ export class NoteBoard extends NoteBoardBase {
     })
   }
 
-  /** 
+  /**
    * 移除所有事件
    */
   rmEvent() {
-    this.drawShape.drawShapeRmEvent()
+    this.drawShape.rmEvent()
     const { canvas } = this
 
     canvas.removeEventListener('mousedown', this.onMousedown)
@@ -168,7 +174,7 @@ export class NoteBoard extends NoteBoardBase {
    * 是图形模式
    */
   private isShapeMode(mode?: Mode) {
-    return ['rect', 'circle'].includes(mode ?? this.mode)
+    return ['rect', 'circle', 'arrow'].includes(mode ?? this.mode)
   }
 
   bindEvent() {
@@ -393,22 +399,27 @@ export class NoteBoard extends NoteBoardBase {
       lastRecord?.[lastRecord!.length - 1]?.shapes?.splice(0)
     }
 
+    const setCursor = (cursor: string) => {
+      this.canvas.style.cursor = cursor
+    }
+
+    const isShapeMode = () => this.isShapeMode()
+
+    const getHistory = () => this.history
+
     DRAW_MAP.set(this.drawShape, {
       draw,
+      setCursor,
       syncShapeRecord,
       cleanShapeRecord,
 
-      getHistory: () => this.history,
+      isShapeMode,
+      getHistory,
 
       unRedo: ({ type }) => {
-        const fnMap = {
-          undo: 'drawShapeUndo' as const,
-          redo: 'drawShapeRedo' as const,
-        }
-
         const lastRecord = this.history.curNode?.next?.value
         if (this.isShapeMode(lastRecord?.[lastRecord.length - 1].mode)) {
-          this.drawShape[fnMap[type]](false)
+          this.drawShape[type](false)
         }
 
         draw()

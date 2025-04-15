@@ -242,4 +242,7 @@ export type DrawMapVal = {
    */
   syncShapeRecord: () => void
   cleanShapeRecord: VoidFunction
+
+  setCursor: (cursor: string) => void
+  isShapeMode: () => boolean
 }
