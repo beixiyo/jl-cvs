@@ -1,4 +1,3 @@
-import { getDPR } from '@/canvasTool'
 import { BaseShape } from '../BaseShape'
 import type { ShapeStyle } from '../type'
 
@@ -77,19 +76,19 @@ export class Rect implements BaseShape {
   }
 
   get minX() {
-    return Math.min(this.startX, this.endX) * getDPR()
+    return Math.min(this.startX, this.endX)
   }
 
   get minY() {
-    return Math.min(this.startY, this.endY) * getDPR()
+    return Math.min(this.startY, this.endY)
   }
 
   get maxX() {
-    return Math.max(this.startX, this.endX) * getDPR()
+    return Math.max(this.startX, this.endX)
   }
 
   get maxY() {
-    return Math.max(this.startY, this.endY) * getDPR()
+    return Math.max(this.startY, this.endY)
   }
 
 }

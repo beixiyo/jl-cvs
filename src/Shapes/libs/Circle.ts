@@ -1,4 +1,3 @@
-import { getDPR } from '@/canvasTool'
 import { BaseShape } from '../BaseShape'
 import type { ShapeStyle } from '../type'
 
@@ -34,8 +33,8 @@ export class Circle implements BaseShape {
 
     ctx.beginPath()
     ctx.arc(
-      this.startX * getDPR(),
-      this.startY * getDPR(),
+      this.startX,
+      this.startY,
       this.radius,
       0,
       2 * Math.PI
@@ -58,8 +57,8 @@ export class Circle implements BaseShape {
   }
 
   isInPath(x: number, y: number): boolean {
-    const dx = x - this.startX * getDPR()
-    const dy = y - this.startY * getDPR()
+    const dx = x - this.startX
+    const dy = y - this.startY
     const distance = Math.sqrt(dx * dx + dy * dy)
 
     return distance <= this.radius
@@ -75,7 +74,7 @@ export class Circle implements BaseShape {
   get radius() {
     const dx = this.endX - this.startX
     const dy = this.endY - this.startY
-    return Math.sqrt(dx * dx + dy * dy) * getDPR()
+    return Math.sqrt(dx * dx + dy * dy)
   }
 }
 
