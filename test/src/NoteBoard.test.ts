@@ -1,5 +1,5 @@
 import { NoteBoard } from '@/NoteBoard'
-import { genBtn } from './tools'
+import { addBlock, genBtn } from './tools'
 import { createCvs } from '@/canvasTool'
 
 
@@ -50,7 +50,7 @@ board.drawImg(
 /**
  * 按钮 =========================================
  */
-genBtn('单独导出', async () => {
+genBtn('单独图片区域导出', async () => {
   const src = await board.exportImg({ exportOnlyImgArea: true })
   const imgEl = new Image()
   imgEl.src = src
@@ -63,13 +63,15 @@ genBtn('单独导出', async () => {
   document.body.appendChild(maskImgEl)
 })
 
-genBtn('导出所有', async () => {
+genBtn('导出所有图层', async () => {
   const src = await board.exportAllLayer({ exportOnlyImgArea: true })
   const imgEl = new Image()
   imgEl.src = src
 
   document.body.appendChild(imgEl)
 })
+
+addBlock()
 
 genBtn('清空', () => {
   board.clear()
@@ -84,6 +86,8 @@ genBtn('重做', () => {
 genBtn('重置大小', () => {
   board.resetSize()
 })
+
+addBlock()
 
 genBtn('矩形', () => {
   board.drawShape.setShapeStyle({
@@ -112,6 +116,8 @@ genBtn('箭头', () => {
   board.setMode('arrow')
 })
 
+addBlock()
+
 genBtn('关闭/ 打开绘制', () => {
   board.mode === 'draw'
     ? board.setMode('none')
@@ -124,11 +130,15 @@ genBtn('开启/ 关闭擦除模式', () => {
     : board.setMode('erase')
 })
 
+addBlock()
+
 genBtn('开启/ 关闭拖拽模式', () => {
   board.mode === 'drag'
     ? board.setMode('none')
     : board.setMode('drag')
 })
+
+addBlock()
 
 genBtn('添加红色画板', () => {
   const { ctx, cvs } = createCvs()
