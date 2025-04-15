@@ -1,6 +1,6 @@
 import type { TransferType } from '@jl-org/tool'
 import { getCvsImg, type HandleImgReturn } from './handleImg'
-import { createCvs, getDPR } from './'
+import { createCvs } from './'
 
 
 /**
@@ -63,8 +63,8 @@ export async function captureVideoFrame<
       h = height
     }
     else {
-      w = video.videoWidth / getDPR()
-      h = video.videoHeight / getDPR()
+      w = video.videoWidth
+      h = video.videoHeight
     }
 
     cvs.width = w

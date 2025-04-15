@@ -127,6 +127,7 @@ genBtn('添加红色画板', () => {
     canvas: cvs,
   })
 
+  ctx.scale(NoteBoard.dpr, NoteBoard.dpr)
   ctx.fillStyle = '#f405'
   ctx.fillRect(0, 0, cvs.width, cvs.height)
 })

@@ -1,3 +1,4 @@
+import { getDPR } from '@/canvasTool'
 import { colorAddOpacity, debounce } from '@jl-org/tool'
 
 /**
@@ -23,7 +24,7 @@ export class GlobeSphere {
   private rotation: number = 0
   private width: number
   private height: number
-  private dpr: number
+  private dpr = getDPR()
   private onResizeDebounce: (width: number, height: number) => void
 
   private options: Required<GlobeSphereOpts>
@@ -53,7 +54,6 @@ export class GlobeSphere {
 
     this.width = this.options.width
     this.height = this.options.height
-    this.dpr = window.devicePixelRatio || 1
     this.onResizeDebounce = debounce(this._onResize.bind(this), this.options.resizeDebounceTime)
 
     this.initCanvas()

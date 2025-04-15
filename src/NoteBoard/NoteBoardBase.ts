@@ -363,6 +363,7 @@ export abstract class NoteBoardBase {
 
   /**
    * 添加新的画布到 canvasList 中
+   * ## 记得手动设置 ctx.scale(dpr, dpr)
    */
   addCanvas(name: string, opts: AddCanvasOpts) {
     const options = this.getAddcanvasOpts(opts)
