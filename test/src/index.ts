@@ -3,7 +3,7 @@
 // import './firework2.test'
 // import './imgToFade.test'
 
-import './NoteBoard.test'
+// import './NoteBoard.test'
 // import './NoteBoardWithBase64.test'
 
 // import './Ripple.test'
@@ -19,3 +19,4 @@ import './NoteBoard.test'
 
 // import './handleImg.test'
 // import './imgToNoise.test'
+import './WavyLines.test'

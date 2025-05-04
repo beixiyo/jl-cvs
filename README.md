@@ -27,7 +27,11 @@ npm i @jl-org/cvs
 - [网格](#网格)
 - [小点网格](#小点网格)
 - [旋转球体](#旋转球体)
+
+<br />
+
 - [动感波浪](#动感波浪)
+- [跟随鼠标的波浪线条](#跟随鼠标的波浪线条)
 
 <br />
 
@@ -375,6 +379,48 @@ const halftoneWave = new HalftoneWave(canvas)
 window.addEventListener('resize', () => {
   halftoneWave.onResize(window.innerWidth, window.innerHeight)
 })
+```
+
+---
+
+# 跟随鼠标的波浪线条
+```ts
+import type { WaveConfig } from '@jl-org/cvs'
+import { WavyLines } from '@jl-org/cvs'
+
+const canvas = document.createElement('canvas')
+document.body.appendChild(canvas)
+
+Object.assign(document.body.style, {
+  margin: '0',
+  padding: '0',
+  overflow: 'hidden',
+  background: '#F50',
+})
+
+Object.assign(canvas.style, {
+  position: 'absolute',
+  top: '0',
+  left: '0',
+  width: '100vw',
+  height: '100vh',
+})
+
+/** 配置项 */
+const config: WaveConfig = {
+  canvas,
+  xGap: 12, // 水平间距
+  yGap: 36, // 垂直间距
+  extraWidth: 250, // 额外宽度
+  extraHeight: 40, // 额外高度
+  mouseEffectRange: 200, // 鼠标效果范围
+  strokeStyle: '#333', // 线条颜色
+}
+
+const wave = new WavyLines(config)
+
+/** 在组件卸载时记得调用destroy方法清理事件监听 */
+// wave.destroy()
 ```
 
 ---
