@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@jl-org/tool':
-        specifier: ^1.8.3
-        version: 1.8.3
+        specifier: ^1.8.7
+        version: 1.8.7
     devDependencies:
       '@jl-org/ts-tool':
         specifier: ^0.0.8
@@ -182,8 +182,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@jl-org/tool@1.8.3':
-    resolution: {integrity: sha512-cLLnaiNAVvhCi98smQZYUmVNc4E8LakrDB3AxTfM5Dz5rCCgxovr3VwSlAXPW4SwTZg5mpa1fWEGMVNhQA3Q1A==}
+  '@jl-org/tool@1.8.7':
+    resolution: {integrity: sha512-O6qJrpgyl9yNA6QKa8K/X9YdhSiYGwpmYrumf9yMt1KWEs78phRdLYfkT6Bw+KiMHHIe0pfWCvWFVBGX6Q+ifg==}
 
   '@jl-org/ts-tool@0.0.8':
     resolution: {integrity: sha512-2YwGmzod5LBOi7cKknRXn2H9xcp99OhokZJ55t+kg7wvPST4obcwLxO03ji0gVuFoHp5BgrkwzDICV+z1a3TDg==}
@@ -386,6 +386,11 @@ packages:
 
   acorn@8.14.0:
     resolution: {integrity: sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+
+  acorn@8.14.1:
+    resolution: {integrity: sha512-OvQ/2pUDKmgfCg++xsTX1wGxfTaszcHVcTctW4UJB4hibJx2HXxxO5UmVgyjMa+ZDsiaf5wWLXYpRWMmBI0QHg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -783,7 +788,7 @@ snapshots:
   '@esbuild/win32-x64@0.21.5':
     optional: true
 
-  '@jl-org/tool@1.8.3': {}
+  '@jl-org/tool@1.8.7': {}
 
   '@jl-org/ts-tool@0.0.8': {}
 
@@ -1001,6 +1006,9 @@ snapshots:
   '@vue/shared@3.5.13': {}
 
   acorn@8.14.0: {}
+
+  acorn@8.14.1:
+    optional: true
 
   ajv-draft-04@1.0.0(ajv@8.13.0):
     optionalDependencies:
@@ -1249,7 +1257,7 @@ snapshots:
   terser@5.28.1:
     dependencies:
       '@jridgewell/source-map': 0.3.6
-      acorn: 8.14.0
+      acorn: 8.14.1
       commander: 2.20.3
       source-map-support: 0.5.21
     optional: true
