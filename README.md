@@ -1,14 +1,7 @@
-# 介绍
-*Canvas* 的各种令人惊叹效果，以及辅助工具
-
-支持 `ESM` | `iife`
-
-**iife** 模式下，全局导出一个 `_jlCvs` 对象
-
----
-
+# Canvas 的各种令人惊叹效果，以及辅助工具
 
 ## 安装
+
 ```bash
 npm i @jl-org/cvs
 ```
@@ -385,7 +378,6 @@ window.addEventListener('resize', () => {
 
 # 跟随鼠标的波浪线条
 ```ts
-import type { WaveConfig } from '@jl-org/cvs'
 import { WavyLines } from '@jl-org/cvs'
 
 const canvas = document.createElement('canvas')
@@ -406,8 +398,7 @@ Object.assign(canvas.style, {
   height: '100vh',
 })
 
-/** 配置项 */
-const config: WaveConfig = {
+const wave = new WavyLines({
   canvas,
   xGap: 12, // 水平间距
   yGap: 36, // 垂直间距
@@ -415,9 +406,7 @@ const config: WaveConfig = {
   extraHeight: 40, // 额外高度
   mouseEffectRange: 200, // 鼠标效果范围
   strokeStyle: '#333', // 线条颜色
-}
-
-const wave = new WavyLines(config)
+})
 
 /** 在组件卸载时记得调用destroy方法清理事件监听 */
 // wave.destroy()

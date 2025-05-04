@@ -1,4 +1,4 @@
-import type { MouseState, Point, WaveConfig } from './types'
+import type { MouseState, Point } from './types'
 import { Noise } from './Noise'
 
 export class WavyLines {
@@ -7,9 +7,9 @@ export class WavyLines {
   private lines: Point[][] = []
   private noise: Noise
   private bounding: DOMRect
-  private config: Required<WaveConfig>
+  private config: Required<WavyLinesConfig>
 
-  constructor(config: WaveConfig) {
+  constructor(config: WavyLinesConfig) {
     const ctx = config.canvas.getContext('2d')
     if (!ctx)
       throw new Error('无法获取canvas上下文')
@@ -235,4 +235,50 @@ export class WavyLines {
     window.removeEventListener('mousemove', this.onMouseMove.bind(this))
     this.config.canvas.removeEventListener('touchmove', this.onTouchMove.bind(this))
   }
+}
+
+/**
+ * 波浪动画配置项
+ */
+export interface WavyLinesConfig {
+  /**
+   * Canvas元素
+   */
+  canvas: HTMLCanvasElement
+
+  /**
+   * 水平间距
+   * @default 10
+   */
+  xGap?: number
+
+  /**
+   * 垂直间距
+   * @default 32
+   */
+  yGap?: number
+
+  /**
+   * 额外宽度
+   * @default 200
+   */
+  extraWidth?: number
+
+  /**
+   * 额外高度
+   * @default 30
+   */
+  extraHeight?: number
+
+  /**
+   * 鼠标效果范围
+   * @default 175
+   */
+  mouseEffectRange?: number
+
+  /**
+   * 线条颜色
+   * @default "black"
+   */
+  strokeStyle?: string
 }

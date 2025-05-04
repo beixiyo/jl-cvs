@@ -19,3 +19,5 @@ export * from '@/svg'
 export * from '@/techNum'
 
 export * from '@/utils'
+
+export * from '@/WavyLines'

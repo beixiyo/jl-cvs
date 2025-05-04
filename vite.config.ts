@@ -21,8 +21,7 @@ export default defineConfig({
     lib: {
       entry: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
       fileName: 'index',
-      formats: ['es', 'cjs', 'iife'],
-      name: '_jlCvs',
+      formats: ['es', 'cjs'],
     },
     rollupOptions: {
       external: ['@jl-org/tool']

@@ -1,6 +1,6 @@
 {
   "name": "@jl-org/cvs",
-  "version": "1.0.38",
+  "version": "1.0.39",
   "description": "利用 Canvas 创造令人惊叹的效果",
   "type": "module",
   "main": "dist/index.cjs",
@@ -34,8 +34,7 @@
   },
   "keywords": [
     "canvas",
-    "jl-canvas",
-    "jl-cvs"
+    "visual"
   ],
   "author": "CJL <2662442385@qq.com>",
   "license": "MIT",

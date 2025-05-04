@@ -1,4 +1,3 @@
-import type { WaveConfig } from '@/WavyLines/types'
 import { WavyLines } from '@/WavyLines'
 
 const canvas = document.createElement('canvas')
@@ -19,8 +18,7 @@ Object.assign(canvas.style, {
   height: '100vh',
 })
 
-/** 配置项 */
-const config: WaveConfig = {
+const wave = new WavyLines({
   canvas,
   xGap: 12, // 水平间距
   yGap: 36, // 垂直间距
@@ -28,9 +26,7 @@ const config: WaveConfig = {
   extraHeight: 40, // 额外高度
   mouseEffectRange: 200, // 鼠标效果范围
   strokeStyle: '#333', // 线条颜色
-}
-
-const wave = new WavyLines(config)
+})
 
 /** 在组件卸载时记得调用destroy方法清理事件监听 */
 // wave.destroy()
