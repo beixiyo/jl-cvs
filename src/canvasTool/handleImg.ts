@@ -8,7 +8,6 @@ export {
   blobToBase64,
   base64ToBlob,
   urlToBlob,
-  blobToStream,
   getImg,
   downloadByUrl,
   downloadByData

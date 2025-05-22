@@ -710,11 +710,6 @@ export declare function base64ToBlob(base64Str: string, mimeType?: string): Blob
 export declare function urlToBlob(url: string): Promise<Blob>;
 
 /**
- * blob 转成 Stream，方便浏览器和 Node 互操作
- */
-export declare function blobToStream(blob: Blob): Promise<ReadableStream>;
-
-/**
  * 判断图片的 src 是否可用，可用则返回图片
  * @param src 图片
  * @param setImg 图片加载前执行的回调函数

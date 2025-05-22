@@ -1,6 +1,6 @@
 {
   "name": "@jl-org/cvs",
-  "version": "1.0.39",
+  "version": "1.0.40",
   "description": "利用 Canvas 创造令人惊叹的效果",
   "type": "module",
   "main": "dist/index.cjs",
@@ -24,7 +24,7 @@
     "test": "vite"
   },
   "dependencies": {
-    "@jl-org/tool": "^1.8.7"
+    "@jl-org/tool": "^1.9.7"
   },
   "devDependencies": {
     "@jl-org/ts-tool": "^0.0.8",
