@@ -12,9 +12,10 @@ input.onchange = async (e) => {
   if (!file) return
 
   // const base64 = await blobToBase64(file)
-  const workerPath = new URL('/public/captureVideoFrame.js', import.meta.url).href
-  const srcs = await captureVideoFrame(file, [1, 2, 10000], 'blob', {
-    workerPath
+  const workerPath = new URL('/captureVideoFrame.js', import.meta.url).href
+  const srcs = await captureVideoFrame(file, [1, 2, 10000], 'base64', {
+    workerPath,
+    quality: 0.8,
   })
 
   fetch(workerPath).then(res => res.text() ).then(res => console.log(res) )

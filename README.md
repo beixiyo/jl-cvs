@@ -769,24 +769,27 @@ export declare function getImgEdge(source: string | ImageData, options?: {
 
 
 ## 截取视频某一帧
+
+1. 复制 `dist/worker/captureVideoFrame.js` 到你的根目录
+2. 传入 workerPath 路径，即可开启 Web Worker 截取帧
+
 ```ts
 /**
- * 截取视频某一帧图片，大于总时长则用最后一秒
+ * 示例，使用 Web Worker 截取视频 1、2、10000 秒的图片
+ */
+const srcs = await captureVideoFrame(file, [1, 2, 10000], 'base64', {
+  workerPath,
+  quality: 0.8,
+})
+
+/**
+ * 截取视频某一帧图片，大于总时长则用最后一秒。
+ * 如果传入 workerPath 并且支持 ImageCapture，则使用 Worker 截取帧，否则降级为截取 Canvas。
  * @param fileOrUrl 文件或者链接
  * @param time 时间，可以是数组
  * @param resType 返回类型
  */
 export declare function captureVideoFrame<N extends number | number[], T extends TransferType = 'base64'>(fileOrUrl: File | string, time: N, resType?: T, options?: Options): Promise<N extends number ? HandleImgReturn<T> : HandleImgReturn<T>[]>;
-
-type Options = {
-    /**
-     * 传入视频文件给你，你需要指定尺寸大小
-     */
-    setSize(video: HTMLVideoElement): {
-        width: number;
-        height: number;
-    };
-};
 ```
 
 ---

@@ -5,7 +5,8 @@ import type { CaptureFrameResult, CaptureVideoFrameData, VideoData } from '@/wor
 
 
 /**
- * 截取视频某一帧图片，大于总时长则用最后一秒
+ * 截取视频某一帧图片，大于总时长则用最后一秒。
+ * 如果传入 workerPath 并且支持 ImageCapture，则使用 Worker 截取帧，否则降级为截取 Canvas。
  * @param fileOrUrl 文件或者链接
  * @param time 时间，可以是数组
  * @param resType 返回类型
@@ -193,10 +194,12 @@ function checkImageCaptureSupport() {
   const video = document.createElement('video')
   if (
     typeof ImageCapture === 'undefined' ||
-    !video.captureStream
+    !isFn(video.captureStream)
   ) {
     return false
   }
+
+  return true
 }
 
 type Options = {
