@@ -14,9 +14,9 @@
 // import './DotGrid.test'
 
 // import './verifyCode'
-// import './captureVideoFrame.test'
+import './captureVideoFrame.test'
 // import './shotImg.test'
 
 // import './handleImg.test'
 // import './imgToNoise.test'
-import './WavyLines.test'
+// import './WavyLines.test'

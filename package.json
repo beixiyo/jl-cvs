@@ -29,6 +29,7 @@
   "devDependencies": {
     "@jl-org/ts-tool": "^0.0.8",
     "@types/node": "^20.11.20",
+    "@types/web": "^0.0.236",
     "vite": "^5.1.5",
     "vite-plugin-dts": "^4.3.0"
   },

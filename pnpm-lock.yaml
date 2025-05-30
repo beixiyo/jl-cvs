@@ -18,6 +18,9 @@ importers:
       '@types/node':
         specifier: ^20.11.20
         version: 20.11.20
+      '@types/web':
+        specifier: ^0.0.236
+        version: 0.0.236
       vite:
         specifier: ^5.1.5
         version: 5.4.11(@types/node@20.11.20)(terser@5.28.1)
@@ -354,6 +357,9 @@ packages:
 
   '@types/node@20.11.20':
     resolution: {integrity: sha512-7/rR21OS+fq8IyHTgtLkDK949uzsa6n8BkziAKtPVpugIkO6D+/ooXMvzXxDnZrmtXVfjb1bKQafYpb8s89LOg==}
+
+  '@types/web@0.0.236':
+    resolution: {integrity: sha512-QZhfiSGpgU9uoWkMqW/hgpBgUPkx7sbTfUt+ObPOmA3K2Dds5zxTrmijKgNM0G7LbE6YP3zQ8FaFFru6R1nLng==}
 
   '@volar/language-core@2.4.10':
     resolution: {integrity: sha512-hG3Z13+nJmGaT+fnQzAkS0hjJRa2FCeqZt6Bd+oGNhUkQ+mTFsDETg5rqUTxyzIh5pSOGY7FHCWUS8G82AzLCA==}
@@ -959,6 +965,8 @@ snapshots:
   '@types/node@20.11.20':
     dependencies:
       undici-types: 5.26.5
+
+  '@types/web@0.0.236': {}
 
   '@volar/language-core@2.4.10':
     dependencies:
