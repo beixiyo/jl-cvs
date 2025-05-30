@@ -1,20 +1,15 @@
-self.onmessage = async function (e: MessageEvent<CaptureVideoFrameData>) {
+self.onmessage = async function ({ data }: MessageEvent<CaptureVideoFrameData[]>) {
   const res: CaptureFrameResult[] = []
-  const {
-    videoData,
-    mimeType,
-    quality
-  } = e.data
 
-  for (const item of videoData) {
+  for (const item of data) {
     const data = await getCaptureFrame(item)
     res.push(data)
   }
 
   self.postMessage(res)
 
-  async function getCaptureFrame(videoData: VideoData) {
-    const { imageBitmap, timestamp } = videoData
+  async function getCaptureFrame(videoData: CaptureVideoFrameData) {
+    const { imageBitmap, timestamp, mimeType, quality } = videoData
     const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height)
     const ctx = canvas.getContext('2d')!
 
@@ -36,10 +31,6 @@ self.onmessage = async function (e: MessageEvent<CaptureVideoFrameData>) {
   }
 }
 
-export type VideoData = {
-  imageBitmap: ImageBitmap
-  timestamp: number
-}
 
 export type CaptureFrameResult = {
   blob: Blob
@@ -49,7 +40,8 @@ export type CaptureFrameResult = {
 }
 
 export type CaptureVideoFrameData = {
-  videoData: VideoData[]
   mimeType: string
   quality: number
+  imageBitmap: ImageBitmap
+  timestamp: number
 }

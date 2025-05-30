@@ -1,4 +1,5 @@
-import { captureVideoFrame } from '@/canvasTool';
+import { captureVideoFrame } from '@/canvasTool'
+import { genArr } from '@jl-org/tool'
 
 
 const input = document.createElement('input')
@@ -11,16 +12,15 @@ input.onchange = async (e) => {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
 
-  const workerPath = '/captureVideoFrame.js'
-  const srcs = await captureVideoFrame(file, [1, 2, 10000], 'base64', {
-    workerPath,
-    quality: 0.8,
+  const srcs = await captureVideoFrame(file, genArr(5, i => i + 1), 'base64', {
+    workerPath: '/captureVideoFrame.js',
+    quality: 0.5,
   })
 
   srcs.forEach((item) => {
-    console.log(item)
     addImg(item)
   })
+  console.log(srcs)
 }
 
 function addImg(src: string | Blob) {

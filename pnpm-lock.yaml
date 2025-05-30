@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@jl-org/tool':
-        specifier: ^1.9.7
-        version: 1.9.7
+        specifier: ^2.0.3
+        version: 2.0.3
     devDependencies:
       '@jl-org/ts-tool':
         specifier: ^0.0.8
@@ -185,8 +185,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@jl-org/tool@1.9.7':
-    resolution: {integrity: sha512-SXa5hI3f8XsMNvN81qMv6j3uJxzwM/xUiUfMdytRB4P9swcNeb6UyDLOAvfdzivInW3YTkzmFjaar03+cmPm2w==}
+  '@jl-org/tool@2.0.3':
+    resolution: {integrity: sha512-Z4H++2rP0EQfVg9iBOw3fh0eF7VgF2blznlO+p72PMTPnEAl3ddayCiWoOBuOhgEln0v78F4HxgwuPdCyN+gRw==}
 
   '@jl-org/ts-tool@0.0.8':
     resolution: {integrity: sha512-2YwGmzod5LBOi7cKknRXn2H9xcp99OhokZJ55t+kg7wvPST4obcwLxO03ji0gVuFoHp5BgrkwzDICV+z1a3TDg==}
@@ -794,7 +794,7 @@ snapshots:
   '@esbuild/win32-x64@0.21.5':
     optional: true
 
-  '@jl-org/tool@1.9.7': {}
+  '@jl-org/tool@2.0.3': {}
 
   '@jl-org/ts-tool@0.0.8': {}
 

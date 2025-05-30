@@ -1,7 +1,7 @@
-import { blobToBase64, isFn, type TransferType } from '@jl-org/tool'
+import { blobToBase64, isFn, splitWorkerTask, type TransferType } from '@jl-org/tool'
 import { getCvsImg, type HandleImgReturn } from './handleImg'
 import { createCvs } from './'
-import type { CaptureFrameResult, CaptureVideoFrameData, VideoData } from '@/worker/captureVideoFrame'
+import type { CaptureFrameResult, CaptureVideoFrameData } from '@/worker/captureVideoFrame'
 import type { PartRequired } from '@jl-org/ts-tool'
 
 
@@ -30,9 +30,9 @@ export async function captureVideoFrame<
   >
 
   const src = getUrl()
-  const times = Array.isArray(time)
+  const times = (Array.isArray(time)
     ? time
-    : [time]
+    : [time])
 
   const opts: PartRequired<Options, 'mimeType' | 'quality'> = {
     mimeType: 'image/webp',
@@ -40,7 +40,7 @@ export async function captureVideoFrame<
     ...options,
   }
 
-  const data = await runWithWorker()
+  const data = await runWithMutWorker()
   if (data !== false) {
     return data
   }
@@ -63,66 +63,45 @@ export async function captureVideoFrame<
       : URL.createObjectURL(fileOrUrl)
   }
 
-  async function runWithWorker(): Promise<false | ReturnRes> {
-    if (options.workerPath) {
-      const isSupport = checkImageCaptureSupport()
-      if (!isSupport) {
-        console.error('不支持 ImageCapture，已降级为截取 canvas')
-        return false
-      }
-
-      const worker = isFn(options.workerPath)
-        ? options.workerPath()
-        : new Worker(options.workerPath)
-
-      const p = new Promise<ReturnRes>((resolve, reject) => {
-        worker.onmessage = async (e: MessageEvent<CaptureFrameResult[]>) => {
-          if (resType === 'base64') {
-            const res: string[] = []
-            for (const item of e.data) {
-              const base64 = await blobToBase64(item.blob)
-              res.push(base64)
-            }
-
-            resolve(res as unknown as ReturnRes)
-            worker.terminate()
-          }
-
-          resolve(e.data.map((item) => item.blob) as unknown as ReturnRes)
-        }
-
-        worker.onerror = (err) => {
-          reject(err)
-        }
-      })
-
-      sendWorkerData(worker)
-      return p
+  async function runWithMutWorker(): Promise<ReturnRes | false> {
+    if (!options.workerPath) {
+      return false
     }
 
-    return false
+    const isSupport = checkImageCaptureSupport()
+    if (!isSupport) {
+      console.error('不支持 ImageCapture，已降级为截取 canvas')
+      return false
+    }
+
+    const videoData: CaptureVideoFrameData[] = await Promise.all(
+      times.map((time) => onVideoSeeked(time, genWorkerData))
+    )
+
+    const data = await splitWorkerTask<
+      CaptureVideoFrameData[],
+      CaptureFrameResult[],
+      Blob
+    >({
+      WorkerScript: options.workerPath,
+      totalItems: times.length,
+      async genSendMsg(st, et) {
+        return videoData.slice(st, et)
+      },
+      onMessage(message, _workerInfo, callbacks) {
+        callbacks.resolveBatch(message.map((item) => item.blob))
+      },
+    })
+
+    if (resType === 'blob') {
+      return data as unknown as ReturnRes
+    }
+
+    const base64s = await Promise.all(data.map((item) => blobToBase64(item)))
+    return base64s as unknown as ReturnRes
   }
 
-  async function sendWorkerData(worker: Worker) {
-    const videoData: VideoData[] = []
-
-    for (let i = 0; i < times.length; i++) {
-      const time = times[i]
-      await onVideoSeeked(time, async (video) => {
-        const workerData = await genWorkerData(video)
-        videoData.push(workerData)
-      })
-    }
-
-    const workerEventData: CaptureVideoFrameData = {
-      videoData,
-      mimeType: opts.mimeType,
-      quality: opts.quality,
-    }
-    worker.postMessage(workerEventData)
-  }
-
-  async function genWorkerData(video: HTMLVideoElement): Promise<VideoData> {
+  async function genWorkerData(video: HTMLVideoElement): Promise<CaptureVideoFrameData> {
     const stream = video.captureStream() as MediaStream
     const track = stream.getVideoTracks()[0]
 
@@ -133,6 +112,8 @@ export async function captureVideoFrame<
     return {
       imageBitmap,
       timestamp,
+      mimeType: opts.mimeType,
+      quality: opts.quality,
     }
   }
 
@@ -185,13 +166,15 @@ export async function captureVideoFrame<
     document.body.appendChild(video)
 
     return new Promise<R>((resolve, reject) => {
-      video.onseeked = async () => {
+      video.oncanplay = async () => {
         const res = await cb(video)
         resolve(res)
         document.body.removeChild(video)
       }
+
       video.onerror = (err) => {
         reject(err)
+        document.body.removeChild(video)
       }
     })
   }
@@ -220,5 +203,5 @@ type Options = {
   /**
    * 指定 worker 路径，可以是路径，也可以是返回 worker 的函数
    */
-  workerPath?: string | (() => Worker)
+  workerPath?: string | (new () => Worker)
 }

@@ -770,7 +770,7 @@ export declare function getImgEdge(source: string | ImageData, options?: {
 
 ## 截取视频某一帧
 
-1. 复制 `dist/worker/captureVideoFrame.js` 到你的根目录
+1. 复制 `dist/worker/captureVideoFrame.js` 到你的根目录，如 `/public/`
 2. 传入 workerPath 路径，即可开启 Web Worker 截取帧
 
 ```ts
@@ -778,8 +778,8 @@ export declare function getImgEdge(source: string | ImageData, options?: {
  * 示例，使用 Web Worker 截取视频 1、2、10000 秒的图片
  */
 const srcs = await captureVideoFrame(file, [1, 2, 10000], 'base64', {
-  workerPath,
-  quality: 0.8,
+  workerPath: '/captureVideoFrame.js',
+  quality: 0.5,
 })
 
 /**
