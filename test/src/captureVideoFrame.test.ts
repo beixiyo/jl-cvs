@@ -1,4 +1,4 @@
-import { blobToBase64, captureVideoFrame } from '@/canvasTool'
+import { captureVideoFrame } from '@/canvasTool';
 
 
 const input = document.createElement('input')
@@ -11,14 +11,11 @@ input.onchange = async (e) => {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
 
-  // const base64 = await blobToBase64(file)
-  const workerPath = new URL('/captureVideoFrame.js', import.meta.url).href
+  const workerPath = '/captureVideoFrame.js'
   const srcs = await captureVideoFrame(file, [1, 2, 10000], 'base64', {
     workerPath,
     quality: 0.8,
   })
-
-  fetch(workerPath).then(res => res.text() ).then(res => console.log(res) )
 
   srcs.forEach((item) => {
     console.log(item)

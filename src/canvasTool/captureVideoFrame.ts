@@ -2,6 +2,7 @@ import { blobToBase64, isFn, type TransferType } from '@jl-org/tool'
 import { getCvsImg, type HandleImgReturn } from './handleImg'
 import { createCvs } from './'
 import type { CaptureFrameResult, CaptureVideoFrameData, VideoData } from '@/worker/captureVideoFrame'
+import type { PartRequired } from '@jl-org/ts-tool'
 
 
 /**
@@ -32,6 +33,12 @@ export async function captureVideoFrame<
   const times = Array.isArray(time)
     ? time
     : [time]
+
+  const opts: PartRequired<Options, 'mimeType' | 'quality'> = {
+    mimeType: 'image/webp',
+    quality: 0.5,
+    ...options,
+  }
 
   const data = await runWithWorker()
   if (data !== false) {
@@ -78,6 +85,7 @@ export async function captureVideoFrame<
             }
 
             resolve(res as unknown as ReturnRes)
+            worker.terminate()
           }
 
           resolve(e.data.map((item) => item.blob) as unknown as ReturnRes)
@@ -108,8 +116,8 @@ export async function captureVideoFrame<
 
     const workerEventData: CaptureVideoFrameData = {
       videoData,
-      mimeType: options.mimeType || 'image/webp',
-      quality: options.quality || 0.5,
+      mimeType: opts.mimeType,
+      quality: opts.quality,
     }
     worker.postMessage(workerEventData)
   }
@@ -149,8 +157,8 @@ export async function captureVideoFrame<
     return getCvsImg(
       cvs,
       resType,
-      options.mimeType,
-      options.quality
+      opts.mimeType,
+      opts.quality
     )
   }
 
