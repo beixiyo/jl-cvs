@@ -1,7 +1,7 @@
 import { blobToBase64, isFn, splitWorkerTask, type TransferType } from '@jl-org/tool'
 import { getCvsImg, type HandleImgReturn } from './handleImg'
 import { createCvs } from './'
-import type { CaptureFrameResult, CaptureVideoFrameData } from '@/worker/captureVideoFrame'
+import type { CaptureVideoFrameData } from '@/worker/captureVideoFrame'
 import type { PartRequired } from '@jl-org/ts-tool'
 
 
@@ -80,24 +80,30 @@ export async function captureVideoFrame<
 
     const data = await splitWorkerTask<
       CaptureVideoFrameData[],
-      CaptureFrameResult[],
-      Blob
+      ArrayBuffer[],
+      ArrayBuffer
     >({
       WorkerScript: options.workerPath,
       totalItems: times.length,
       async genSendMsg(st, et) {
-        return videoData.slice(st, et)
+        const data = videoData.slice(st, et)
+        return Object.assign(data, {
+          structuredSerializeOptions: {
+            transfer: data.map((item) => item.imageBitmap)
+          } satisfies StructuredSerializeOptions
+        })
       },
       onMessage(message, _workerInfo, callbacks) {
-        callbacks.resolveBatch(message.map((item) => item.blob))
+        callbacks.resolveBatch(message)
       },
     })
 
+    const blobData = data.map((item: ArrayBuffer) => new Blob([item], { type: opts.mimeType }))
     if (resType === 'blob') {
-      return data as unknown as ReturnRes
+      return blobData as unknown as ReturnRes
     }
 
-    const base64s = await Promise.all(data.map((item) => blobToBase64(item)))
+    const base64s = await Promise.all(blobData.map((item) => blobToBase64(item)))
     return base64s as unknown as ReturnRes
   }
 

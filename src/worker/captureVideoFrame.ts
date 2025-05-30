@@ -1,12 +1,14 @@
 self.onmessage = async function ({ data }: MessageEvent<CaptureVideoFrameData[]>) {
-  const res: CaptureFrameResult[] = []
+  const res: ArrayBuffer[] = []
 
   for (const item of data) {
     const data = await getCaptureFrame(item)
     res.push(data)
   }
 
-  self.postMessage(res)
+  self.postMessage(res, {
+    transfer: res
+  })
 
   async function getCaptureFrame(videoData: CaptureVideoFrameData) {
     const { imageBitmap, timestamp, mimeType, quality } = videoData
@@ -14,29 +16,16 @@ self.onmessage = async function ({ data }: MessageEvent<CaptureVideoFrameData[]>
     const ctx = canvas.getContext('2d')!
 
     ctx.drawImage(imageBitmap, 0, 0)
-    return new Promise<CaptureFrameResult>((resolve, reject) => {
+    return new Promise<ArrayBuffer>((resolve, reject) => {
       canvas.convertToBlob({ type: mimeType, quality })
-        .then(blob => {
-          const res: CaptureFrameResult = {
-            blob,
-            width: imageBitmap.width,
-            height: imageBitmap.height,
-            timestamp
-          }
+        .then(async (blob) => {
+          const buffer = await blob.arrayBuffer()
           imageBitmap.close()
-          resolve(res)
+          resolve(buffer)
         })
         .catch(reject)
     })
   }
-}
-
-
-export type CaptureFrameResult = {
-  blob: Blob
-  width: number
-  height: number
-  timestamp: number
 }
 
 export type CaptureVideoFrameData = {
