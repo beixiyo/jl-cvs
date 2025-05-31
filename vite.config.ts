@@ -41,24 +41,18 @@ export default defineConfig({
       preserveEntrySignatures: 'strict',
       input: {
         index: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
-        ...getWorkerEntries('./src/worker')
+        ...getDirEntries('./src/worker')
       },
       output: [
         // ESM 格式输出（主入口 + Worker）
         {
           format: 'es',
           entryFileNames: '[name].js',
-          exports: 'named',
         },
         // CJS 格式输出（仅主入口）
         {
           format: 'cjs',
           entryFileNames: '[name].cjs',
-          exports: 'named',
-          // 排除Worker（CJS不需要）
-          manualChunks: (id) => {
-            if (id.includes('worker/') || id.includes('worker\\')) return null
-          }
         }
       ],
 
@@ -93,16 +87,12 @@ function cleanupPlugin(targetDir: string, exts: string[]): Plugin {
         if (needRm) {
           rmSync(filePath)
         }
-        else {
-          const content = readFileSync(filePath, 'utf-8')
-          writeFileSync(resolve('./public', file), content)
-        }
       }
     }
   }
 }
 
-function getWorkerEntries(dirPath: string) {
+function getDirEntries(dirPath: string) {
   const workerAbsolutePath = fileURLToPath(new URL(dirPath, import.meta.url))
   const entries = {}
 

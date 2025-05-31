@@ -18,8 +18,7 @@ input.onchange = async (e) => {
 
   console.time('captureVideoFrame')
   const srcs = await captureVideoFrame(file, genArr(20, i => i + 1), 'base64', {
-    workerPath: '/captureVideoFrame.js',
-    quality: 1,
+    quality: 0.5,
   })
   console.timeEnd('captureVideoFrame')
 

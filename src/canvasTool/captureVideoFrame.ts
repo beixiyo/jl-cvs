@@ -7,7 +7,7 @@ import type { PartRequired } from '@jl-org/ts-tool'
 
 /**
  * 截取视频某一帧图片，大于总时长则用最后一秒。
- * 如果传入 workerPath 并且支持 ImageCapture，则使用 Worker 截取帧，否则降级为截取 Canvas。
+ * 如果浏览器支持 ImageCapture，则使用 Worker 截取帧，否则降级为截取 Canvas。
  * @param fileOrUrl 文件或者链接
  * @param time 时间，可以是数组
  * @param resType 返回类型
@@ -64,9 +64,9 @@ export async function captureVideoFrame<
   }
 
   async function runWithMutWorker(): Promise<ReturnRes | false> {
-    if (!options.workerPath) {
-      return false
-    }
+    const workerJS = `self.onmessage=async function({data:n}){const e=[];for(const a of n){const t=await c(a);e.push(t)}self.postMessage(e,{transfer:e});async function c(a){const{imageBitmap:t,timestamp:g,mimeType:o,quality:r}=a,s=new OffscreenCanvas(t.width,t.height);return s.getContext("2d").drawImage(t,0,0),new Promise((f,i)=>{s.convertToBlob({type:o,quality:r}).then(async m=>{const u=await m.arrayBuffer();t.close(),f(u)}).catch(i)})}};
+`
+    const workerURL = URL.createObjectURL(new Blob([workerJS], { type: 'text/javascript' }))
 
     const isSupport = checkImageCaptureSupport()
     if (!isSupport) {
@@ -83,7 +83,7 @@ export async function captureVideoFrame<
       ArrayBuffer[],
       ArrayBuffer
     >({
-      WorkerScript: options.workerPath,
+      WorkerScript: options.workerPath || workerURL,
       totalItems: times.length,
       async genSendMsg(st, et) {
         const data = videoData.slice(st, et)
