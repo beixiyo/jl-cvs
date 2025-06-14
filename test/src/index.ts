@@ -6,7 +6,7 @@
 // import './NoteBoard.test'
 // import './NoteBoardWithBase64.test'
 
-// import './Ripple.test'
+import './Ripple.test'
 // import './StarField.test'
 // import './Grid.test'
 // import './GlobeSphere.test'
@@ -14,7 +14,7 @@
 // import './DotGrid.test'
 
 // import './verifyCode'
-import './captureVideoFrame.test'
+// import './captureVideoFrame.test'
 // import './shotImg.test'
 
 // import './handleImg.test'

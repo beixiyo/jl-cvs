@@ -19,3 +19,4 @@ ripple.canvas.style.top = '0'
 ripple.canvas.style.left = '0'
 
 document.body.appendChild(ripple.canvas)
+ripple.canvas.style.background = '#333'

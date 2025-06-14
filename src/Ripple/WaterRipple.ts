@@ -1,5 +1,6 @@
-import { applyAnimation, getWinHeight, getWinWidth, isFn } from '@jl-org/tool'
+import { applyAnimation, getWinHeight, getWinWidth, isFn, Clock } from '@jl-org/tool'
 import type { Optional } from '@jl-org/ts-tool'
+
 
 /**
  * 水波纹动画
@@ -13,11 +14,11 @@ import type { Optional } from '@jl-org/ts-tool'
  * ```
  */
 export class WaterRipple {
-
   private declare x: number
   private declare y: number
-  private step = 0
+  private clock: Clock
   private opts: Optional<Required<RippleOpts>, 'strokeStyle'>
+  private stopAnimation?: VoidFunction
 
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
@@ -28,7 +29,7 @@ export class WaterRipple {
       height: getWinHeight(),
       yOffset: 180,
       xOffset: 0,
-      canvas: document.createElement('canvas'),
+      canvas: opts.canvas || document.createElement('canvas'),
       lineWidth: 2,
       circleCount: 13,
       intensity: 1,
@@ -38,11 +39,10 @@ export class WaterRipple {
 
     this.canvas = this.opts.canvas
     this.ctx = this.canvas.getContext('2d')!
+    this.clock = new Clock()
 
     this.initCanvas()
-    applyAnimation(() => {
-      this.drawCircles()
-    })
+    this.startAnimation()
     window.addEventListener('resize', () => {
       this.opts.onResize()
       this.initCanvas()
@@ -53,6 +53,24 @@ export class WaterRipple {
     this.opts.width = width
     this.opts.height = height
     this.initCanvas()
+  }
+
+  /**
+   * 开始动画
+   */
+  private startAnimation() {
+    this.stopAnimation?.()
+    this.stopAnimation = applyAnimation(() => {
+      this.drawCircles()
+    })
+  }
+
+  /**
+   * 停止动画
+   */
+  stop() {
+    this.stopAnimation?.()
+    this.clock.stop()
   }
 
   private drawCircle(radius: number) {
@@ -83,12 +101,15 @@ export class WaterRipple {
     const maxDistance = Math.max(width, height)
     const perRadius = maxDistance / circleCount
 
+    /** 使用基于时间的动画计算，确保在不同帧率下表现一致 */
+    // intensity 控制波纹扩散速度（像素/秒）
+    const timeBasedStep = (this.clock.elapsedMS * intensity * 0.1) % maxDistance
+
     ctx.clearRect(0, 0, width, height)
     for (let i = 0; i < circleCount; i++) {
-      const radius = (perRadius * i + this.step) % maxDistance
+      const radius = (perRadius * i + timeBasedStep) % maxDistance
       this.drawCircle(radius)
     }
-    this.step = (this.step + Math.ceil(intensity)) % Number.MAX_SAFE_INTEGER
   }
 
   private initCanvas() {
@@ -99,7 +120,6 @@ export class WaterRipple {
     this.canvas.width = width
     this.canvas.height = height
   }
-
 }
 
 export type RippleOpts = {
