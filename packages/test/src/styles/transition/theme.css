@@ -1,0 +1,24 @@
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* 进入dark模式和退出dark模式时，两个图像的位置顺序正好相反 */
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 999;
+}
+
+/* 根据自己选择器修改 */
+:root.dark::view-transition-old(root) {
+  z-index: 999;
+}
+
+:root.dark::view-transition-new(root) {
+  z-index: 1;
+}

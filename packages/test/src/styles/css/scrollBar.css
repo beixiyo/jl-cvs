@@ -1,0 +1,42 @@
+/* 全局滚动条样式 */
+::-webkit-scrollbar,
+/* Firefox浏览器滚动条样式 */
+scrollbar,
+/* IE浏览器滚动条样式 */
+-ms-viewport {
+    /* 滚动条大小 */
+    width: 10px;
+    height: 10px;
+    /* 滚动条背景色 */
+    background-color: #f5f5f519;
+}
+
+/* 滚动条滑块 */
+::-webkit-scrollbar-thumb,
+/* Firefox浏览器滚动条滑块 */
+scrollbar-thumb {
+    /* 滑块背景色 */
+    background-color: var(--primaryColor);
+    transition: .3s;
+    cursor: pointer;
+    /* 滑块圆角 */
+    border-radius: 6px;
+    /* 滑块边框 */
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+/* 滚动条滑块悬停效果 */
+::-webkit-scrollbar-thumb:hover,
+/* Firefox浏览器滚动条滑块悬停效果 */
+scrollbar-thumb:hover {
+    /* 滑块悬停背景色 */
+    background-color: var(--primaryColor);
+}
+
+/* 滚动条按钮 */
+::-webkit-scrollbar-button {
+    /* 按钮大小 */
+    display: none;
+    /* 隐藏滚动条按钮 */
+}

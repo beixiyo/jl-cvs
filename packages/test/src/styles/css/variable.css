@@ -1,0 +1,11 @@
+:root.light {
+  --bgColor: #fff;
+}
+
+:root.dark {
+  --bgColor: #000;
+}
+
+:root {
+  --primaryColor: #292F37;
+}

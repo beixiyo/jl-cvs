@@ -1,0 +1,12 @@
+:root {
+  --primaryColor: #292F37;
+  --lightTextColor: #C4C4C6;
+  --lightBg: #F9FAFC;
+  --innerBg: #F2F3F6;
+  --borderColor: #E8E9E9;
+  --successColor: #10B981;
+  --infoColor: #3B82F6;
+  --dangerColor: #EF4444;
+  --padding: 16;
+  --borderRadius: 4;
+}
