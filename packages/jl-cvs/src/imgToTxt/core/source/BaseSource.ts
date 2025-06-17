@@ -1,12 +1,10 @@
 import { createCvs } from '@/canvasTool'
 import { Bitmap } from '../Bitmap'
 
-
 /**
  * 图片源基类，里面有 初始化 和 获取像素 方法
  */
 export abstract class BaseSource {
-
   /** 这里的 canvas 是自己创建的，而非用户的 */
   protected canvas: HTMLCanvasElement
   protected ctx: CanvasRenderingContext2D
@@ -14,7 +12,7 @@ export abstract class BaseSource {
 
   constructor(isDynamic = false) {
     const { cvs, ctx } = createCvs(undefined, undefined, {
-      willReadFrequently: isDynamic
+      willReadFrequently: isDynamic,
     })
     this.canvas = cvs
     this.ctx = ctx
@@ -26,7 +24,8 @@ export abstract class BaseSource {
 
   /** 仅仅调用一次实现类的 setCvsSize 方法 */
   private init() {
-    if (this.isInit) return
+    if (this.isInit)
+      return
 
     this.setCvsSize()
     this.isInit = true

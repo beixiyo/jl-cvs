@@ -1,6 +1,6 @@
 export {
-  timeFunc,
   genTimeFunc,
-  type TimeFuncStr,
+  timeFunc,
   type TimeFunc,
+  type TimeFuncStr,
 } from '@jl-org/tool'

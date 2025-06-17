@@ -1,12 +1,10 @@
-import { clearAllCvs, createCvs, getImg, cutImg, getCvsImg, getDPR } from '@/canvasTool'
-import { mergeOpts, setCanvas } from './tools'
-import type { NoteBoardOptions, CanvasAttrs, Mode, ImgInfo, NoteBoardOptionsRequired, DrawImgOptions, CanvasItem, ExportOptions, AddCanvasOpts } from './type'
-import { getCircleCursor } from '@/utils'
+import type { AddCanvasOpts, CanvasAttrs, CanvasItem, DrawImgOptions, ExportOptions, ImgInfo, Mode, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
 import type { ShapeType } from '@/Shapes'
-
+import { clearAllCvs, createCvs, cutImg, getCvsImg, getDPR, getImg } from '@/canvasTool'
+import { getCircleCursor } from '@/utils'
+import { mergeOpts, setCanvas } from './tools'
 
 export abstract class NoteBoardBase {
-
   static dpr = getDPR()
 
   /** 容器 */
@@ -55,8 +53,8 @@ export abstract class NoteBoardBase {
    */
   abstract history: any
   /**
-    * 撤销
-    */
+   * 撤销
+   */
   abstract undo(): void
   /**
    * 重做
@@ -85,7 +83,7 @@ export abstract class NoteBoardBase {
   constructor(opts: NoteBoardOptions) {
     this.opts = mergeOpts(opts, NoteBoardBase.dpr)
 
-    // 设置画笔画板置顶
+    /** 设置画笔画板置顶 */
     this.canvas.style.zIndex = '99'
     this.el = opts.el
 
@@ -96,11 +94,11 @@ export abstract class NoteBoardBase {
 
     this.addCanvas(
       'imgCanvas',
-      { canvas: this.imgCanvas }
+      { canvas: this.imgCanvas },
     )
     this.addCanvas(
       'brushCanvas',
-      { canvas: this.canvas }
+      { canvas: this.canvas },
     )
     this.setStyle(this.opts)
 
@@ -116,12 +114,12 @@ export abstract class NoteBoardBase {
    * 获取画板图像内容
    */
   async exportImg(
-    options: Omit<ExportOptions, 'canvas'> = {}
+    options: Omit<ExportOptions, 'canvas'> = {},
   ) {
     const canvas = this.imgCanvas
     return this.exportLayer({
       ...options,
-      canvas
+      canvas,
     })
   }
 
@@ -129,12 +127,12 @@ export abstract class NoteBoardBase {
    * 获取画板遮罩（画笔）内容
    */
   async exportMask(
-    options: Omit<ExportOptions, 'canvas'> = {}
+    options: Omit<ExportOptions, 'canvas'> = {},
   ) {
     const canvas = this.canvas
     return this.exportLayer({
       ...options,
-      canvas
+      canvas,
     })
   }
 
@@ -143,19 +141,20 @@ export abstract class NoteBoardBase {
    */
   async exportAllLayer(
     options: Omit<ExportOptions, 'canvas'> = {},
-    canvasList: HTMLCanvasElement[] = this.canvasList.map((item) => item.canvas)
+    canvasList: HTMLCanvasElement[] = this.canvasList.map(item => item.canvas),
   ) {
     const canvasDataUrls = []
     for (const canvas of canvasList) {
       canvasDataUrls.push(await this.exportLayer({
         ...options,
-        canvas
+        canvas,
       }))
     }
 
-    const imgs = await Promise.all(canvasDataUrls.map((item) => getImg(item))) as HTMLImageElement[]
+    const imgs = await Promise.all(canvasDataUrls.map(item => getImg(item))) as HTMLImageElement[]
     for (const item of imgs) {
-      if (!item) return ''
+      if (!item)
+        return ''
     }
     const img = imgs[0]
 
@@ -188,8 +187,8 @@ export abstract class NoteBoardBase {
       mimeType,
       quality,
       canvas = this.canvas,
-      imgInfo = this.imgInfo
-    }: ExportOptions = {}
+      imgInfo = this.imgInfo,
+    }: ExportOptions = {},
   ) {
     const rawBase64 = await getCvsImg(canvas, 'base64', mimeType, quality)
 
@@ -202,7 +201,8 @@ export abstract class NoteBoardBase {
     }
 
     const img = await getImg(rawBase64)
-    if (!img) return ''
+    if (!img)
+      return ''
 
     const {
       x,
@@ -223,14 +223,14 @@ export abstract class NoteBoardBase {
       mimeType,
       quality,
     })
-
   }
 
   /**
    * 根据 dpr 计算图片信息
    */
   calcImgInfoWithDPR(imgInfo = this.imgInfo) {
-    if (!imgInfo) throw new Error('imgInfo is undefined')
+    if (!imgInfo)
+      throw new Error('imgInfo is undefined')
 
     /**
      * 缩放回原始大小的计算过程
@@ -269,7 +269,7 @@ export abstract class NoteBoardBase {
    */
   async drawImg(
     img: HTMLImageElement | string,
-    options: DrawImgOptions = {}
+    options: DrawImgOptions = {},
   ) {
     const {
       afterDraw,
@@ -278,7 +278,7 @@ export abstract class NoteBoardBase {
       autoFit,
       center,
       context = this.imgCtx,
-      needRecordImgInfo = true
+      needRecordImgInfo = true,
     } = options
 
     beforeDraw?.()
@@ -287,32 +287,33 @@ export abstract class NoteBoardBase {
     const newImg = typeof img === 'string'
       ? await getImg(img, img => img.crossOrigin = 'anonymous')
       : img
-    if (!newImg) return new Error('Image load failed')
+    if (!newImg)
+      return new Error('Image load failed')
 
     const {
       width: canvasWidth,
-      height: canvasHeight
+      height: canvasHeight,
     } = this.opts
 
-    const imgWidth = options.imgWidth ?? newImg.naturalWidth,
-      imgHeight = options.imgHeight ?? newImg.naturalHeight
+    const imgWidth = options.imgWidth ?? newImg.naturalWidth
+    const imgHeight = options.imgHeight ?? newImg.naturalHeight
 
-    const scaleX = canvasWidth / imgWidth,
-      scaleY = canvasHeight / imgHeight,
-      minScale = Math.min(scaleX, scaleY)
+    const scaleX = canvasWidth / imgWidth
+    const scaleY = canvasHeight / imgHeight
+    const minScale = Math.min(scaleX, scaleY)
 
-    let drawWidth = imgWidth,
-      drawHeight = imgHeight,
-      x = 0,
-      y = 0
+    let drawWidth = imgWidth
+    let drawHeight = imgHeight
+    let x = 0
+    let y = 0
 
     if (autoFit) {
-      // 保持宽高比的情况下，使图片适应画布
+      /** 保持宽高比的情况下，使图片适应画布 */
       drawWidth = imgWidth * minScale
       drawHeight = imgHeight * minScale
     }
     if (center) {
-      // 计算居中位置
+      /** 计算居中位置 */
       x = (canvasWidth - drawWidth) / 2
       y = (canvasHeight - drawHeight) / 2
     }
@@ -349,8 +350,8 @@ export abstract class NoteBoardBase {
   async setTransform() {
     const { canvas, imgCanvas } = this
 
-    const transformOrigin = `${this.mousePoint.x}px ${this.mousePoint.y}px`,
-      transform = `scale(${this.scale}, ${this.scale}) translate(${this.translateX}px, ${this.translateY}px)`
+    const transformOrigin = `${this.mousePoint.x}px ${this.mousePoint.y}px`
+    const transform = `scale(${this.scale}, ${this.scale}) translate(${this.translateX}px, ${this.translateY}px)`
 
     canvas.style.transformOrigin = transformOrigin
     canvas.style.transform = transform
@@ -391,7 +392,7 @@ export abstract class NoteBoardBase {
     this.canvasList.push({
       canvas: options.canvas,
       ctx: options.canvas.getContext('2d') as CanvasRenderingContext2D,
-      name
+      name,
     })
 
     options.parentEl.appendChild(options.canvas)
@@ -440,7 +441,7 @@ export abstract class NoteBoardBase {
   setCursor(lineWidth?: number, strokeStyle?: string) {
     this.canvas.style.cursor = getCircleCursor(
       lineWidth || this.opts.lineWidth,
-      strokeStyle || this.opts.strokeStyle
+      strokeStyle || this.opts.strokeStyle,
     )
   }
 
@@ -459,8 +460,6 @@ export abstract class NoteBoardBase {
       parentEl: HTMLElement
     }
   }
-
 }
-
 
 export type NoteBoardWithBase64Mode = Exclude<Mode, ShapeType>

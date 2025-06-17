@@ -1,10 +1,8 @@
-import { Pixel } from '@jl-org/tool'
-import { BaseSource } from './source'
-
+import type { Pixel } from '@jl-org/tool'
+import type { BaseSource } from './source'
 
 /** 绘制类 */
 export class Painter {
-
   private replaceText: string
   private gap: number
   private source: BaseSource
@@ -61,11 +59,12 @@ export class Painter {
   private drawText(
     x: number,
     y: number,
-    rgba: Pixel
+    rgba: Pixel,
   ) {
     let [r, g, b, a] = rgba
     /** 不要透明的 */
-    if (!a) return
+    if (!a)
+      return
 
     if (this.isGray) {
       r = g = b = 0.2126 * r + 0.7152 * g + 0.0722 * b
@@ -96,7 +95,6 @@ export class Painter {
     }
   }
 }
-
 
 export type PainterOptions = {
   canvas: HTMLCanvasElement

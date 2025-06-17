@@ -1,17 +1,16 @@
-import { clearAllCvs } from '@/canvasTool'
-import { Rect } from './libs/Rect'
-import type { ShapeStyle } from './type'
 import type { BaseShape } from './BaseShape'
+import type { ShapeStyle } from './type'
+import { clearAllCvs } from '@/canvasTool'
 import { DRAW_MAP } from '@/NoteBoard'
 import { UnRedoLinkedList } from '@/utils'
-import { Circle } from './libs/Circle'
 import { Arrow } from './libs/Arrow'
-
+import { Circle } from './libs/Circle'
+import { Rect } from './libs/Rect'
 
 const ShapeMap = {
   rect: Rect,
   circle: Circle,
-  arrow: Arrow
+  arrow: Arrow,
 }
 
 /**
@@ -21,7 +20,6 @@ const ShapeMap = {
  * - 箭头
  */
 export class DrawShape {
-
   disable = false
 
   /**
@@ -132,7 +130,8 @@ export class DrawShape {
    ***************************************************/
 
   private onMouseDown = (e: MouseEvent) => {
-    if (this.disable) return
+    if (this.disable)
+      return
     this.isDrawing = true
 
     /**
@@ -145,15 +144,16 @@ export class DrawShape {
     const { offsetX, offsetY } = e
     const shape = this.getShape(offsetX, offsetY)
 
-    // 拖动
+    /** 拖动 */
     if (shape) {
       this.dragX = offsetX
       this.dragY = offsetY
       this.curDragShape = shape
 
-      // 不记录矩形位移的历史记录
+      /** 不记录矩形位移的历史记录 */
       const history = this.drawMap?.getHistory()
-      if (!history) return
+      if (!history)
+        return
       history.undo()
       history.cleanUnusedNodes()
 
@@ -184,7 +184,8 @@ export class DrawShape {
         : this.drawMap?.setCursor('crosshair')
     }
 
-    if (!this.isDrawing) return
+    if (!this.isDrawing)
+      return
 
     const { curDragShape } = this
     /**
@@ -215,7 +216,8 @@ export class DrawShape {
     }
 
     const shape = this.lastShape
-    if (!shape) return
+    if (!shape)
+      return
 
     shape.endX = e.offsetX
     shape.endY = e.offsetY
@@ -244,7 +246,6 @@ export class DrawShape {
     return DRAW_MAP.get(this)
   }
 }
-
 
 export type ShapeType = keyof typeof ShapeMap
 

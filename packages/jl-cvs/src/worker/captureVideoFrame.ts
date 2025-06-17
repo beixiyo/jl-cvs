@@ -7,7 +7,7 @@ self.onmessage = async function ({ data }: MessageEvent<CaptureVideoFrameData[]>
   }
 
   self.postMessage(res, {
-    transfer: res
+    transfer: res,
   })
 
   async function getCaptureFrame(videoData: CaptureVideoFrameData) {

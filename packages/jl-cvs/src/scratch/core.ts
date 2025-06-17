@@ -1,9 +1,8 @@
-import type { ScratchOpts, mouseMoveCb } from './types'
-
+import type { mouseMoveCb, ScratchOpts } from './types'
 
 /**
  * 刮刮乐，请确保有定位元素的包含块作为父级元素
- * @param canvas 
+ * @param canvas
  * @param onScratch 刮动回调函数
  * @param opts 配置
  * @returns 返回清理函数
@@ -11,7 +10,7 @@ import type { ScratchOpts, mouseMoveCb } from './types'
 export function createScratch(
   canvas: HTMLCanvasElement,
   opts: ScratchOpts = {},
-  onScratch?: mouseMoveCb
+  onScratch?: mouseMoveCb,
 ) {
   const ctx = setStyle(canvas, opts)
   return bindEvent(canvas, ctx, onScratch)
@@ -27,7 +26,7 @@ function setStyle(canvas: HTMLCanvasElement, opts: ScratchOpts) {
     bg = '#999',
     lineWidth = 15,
     lineCap = 'round',
-    lineJoin = 'round'
+    lineJoin = 'round',
   } = opts || {}
 
   width && (canvas.width = width)
@@ -37,7 +36,7 @@ function setStyle(canvas: HTMLCanvasElement, opts: ScratchOpts) {
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-  // 什么颜色都行
+  /** 什么颜色都行 */
   ctx.fillStyle = 'transparent'
   ctx.lineWidth = lineWidth
   ctx.lineCap = lineCap
@@ -59,13 +58,12 @@ function setStyle(canvas: HTMLCanvasElement, opts: ScratchOpts) {
 function bindEvent(
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
-  onScratch?: mouseMoveCb
+  onScratch?: mouseMoveCb,
 ) {
   canvas.addEventListener('mousedown', onMouseDown)
   canvas.addEventListener('mouseup', onMouseUp)
 
   return rmEvent
-
 
   function onMouseDown({ clientX, clientY }: MouseEvent) {
     ctx.moveTo(clientX, clientY)
@@ -88,4 +86,3 @@ function bindEvent(
     canvas.removeEventListener('mouseup', onMouseUp)
   }
 }
-

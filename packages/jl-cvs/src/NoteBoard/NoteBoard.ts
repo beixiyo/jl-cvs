@@ -1,8 +1,7 @@
-import type { Mode, RecordPath, NoteBoardOptions, DrawMapVal } from './type'
-import { excludeKeys, UnRedoLinkedList } from '@/utils'
+import type { DrawMapVal, Mode, NoteBoardOptions, RecordPath } from './type'
 import { DrawShape } from '@/Shapes'
+import { excludeKeys, UnRedoLinkedList } from '@/utils'
 import { NoteBoardBase } from './NoteBoardBase'
-
 
 /**
  * 统一绘图函数
@@ -30,7 +29,6 @@ export const DRAW_MAP = new WeakMap<
  * - 截图
  */
 export class NoteBoard extends NoteBoardBase {
-
   mode: Mode = 'draw'
   drawShape: DrawShape
 
@@ -110,14 +108,15 @@ export class NoteBoard extends NoteBoardBase {
     const recordPath = this.history.undo()
     if (!recordPath?.value) {
       this.clear(false)
-      // 清理图形里不要的记录
+      /** 清理图形里不要的记录 */
       this.drawShape.undo()
 
       return
     }
 
     const drawFn = this.drawShape.drawMap?.unRedo
-    if (!drawFn) return
+    if (!drawFn)
+      return
     const data = drawFn({ type: 'undo' })
 
     this.opts.onUndo?.({
@@ -136,7 +135,8 @@ export class NoteBoard extends NoteBoardBase {
     }
 
     const drawFn = this.drawShape.drawMap?.unRedo
-    if (!drawFn) return
+    if (!drawFn)
+      return
 
     const data = drawFn({ type: 'redo' })
     this.opts.onRedo?.({
@@ -190,7 +190,7 @@ export class NoteBoard extends NoteBoardBase {
   onMousedown = (e: MouseEvent) => {
     this.opts.onMouseDown?.(e)
 
-    // 拖拽模式
+    /** 拖拽模式 */
     if (this.mode === 'drag') {
       this.isDragging = true
       this.dragStart = { x: e.offsetX, y: e.offsetY }
@@ -206,9 +206,10 @@ export class NoteBoard extends NoteBoardBase {
       this.drawShape.drawMap?.syncShapeRecord()
     }
 
-    if (!this.canDraw) return
+    if (!this.canDraw)
+      return
 
-    // 画笔模式
+    /** 画笔模式 */
     this.isDrawing = true
     this.ctx.beginPath()
 
@@ -237,7 +238,7 @@ export class NoteBoard extends NoteBoardBase {
         translateY: this.translateY,
         transformOriginX: this.dragStart.x,
         transformOriginY: this.dragStart.y,
-        e
+        e,
       })
 
       return
@@ -246,7 +247,8 @@ export class NoteBoard extends NoteBoardBase {
     /**
      * 画笔
      */
-    if (!this.canDraw || !this.isDrawing) return
+    if (!this.canDraw || !this.isDrawing)
+      return
 
     const { offsetX, offsetY } = e
     const { ctx, drawStart } = this
@@ -261,10 +263,11 @@ export class NoteBoard extends NoteBoardBase {
       y: offsetY,
     }
 
-    if (!lastRecord) return
+    if (!lastRecord)
+      return
     lastRecord[lastRecord.length - 1].path.push({
       moveTo: [drawStart.x, drawStart.y],
-      lineTo: [offsetX, offsetY]
+      lineTo: [offsetX, offsetY],
     })
   }
 
@@ -278,7 +281,8 @@ export class NoteBoard extends NoteBoardBase {
       return
     }
 
-    if (!this.canDraw) return
+    if (!this.canDraw)
+      return
     this.isDrawing = false
   }
 
@@ -290,17 +294,19 @@ export class NoteBoard extends NoteBoardBase {
       return
     }
 
-    if (!this.canDraw) return
+    if (!this.canDraw)
+      return
     this.isDrawing = false
   }
 
   onWheel = (e: WheelEvent) => {
     e.preventDefault()
-    if (!this.isEnableZoom) return
+    if (!this.isEnableZoom)
+      return
 
     this.mousePoint = {
       x: e.offsetX,
-      y: e.offsetY
+      y: e.offsetY,
     }
 
     this.scale = e.deltaY > 0
@@ -312,7 +318,7 @@ export class NoteBoard extends NoteBoardBase {
 
     this.opts.onWheel?.({
       scale: this.scale,
-      e
+      e,
     })
   }
 
@@ -325,18 +331,24 @@ export class NoteBoard extends NoteBoardBase {
           { ...this.opts },
           [
             'el',
-            'minScale', 'maxScale',
-            'onMouseDown', 'onMouseMove',
-            'onMouseUp', 'onMouseLeave',
-            'onWheel', 'onDrag',
-            'onRedo', 'onUndo',
-            'height', 'width',
-          ]
+            'minScale',
+            'maxScale',
+            'onMouseDown',
+            'onMouseMove',
+            'onMouseUp',
+            'onMouseLeave',
+            'onWheel',
+            'onDrag',
+            'onRedo',
+            'onUndo',
+            'height',
+            'width',
+          ],
         ),
         path: [],
         shapes: [],
         mode: this.mode,
-      }
+      },
     ])
   }
 
@@ -345,7 +357,8 @@ export class NoteBoard extends NoteBoardBase {
    */
   private drawRecord() {
     const lastRecord = this.history.curValue
-    if (!lastRecord) return
+    if (!lastRecord)
+      return
     const { ctx } = this
     const currentMode = this.mode
 
@@ -374,7 +387,7 @@ export class NoteBoard extends NoteBoardBase {
       const lastRecord = this.history.curValue
       if (lastRecord) {
         this.ctx.globalCompositeOperation = this.opts.globalCompositeOperation
-        lastRecord[lastRecord.length - 1].shapes.forEach(shape => {
+        lastRecord[lastRecord.length - 1].shapes.forEach((shape) => {
           shape.draw()
         })
       }

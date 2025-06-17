@@ -2,7 +2,6 @@
  * 创建撤销、重做链表
  */
 export class UnRedoLinkedList<T> {
-
   /** 头节点 */
   head: UnRedoNode<T> | null = null
   /** 尾节点 */
@@ -31,24 +30,24 @@ export class UnRedoLinkedList<T> {
       id: this.nextIndex++,
       value: item,
       prev: this.curNode,
-      next: null
+      next: null,
     }
 
-    // 如果当前节点存在，截断后续链接
+    /** 如果当前节点存在，截断后续链接 */
     if (this.curNode) {
       this.curNode.next = newNode
     }
 
-    // 更新尾节点和当前节点
+    /** 更新尾节点和当前节点 */
     this.tail = newNode
     this.curNode = newNode
 
-    // 首次设置头节点
+    /** 首次设置头节点 */
     if (!this.head) {
       this.head = newNode
     }
 
-    // 缓存节点
+    /** 缓存节点 */
     this.nodeMap.set(newNode.id, newNode)
 
     return newNode
@@ -72,7 +71,8 @@ export class UnRedoLinkedList<T> {
       this.isInit = false
       return this.head
     }
-    if (!this.curNode || !this.curNode.next) return null
+    if (!this.curNode || !this.curNode.next)
+      return null
 
     this.curNode = this.curNode.next
     return this.curNode
@@ -143,14 +143,14 @@ export class UnRedoLinkedList<T> {
     callback?.(false)
     const keepIndices = new Set<number>()
 
-    // 标记需要保留的节点
+    /** 标记需要保留的节点 */
     let current = this.curNode
     while (current) {
       keepIndices.add(current.id)
       current = current.prev
     }
 
-    // 移除不再需要的节点
+    /** 移除不再需要的节点 */
     for (const [id] of this.nodeMap.entries()) {
       if (!keepIndices.has(id)) {
         this.nodeMap.delete(id)
@@ -172,15 +172,14 @@ export class UnRedoLinkedList<T> {
     this.tail = null
     this.curNode = null
   }
-
 }
 
 /**
  * 创建撤销、重做列表
  */
 export function createUnReDoList<T>() {
-  const undoList = [] as T[],
-    redoList = [] as T[]
+  const undoList = [] as T[]
+  const redoList = [] as T[]
 
   return {
     undoList,
@@ -201,7 +200,8 @@ export function createUnReDoList<T>() {
 
     /** 撤销 */
     undo: (callback?: (item: T) => void) => {
-      if (undoList.length <= 0) return
+      if (undoList.length <= 0)
+        return
 
       redoList.push(undoList.pop()!)
       const item = undoList[undoList.length - 1]
@@ -210,13 +210,14 @@ export function createUnReDoList<T>() {
     },
     /** 重做 */
     redo: (callback?: (item: T) => void) => {
-      if (redoList.length <= 0) return
+      if (redoList.length <= 0)
+        return
 
       undoList.push(redoList.pop()!)
       const item = undoList[undoList.length - 1]
       callback?.(item)
       return item
-    }
+    },
   }
 }
 

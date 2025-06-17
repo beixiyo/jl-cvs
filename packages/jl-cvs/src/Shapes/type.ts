@@ -9,7 +9,7 @@ export type ShapeStyle = {
    * @default 1
    */
   lineWidth?: number
-  /** 
+  /**
    * 填充色
    */
   fillStyle?: string

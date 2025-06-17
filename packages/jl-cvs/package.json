@@ -20,7 +20,8 @@
     }
   },
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "lint": "eslint ./src --fix"
   },
   "dependencies": {
     "@jl-org/tool": "^2.0.3"

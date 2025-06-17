@@ -21,7 +21,7 @@ export class TxtSource extends BaseSource {
       weight: 'bold',
       color: option.color,
       textAlign: 'center',
-      textBaseline: 'middle'
+      textBaseline: 'middle',
     })
   }
 
@@ -30,7 +30,7 @@ export class TxtSource extends BaseSource {
     this.ctx.fillText(
       this.option.txt,
       this.canvas.width / 2,
-      this.canvas.height / 2
+      this.canvas.height / 2,
     )
   }
 }

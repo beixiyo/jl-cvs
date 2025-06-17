@@ -1,29 +1,27 @@
-import { getImg } from '@/canvasTool'
 import type { Mode, NoteBoardOptions } from './type'
-import { createUnReDoList } from '@/utils'
 import type { ShapeType } from '@/Shapes'
+import { getImg } from '@/canvasTool'
+import { createUnReDoList } from '@/utils'
 import { NoteBoardBase } from './NoteBoardBase'
-
 
 /**
  * 使用 base64 实现历史记录的画板
  * ### 如需使用绘制图像，请使用 NoteBoard
- * 
+ *
  * 提供如下功能
  * - 签名涂抹
  * - 分层自适应绘图
- * 
+ *
  * - 擦除（仅针对 brushCanvas 画板）
  * - 撤销（仅针对 brushCanvas 画板）
  * - 重做（仅针对 brushCanvas 画板）
- * 
+ *
  * - 缩放
  * - 拖拽
- * 
+ *
  * - 截图
  */
 export class NoteBoardWithBase64 extends NoteBoardBase {
-
   mode: NoteBoardWithBase64Mode = 'draw'
 
   /**
@@ -72,13 +70,14 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
    */
   async undo() {
     return new Promise<boolean>((resolve) => {
-      this.history.undo(async base64 => {
+      this.history.undo(async (base64) => {
         this.clear(false)
-        if (!base64) return resolve(false)
+        if (!base64)
+          return resolve(false)
 
-        // 保存当前的混合模式
+        /** 保存当前的混合模式 */
         const currentCompositeOperation = this.ctx.globalCompositeOperation
-        // 临时设置为默认混合模式
+        /** 临时设置为默认混合模式 */
         this.ctx.globalCompositeOperation = 'source-over'
 
         const img = await getImg(base64, img => img.crossOrigin = 'anonymous') as HTMLImageElement
@@ -96,13 +95,14 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
    */
   async redo() {
     return new Promise<boolean>((resolve) => {
-      this.history.redo(async base64 => {
+      this.history.redo(async (base64) => {
         this.clear(false)
-        if (!base64) return resolve(false)
+        if (!base64)
+          return resolve(false)
 
-        // 保存当前的混合模式
+        /** 保存当前的混合模式 */
         const currentCompositeOperation = this.ctx.globalCompositeOperation
-        // 临时设置为默认混合模式
+        /** 临时设置为默认混合模式 */
         this.ctx.globalCompositeOperation = 'source-over'
 
         const img = await getImg(base64, img => img.crossOrigin = 'anonymous') as HTMLImageElement
@@ -115,7 +115,7 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
     })
   }
 
-  /** 
+  /**
    * 移除所有事件
    */
   rmEvent() {
@@ -158,9 +158,10 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
       this.dragStart = { x: e.offsetX, y: e.offsetY }
     }
 
-    if (!this.canDraw) return
+    if (!this.canDraw)
+      return
 
-    // 画笔模式
+    /** 画笔模式 */
     this.isDrawing = true
     this.ctx.beginPath()
     this.drawStart = {
@@ -188,14 +189,15 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
         translateY: this.translateY,
         transformOriginX: this.dragStart.x,
         transformOriginY: this.dragStart.y,
-        e
+        e,
       })
     }
 
     /**
      * 画笔
      */
-    if (!this.canDraw || !this.isDrawing) return
+    if (!this.canDraw || !this.isDrawing)
+      return
 
     const { offsetX, offsetY } = e
     const { ctx, drawStart: start } = this
@@ -221,7 +223,8 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
       this.translateY += e.offsetY - this.dragStart.y
     }
 
-    if (!this.canDraw) return
+    if (!this.canDraw)
+      return
 
     this.isDrawing = false
     this.addNewRecord()
@@ -234,17 +237,19 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
       this.isDragging = false
     }
 
-    if (!this.canDraw) return
+    if (!this.canDraw)
+      return
     this.isDrawing = false
   }
 
   onWheel = (e: WheelEvent) => {
     e.preventDefault()
-    if (!this.isEnableZoom) return
+    if (!this.isEnableZoom)
+      return
 
     this.mousePoint = {
       x: e.offsetX,
-      y: e.offsetY
+      y: e.offsetY,
     }
 
     this.scale = e.deltaY > 0
@@ -256,11 +261,9 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
 
     this.opts.onWheel?.({
       scale: this.scale,
-      e
+      e,
     })
   }
-
 }
-
 
 export type NoteBoardWithBase64Mode = Exclude<Mode, ShapeType>

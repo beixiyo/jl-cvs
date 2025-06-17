@@ -21,7 +21,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.1",
-    "tailwind-merge": "^2.5.4"
+    "tailwind-merge": "^2.5.4",
+    "@jl-org/cvs": "workspace:*"
   },
   "devDependencies": {
     "@jl-org/js-to-style": "^0.0.2",

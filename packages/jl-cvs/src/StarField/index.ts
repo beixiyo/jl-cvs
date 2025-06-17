@@ -1,8 +1,6 @@
 import { debounce } from '@jl-org/tool'
 
-
 export class StarField {
-
   private canvas: HTMLCanvasElement
   private context: CanvasRenderingContext2D
   private stars: IStar[]
@@ -37,7 +35,7 @@ export class StarField {
       flickerSpeed: 0.01,
       width: window.innerWidth,
       height: window.innerHeight,
-      resizeDebounceTime: 80
+      resizeDebounceTime: 80,
     }
 
     /** 合并用户配置和默认配置 */
@@ -168,7 +166,7 @@ export class StarField {
        */
       gradient.addColorStop(
         0.3,
-        `${star.baseColor}${Math.round(star.alpha * 0.8 * 255).toString(16).padStart(2, '0')}`
+        `${star.baseColor}${Math.round(star.alpha * 0.8 * 255).toString(16).padStart(2, '0')}`,
       )
       gradient.addColorStop(1, 'transparent')
 

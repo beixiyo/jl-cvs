@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "pnpm --filter @jl-org/cvs build",
-    "test": "pnpm --filter test-page dev"
+    "test": "pnpm --filter test-page dev",
+    "lint": "pnpm --filter @jl-org/cvs lint && pnpm --filter test-page lint"
   },
   "devDependencies": {
     "@jl-org/ts-tool": "^0.0.8",

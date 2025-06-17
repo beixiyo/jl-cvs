@@ -10,12 +10,12 @@ export interface BaseShape {
   endY: number
 
   shapeStyle: ShapeStyle
-  setShapeStyle(shapeStyle: ShapeStyle): void
+  setShapeStyle: (shapeStyle: ShapeStyle) => void
 
-  draw(): void
+  draw: () => void
 
-  isInPath(
+  isInPath: (
     x: number,
     y: number
-  ): boolean
+  ) => boolean
 }

@@ -1,9 +1,8 @@
-import { blobToBase64, isFn, splitWorkerTask, type TransferType } from '@jl-org/tool'
-import { getCvsImg, type HandleImgReturn } from './handleImg'
-import { createCvs } from './'
-import type { CaptureVideoFrameData } from '@/worker/captureVideoFrame'
 import type { PartRequired } from '@jl-org/ts-tool'
-
+import type { CaptureVideoFrameData } from '@/worker/captureVideoFrame'
+import { blobToBase64, isFn, splitWorkerTask, type TransferType } from '@jl-org/tool'
+import { createCvs } from './'
+import { getCvsImg, type HandleImgReturn } from './handleImg'
 
 /**
  * 截取视频某一帧图片，大于总时长则用最后一秒。
@@ -19,7 +18,7 @@ export async function captureVideoFrame<
   fileOrUrl: File | string,
   time: N,
   resType: T = 'base64' as T,
-  options: Options = {}
+  options: Options = {},
 ): Promise<N extends number
   ? HandleImgReturn<T>
   : HandleImgReturn<T>[]
@@ -46,13 +45,12 @@ export async function captureVideoFrame<
   }
 
   const { ctx, cvs } = createCvs()
-  const resPromises = times.map((time) => onVideoSeeked(
+  const resPromises = times.map(time => onVideoSeeked(
     time,
-    videoEl => videoToCanvas(videoEl)
+    videoEl => videoToCanvas(videoEl),
   ))
 
   return Promise.all(resPromises) as unknown as ReturnRes
-
 
   /***************************************************
    *                    Function
@@ -75,7 +73,7 @@ export async function captureVideoFrame<
     }
 
     const videoData: CaptureVideoFrameData[] = await Promise.all(
-      times.map((time) => onVideoSeeked(time, genWorkerData))
+      times.map(time => onVideoSeeked(time, genWorkerData)),
     )
 
     const data = await splitWorkerTask<
@@ -89,8 +87,8 @@ export async function captureVideoFrame<
         const data = videoData.slice(st, et)
         return Object.assign(data, {
           structuredSerializeOptions: {
-            transfer: data.map((item) => item.imageBitmap)
-          } satisfies StructuredSerializeOptions
+            transfer: data.map(item => item.imageBitmap),
+          } satisfies StructuredSerializeOptions,
         })
       },
       onMessage(message, _workerInfo, callbacks) {
@@ -103,7 +101,7 @@ export async function captureVideoFrame<
       return blobData as unknown as ReturnRes
     }
 
-    const base64s = await Promise.all(blobData.map((item) => blobToBase64(item)))
+    const base64s = await Promise.all(blobData.map(item => blobToBase64(item)))
     return base64s as unknown as ReturnRes
   }
 
@@ -145,7 +143,7 @@ export async function captureVideoFrame<
       cvs,
       resType,
       opts.mimeType,
-      opts.quality
+      opts.quality,
     )
   }
 
@@ -154,7 +152,7 @@ export async function captureVideoFrame<
    */
   async function onVideoSeeked<R = any>(
     time: number,
-    cb: (video: HTMLVideoElement) => Promise<R>
+    cb: (video: HTMLVideoElement) => Promise<R>,
   ): Promise<R> {
     const video = document.createElement('video')
 
@@ -184,14 +182,13 @@ export async function captureVideoFrame<
       }
     })
   }
-
 }
 
 function checkImageCaptureSupport() {
   const video = document.createElement('video')
   if (
-    typeof ImageCapture === 'undefined' ||
-    !isFn(video.captureStream)
+    typeof ImageCapture === 'undefined'
+    || !isFn(video.captureStream)
   ) {
     return false
   }

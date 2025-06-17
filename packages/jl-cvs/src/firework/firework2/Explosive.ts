@@ -1,14 +1,12 @@
+import type { Firework2 } from './Firework2'
 import { getColor } from '@/canvasTool'
-import { Firework2 } from './Firework2'
+import { delFromItem, getRandomNum } from '@/utils'
 import { ExplosiveDebris, type ExplosiveDebrisOpts } from './ExplosiveDebris'
-import { getRandomNum, delFromItem } from '@/utils'
-
 
 /**
  * 爆炸器
  */
 export class Explosive {
-
   firework: Firework2
   x: number
   y: number
@@ -34,20 +32,20 @@ export class Explosive {
 
   start(
     debrisNum = this.debrisNum,
-    opts: Partial<ExplosiveDebrisOpts> = {}
+    opts: Partial<ExplosiveDebrisOpts> = {},
   ) {
     const params = {
       x: opts.x ?? this.x,
       y: opts.y ?? this.y,
       needSecondBurst: this.needSecondBurst && this.isFirstBurst,
-      ...opts
+      ...opts,
     }
 
     for (let i = 0; i < debrisNum; i++) {
       const explosiveDebris = new ExplosiveDebris({
         firework: this.firework,
         color: this.color,
-        ...params
+        ...params,
       })
       explosiveDebris.start()
       this.debrisArr.push(explosiveDebris)
@@ -57,12 +55,12 @@ export class Explosive {
 
   update() {
     const list = [...this.debrisArr]
-    list.forEach(debris => {
+    list.forEach((debris) => {
       const res = debris.update()
       if (res.isEnd) {
         delFromItem(this.debrisArr, debris)
 
-        // 二次爆炸
+        /** 二次爆炸 */
         if (debris.needSecondBurst) {
           this.start(5, {
             x: res.x,
@@ -75,10 +73,9 @@ export class Explosive {
     })
 
     return {
-      isEnd: list.length <= 0
+      isEnd: list.length <= 0,
     }
   }
-
 }
 
 export type ExplosiveOpts = {

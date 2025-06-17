@@ -261,7 +261,7 @@ export class Grid {
     this.ctx.strokeStyle = this.borderColor
     this.ctx.lineWidth = this.borderWidth
 
-    // 添加虚线样式控制
+    /** 添加虚线样式控制 */
     if (this.dashedLines) {
       this.ctx.setLineDash(this.dashPattern)
     }
@@ -286,7 +286,6 @@ export class Grid {
     }
   }
 }
-
 
 export interface GridOptions {
   /**

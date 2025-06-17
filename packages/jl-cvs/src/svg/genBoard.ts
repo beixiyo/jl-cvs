@@ -6,17 +6,17 @@
  * @param opts 文字配置选项
  */
 export function genSvgBoard(width = 100, height = 100, gap = 10, opts: Opts = {}) {
-  const svg = genSvg(),
-    g = genBoard(width, height, gap, opts)
+  const svg = genSvg()
+  const g = genBoard(width, height, gap, opts)
 
   return { svg, g }
 }
 
 /** 生成棋盘的 path 和 text 元素 */
 export function genBoard(width = 100, height = 100, gap = 10, opts: Opts = {}) {
-  const textArr = genTextArr(width, height, gap, opts.fontOpts),
-    grid = genGrid(width, height, gap, opts.gridOpts),
-    g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+  const textArr = genTextArr(width, height, gap, opts.fontOpts)
+  const grid = genGrid(width, height, gap, opts.gridOpts)
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
 
   textArr.forEach(text => g.appendChild(text))
   g.appendChild(grid)
@@ -28,8 +28,8 @@ export function genBoard(width = 100, height = 100, gap = 10, opts: Opts = {}) {
 export function genSvg(viewBox = '0 0 100 100', width = 300, height = 300) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   svg.setAttribute('viewBox', viewBox)
-  svg.setAttribute('width', width + '')
-  svg.setAttribute('width', height + '')
+  svg.setAttribute('width', `${width}`)
+  svg.setAttribute('width', `${height}`)
 
   return svg
 }
@@ -37,8 +37,10 @@ export function genSvg(viewBox = '0 0 100 100', width = 300, height = 300) {
 /** 生成 svg path 网格 */
 export function genGrid(width = 100, height = 100, gap = 10, opts: GridOpts = {}) {
   const {
-    stroke = '#ddd', strokeWidth = .3,
-    needHorizontal, needVertical
+    stroke = '#ddd',
+    strokeWidth = 0.3,
+    needHorizontal,
+    needVertical,
   } = opts
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
   setGrid()
@@ -49,10 +51,10 @@ export function genGrid(width = 100, height = 100, gap = 10, opts: GridOpts = {}
       height,
       gap,
       needHorizontal,
-      needVertical
+      needVertical,
     ))
     path.setAttribute('stroke', stroke)
-    path.setAttribute('stroke-width', strokeWidth + '')
+    path.setAttribute('stroke-width', `${strokeWidth}`)
     path.setAttribute('fill', 'none')
   }
 
@@ -73,7 +75,7 @@ export function genGridPath(
   height = 100,
   gap = 10,
   needHorizontal = true,
-  needVertical = true
+  needVertical = true,
 ) {
   let d = ''
 
@@ -105,7 +107,7 @@ export function genTextArr(width = 100, height = 100, gap = 10, opts: FontOpts =
     fill = '#000',
     offsetX = 1.5,
     offsetY = 1.8,
-    position = ['left', 'top']
+    position = ['left', 'top'],
   } = opts
   const textArr: SVGTextElement[] = []
 
@@ -133,23 +135,21 @@ export function genTextArr(width = 100, height = 100, gap = 10, opts: FontOpts =
     }
   }
 
-
   function genText(x: number, y: number, content: string | number) {
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
-    text.setAttribute('x', x + '')
-    text.setAttribute('y', y + '')
-    text.setAttribute('font-size', fontSize + '')
+    text.setAttribute('x', `${x}`)
+    text.setAttribute('y', `${y}`)
+    text.setAttribute('font-size', `${fontSize}`)
     text.setAttribute('fill', fill)
     text.setAttribute('text-anchor', 'middle')
     text.setAttribute('alignment-baseline', 'middle')
 
-    text.textContent = content + ''
+    text.textContent = `${content}`
     return text
   }
 
   return textArr
 }
-
 
 type PositionStr = 'top' | 'bottom' | 'left' | 'right'
 

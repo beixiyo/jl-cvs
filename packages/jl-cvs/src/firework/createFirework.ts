@@ -1,25 +1,24 @@
 import { clearAllCvs, getWinHeight, getWinWidth } from '@/canvasTool'
-import { Firework } from './Firework'
 import { getColor } from '@/canvasTool/color'
-
+import { Firework } from './Firework'
 
 /**
  * 放烟花，返回一个取消函数
  */
 export function createFirework(
   cvs: HTMLCanvasElement,
-  opts?: FireworkOpts
+  opts?: FireworkOpts,
 ) {
   const
     /** 烟花对象数组 */
-    fireworkArr: Firework[] = [],
+    fireworkArr: Firework[] = []
     /** 即将爆炸的烟花数组 */
-    bombArr: Firework[] = [],
-    ctx = cvs.getContext('2d')!,
-    _opts = normalizeOpts(opts)
+  const bombArr: Firework[] = []
+  const ctx = cvs.getContext('2d')!
+  const _opts = normalizeOpts(opts)
 
-  let time = Date.now(),
-    id: number
+  let time = Date.now()
+  let id: number
 
   cvs.width = _opts.width
   cvs.height = _opts.height
@@ -37,7 +36,6 @@ export function createFirework(
     clearAllCvs(ctx, cvs)
   }
 
-
   function update(ctx: CanvasRenderingContext2D, opts: Required<FireworkOpts>) {
     clearAllCvs(ctx, cvs)
 
@@ -50,7 +48,7 @@ export function createFirework(
       width,
       yRange,
       getFireworkColor,
-      getBoomColor
+      getBoomColor,
     } = opts
     const curTime = Date.now()
     const [x, y] = getPos(width, yRange)
@@ -60,35 +58,37 @@ export function createFirework(
       time = curTime
       const fw = new Firework(
         ctx,
-        x, y,
+        x,
+        y,
         ballCount,
         getFireworkColor,
         getBoomColor,
-        r, speed
+        r,
+        speed,
       )
       fireworkArr.push(fw)
     }
     if (fireworkArr.length > maxCount) {
       const fw = fireworkArr.shift()
-      if (fw) bombArr.push(fw)
+      if (fw)
+        bombArr.push(fw)
     }
     if (bombArr.length > maxCount) {
       bombArr.shift()
     }
 
-    fireworkArr.forEach(fw => {
+    fireworkArr.forEach((fw) => {
       fw.draw()
       fw.y += speed
-      fw.opacity -= .01
+      fw.opacity -= 0.01
     })
-    bombArr.forEach((bombBall) => bombBall.bomb())
+    bombArr.forEach(bombBall => bombBall.bomb())
 
     id = requestAnimationFrame(() => {
       update(ctx, opts)
     })
   }
 }
-
 
 /** 工具 -------------------------------------------------------------------------------------------- */
 function getPos(width: number, yRange: number): [number, number] {
@@ -108,22 +108,21 @@ function normalizeOpts(opts: FireworkOpts = {}): Required<FireworkOpts> {
       gapTime: 500,
       maxCount: 2,
       getFireworkColor: (opacity: number) => `rgba(210, 250, 90, ${opacity})`,
-      getBoomColor: getColor
+      getBoomColor: getColor,
     },
-    opts
+    opts,
   )
 }
-
 
 export type FireworkOpts = {
   width?: number
   height?: number
-  /** 
-   * 烟花出现的范围，默认 50  
-   * **这个 y 轴和 DOM 的 y 轴相反**  
-   * 即高度以外 50 到可见范围内随机  
+  /**
+   * 烟花出现的范围，默认 50
+   * **这个 y 轴和 DOM 的 y 轴相反**
+   * 即高度以外 50 到可见范围内随机
    */
-  yRange?: number,
+  yRange?: number
   /** 运动速度，默认 2.5 */
   speed?: number
   /** 烟花小球半径，默认 6 */
@@ -134,8 +133,8 @@ export type FireworkOpts = {
   gapTime?: number
   /** 同时存在最大的烟花数量（超过则爆炸）默认 2 */
   maxCount?: number
-  /** 
-   * 烟花的颜色，注意不是爆炸后小球的颜色  
+  /**
+   * 烟花的颜色，注意不是爆炸后小球的颜色
    * 需要接收一个透明度，返回一个 rgba 颜色
    */
   getFireworkColor?: (opacity: number) => string

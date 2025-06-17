@@ -1,11 +1,10 @@
-import { BaseShape } from '../BaseShape'
+import type { BaseShape } from '../BaseShape'
 import type { ShapeStyle } from '../type'
 
 /**
  * 绘制矩形
  */
 export class Rect implements BaseShape {
-
   ctx: CanvasRenderingContext2D
 
   startX: number
@@ -57,10 +56,10 @@ export class Rect implements BaseShape {
 
   isInPath(x: number, y: number): boolean {
     if (
-      x > this.minX &&
-      x < this.maxX &&
-      y > this.minY &&
-      y < this.maxY
+      x > this.minX
+      && x < this.maxX
+      && y > this.minY
+      && y < this.maxY
     ) {
       return true
     }
@@ -90,9 +89,7 @@ export class Rect implements BaseShape {
   get maxY() {
     return Math.max(this.startY, this.endY)
   }
-
 }
-
 
 export type RectOpts = {
   startX: number

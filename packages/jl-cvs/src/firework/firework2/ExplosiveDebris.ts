@@ -1,13 +1,11 @@
-import { Ball, getColor } from '@/canvasTool'
 import type { Firework2 } from './Firework2'
+import { Ball, getColor } from '@/canvasTool'
 import { getRandomNum } from '@/utils'
-
 
 /**
  * 爆炸烟花尾迹
  */
 export class ExplosiveDebris {
-
   firework: Firework2
 
   x: number
@@ -63,7 +61,8 @@ export class ExplosiveDebris {
     let opacity = progress > 0.7
       ? 1 - progress
       : 1
-    if (opacity < 0) opacity = 0
+    if (opacity < 0)
+      opacity = 0
 
     new Ball({
       x: this.x,
@@ -71,10 +70,10 @@ export class ExplosiveDebris {
       color: this.color,
       r: this.radius,
       opacity,
-      ctx: this.firework.ctx
+      ctx: this.firework.ctx,
     }).draw()
 
-    // 添加痕迹碎片
+    /** 添加痕迹碎片 */
     if (this.debrisNum > 0 && Math.random() > 0.8) {
       this.debrisNum--
       this.firework.addDebris({
@@ -83,19 +82,17 @@ export class ExplosiveDebris {
         color: this.color,
         radius: 0.5,
         g: 0.1,
-        ctx: this.firework.ctx
+        ctx: this.firework.ctx,
       })
     }
 
     return {
       x: this.x,
       y: this.y,
-      isEnd: progress >= 1
+      isEnd: progress >= 1,
     }
   }
-
 }
-
 
 export type ExplosiveDebrisOpts = {
   firework: Firework2

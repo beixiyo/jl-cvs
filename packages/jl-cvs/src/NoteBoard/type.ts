@@ -1,7 +1,7 @@
+import type { PartRequired } from '@jl-org/ts-tool'
 import type { ShapeType, UnRedoReturn } from '@/Shapes'
 import type { BaseShape } from '@/Shapes/BaseShape'
 import type { UnRedoLinkedList } from '@/utils'
-import type { PartRequired } from '@jl-org/ts-tool'
 
 export type MouseEventFn = (e: MouseEvent) => void
 
@@ -56,17 +56,16 @@ export type NoteBoardOptions = {
 
 export type NoteBoardOptionsRequired = PartRequired<
   NoteBoardOptions,
-  'width' |
-  'height' |
-  'minScale' |
-  'maxScale' |
-  'lineWidth' |
-  'strokeStyle' |
-  'lineCap' |
-  'globalCompositeOperation' |
-  'drawGlobalCompositeOperation'
+  'width'
+  | 'height'
+  | 'minScale'
+  | 'maxScale'
+  | 'lineWidth'
+  | 'strokeStyle'
+  | 'lineCap'
+  | 'globalCompositeOperation'
+  | 'drawGlobalCompositeOperation'
 >
-
 
 export type CanvasAttrs = {
   /**

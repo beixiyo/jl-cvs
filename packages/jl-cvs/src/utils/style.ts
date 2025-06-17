@@ -3,10 +3,7 @@
  * @param size 光标大小，默认 30
  * @param color 光标颜色，默认 `#409eff55`
  */
-export const getCircleCursor = (
-  size = 30,
-  color = '#409eff55'
-) => {
+export function getCircleCursor(size = 30, color = '#409eff55') {
   const circle = `
     <svg
       xmlns='http://www.w3.org/2000/svg'

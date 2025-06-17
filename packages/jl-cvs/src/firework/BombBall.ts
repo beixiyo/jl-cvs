@@ -1,8 +1,6 @@
 import { getColor } from '@/canvasTool/color'
 
-
 export class BombBall {
-
   /**
    * 绘制一个爆炸开的球
    * @param ctx 上下文

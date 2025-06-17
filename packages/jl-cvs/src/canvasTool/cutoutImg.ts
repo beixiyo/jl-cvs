@@ -4,7 +4,6 @@
 
 import { createCvs, eachPixel, getColorInfo, getImg, getImgData } from '@jl-org/tool'
 
-
 /**
  * 抠图转遮罩（把图片的非透明区域，换成指定颜色）
  * @param imgUrl 图片
@@ -17,14 +16,14 @@ export async function cutoutImgToMask(
     smoothEdge = true,
     smoothRadius = 1,
     alphaThreshold = 0,
-    ignoreAlpha = true
-  }: CutImgToMaskOpts = {}
+    ignoreAlpha = true,
+  }: CutImgToMaskOpts = {},
 ) {
   const imgData = await getImgData(imgUrl)
   const { r, g, b, a } = getColorInfo(replaceColor)
   const { width, height } = imgData
 
-  // 创建一个临时的 alpha 通道数组，保存原始 alpha 值
+  /** 创建一个临时的 alpha 通道数组，保存原始 alpha 值 */
   const originalAlpha = new Uint8ClampedArray(width * height)
 
   eachPixel(imgData.imgData, ([R, G, B, A], x, y, index) => {
@@ -32,9 +31,9 @@ export async function cutoutImgToMask(
     const data = imgData.imgData.data
 
     if (A > alphaThreshold) {
-      data[index] = r         // Set Red
-      data[index + 1] = g     // Set Green
-      data[index + 2] = b     // Set Blue
+      data[index] = r // Set Red
+      data[index + 1] = g // Set Green
+      data[index + 2] = b // Set Blue
       /**
        * 保留原始 alpha 值以实现平滑边缘
        * 如果 alpha 值大于 alphaThreshold，则保留原始 alpha 值
@@ -55,9 +54,9 @@ export async function cutoutImgToMask(
     }
   })
 
-  // 如果需要平滑边缘
+  /** 如果需要平滑边缘 */
   if (smoothEdge) {
-    // 检测边缘像素
+    /** 检测边缘像素 */
     const isEdge = new Uint8ClampedArray(width * height)
 
     for (let y = 1; y < height - 1; y++) {
@@ -65,29 +64,36 @@ export async function cutoutImgToMask(
         const idx = y * width + x
         const center = originalAlpha[idx]
 
-        // 检查周围8个像素，如果有任何一个与中心像素的透明度差异较大，则认为是边缘
+        /** 检查周围8个像素，如果有任何一个与中心像素的透明度差异较大，则认为是边缘 */
         const neighbors = [
-          originalAlpha[(y - 1) * width + (x - 1)], originalAlpha[(y - 1) * width + x], originalAlpha[(y - 1) * width + (x + 1)],
-          originalAlpha[y * width + (x - 1)], originalAlpha[y * width + (x + 1)],
-          originalAlpha[(y + 1) * width + (x - 1)], originalAlpha[(y + 1) * width + x], originalAlpha[(y + 1) * width + (x + 1)]
+          originalAlpha[(y - 1) * width + (x - 1)],
+          originalAlpha[(y - 1) * width + x],
+          originalAlpha[(y - 1) * width + (x + 1)],
+          originalAlpha[y * width + (x - 1)],
+          originalAlpha[y * width + (x + 1)],
+          originalAlpha[(y + 1) * width + (x - 1)],
+          originalAlpha[(y + 1) * width + x],
+          originalAlpha[(y + 1) * width + (x + 1)],
         ]
 
-        // 如果中心像素与任何相邻像素的透明度差异超过阈值，则标记为边缘
-        isEdge[idx] = neighbors.some(n => Math.abs(center - n) > 20) ? 1 : 0
+        /** 如果中心像素与任何相邻像素的透明度差异超过阈值，则标记为边缘 */
+        isEdge[idx] = neighbors.some(n => Math.abs(center - n) > 20)
+          ? 1
+          : 0
       }
     }
 
-    // 对边缘像素应用平滑处理
+    /** 对边缘像素应用平滑处理 */
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const idx = y * width + x
-        const dataIdx = idx * 4 + 3  // alpha 通道的索引
+        const dataIdx = idx * 4 + 3 // alpha 通道的索引
 
         if (isEdge[idx] === 1) {
           let sum = 0
           let count = 0
 
-          // 在半径范围内采样
+          /** 在半径范围内采样 */
           for (let dy = -smoothRadius; dy <= smoothRadius; dy++) {
             for (let dx = -smoothRadius; dx <= smoothRadius; dx++) {
               const nx = x + dx
@@ -96,7 +102,7 @@ export async function cutoutImgToMask(
               if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
                 const distance = Math.sqrt(dx * dx + dy * dy)
                 if (distance <= smoothRadius) {
-                  // 高斯权重
+                  /** 高斯权重 */
                   const weight = Math.exp(-(distance * distance) / (2 * smoothRadius * smoothRadius))
                   sum += imgData.imgData.data[(ny * width + nx) * 4 + 3] * weight
                   count += weight
@@ -105,7 +111,7 @@ export async function cutoutImgToMask(
             }
           }
 
-          // 应用平滑后的 alpha 值
+          /** 应用平滑后的 alpha 值 */
           if (count > 0) {
             imgData.imgData.data[dataIdx] = Math.round(sum / count)
           }
@@ -120,10 +126,9 @@ export async function cutoutImgToMask(
 
   return {
     base64,
-    imgData: imgData.imgData
+    imgData: imgData.imgData,
   }
 }
-
 
 /**
  * 传入一张原始图片和一张遮罩图片，将遮罩图不透明的区域提取出来。
@@ -134,11 +139,11 @@ export async function cutoutImgToMask(
  */
 export async function cutoutImg(
   originalImageSource: string | HTMLImageElement,
-  maskImageSource: string | HTMLImageElement
+  maskImageSource: string | HTMLImageElement,
 ): Promise<string> {
   const [originalImage, maskImage] = await Promise.all([
     getImg(originalImageSource),
-    getImg(maskImageSource)
+    getImg(maskImageSource),
   ])
 
   if (!originalImage || !maskImage) {
@@ -151,10 +156,10 @@ export async function cutoutImg(
   const maskHeight = maskImage.naturalHeight || maskImage.height
 
   if (!width || !height) {
-    throw new Error("Could not determine original image dimensions.")
+    throw new Error('Could not determine original image dimensions.')
   }
   if (!maskWidth || !maskHeight) {
-    throw new Error("Could not determine mask image dimensions.")
+    throw new Error('Could not determine mask image dimensions.')
   }
   if (width !== maskWidth || height !== maskHeight) {
     throw new Error(`Image dimension mismatch: Original (${width}x${height}), Mask (${maskWidth}x${maskHeight}). They must be identical.`)
@@ -169,7 +174,6 @@ export async function cutoutImg(
 
   return cvs.toDataURL('image/png')
 }
-
 
 /**
  * 传入一张原始图片和一张遮罩图片，将遮罩图不透明的区域提取出来，并对提取出的区域进行平滑处理。
@@ -280,7 +284,6 @@ function edgeSmooth(
 
   return resultData
 }
-
 
 export type CutoutImgOpts = {
   /**

@@ -1,11 +1,10 @@
-import { BaseShape } from '../BaseShape'
+import type { BaseShape } from '../BaseShape'
 import type { ShapeStyle } from '../type'
 
 /**
  * 绘制圆形
  */
 export class Circle implements BaseShape {
-
   ctx: CanvasRenderingContext2D
 
   startX: number
@@ -37,7 +36,7 @@ export class Circle implements BaseShape {
       this.startY,
       this.radius,
       0,
-      2 * Math.PI
+      2 * Math.PI,
     )
 
     /**

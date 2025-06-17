@@ -236,7 +236,6 @@ export class DotGrid {
   }
 }
 
-
 export interface DotGridOptions {
   /**
    * Canvas 的宽度（像素），决定整个网格区域的宽度

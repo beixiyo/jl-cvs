@@ -1,9 +1,9 @@
 export {
-  isStr,
-  isNum,
+  isArr,
   isBool,
   isFn,
+  isNum,
   isObj,
-  isArr,
-  isSame
+  isSame,
+  isStr,
 } from '@jl-org/tool'

@@ -27,7 +27,7 @@ export class ImgSource extends BaseSource {
       0,
       0,
       this.width,
-      this.height
+      this.height,
     )
   }
 }

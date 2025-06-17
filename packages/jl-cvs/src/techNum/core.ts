@@ -1,12 +1,11 @@
-import { getWinHeight, getWinWidth, getColor as _getColor } from '@/canvasTool'
 import type { TechNumOpts } from './types'
+import { getColor as _getColor, getWinHeight, getWinWidth } from '@/canvasTool'
 import { randomStr } from '@/utils'
-
 
 /**
  * 绘制黑客科技数字墙
- * @param canvas 
- * @param opts 
+ * @param canvas
+ * @param opts
  * @returns 一个停止和开始函数
  */
 export function createTechNum(canvas: HTMLCanvasElement, opts: TechNumOpts = {}) {
@@ -20,7 +19,7 @@ export function createTechNum(canvas: HTMLCanvasElement, opts: TechNumOpts = {})
     gapRate = 0.85,
     getStr = randomStr,
     getColor = _getColor,
-    durationMS = 30
+    durationMS = 30,
   } = opts
 
   canvas.width = width
@@ -35,14 +34,13 @@ export function createTechNum(canvas: HTMLCanvasElement, opts: TechNumOpts = {})
 
   initData(width, height)
 
-
   function initData(width: number, height: number) {
     canvas.width = width
     canvas.height = height
 
     totalCol = Math.floor(width / colWidth),
-      /** 每列文字 y 轴索引 */
-      colNext = Array.from({ length: totalCol }, () => 1)
+    /** 每列文字 y 轴索引 */
+    colNext = Array.from({ length: totalCol }, () => 1)
   }
 
   function draw() {
@@ -51,12 +49,12 @@ export function createTechNum(canvas: HTMLCanvasElement, opts: TechNumOpts = {})
     ctx.font = `${fontSize}px ${font}`
 
     for (let i = 0; i < totalCol; i++) {
-      const x = i * colWidth,
-        // 每画一行 对应一行索引增加
-        y = fontSize * colNext[i]++
+      const x = i * colWidth
+      /** 每画一行 对应一行索引增加 */
+      const y = fontSize * colNext[i]++
       ctx.fillText(getStr(), x, y, width)
 
-      // 超出屏幕高度 并且满足概率 重置 y 轴
+      /** 超出屏幕高度 并且满足概率 重置 y 轴 */
       if (y >= height && Math.random() > gapRate) {
         colNext[i] = 1
       }
@@ -74,7 +72,7 @@ export function createTechNum(canvas: HTMLCanvasElement, opts: TechNumOpts = {})
     start,
     stop,
     /** 重置大小 */
-    setSize: initData
+    setSize: initData,
   }
 }
 

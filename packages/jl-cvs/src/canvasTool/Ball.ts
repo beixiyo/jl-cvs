@@ -1,6 +1,5 @@
 import { getColor } from './color'
 
-
 export class Ball {
   /** 留给外部使用，用于记录绘制次数 */
   count = 0
@@ -28,7 +27,7 @@ export class Ball {
       r,
       color = getColor(),
       opacity = 1,
-      ctx
+      ctx,
     } = opts
 
     this.x = x
@@ -53,7 +52,6 @@ export class Ball {
     ctx.fill()
   }
 }
-
 
 export type BallOpts = {
   x: number

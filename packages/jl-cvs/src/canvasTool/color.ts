@@ -1,10 +1,10 @@
 export {
-  getColorInfo,
+  colorAddOpacity,
   getColor,
   getColorArr,
+  getColorInfo,
   hexColorToRaw,
   hexToRGB,
-  rgbToHex,
   lightenColor,
-  colorAddOpacity
+  rgbToHex,
 } from '@jl-org/tool'

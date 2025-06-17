@@ -1,7 +1,8 @@
-import { BaseSource, createSource } from './core/source'
-import { Painter, PainterOptions } from './core/Painter'
+import type { PainterOptions } from './core/Painter'
+import type { BaseSource } from './core/source'
 import { getImg } from '@/canvasTool'
-
+import { Painter } from './core/Painter'
+import { createSource } from './core/source'
 
 /**
  * 用文本来绘制图片或视频
@@ -10,7 +11,7 @@ export async function imgToTxt(options: TxtImgOpt) {
   normalizeOptions(options)
 
   const { opts } = options
-  let painterOption: TxtImgOpt & {
+  const painterOption: TxtImgOpt & {
     /** BaseSource 类，里面对 canvas 进行了初始化 */
     source: BaseSource
   } = { ...options } as any
@@ -26,14 +27,16 @@ export async function imgToTxt(options: TxtImgOpt) {
   }
   else if (opts.img) {
     const img = await createImage(opts.img)
-    if (!img) throw (new Error('img src is not available'))
+    if (!img)
+      throw (new Error('img src is not available'))
 
-    let width = opts.width || img.width,
-      height = opts.height || img.height
+    let width = opts.width || img.width
+    let height = opts.height || img.height
 
     if (opts.width && !opts.height) {
       height = (width / img.width) * img.height
-    } else if (opts.height && !opts.width) {
+    }
+    else if (opts.height && !opts.width) {
       width = (height / img.height) * img.width
     }
 
@@ -46,8 +49,8 @@ export async function imgToTxt(options: TxtImgOpt) {
   }
   else if (opts.video) {
     const video = await createVideo(opts.video)
-    let width = opts.width || video.videoWidth,
-      height = opts.height || video.videoHeight
+    let width = opts.width || video.videoWidth
+    let height = opts.height || video.videoHeight
 
     if (opts.width && !opts.height) {
       height = (width / video.videoWidth) * video.videoHeight
@@ -76,7 +79,6 @@ export async function imgToTxt(options: TxtImgOpt) {
     },
   }
 }
-
 
 function normalizeOptions(options: TxtImgOpt) {
   if (!options) {
@@ -121,7 +123,6 @@ function createVideo(src: string | HTMLVideoElement): Promise<HTMLVideoElement> 
     video.src = src
   })
 }
-
 
 export type TxtImgOpt = {
   canvas: HTMLCanvasElement

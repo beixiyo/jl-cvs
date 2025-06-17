@@ -1,12 +1,11 @@
-import { createCvs, getImg, getPixel } from '@/canvasTool'
 import type { ImgToFadeOpts } from './types'
+import { createCvs, getImg, getPixel } from '@/canvasTool'
 import { Ball } from '@/canvasTool/Ball'
-
 
 /**
  * 让图片灰飞烟灭效果
- * @param bgCanvas 
- * @param opts 
+ * @param bgCanvas
+ * @param opts
  */
 export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts) {
   const {
@@ -26,21 +25,21 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
   bgCanvas.height = height
 
   const { cvs: imgCvs, ctx: imgCtx } = createCvs(
-    imgWidth, imgHeight,
+    imgWidth,
+    imgHeight,
   )
 
   imgCtx.drawImage(img, 0, 0, imgWidth, imgHeight)
 
-  const destroyBalls: Ball[] = [],
-    imgData = imgCtx.getImageData(0, 0, imgWidth, imgHeight),
-    pixelIndexs: number[] = []
+  const destroyBalls: Ball[] = []
+  const imgData = imgCtx.getImageData(0, 0, imgWidth, imgHeight)
+  const pixelIndexs: number[] = []
 
   for (let i = 0; i < imgData.data.length / 4; i++) {
     pixelIndexs.push(i)
   }
 
   drawPoint()
-
 
   function drawPoint() {
     /** 覆盖上背景先，再用图片画布填充指定像素点，形成灰飞烟灭效果 */
@@ -52,7 +51,7 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
       imgCvs,
       ...getCenterPos(),
       imgWidth,
-      imgHeight
+      imgHeight,
     )
 
     createAndDelParticle(ballCount)
@@ -82,13 +81,13 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
         y: y + centerY,
         r: Math.random() * 2.2,
         color,
-        ctx: bgCtx
+        ctx: bgCtx,
       })
-      // 记录当前消失的某个像素点
+      /** 记录当前消失的某个像素点 */
       destroyBalls.push(point)
 
       clearPixel(x, y, index)
-      // 偷偷多删除一些像素点 不然消失的太慢了
+      /** 偷偷多删除一些像素点 不然消失的太慢了 */
       for (let i = 0; i < extraDelCount; i++) {
         const [x, y, index] = getXY()
         clearPixel(x, y, index)
@@ -108,7 +107,7 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
       ball.count++
       ball.draw()
 
-      // 大于这个距离，才删除此像素点，达到像素移动的效果
+      /** 大于这个距离，才删除此像素点，达到像素移动的效果 */
       if (ball.count > 100) {
         destroyBalls.splice(i, 1)
       }
@@ -127,18 +126,17 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
   function getXY(): [x: number, y: number, index: number] {
     const
       /** 随机像素点索引 */
-      index = Math.floor(Math.random() * pixelIndexs.length),
+      index = Math.floor(Math.random() * pixelIndexs.length)
       /** 获取随机像素点 */
-      pixelIndex = pixelIndexs[index],
-      /** 数组位置对宽度取余，获取行 */
-      x = pixelIndex % imgWidth,
-      /** 数组位置整除宽度，获取列 */
-      y = Math.floor(pixelIndex / imgWidth)
+    const pixelIndex = pixelIndexs[index]
+    /** 数组位置对宽度取余，获取行 */
+    const x = pixelIndex % imgWidth
+    /** 数组位置整除宽度，获取列 */
+    const y = Math.floor(pixelIndex / imgWidth)
 
     return [x, y, index]
   }
 }
-
 
 async function checkAndInit(opts: ImgToFadeOpts) {
   const {

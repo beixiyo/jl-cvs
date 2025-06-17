@@ -1,24 +1,23 @@
 export {
   calcCoord,
   createCvs,
+  eachPixel,
+  fillPixel,
+  getImgData,
   getImgDataIndex,
   getPixel,
-  parseImgData,
-  fillPixel,
-  eachPixel,
-  scaleImgData,
-  getImgData,
-  getWinWidth,
   getWinHeight,
+  getWinWidth,
+  parseImgData,
+  scaleImgData,
 } from '@jl-org/tool'
-
 
 /**
  * 设置字体，默认居中
  */
 export function setFont(
   ctx: CanvasRenderingContext2D,
-  options: CtxFontOpt
+  options: CtxFontOpt,
 ) {
   const {
     size = 16,
@@ -26,7 +25,7 @@ export function setFont(
     weight = 'normal',
     textAlign = 'center',
     textBaseline = 'middle',
-    color = '#000'
+    color = '#000',
   } = options
 
   ctx.font = `${weight} ${size}px ${family}`
@@ -44,7 +43,6 @@ export function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEle
  * 获取设备像素比，最大值默认为 2
  */
 export const getDPR = (max = 2) => Math.min(window.devicePixelRatio, max)
-
 
 export type CtxFontOpt = {
   /** 字体大小，默认 16 */

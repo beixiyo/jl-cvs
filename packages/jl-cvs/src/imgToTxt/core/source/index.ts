@@ -1,15 +1,17 @@
+import type { ImgSourceOption } from './ImgSource'
+import type { TxtSourceOption } from './TxtSource'
+import type { VideoSourceOption } from './VideoSource'
 import { BaseSource } from './BaseSource'
-import { ImgSource, ImgSourceOption } from './ImgSource'
-import { TxtSourceOption, TxtSource } from './TxtSource'
-import { VideoSource, VideoSourceOption } from './VideoSource'
+import { ImgSource } from './ImgSource'
+import { TxtSource } from './TxtSource'
+import { VideoSource } from './VideoSource'
 
 export { BaseSource }
-export type { TxtSourceOption, ImgSourceOption, VideoSourceOption }
-
+export type { ImgSourceOption, TxtSourceOption, VideoSourceOption }
 
 export function createSource(
   isDynamic: boolean,
-  sourceOption: TxtSourceOption | ImgSourceOption | VideoSourceOption
+  sourceOption: TxtSourceOption | ImgSourceOption | VideoSourceOption,
 ): BaseSource {
   if ((sourceOption as TxtSourceOption).txt) {
     return new TxtSource(isDynamic, sourceOption as TxtSourceOption)

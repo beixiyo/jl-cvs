@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
+import { memo } from 'react'
 import { CusotmSuspense } from '@/components/CusotmSuspense'
 import { KeepAliveRoute } from '@/components/KeepAliveRoute'
-import { memo } from 'react'
 
 /**
  * 提供

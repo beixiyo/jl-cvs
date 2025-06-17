@@ -1,5 +1,5 @@
-import { getDPR } from '@/canvasTool'
 import { colorAddOpacity, debounce } from '@jl-org/tool'
+import { getDPR } from '@/canvasTool'
 
 /**
  * 用小点绘制一个旋转的球体
@@ -49,7 +49,7 @@ export class GlobeSphere {
 
     this.options = {
       ...defaultOpts,
-      ...opts
+      ...opts,
     }
 
     this.width = this.options.width
@@ -150,7 +150,6 @@ export class GlobeSphere {
     }
   }
 }
-
 
 export type GlobeSphereOpts = {
   /** Canvas 宽度 */

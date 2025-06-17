@@ -1,18 +1,18 @@
+import type { TransferType } from '@jl-org/tool'
+import { blobToBase64, getImg, isStr } from '@jl-org/tool'
 import { createCvs, getDPR } from './'
-import { blobToBase64, getImg, isStr, TransferType } from '@jl-org/tool';
 
 export {
-  cutImg,
-  compressImg,
-  getCvsImg,
-  blobToBase64,
   base64ToBlob,
-  urlToBlob,
-  getImg,
+  blobToBase64,
+  compressImg,
+  cutImg,
+  downloadByData,
   downloadByUrl,
-  downloadByData
+  getCvsImg,
+  getImg,
+  urlToBlob,
 } from '@jl-org/tool'
-
 
 /**
  * 图片噪点化
@@ -24,8 +24,8 @@ export function imgToNoise(img: HTMLImageElement, level = 100) {
   const { ctx, cvs } = createCvs(width, height)
   ctx.drawImage(img, 0, 0)
 
-  const imgData = ctx.getImageData(0, 0, width, height),
-    data = imgData.data
+  const imgData = ctx.getImageData(0, 0, width, height)
+  const data = imgData.data
 
   for (let i = 0; i < data.length; i += 4) {
     /** 对每个颜色通道添加噪声 */
@@ -47,7 +47,6 @@ export function imgToNoise(img: HTMLImageElement, level = 100) {
   return cvs
 }
 
-
 /**
  * 添加水印
  * 返回 base64 和图片大小，你可以用 CSS 设置上
@@ -60,13 +59,13 @@ export function waterMark({
   gap = 20,
   text = '水印',
   color = '#fff5',
-  rotate = 35
+  rotate = 35,
 }: WaterMarkOpts) {
-  const { cvs, ctx } = createCvs(0, 0),
-    _fontSize = fontSize * getDPR(),
-    font = _fontSize + 'px serif'
+  const { cvs, ctx } = createCvs(0, 0)
+  const _fontSize = fontSize * getDPR()
+  const font = `${_fontSize}px serif`
 
-  // 获取文字宽度
+  /** 获取文字宽度 */
   ctx.font = font
   const { width } = ctx.measureText(text)
   const canvasSize = Math.max(100, width) + gap * getDPR()
@@ -100,7 +99,7 @@ export async function composeImg(
     setImg?: (img: HTMLImageElement) => void
   }>,
   width: number,
-  height: number
+  height: number,
 ) {
   const { cvs, ctx } = createCvs(width, height)
   for (const item of srcs) {
@@ -119,11 +118,10 @@ export async function composeImg(
   return cvs.toDataURL()
 }
 
-
-export type HandleImgReturn<T extends TransferType> =
-  T extends 'blob'
-  ? Blob
-  : string
+export type HandleImgReturn<T extends TransferType>
+  = T extends 'blob'
+    ? Blob
+    : string
 
 export type WaterMarkOpts = {
   text?: string

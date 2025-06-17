@@ -1,11 +1,9 @@
 import type { AddCanvasOpts, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
 
-
 export function mergeOpts(
   opts: NoteBoardOptions,
-  dpr: number
+  dpr: number,
 ): NoteBoardOptionsRequired {
-
   const defaultOpts: NoteBoardOptionsRequired = {
     width: 800 * dpr,
     height: 600 * dpr,
@@ -16,7 +14,7 @@ export function mergeOpts(
     strokeStyle: '#000',
     lineCap: 'round' as CanvasLineCap,
     globalCompositeOperation: 'source-over',
-    drawGlobalCompositeOperation: 'source-over'
+    drawGlobalCompositeOperation: 'source-over',
   }
 
   return {
@@ -29,7 +27,7 @@ export function setCanvas(
   opts: Required<AddCanvasOpts> & {
     parentEl: HTMLElement
   },
-  dpr: number
+  dpr: number,
 ) {
   const { width, height, center, canvas, parentEl } = opts
   const { offsetHeight, offsetWidth } = parentEl
@@ -41,7 +39,7 @@ export function setCanvas(
   canvas.style.width = '100%'
   canvas.style.height = '100%'
 
-  // 居中
+  /** 居中 */
   if (center) {
     canvas.style.top = `${(offsetHeight - height) / 2}px`
     canvas.style.left = `${(offsetWidth - width) / 2}px`

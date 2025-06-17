@@ -1,6 +1,6 @@
-import { TransferType } from '@jl-org/tool'
-import { HandleImgReturn, cutImg } from '@/canvasTool'
-
+import type { TransferType } from '@jl-org/tool'
+import type { HandleImgReturn } from '@/canvasTool'
+import { cutImg } from '@/canvasTool'
 
 export class ShotImg {
   cvs: HTMLCanvasElement
@@ -24,7 +24,7 @@ export class ShotImg {
   /** 你传递的图片 */
   img: HTMLImageElement | undefined
   /** 蒙层透明度 */
-  opacity = .7
+  opacity = 0.7
 
   /**
    * 把你传入的 Canvas 变成一个可拖动的截图区域
@@ -63,7 +63,7 @@ export class ShotImg {
   getShotImg<T extends TransferType>(
     resType: T = 'base64' as T,
     mimeType?: string,
-    quality?: number
+    quality?: number,
   ): Promise<HandleImgReturn<T>> {
     if (!this.img) {
       console.warn('请调用 setImg 先设置图片')
@@ -77,13 +77,12 @@ export class ShotImg {
         y: this.stPos[1],
         width: this.shotWidth,
         height: this.shotHeight,
-        mimeType: mimeType,
-        quality: quality,
+        mimeType,
+        quality,
       },
-      resType
+      resType,
     )
   }
-
 
   /** =========================== 私有方法 ================================= */
 
@@ -122,10 +121,10 @@ export class ShotImg {
 
   private onMouseMove = (e: MouseEvent) => {
     this.endPos = [e.offsetX, e.offsetY]
-    const [stX, stY] = this.stPos,
-      [endX, endY] = this.endPos
+    const [stX, stY] = this.stPos
+    const [endX, endY] = this.endPos
 
-    // 记录 `终点 - 起点` 得到宽高
+    /** 记录 `终点 - 起点` 得到宽高 */
     this.shotWidth = endX - stX
     this.shotHeight = endY - stY
 
@@ -149,16 +148,15 @@ export class ShotImg {
       return
     }
 
-    // 擦除区域模式
+    /** 擦除区域模式 */
     this.ctx.globalCompositeOperation = 'destination-out'
-    // 从鼠标点击起点开始画 
+    /** 从鼠标点击起点开始画 */
     this.ctx.fillRect(...this.stPos, this.shotWidth, this.shotHeight)
 
-    // 往擦除区域填充
+    /** 往擦除区域填充 */
     this.ctx.globalCompositeOperation = 'destination-over'
     this.drawImg()
   }
 }
-
 
 export type Point = [number, number]

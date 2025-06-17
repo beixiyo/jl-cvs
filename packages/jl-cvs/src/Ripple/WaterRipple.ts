@@ -1,6 +1,5 @@
-import { applyAnimation, getWinHeight, getWinWidth, isFn, Clock } from '@jl-org/tool'
 import type { Optional } from '@jl-org/ts-tool'
-
+import { applyAnimation, Clock, getWinHeight, getWinWidth, isFn } from '@jl-org/tool'
 
 /**
  * 水波纹动画

@@ -1,14 +1,12 @@
-import { Ball, getColor, timeFunc } from '@/canvasTool'
-import type { Firework2 } from './Firework2'
-import { getRandomNum } from '@/utils'
 import type { Optional } from '@jl-org/ts-tool'
-
+import type { Firework2 } from './Firework2'
+import { Ball, getColor, timeFunc } from '@/canvasTool'
+import { getRandomNum } from '@/utils'
 
 /**
  * 发射烟花，以及添加烟花尾迹
  */
 export class Launcher {
-
   /** 烟花实例 */
   firework: Firework2
   /** 颜色 */
@@ -34,7 +32,7 @@ export class Launcher {
       y = 0,
       x = width * getRandomNum(0.2, 0.8, true),
       radius = getRandomNum(2, 5),
-      duration = getRandomNum(2000, 3500)
+      duration = getRandomNum(2000, 3500),
     } = opts
 
     this.firework = firework
@@ -58,17 +56,18 @@ export class Launcher {
     const { x, ty, duration, startTime, firework } = this
 
     const progress = timeFunc.linear(
-      (Date.now() - startTime) / duration
+      (Date.now() - startTime) / duration,
     )
     let y = this.y + ty * progress
     y = Math.min(y, ty)
 
-    // 透明度变小
+    /** 透明度变小 */
     let opacity = 1 - (y / ty)
-    if (opacity < 0) opacity = 0
+    if (opacity < 0)
+      opacity = 0
     this.draw(x, y, opacity)
 
-    // 添加烟花尾迹
+    /** 添加烟花尾迹 */
     if (Math.random() > 0.7 && opacity >= 0.1) {
       firework.addDebris({
         x: x + getRandomNum(-2, 2, true),
@@ -80,29 +79,29 @@ export class Launcher {
     return {
       x,
       y,
-      isEnd: y >= ty
+      isEnd: y >= ty,
     }
   }
 
   draw(x: number, y: number, opacity: number) {
-    // 外圆，烟花的颜色
+    /** 外圆，烟花的颜色 */
     new Ball({
       opacity,
       x,
       y,
       r: this.radius,
       color: this.color,
-      ctx: this.firework.ctx
+      ctx: this.firework.ctx,
     }).draw()
 
-    // 内圆，白色
+    /** 内圆，白色 */
     new Ball({
       opacity,
       x,
       y,
       r: this.radius / 2,
       color: '#fff',
-      ctx: this.firework.ctx
+      ctx: this.firework.ctx,
     }).draw()
   }
 }

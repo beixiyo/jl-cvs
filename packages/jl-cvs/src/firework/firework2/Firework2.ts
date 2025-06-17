@@ -1,15 +1,13 @@
 import { getColor } from '@/canvasTool'
-import { Launcher } from './Launcher'
+import { delFromItem } from '@/utils'
 import { Debris, type DebrisOpts } from './Debris'
 import { Explosive } from './Explosive'
-import { delFromItem } from '@/utils'
-
+import { Launcher } from './Launcher'
 
 /**
  * 二段爆炸的烟花
  */
 export class Firework2 {
-
   private color: string
   private status: Firework2Status = 'waiting'
 
@@ -26,7 +24,7 @@ export class Firework2 {
       height,
       width,
       y,
-      ctx
+      ctx,
     } = opts
 
     this.color = color
@@ -36,11 +34,11 @@ export class Firework2 {
       firework: this,
       height,
       width,
-      y
+      y,
     })
   }
 
-  /** 
+  /**
    * 发射
    */
   launch() {
@@ -60,7 +58,8 @@ export class Firework2 {
       }
     }
     else if (this.status === 'booming') {
-      if (!this.explosive) return
+      if (!this.explosive)
+        return
       const res = this.explosive.update()
       if (res.isEnd) {
         this.status = 'end'
@@ -75,7 +74,7 @@ export class Firework2 {
    */
   updateDebris() {
     const list = [...this.debrisArr]
-    list.forEach(debris => {
+    list.forEach((debris) => {
       const res = debris.update()
       if (res.isEnd) {
         delFromItem(this.debrisArr, debris)
@@ -91,7 +90,7 @@ export class Firework2 {
       firework: this,
       x,
       y,
-      color: this.color
+      color: this.color,
     })
     this.explosive.start()
   }
@@ -102,7 +101,7 @@ export class Firework2 {
   addDebris(opts: DebrisOpts) {
     const debris = new Debris({
       ...opts,
-      color: opts.color || this.color
+      color: opts.color || this.color,
     })
     debris.start()
     this.debrisArr.push(debris)

@@ -1,6 +1,5 @@
-import { BaseShape } from '../BaseShape'
+import type { BaseShape } from '../BaseShape'
 import type { ShapeStyle } from '../type'
-
 
 /**
  * 绘制箭头
@@ -16,8 +15,8 @@ export class Arrow implements BaseShape {
   shapeStyle: ShapeStyle = {}
 
   // Arrowhead properties (can be adjusted)
-  private headLength: number = 10; // Logical length of the arrowhead sides
-  private headAngle: number = Math.PI / 6; // Angle of arrowhead sides relative to the line (30 degrees)
+  private headLength: number = 10 // Logical length of the arrowhead sides
+  private headAngle: number = Math.PI / 6 // Angle of arrowhead sides relative to the line (30 degrees)
 
   constructor(opts: ArrowOpts) {
     this.ctx = opts.ctx
@@ -63,7 +62,7 @@ export class Arrow implements BaseShape {
     ctx.lineTo(point1X, point1Y)
     ctx.lineTo(point2X, point2Y)
     ctx.closePath() // Close the triangle path
-    ctx.fill()    // Fill the arrowhead
+    ctx.fill() // Fill the arrowhead
   }
 
   isInPath(x: number, y: number): boolean {

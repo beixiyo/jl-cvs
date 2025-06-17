@@ -1,12 +1,10 @@
 import { Ball } from '@/canvasTool'
 import { getRandomNum } from '@/utils'
 
-
 /**
  * 烟花尾迹
  */
 export class Debris {
-
   /** 颜色 */
   color: string
   /** 透明度 */
@@ -52,17 +50,16 @@ export class Debris {
       r: this.radius,
       color: this.color,
       opacity: this.opacity,
-      ctx: this.ctx
+      ctx: this.ctx,
     }).draw()
 
     return {
       x: this.x,
       y: this.y,
-      isEnd: duration > this.duration
+      isEnd: duration > this.duration,
     }
   }
 }
-
 
 export type DebrisOpts = {
   color?: string
