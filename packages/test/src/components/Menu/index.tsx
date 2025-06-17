@@ -5,6 +5,8 @@ import { ThemeToggle } from '../ThemeToggle'
 const SEP = { path: '/', name: '' }
 
 const pathArr = [
+  { path: '/waterRipple', name: '🌊 水波纹效果' },
+  { path: '/noteBoard', name: '🎨 图像编辑画板' },
 ]
 
 export function Menu(
