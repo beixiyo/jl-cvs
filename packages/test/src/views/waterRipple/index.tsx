@@ -141,8 +141,9 @@ export default function WaterRippleTest() {
   }, [createRipple])
 
   return (
-    <div className="p-6 space-y-8 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 overflow-auto h-screen">
-      <div className="text-center">
+    <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+      {/* 页面标题 - 全宽显示 */}
+      <div className="p-6 text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
           🌊 水波纹动画效果
         </h1>
@@ -151,204 +152,207 @@ export default function WaterRippleTest() {
         </p>
       </div>
 
-      {/* 主要效果展示区域 */}
-      <Card className="p-8">
-        <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
-          水波纹效果展示
-        </h2>
-        <div className="flex justify-center">
-          <canvas
-            ref={ canvasRef }
-            className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl bg-black"
-            style={ { maxWidth: '100%', height: 'auto' } }
-          />
-        </div>
-      </Card>
-
-      {/* 控制面板 */}
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-          控制面板
-        </h2>
-
-        {/* 预设配置 */}
-        <div className="mb-6">
-          <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
-            预设效果
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {presets.map((preset, index) => (
-              <Button
-                key={ `preset-${preset.name}-${index}` }
-                onClick={ () => applyPreset(preset.config) }
-                variant="primary"
-                className="text-sm"
-              >
-                {preset.name}
-              </Button>
-            ))}
-          </div>
+      {/* 响应式布局容器 */}
+      <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-120px)]">
+        {/* 左侧：效果展示区域 */}
+        <div className="flex-1 p-6 lg:pr-3">
+          <Card className="h-full p-6">
+            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
+              水波纹效果展示
+            </h2>
+            <div className="flex justify-center items-center h-full">
+              <canvas
+                ref={ canvasRef }
+                className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl bg-black"
+                style={ { maxWidth: '100%', height: 'auto' } }
+              />
+            </div>
+          </Card>
         </div>
 
-        {/* 参数配置 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              画布宽度
-            </label>
-            <Input
-              type="number"
-              value={ config.width }
-              onChange={ e => updateConfig('width', Number(e.target.value)) }
-              min={ 200 }
-              max={ 1200 }
-            />
-          </div>
+        {/* 右侧：控制面板 */}
+        <div className="w-full lg:w-96 p-6 lg:pl-3">
+          <Card className="h-full">
+            <div className="p-6 h-full overflow-y-auto">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+                控制面板
+              </h2>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              画布高度
-            </label>
-            <Input
-              type="number"
-              value={ config.height }
-              onChange={ e => updateConfig('height', Number(e.target.value)) }
-              min={ 200 }
-              max={ 800 }
-            />
-          </div>
+              {/* 预设配置 */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                  预设效果
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {presets.map((preset, index) => (
+                    <Button
+                      key={ `preset-${preset.name}-${index}` }
+                      onClick={ () => applyPreset(preset.config) }
+                      variant="primary"
+                      className="text-sm"
+                    >
+                      {preset.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              Y轴偏移
-            </label>
-            <Input
-              type="number"
-              value={ config.yOffset }
-              onChange={ e => updateConfig('yOffset', Number(e.target.value)) }
-              min={ -200 }
-              max={ 400 }
-            />
-          </div>
+              {/* 参数配置 */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                  参数配置
+                </h3>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              X轴偏移
-            </label>
-            <Input
-              type="number"
-              value={ config.xOffset }
-              onChange={ e => updateConfig('xOffset', Number(e.target.value)) }
-              min={ -200 }
-              max={ 200 }
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    画布宽度
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.width }
+                    onChange={ e => updateConfig('width', Number(e.target.value)) }
+                    min={ 200 }
+                    max={ 1200 }
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              线条宽度
-            </label>
-            <Input
-              type="number"
-              value={ config.lineWidth }
-              onChange={ e => updateConfig('lineWidth', Number(e.target.value)) }
-              min={ 1 }
-              max={ 10 }
-              step={ 0.5 }
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    画布高度
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.height }
+                    onChange={ e => updateConfig('height', Number(e.target.value)) }
+                    min={ 200 }
+                    max={ 800 }
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              波纹圈数
-            </label>
-            <Input
-              type="number"
-              value={ config.circleCount }
-              onChange={ e => updateConfig('circleCount', Number(e.target.value)) }
-              min={ 5 }
-              max={ 30 }
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    Y轴偏移
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.yOffset }
+                    onChange={ e => updateConfig('yOffset', Number(e.target.value)) }
+                    min={ -200 }
+                    max={ 400 }
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              动画强度
-            </label>
-            <Input
-              type="number"
-              value={ config.intensity }
-              onChange={ e => updateConfig('intensity', Number(e.target.value)) }
-              min={ 0.1 }
-              max={ 5 }
-              step={ 0.1 }
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    X轴偏移
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.xOffset }
+                    onChange={ e => updateConfig('xOffset', Number(e.target.value)) }
+                    min={ -200 }
+                    max={ 200 }
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              描边颜色
-            </label>
-            <Input
-              type="color"
-              value={ config.strokeStyle }
-              onChange={ e => updateConfig('strokeStyle', e.target.value) }
-              placeholder="rgba(255,255,255,0.5)"
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    线条宽度
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.lineWidth }
+                    onChange={ e => updateConfig('lineWidth', Number(e.target.value)) }
+                    min={ 1 }
+                    max={ 10 }
+                    step={ 0.5 }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    波纹圈数
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.circleCount }
+                    onChange={ e => updateConfig('circleCount', Number(e.target.value)) }
+                    min={ 5 }
+                    max={ 30 }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    动画强度
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.intensity }
+                    onChange={ e => updateConfig('intensity', Number(e.target.value)) }
+                    min={ 0.1 }
+                    max={ 5 }
+                    step={ 0.1 }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    描边颜色
+                  </label>
+                  <Input
+                    type="color"
+                    value={ config.strokeStyle }
+                    onChange={ e => updateConfig('strokeStyle', e.target.value) }
+                    placeholder="rgba(255,255,255,0.5)"
+                  />
+                </div>
+              </div>
+
+              {/* 使用说明 */}
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                  使用说明
+                </h3>
+                <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                  <div>
+                    <strong>基本用法：</strong>
+                    创建 WaterRipple 实例，传入 canvas 元素和配置参数
+                  </div>
+                  <div>
+                    <strong>width/height：</strong>
+                    画布尺寸
+                  </div>
+                  <div>
+                    <strong>xOffset/yOffset：</strong>
+                    波纹中心偏移量
+                  </div>
+                  <div>
+                    <strong>lineWidth：</strong>
+                    波纹线条宽度
+                  </div>
+                  <div>
+                    <strong>circleCount：</strong>
+                    同时显示的波纹圈数
+                  </div>
+                  <div>
+                    <strong>intensity：</strong>
+                    动画速度强度
+                  </div>
+                  <div>
+                    <strong>strokeStyle：</strong>
+                    自定义描边样式
+                  </div>
+                  <div>
+                    <strong>方法：</strong>
+                    stop() 停止动画，setSize(width, height) 调整尺寸
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
-      </Card>
-
-      {/* 使用说明 */}
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-          使用说明
-        </h2>
-        <div className="space-y-3 text-gray-600 dark:text-gray-300">
-          <p>
-            <strong>基本用法：</strong>
-            创建 WaterRipple 实例，传入 canvas 元素和配置参数
-          </p>
-          <p>
-            <strong>主要参数：</strong>
-          </p>
-          <ul className="list-disc list-inside ml-4 space-y-1">
-            <li>
-              <code>width/height</code>
-              : 画布尺寸
-            </li>
-            <li>
-              <code>xOffset/yOffset</code>
-              : 波纹中心偏移量
-            </li>
-            <li>
-              <code>lineWidth</code>
-              : 波纹线条宽度
-            </li>
-            <li>
-              <code>circleCount</code>
-              : 同时显示的波纹圈数
-            </li>
-            <li>
-              <code>intensity</code>
-              : 动画速度强度
-            </li>
-            <li>
-              <code>strokeStyle</code>
-              : 自定义描边样式
-            </li>
-          </ul>
-          <p>
-            <strong>方法：</strong>
-            <code>stop()</code>
-            {' '}
-            停止动画，
-            <code>setSize(width, height)</code>
-            {' '}
-            调整尺寸
-          </p>
-        </div>
-      </Card>
+      </div>
     </div>
   )
 }
