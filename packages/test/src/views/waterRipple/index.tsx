@@ -1,12 +1,11 @@
 import { WaterRipple } from '@jl-org/cvs'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
-import { Select } from '@/components/Select'
-import { cn } from '@/utils'
 
 export default function WaterRippleTest() {
-  const [rippleInstances, setRippleInstances] = useState<WaterRipple[]>([])
+  const [rippleInstance, setRippleInstance] = useState<WaterRipple | null>(null)
   const [config, setConfig] = useState({
     width: 800,
     height: 600,
@@ -18,9 +17,9 @@ export default function WaterRippleTest() {
     strokeStyle: '',
   })
 
-  const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([])
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
-  // 预设配置
+  /** 预设配置 */
   const presets = [
     {
       name: '默认效果',
@@ -76,8 +75,8 @@ export default function WaterRippleTest() {
     },
   ]
 
-  // 创建水波纹实例
-  const createRipple = (canvas: HTMLCanvasElement, customConfig?: any) => {
+  /** 创建水波纹实例 */
+  const createRipple = useCallback((canvas: HTMLCanvasElement, customConfig?: any) => {
     const rippleConfig = customConfig || config
 
     const ripple = new WaterRipple({
@@ -91,70 +90,58 @@ export default function WaterRippleTest() {
       intensity: rippleConfig.intensity,
       strokeStyle: rippleConfig.strokeStyle || undefined,
       onResize: () => {
-        console.log('Canvas resized')
+        // Canvas 尺寸调整回调
       },
     })
 
     return ripple
-  }
+  }, [config])
 
-  // 应用预设配置
+  /** 应用预设配置 */
   const applyPreset = (presetConfig: any) => {
     setConfig(presetConfig)
 
-    // 重新创建所有实例
-    rippleInstances.forEach(instance => instance.stop())
-    const newInstances: WaterRipple[] = []
+    /** 重新创建实例 */
+    if (rippleInstance) {
+      rippleInstance.stop()
+    }
 
-    canvasRefs.current.forEach((canvas, index) => {
-      if (canvas) {
-        const ripple = createRipple(canvas, presetConfig)
-        newInstances.push(ripple)
-      }
-    })
-
-    setRippleInstances(newInstances)
+    if (canvasRef.current) {
+      const ripple = createRipple(canvasRef.current, presetConfig)
+      setRippleInstance(ripple)
+    }
   }
 
-  // 更新配置
+  /** 更新配置 */
   const updateConfig = (key: string, value: any) => {
     const newConfig = { ...config, [key]: value }
     setConfig(newConfig)
 
-    // 重新创建实例
-    rippleInstances.forEach(instance => instance.stop())
-    const newInstances: WaterRipple[] = []
+    /** 重新创建实例 */
+    if (rippleInstance) {
+      rippleInstance.stop()
+    }
 
-    canvasRefs.current.forEach((canvas) => {
-      if (canvas) {
-        const ripple = createRipple(canvas, newConfig)
-        newInstances.push(ripple)
-      }
-    })
-
-    setRippleInstances(newInstances)
+    if (canvasRef.current) {
+      const ripple = createRipple(canvasRef.current, newConfig)
+      setRippleInstance(ripple)
+    }
   }
 
-  // 初始化画布
+  /** 初始化画布 */
   useEffect(() => {
-    const instances: WaterRipple[] = []
+    if (canvasRef.current) {
+      const ripple = createRipple(canvasRef.current)
+      setRippleInstance(ripple)
 
-    canvasRefs.current.forEach((canvas) => {
-      if (canvas) {
-        const ripple = createRipple(canvas)
-        instances.push(ripple)
+      return () => {
+        ripple.stop()
       }
-    })
-
-    setRippleInstances(instances)
-
-    return () => {
-      instances.forEach(instance => instance.stop())
     }
-  }, [])
+  }, [createRipple])
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+    <div className="p-6 space-y-8 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 overflow-auto h-screen">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
           🌊 水波纹动画效果
@@ -163,6 +150,20 @@ export default function WaterRippleTest() {
           Canvas 水波纹动画组件，支持多种配置参数和预设效果
         </p>
       </div>
+
+      {/* 主要效果展示区域 */}
+      <Card className="p-8">
+        <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
+          水波纹效果展示
+        </h2>
+        <div className="flex justify-center">
+          <canvas
+            ref={ canvasRef }
+            className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl bg-black"
+            style={ { maxWidth: '100%', height: 'auto' } }
+          />
+        </div>
+      </Card>
 
       {/* 控制面板 */}
       <Card className="p-6">
@@ -178,8 +179,8 @@ export default function WaterRippleTest() {
           <div className="flex flex-wrap gap-2">
             {presets.map((preset, index) => (
               <Button
-                key={index}
-                onClick={() => applyPreset(preset.config)}
+                key={ `preset-${preset.name}-${index}` }
+                onClick={ () => applyPreset(preset.config) }
                 variant="primary"
                 className="text-sm"
               >
@@ -197,10 +198,10 @@ export default function WaterRippleTest() {
             </label>
             <Input
               type="number"
-              value={config.width}
-              onChange={(e) => updateConfig('width', Number(e.target.value))}
-              min={200}
-              max={1200}
+              value={ config.width }
+              onChange={ e => updateConfig('width', Number(e.target.value)) }
+              min={ 200 }
+              max={ 1200 }
             />
           </div>
 
@@ -210,10 +211,10 @@ export default function WaterRippleTest() {
             </label>
             <Input
               type="number"
-              value={config.height}
-              onChange={(e) => updateConfig('height', Number(e.target.value))}
-              min={200}
-              max={800}
+              value={ config.height }
+              onChange={ e => updateConfig('height', Number(e.target.value)) }
+              min={ 200 }
+              max={ 800 }
             />
           </div>
 
@@ -223,10 +224,10 @@ export default function WaterRippleTest() {
             </label>
             <Input
               type="number"
-              value={config.yOffset}
-              onChange={(e) => updateConfig('yOffset', Number(e.target.value))}
-              min={-200}
-              max={400}
+              value={ config.yOffset }
+              onChange={ e => updateConfig('yOffset', Number(e.target.value)) }
+              min={ -200 }
+              max={ 400 }
             />
           </div>
 
@@ -236,10 +237,10 @@ export default function WaterRippleTest() {
             </label>
             <Input
               type="number"
-              value={config.xOffset}
-              onChange={(e) => updateConfig('xOffset', Number(e.target.value))}
-              min={-200}
-              max={200}
+              value={ config.xOffset }
+              onChange={ e => updateConfig('xOffset', Number(e.target.value)) }
+              min={ -200 }
+              max={ 200 }
             />
           </div>
 
@@ -249,11 +250,11 @@ export default function WaterRippleTest() {
             </label>
             <Input
               type="number"
-              value={config.lineWidth}
-              onChange={(e) => updateConfig('lineWidth', Number(e.target.value))}
-              min={1}
-              max={10}
-              step={0.5}
+              value={ config.lineWidth }
+              onChange={ e => updateConfig('lineWidth', Number(e.target.value)) }
+              min={ 1 }
+              max={ 10 }
+              step={ 0.5 }
             />
           </div>
 
@@ -263,10 +264,10 @@ export default function WaterRippleTest() {
             </label>
             <Input
               type="number"
-              value={config.circleCount}
-              onChange={(e) => updateConfig('circleCount', Number(e.target.value))}
-              min={5}
-              max={30}
+              value={ config.circleCount }
+              onChange={ e => updateConfig('circleCount', Number(e.target.value)) }
+              min={ 5 }
+              max={ 30 }
             />
           </div>
 
@@ -276,11 +277,11 @@ export default function WaterRippleTest() {
             </label>
             <Input
               type="number"
-              value={config.intensity}
-              onChange={(e) => updateConfig('intensity', Number(e.target.value))}
-              min={0.1}
-              max={5}
-              step={0.1}
+              value={ config.intensity }
+              onChange={ e => updateConfig('intensity', Number(e.target.value)) }
+              min={ 0.1 }
+              max={ 5 }
+              step={ 0.1 }
             />
           </div>
 
@@ -290,42 +291,13 @@ export default function WaterRippleTest() {
             </label>
             <Input
               type="color"
-              value={config.strokeStyle}
-              onChange={(e) => updateConfig('strokeStyle', e.target.value)}
+              value={ config.strokeStyle }
+              onChange={ e => updateConfig('strokeStyle', e.target.value) }
               placeholder="rgba(255,255,255,0.5)"
             />
           </div>
         </div>
       </Card>
-
-      {/* 效果展示 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
-            当前配置效果
-          </h3>
-          <div className="flex justify-center">
-            <canvas
-              ref={(el) => (canvasRefs.current[0] = el)}
-              className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg bg-black"
-              style={{ maxWidth: '100%', height: 'auto' }}
-            />
-          </div>
-        </Card>
-
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
-            对比效果
-          </h3>
-          <div className="flex justify-center">
-            <canvas
-              ref={(el) => (canvasRefs.current[1] = el)}
-              className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg bg-black"
-              style={{ maxWidth: '100%', height: 'auto' }}
-            />
-          </div>
-        </Card>
-      </div>
 
       {/* 使用说明 */}
       <Card className="p-6">
@@ -341,16 +313,39 @@ export default function WaterRippleTest() {
             <strong>主要参数：</strong>
           </p>
           <ul className="list-disc list-inside ml-4 space-y-1">
-            <li><code>width/height</code>: 画布尺寸</li>
-            <li><code>xOffset/yOffset</code>: 波纹中心偏移量</li>
-            <li><code>lineWidth</code>: 波纹线条宽度</li>
-            <li><code>circleCount</code>: 同时显示的波纹圈数</li>
-            <li><code>intensity</code>: 动画速度强度</li>
-            <li><code>strokeStyle</code>: 自定义描边样式</li>
+            <li>
+              <code>width/height</code>
+              : 画布尺寸
+            </li>
+            <li>
+              <code>xOffset/yOffset</code>
+              : 波纹中心偏移量
+            </li>
+            <li>
+              <code>lineWidth</code>
+              : 波纹线条宽度
+            </li>
+            <li>
+              <code>circleCount</code>
+              : 同时显示的波纹圈数
+            </li>
+            <li>
+              <code>intensity</code>
+              : 动画速度强度
+            </li>
+            <li>
+              <code>strokeStyle</code>
+              : 自定义描边样式
+            </li>
           </ul>
           <p>
             <strong>方法：</strong>
-            <code>stop()</code> 停止动画，<code>setSize(width, height)</code> 调整尺寸
+            <code>stop()</code>
+            {' '}
+            停止动画，
+            <code>setSize(width, height)</code>
+            {' '}
+            调整尺寸
           </p>
         </div>
       </Card>
