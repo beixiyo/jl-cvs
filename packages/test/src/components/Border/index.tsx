@@ -1,7 +1,7 @@
+import { memo, useEffect, useState } from 'react'
 import { useElBounding } from '@/hooks'
 import { primaryColor } from '@/styles/variable'
 import { cn } from '@/utils'
-import { memo, useEffect, useState } from 'react'
 
 export const Border = memo((props: BorderProps) => {
   const {

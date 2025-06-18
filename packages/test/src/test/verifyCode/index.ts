@@ -2,11 +2,10 @@
  * @link https://juejin.cn/post/7306062725213044774
  */
 
-import { adaptiveBinarize, adaptiveGrayscale, enhanceContrast, getImgData, scaleImgData } from '@/canvasTool'
-import { blobToBase64, createCvs } from '@jl-org/tool'
 import type { BinaryRow } from './type'
+import { blobToBase64, createCvs } from '@jl-org/tool'
+import { adaptiveBinarize, getImgData, scaleImgData } from '@/canvasTool'
 import { convolution } from './convolution'
-
 
 const SCALE = 4
 const THRESHOLD = 165
@@ -15,8 +14,7 @@ const url = new URL('./assets/9.png', import.meta.url).href
 main()
 
 async function main() {
-
-  const { imgData, } = await getCodeImgData()
+  const { imgData } = await getCodeImgData()
   const { imgData: data, binData } = binarization(imgData)
 
   const data4x = scaleImgData(data, SCALE)
@@ -33,10 +31,9 @@ async function main() {
   console.log(convolution(rawSizeData))
 }
 
-
 /**
  * 还原二值化数据的缩放
- * @returns 
+ * @returns
  */
 function restoreDataScale(data: BinaryRow[], scale: number) {
   const scaleData = []
@@ -62,7 +59,7 @@ function cutWhiteEdge(data: BinaryRow[]): void {
   const isWhiteEdge = () =>
     edge.every(binary => binary == '0')
 
-  // 连续切边
+  /** 连续切边 */
   const cutEdgeContinuous = (getEdge: () => BinaryRow, cutEdge: VoidFunction) => {
     const _resetEdge = () => (edge = getEdge())
     for (
@@ -72,30 +69,30 @@ function cutWhiteEdge(data: BinaryRow[]): void {
     );
   }
 
-  // 切边顺序：上下左右
+  /** 切边顺序：上下左右 */
 
-  // 上
+  /** 上 */
   cutEdgeContinuous(
     () => data[0],
-    () => data.shift()
+    () => data.shift(),
   )
 
-  // 下
+  /** 下 */
   cutEdgeContinuous(
     () => data[data.length - 1],
-    () => data.pop()
+    () => data.pop(),
   )
 
-  // 左
+  /** 左 */
   cutEdgeContinuous(
     () => data.map(row => row[0]),
-    () => data.forEach(row => row.shift())
+    () => data.forEach(row => row.shift()),
   )
 
-  // 右
+  /** 右 */
   cutEdgeContinuous(
     () => data.map(row => row[row.length - 1]),
-    () => data.forEach(row => row.pop())
+    () => data.forEach(row => row.pop()),
   )
 }
 
@@ -110,33 +107,32 @@ function deNoising(binData: BinaryRow[]) {
 
   const isEffectivePoint = (x: number, y: number) => binData[y][x] == '1'
   const checkAround = (x: number, y: number) => {
-    // 边界控制
+    /** 边界控制 */
     const checkTop = y > 0
     const checkBottom = y < h - 1
     const checkLeft = x > 0
     const checkRight = x < w - 1
 
     return (
-      (checkTop && isEffectivePoint(x, y - 1)) ||
-      (checkBottom && isEffectivePoint(x, y + 1)) ||
-      (checkLeft && isEffectivePoint(x - 1, y)) ||
-      (checkRight && isEffectivePoint(x + 1, y))
+      (checkTop && isEffectivePoint(x, y - 1))
+      || (checkBottom && isEffectivePoint(x, y + 1))
+      || (checkLeft && isEffectivePoint(x - 1, y))
+      || (checkRight && isEffectivePoint(x + 1, y))
     )
   }
 
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       if (
-        isEffectivePoint(x, y) &&
-        !checkAround(x, y)
+        isEffectivePoint(x, y)
+        && !checkAround(x, y)
       ) {
-        // 将噪点置为无效点
+        /** 将噪点置为无效点 */
         binData[y][x] = '0'
       }
     }
   }
 }
-
 
 /**
  * 二值化处理
@@ -150,7 +146,7 @@ function binarization(imgData: ImageData, threshold = THRESHOLD) {
   const binData: BinaryRow[] = []
 
   const pixelToBin = (pixel: number[]) =>
-    pixel.every((val) => val > threshold)
+    pixel.every(val => val > threshold)
       ? '0'
       : '1'
 
@@ -162,7 +158,7 @@ function binarization(imgData: ImageData, threshold = THRESHOLD) {
       const pixel = [
         imgData.data[index],
         imgData.data[index + 1],
-        imgData.data[index + 2]
+        imgData.data[index + 2],
       ]
       row.push(pixelToBin(pixel))
     }
@@ -172,12 +168,12 @@ function binarization(imgData: ImageData, threshold = THRESHOLD) {
 
   return {
     imgData,
-    /** 
+    /**
      * 0 | 1 的二维数组
      * 一个数组为一行
      * 一个元素为一个像素点，0 为无效点，1 为有效点
      */
-    binData
+    binData,
   }
 }
 
@@ -192,5 +188,3 @@ async function getCodeImgData() {
 
   return getImgData(src)
 }
-
-

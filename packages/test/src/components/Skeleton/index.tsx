@@ -1,6 +1,6 @@
+import { memo } from 'react'
 import { useTheme } from '@/hooks'
 import { cn } from '@/utils'
-import { memo } from 'react'
 import styles from './styles.module.scss'
 
 export const Skeleton = memo<SkeletonProps>((props) => {

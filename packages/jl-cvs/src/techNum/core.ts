@@ -38,7 +38,7 @@ export function createTechNum(canvas: HTMLCanvasElement, opts: TechNumOpts = {})
     canvas.width = width
     canvas.height = height
 
-    totalCol = Math.floor(width / colWidth),
+    totalCol = Math.floor(width / colWidth)
     /** 每列文字 y 轴索引 */
     colNext = Array.from({ length: totalCol }, () => 1)
   }

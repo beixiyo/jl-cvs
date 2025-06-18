@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
-import { cn } from '@/utils'
 import { memo } from 'react'
+import { cn } from '@/utils'
 import { TabHeader } from './TabHeader'
 import { TabItem } from './TabItem'
 
@@ -18,7 +18,7 @@ function InnerTabs<T extends string>(
     onChange,
 
     dataId,
-  }: TabsProps<T>
+  }: TabsProps<T>,
 ) {
   return <div
     className={ cn(

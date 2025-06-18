@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { Loading } from '@/components/Loading'
 import { Suspense } from 'react'
+import { Loading } from '@/components/Loading'
 
 /**
  * lazy 加载的才有过渡效果

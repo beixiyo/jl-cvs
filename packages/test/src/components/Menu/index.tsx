@@ -43,7 +43,7 @@ export function Menu(
       ) }
       style={ style }
     >
-      <ThemeToggle className='my-0' />
+      <ThemeToggle className="my-0" />
 
       { pathArr.map((item, index) => (
         <NavLink

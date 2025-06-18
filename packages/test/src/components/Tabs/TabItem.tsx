@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react'
 import type { TabItemType } from './index'
+import { memo } from 'react'
 import { vShow } from '@/hooks'
 import { cn } from '@/utils'
-import { memo } from 'react'
 import { KeepAlive } from '../KeepAlive'
 
 function InnerTabItem<T extends string>(
@@ -11,7 +11,7 @@ function InnerTabItem<T extends string>(
     className,
     item,
     active,
-  }: TabItemProps<T>
+  }: TabItemProps<T>,
 ) {
   return <div
     className={ cn(className) }
@@ -28,7 +28,6 @@ function InnerTabItem<T extends string>(
 
 InnerTabItem.displayName = 'InnerTabItem'
 export const TabItem = memo(InnerTabItem) as typeof InnerTabItem
-
 
 export interface TabItemProps<T extends string> {
   className?: string

@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
-import { Select } from '@/components/Select'
 import { Slider } from '@/components/Slider'
 import { useGetState } from '@/hooks'
 
@@ -11,7 +10,6 @@ type GridType = 'grid' | 'dotGrid'
 
 export default function GridTest() {
   const [gridType, setGridType] = useState<GridType>('grid')
-  const [isActive, setIsActive] = useState(false)
 
   // Grid 配置
   const [gridConfig, setGridConfig] = useGetState({
@@ -167,61 +165,33 @@ export default function GridTest() {
       else {
         gridInstanceRef.current = new DotGrid(canvasRef.current, latestDotGridConfig)
       }
-      setIsActive(true)
     }
     catch (error) {
       console.error('创建网格实例失败:', error)
-      alert('创建网格实例失败，请检查配置')
-      setIsActive(false)
-    }
-  }
-
-  /** 停止网格 */
-  const stopGrid = () => {
-    if (gridInstanceRef.current && canvasRef.current) {
-      const ctx = canvasRef.current.getContext('2d')
-      if (ctx) {
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-      }
-      gridInstanceRef.current = null
-      setIsActive(false)
     }
   }
 
   /** 应用预设配置 */
   const applyGridPreset = (presetConfig: any) => {
     setGridConfig(prev => ({ ...prev, ...presetConfig }))
-    if (isActive && gridType === 'grid') {
-      setTimeout(createGridInstance, 100) // 延迟重新创建
-    }
   }
 
   const applyDotGridPreset = (presetConfig: any) => {
     setDotGridConfig(prev => ({ ...prev, ...presetConfig }))
-    if (isActive && gridType === 'dotGrid') {
-      setTimeout(createGridInstance, 100) // 延迟重新创建
-    }
   }
 
   /** 更新配置 */
   const updateGridConfig = (key: string, value: any) => {
     setGridConfig(prev => ({ ...prev, [key]: value }))
-    if (isActive && gridType === 'grid') {
-      setTimeout(createGridInstance, 100) // 延迟重新创建
-    }
   }
 
   const updateDotGridConfig = (key: string, value: any) => {
     setDotGridConfig(prev => ({ ...prev, [key]: value }))
-    if (isActive && gridType === 'dotGrid') {
-      setTimeout(createGridInstance, 100) // 延迟重新创建
-    }
   }
 
   /** 切换网格类型 */
   const switchGridType = (type: GridType) => {
     setGridType(type)
-    stopGrid() // 先停止当前网格
   }
 
   /** 自动启动效果 */
@@ -233,6 +203,36 @@ export default function GridTest() {
       }
     }, 500)
   }, [])
+
+  /** 监听网格类型变化，自动重新创建 */
+  useEffect(() => {
+    if (canvasRef.current) {
+      const timer = setTimeout(() => {
+        createGridInstance()
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [gridType])
+
+  /** 监听Grid配置变化，自动重新创建 */
+  useEffect(() => {
+    if (canvasRef.current && gridInstanceRef.current && gridType === 'grid') {
+      const timer = setTimeout(() => {
+        createGridInstance()
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [gridConfig.width, gridConfig.height, gridConfig.cellWidth, gridConfig.cellHeight, gridConfig.backgroundColor, gridConfig.borderColor, gridConfig.borderWidth, gridConfig.dashedLines])
+
+  /** 监听DotGrid配置变化，自动重新创建 */
+  useEffect(() => {
+    if (canvasRef.current && gridInstanceRef.current && gridType === 'dotGrid') {
+      const timer = setTimeout(() => {
+        createGridInstance()
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [dotGridConfig.width, dotGridConfig.height, dotGridConfig.dotSpacingX, dotGridConfig.dotSpacingY, dotGridConfig.dotRadius, dotGridConfig.dotColor, dotGridConfig.backgroundColor])
 
   /** 处理窗口大小变化 */
   useEffect(() => {
@@ -264,10 +264,10 @@ export default function GridTest() {
   }, [])
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+    <div className="min-h-screen from-gray-50 to-slate-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
       {/* 页面标题 - 全宽显示 */}
       <div className="p-6 text-center">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+        <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           📐 网格效果
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
@@ -276,18 +276,18 @@ export default function GridTest() {
       </div>
 
       {/* 响应式布局容器 */}
-      <div className="flex flex-col lg:flex-row gap-6 px-6">
+      <div className="flex flex-col gap-6 px-6 lg:flex-row">
         {/* 左侧：效果展示区域 */}
         <div className="flex-1">
-          <Card className="p-6 min-h-[600px]">
-            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
+          <Card className="min-h-[600px] p-6">
+            <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
               网格效果展示
             </h2>
-            <div className="flex flex-col items-center justify-center min-h-[500px] space-y-4">
+            <div className="min-h-[500px] flex flex-col items-center justify-center space-y-4">
               <div className="relative">
                 <canvas
                   ref={ canvasRef }
-                  className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl"
+                  className="border border-gray-300 rounded-lg shadow-xl dark:border-gray-600"
                   width={ gridType === 'grid'
                     ? gridConfig.width
                     : dotGridConfig.width }
@@ -296,30 +296,6 @@ export default function GridTest() {
                     : dotGridConfig.height }
                   style={ { maxWidth: '100%', height: 'auto' } }
                 />
-                { !isActive && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 rounded-lg">
-                    <p className="text-white text-sm">点击启动查看效果</p>
-                  </div>
-                ) }
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  onClick={ createGridInstance }
-                  disabled={ isActive }
-                  variant="default"
-                >
-                  { isActive
-                    ? '网格运行中...'
-                    : '🎬 启动网格' }
-                </Button>
-                <Button
-                  onClick={ stopGrid }
-                  disabled={ !isActive }
-                  variant="primary"
-                >
-                  ⏹️ 停止网格
-                </Button>
               </div>
 
               <div className="text-center text-sm text-gray-600 dark:text-gray-400">
@@ -333,17 +309,17 @@ export default function GridTest() {
         {/* 右侧：控制面板 */}
         <div className="w-full lg:w-96">
           <Card>
-            <div className="p-6 max-h-[80vh] overflow-y-auto">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+            <div className="max-h-[80vh] overflow-y-auto p-6">
+              <h2 className="mb-4 text-xl text-gray-800 font-semibold dark:text-white">
                 控制面板
               </h2>
 
               {/* 网格类型选择 */}
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   网格类型
                 </h3>
-                <div className="flex gap-2 mb-4">
+                <div className="mb-4 flex gap-2">
                   <Button
                     onClick={ () => switchGridType('grid') }
                     variant={ gridType === 'grid'
@@ -367,7 +343,7 @@ export default function GridTest() {
 
               {/* 预设配置 */}
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   预设效果
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
@@ -396,13 +372,13 @@ export default function GridTest() {
               </div>
 
               {/* 基础参数配置 */}
-              <div className="space-y-4 mb-6">
-                <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+              <div className="mb-6 space-y-4">
+                <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                   基础参数
                 </h3>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
                   <Input
@@ -425,7 +401,7 @@ export default function GridTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
                   <Input
@@ -448,7 +424,7 @@ export default function GridTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     背景颜色
                   </label>
                   <div className="flex items-center gap-2">
@@ -465,7 +441,7 @@ export default function GridTest() {
                           updateDotGridConfig('backgroundColor', e.target.value)
                         }
                       } }
-                      className="w-12 h-8 p-0 border-0"
+                      className="h-8 w-12 border-0 p-0"
                     />
                     <Input
                       type="text"
@@ -488,13 +464,13 @@ export default function GridTest() {
 
               {/* 网格特定配置 */}
               { gridType === 'grid' && (
-                <div className="space-y-4 mb-6">
-                  <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                <div className="mb-6 space-y-4">
+                  <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                     线条网格配置
                   </h3>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       单元格宽度 (
                       { gridConfig.cellWidth }
                       px)
@@ -517,7 +493,7 @@ export default function GridTest() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       单元格高度 (
                       { gridConfig.cellHeight }
                       px)
@@ -540,7 +516,7 @@ export default function GridTest() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       边框宽度 (
                       { gridConfig.borderWidth }
                       px)
@@ -564,7 +540,7 @@ export default function GridTest() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       边框颜色
                     </label>
                     <div className="flex items-center gap-2">
@@ -572,7 +548,7 @@ export default function GridTest() {
                         type="color"
                         value={ gridConfig.borderColor }
                         onChange={ e => updateGridConfig('borderColor', e.target.value) }
-                        className="w-12 h-8 p-0 border-0"
+                        className="h-8 w-12 border-0 p-0"
                       />
                       <Input
                         type="text"
@@ -599,13 +575,13 @@ export default function GridTest() {
 
               {/* 点阵特定配置 */}
               { gridType === 'dotGrid' && (
-                <div className="space-y-4 mb-6">
-                  <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                <div className="mb-6 space-y-4">
+                  <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                     点阵网格配置
                   </h3>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       水平间距 (
                       { dotGridConfig.dotSpacingX }
                       px)
@@ -628,7 +604,7 @@ export default function GridTest() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       垂直间距 (
                       { dotGridConfig.dotSpacingY }
                       px)
@@ -651,7 +627,7 @@ export default function GridTest() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       点半径 (
                       { dotGridConfig.dotRadius }
                       px)
@@ -675,7 +651,7 @@ export default function GridTest() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       点颜色
                     </label>
                     <div className="flex items-center gap-2">
@@ -683,7 +659,7 @@ export default function GridTest() {
                         type="color"
                         value={ dotGridConfig.dotColor }
                         onChange={ e => updateDotGridConfig('dotColor', e.target.value) }
-                        className="w-12 h-8 p-0 border-0"
+                        className="h-8 w-12 border-0 p-0"
                       />
                       <Input
                         type="text"
@@ -695,7 +671,7 @@ export default function GridTest() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       高亮范围 (
                       { dotGridConfig.highlightRange }
                       )
@@ -720,11 +696,11 @@ export default function GridTest() {
               ) }
 
               {/* 使用说明 */}
-              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+              <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-600">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   使用说明
                 </h3>
-                <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                <div className="text-sm text-gray-600 space-y-3 dark:text-gray-300">
                   <div>
                     <strong>线条网格：</strong>
                     由线条构成的规则网格，支持虚线模式

@@ -1,7 +1,7 @@
 import type { CSSProperties, HTMLAttributes } from 'react'
 import type { TabItemType } from '.'
-import { cn } from '@/utils'
 import { memo } from 'react'
+import { cn } from '@/utils'
 
 function InnerTabHeader<T extends string>(
   {

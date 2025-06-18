@@ -1,7 +1,7 @@
 import type { MotionProps } from 'framer-motion'
-import { cn } from '@/utils'
 import { motion } from 'framer-motion'
 import React, { memo } from 'react'
+import { cn } from '@/utils'
 
 /**
  * 动态打勾组件，提供流畅的动画效果和高度可定制性

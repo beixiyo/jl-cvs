@@ -1,7 +1,7 @@
-import { useAsyncEffect } from '@/hooks'
 import { getImg, retryTask } from '@jl-org/tool'
 import { clsx } from 'clsx'
 import { memo } from 'react'
+import { useAsyncEffect } from '@/hooks'
 
 export const RetryImg = memo<RetryImgProps>((
   {

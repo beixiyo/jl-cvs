@@ -1,5 +1,5 @@
 import { WavyLines } from '@jl-org/cvs'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
@@ -18,7 +18,6 @@ export default function WavyLinesTest() {
     strokeStyle: '#333333',
   }, true)
 
-  const [isActive, setIsActive] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wavyLinesRef = useRef<WavyLines | null>(null)
 
@@ -107,7 +106,7 @@ export default function WavyLinesTest() {
   /** 创建波浪线实例 */
   const createWavyLines = () => {
     if (!canvasRef.current) {
-      alert('画布未准备好')
+      console.warn('画布未准备好')
       return
     }
 
@@ -135,53 +134,20 @@ export default function WavyLinesTest() {
         mouseEffectRange: latestConfig.mouseEffectRange,
         strokeStyle: latestConfig.strokeStyle,
       })
-
-      setIsActive(true)
     }
     catch (error) {
       console.error('创建波浪线实例失败:', error)
-      alert('创建波浪线实例失败，请检查配置')
-      setIsActive(false)
-    }
-  }
-
-  /** 停止波浪线 */
-  const stopWavyLines = () => {
-    if (wavyLinesRef.current) {
-      wavyLinesRef.current.destroy()
-      wavyLinesRef.current = null
-      setIsActive(false)
-
-      /** 清空画布 */
-      if (canvasRef.current) {
-        const ctx = canvasRef.current.getContext('2d')
-        if (ctx) {
-          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-        }
-      }
     }
   }
 
   /** 应用预设配置 */
   const applyPreset = (presetConfig: any) => {
     setConfig(prev => ({ ...prev, ...presetConfig }))
-    if (isActive) {
-      setTimeout(() => {
-        stopWavyLines()
-        setTimeout(createWavyLines, 100)
-      }, 100)
-    }
   }
 
   /** 更新配置 */
   const updateConfig = (key: string, value: any) => {
     setConfig(prev => ({ ...prev, [key]: value }))
-    if (isActive) {
-      setTimeout(() => {
-        stopWavyLines()
-        setTimeout(createWavyLines, 100)
-      }, 100)
-    }
   }
 
   /** 自动启动效果 */
@@ -194,6 +160,17 @@ export default function WavyLinesTest() {
     }, 500)
   }, [])
 
+  /** 监听配置变化，自动重新创建实例 */
+  useEffect(() => {
+    if (canvasRef.current && wavyLinesRef.current) {
+      /** 延迟重新创建，避免频繁更新 */
+      const timer = setTimeout(() => {
+        createWavyLines()
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [config.width, config.height, config.xGap, config.yGap, config.extraWidth, config.extraHeight, config.mouseEffectRange, config.strokeStyle])
+
   /** 组件卸载时清理 */
   useEffect(() => {
     return () => {
@@ -204,10 +181,10 @@ export default function WavyLinesTest() {
   }, [])
 
   return (
-    <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+    <div className="min-h-screen from-cyan-50 to-blue-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
       {/* 页面标题 - 全宽显示 */}
       <div className="p-6 text-center">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+        <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           〰️ 波浪线条效果
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
@@ -216,46 +193,22 @@ export default function WavyLinesTest() {
       </div>
 
       {/* 响应式布局容器 */}
-      <div className="flex flex-col lg:flex-row gap-6 px-6">
+      <div className="flex flex-col gap-6 px-6 lg:flex-row">
         {/* 左侧：效果展示区域 */}
         <div className="flex-1">
-          <Card className="p-6 min-h-[600px]">
-            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
+          <Card className="min-h-[600px] p-6">
+            <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
               波浪线条效果展示
             </h2>
-            <div className="flex flex-col items-center justify-center min-h-[500px] space-y-4">
+            <div className="min-h-[500px] flex flex-col items-center justify-center space-y-4">
               <div className="relative">
                 <canvas
                   ref={ canvasRef }
-                  className="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 shadow-xl"
+                  className="border border-gray-300 rounded-lg bg-white shadow-xl dark:border-gray-600 dark:bg-gray-800"
                   width={ config.width }
                   height={ config.height }
                   style={ { maxWidth: '100%', height: 'auto' } }
                 />
-                { !isActive && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 rounded-lg">
-                    <p className="text-white text-sm">点击启动查看效果</p>
-                  </div>
-                ) }
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  onClick={ createWavyLines }
-                  disabled={ isActive }
-                  variant="default"
-                >
-                  { isActive
-                    ? '波浪运行中...'
-                    : '🎬 启动波浪' }
-                </Button>
-                <Button
-                  onClick={ stopWavyLines }
-                  disabled={ !isActive }
-                  variant="primary"
-                >
-                  ⏹️ 停止波浪
-                </Button>
               </div>
 
               <div className="text-center text-sm text-gray-600 dark:text-gray-400">
@@ -269,14 +222,14 @@ export default function WavyLinesTest() {
         {/* 右侧：控制面板 */}
         <div className="w-full lg:w-96">
           <Card>
-            <div className="p-6 max-h-[80vh] overflow-y-auto">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+            <div className="max-h-[80vh] overflow-y-auto p-6">
+              <h2 className="mb-4 text-xl text-gray-800 font-semibold dark:text-white">
                 控制面板
               </h2>
 
               {/* 预设配置 */}
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   预设效果
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
@@ -294,13 +247,13 @@ export default function WavyLinesTest() {
               </div>
 
               {/* 基础参数配置 */}
-              <div className="space-y-4 mb-6">
-                <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+              <div className="mb-6 space-y-4">
+                <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                   基础参数
                 </h3>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
                   <Input
@@ -313,7 +266,7 @@ export default function WavyLinesTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
                   <Input
@@ -326,7 +279,7 @@ export default function WavyLinesTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     水平间距 (
                     { config.xGap }
                     px)
@@ -349,7 +302,7 @@ export default function WavyLinesTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     垂直间距 (
                     { config.yGap }
                     px)
@@ -372,7 +325,7 @@ export default function WavyLinesTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     额外宽度 (
                     { config.extraWidth }
                     px)
@@ -395,7 +348,7 @@ export default function WavyLinesTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     额外高度 (
                     { config.extraHeight }
                     px)
@@ -418,7 +371,7 @@ export default function WavyLinesTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     鼠标效果范围 (
                     { config.mouseEffectRange }
                     px)
@@ -443,7 +396,7 @@ export default function WavyLinesTest() {
 
               {/* 颜色配置 */}
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   线条颜色
                 </h3>
                 <div className="space-y-3">
@@ -452,7 +405,7 @@ export default function WavyLinesTest() {
                       type="color"
                       value={ config.strokeStyle }
                       onChange={ e => updateConfig('strokeStyle', e.target.value) }
-                      className="w-12 h-8 p-0 border-0"
+                      className="h-8 w-12 border-0 p-0"
                     />
                     <Input
                       type="text"
@@ -463,7 +416,7 @@ export default function WavyLinesTest() {
                     />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">快速选择颜色：</p>
+                    <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">快速选择颜色：</p>
                     <div className="grid grid-cols-2 gap-2">
                       { colorPresets.map((preset, index) => (
                         <Button
@@ -482,11 +435,11 @@ export default function WavyLinesTest() {
               </div>
 
               {/* 使用说明 */}
-              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+              <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-600">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   使用说明
                 </h3>
-                <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                <div className="text-sm text-gray-600 space-y-3 dark:text-gray-300">
                   <div>
                     <strong>水平/垂直间距：</strong>
                     控制线条的密度和分布

@@ -1,5 +1,5 @@
-import type { RoundedStyle, SizeStyle } from '@/types'
 import type { ButtonProps, ButtonVariant } from './types'
+import type { RoundedStyle, SizeStyle } from '@/types'
 import { cva } from 'class-variance-authority'
 
 /**

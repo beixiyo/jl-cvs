@@ -1,8 +1,8 @@
-import type { SizeStyle } from '@/types'
 import type { VariantProps } from 'class-variance-authority'
-import { cn } from '@/utils'
+import type { SizeStyle } from '@/types'
 import { cva } from 'class-variance-authority'
 import React, { memo, useState } from 'react'
+import { cn } from '@/utils'
 
 const switchVariants = cva(
   'relative inline-flex items-center transition-colors duration-300 ease-in-out cursor-pointer',

@@ -1,7 +1,7 @@
 import type { CheckmarkProps } from './Checkmark'
+import { memo } from 'react'
 import { primaryColor } from '@/styles/variable'
 import { cn } from '@/utils'
-import { memo } from 'react'
 import { Checkmark } from './Checkmark'
 
 /**

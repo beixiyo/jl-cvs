@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-globals */
+
 self.onmessage = async function ({ data }: MessageEvent<CaptureVideoFrameData[]>) {
   const res: ArrayBuffer[] = []
 

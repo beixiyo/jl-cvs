@@ -280,9 +280,9 @@ export default function NoteBoardTest() {
   }
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+    <div className="min-h-screen from-purple-50 to-pink-50 bg-gradient-to-br p-6 space-y-6 dark:from-gray-900 dark:to-gray-800">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+        <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           🎨 图像编辑画板
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
@@ -341,12 +341,12 @@ export default function NoteBoardTest() {
       </Card>
 
       {/* 主要内容区域 */ }
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
         {/* 画布区域 */ }
         <div className="lg:col-span-3">
           <div
             ref={ canvasContainerRef }
-            className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-slate-100"
+            className="overflow-hidden border-2 border-gray-300 rounded-lg border-dashed bg-slate-100 dark:border-gray-600"
             style={ { width, height } }
           />
         </div>
@@ -355,12 +355,12 @@ export default function NoteBoardTest() {
         <div className="space-y-4">
           {/* 画笔设置 */ }
           <Card className="p-4">
-            <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+            <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
               画笔设置
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                   线条宽度
                 </label>
                 <div className="px-2">
@@ -379,14 +379,14 @@ export default function NoteBoardTest() {
                     tooltip={ { formatter: val => `${val}px` } }
                   />
                 </div>
-                <span className="text-sm text-gray-500 mt-1 block">
+                <span className="mt-1 block text-sm text-gray-500">
                   { config.lineWidth }
                   px
                 </span>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                   线条样式
                 </label>
                 <Select
@@ -401,24 +401,24 @@ export default function NoteBoardTest() {
               </div>
 
               <div className="flex gap-4">
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                   描边颜色
                 </label>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="mb-2 flex items-center gap-2">
                   <input
                     type="color"
                     value={ config.strokeStyle }
                     onChange={ e => updateConfig('strokeStyle', e.target.value) }
-                    className="w-12 h-8 p-0 border-0"
+                    className="h-8 w-12 border-0 p-0"
                   />
                 </div>
               </div>
               {/* 色块选择 */ }
-              <div className="grid grid-cols-4 gap-1 my-6">
+              <div className="grid grid-cols-4 my-6 gap-1">
                 { presetColors.map(color => (
                   <button
                     key={ color }
-                    className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600"
+                    className="h-6 w-6 border border-gray-300 rounded dark:border-gray-600"
                     style={ { backgroundColor: color } }
                     onClick={ () => updateConfig('strokeStyle', color) }
                   />
@@ -429,7 +429,7 @@ export default function NoteBoardTest() {
 
           {/* 图片上传 */ }
           <Card className="p-4">
-            <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+            <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
               背景图片
             </h3>
             <Uploader
@@ -444,13 +444,13 @@ export default function NoteBoardTest() {
 
       {/* 使用说明 */ }
       <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+        <h2 className="mb-4 text-xl text-gray-800 font-semibold dark:text-white">
           功能说明
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600 dark:text-gray-300">
+        <div className="grid grid-cols-1 gap-6 text-gray-600 md:grid-cols-2 dark:text-gray-300">
           <div>
-            <h3 className="font-semibold mb-2">绘图模式</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm">
+            <h3 className="mb-2 font-semibold">绘图模式</h3>
+            <ul className="list-disc list-inside text-sm space-y-1">
               <li>
                 <strong>绘制：</strong>
                 自由绘制线条
@@ -478,8 +478,8 @@ export default function NoteBoardTest() {
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold mb-2">快捷操作</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm">
+            <h3 className="mb-2 font-semibold">快捷操作</h3>
+            <ul className="list-disc list-inside text-sm space-y-1">
               <li>
                 <strong>撤销/重做：</strong>
                 支持多步操作历史
@@ -517,7 +517,7 @@ export default function NoteBoardTest() {
       >
         <div className="h-full flex flex-col">
           {/* 工具栏 */ }
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+          <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 <Image size={ 16 } />
@@ -579,10 +579,10 @@ export default function NoteBoardTest() {
                   initial={ { opacity: 0, y: 20 } }
                   animate={ { opacity: 1, y: 0 } }
                   transition={ { delay: index * 0.1 } }
-                  className="group relative bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
+                  className="group relative overflow-hidden border border-gray-200 rounded-xl bg-white shadow-lg transition-all duration-300 dark:border-gray-700 dark:bg-gray-800 hover:shadow-xl"
                 >
                   {/* 图像头部信息 */ }
-                  <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+                  <div className="border-b border-gray-100 p-4 dark:border-gray-700">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className={ cn(
@@ -592,7 +592,7 @@ export default function NoteBoardTest() {
                           image.type === 'all' && 'bg-purple-500',
                         ) } />
                         <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
+                          <h3 className="text-gray-900 font-semibold dark:text-white">
                             { image.name }
                           </h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -603,7 +603,7 @@ export default function NoteBoardTest() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                         <Button
                           onClick={ () => handleFullscreenPreview(image.src) }
                           variant="primary"
@@ -628,11 +628,11 @@ export default function NoteBoardTest() {
 
                   {/* 图像展示区域 */ }
                   <div className="relative p-4">
-                    <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg p-4 min-h-[200px] flex items-center justify-center">
+                    <div className="relative min-h-[200px] flex items-center justify-center rounded-lg from-gray-50 to-gray-100 bg-gradient-to-br p-4 dark:from-gray-700 dark:to-gray-800">
                       <img
                         src={ image.src }
                         alt={ image.name }
-                        className="max-w-full max-h-64 object-contain rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                        className="max-h-64 max-w-full cursor-pointer rounded-lg object-contain shadow-md transition-shadow hover:shadow-lg"
                         style={ {
                           imageRendering: 'pixelated',
                         } }
@@ -640,12 +640,12 @@ export default function NoteBoardTest() {
                       />
 
                       {/* 悬浮操作按钮 */ }
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100">
                         <Button
                           onClick={ () => handleFullscreenPreview(image.src) }
                           variant="primary"
                           size="sm"
-                          className="bg-black/50 hover:bg-black/70 text-white border-0"
+                          className="border-0 bg-black/50 text-white hover:bg-black/70"
                         >
                           <Maximize2 size={ 16 } />
                         </Button>

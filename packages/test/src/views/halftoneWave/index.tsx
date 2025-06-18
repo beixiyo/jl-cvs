@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
-import { cn } from '@/utils'
 
 export default function HalftoneWaveTest() {
   const [halftoneWave, setHalftoneWave] = useState<HalftoneWave | null>(null)
@@ -19,7 +18,7 @@ export default function HalftoneWaveTest() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  // 预设配置
+  /** 预设配置 */
   const presets = [
     {
       name: '默认效果',
@@ -71,7 +70,7 @@ export default function HalftoneWaveTest() {
     },
   ]
 
-  // 颜色主题
+  /** 颜色主题 */
   const colorThemes = [
     {
       name: '经典黑白',
@@ -102,11 +101,12 @@ export default function HalftoneWaveTest() {
 
   const [selectedColorTheme, setSelectedColorTheme] = useState(0)
 
-  // 初始化半调波浪
+  /** 初始化半调波浪 */
   const initHalftoneWave = () => {
-    if (!canvasRef.current) return
+    if (!canvasRef.current)
+      return
 
-    // 销毁之前的实例
+    /** 销毁之前的实例 */
     if (halftoneWave) {
       halftoneWave.destroy()
     }
@@ -115,7 +115,7 @@ export default function HalftoneWaveTest() {
     setHalftoneWave(halftoneWaveInstance)
   }
 
-  // 应用预设
+  /** 应用预设 */
   const applyPreset = (presetConfig: any) => {
     setConfig(presetConfig)
     setTimeout(() => {
@@ -123,7 +123,7 @@ export default function HalftoneWaveTest() {
     }, 100)
   }
 
-  // 更新配置
+  /** 更新配置 */
   const updateConfig = (key: string, value: any) => {
     const newConfig = { ...config, [key]: value }
     setConfig(newConfig)
@@ -133,7 +133,7 @@ export default function HalftoneWaveTest() {
     }, 100)
   }
 
-  // 切换颜色主题
+  /** 切换颜色主题 */
   const changeColorTheme = (index: number) => {
     setSelectedColorTheme(index)
     const theme = colorThemes[index]
@@ -149,7 +149,7 @@ export default function HalftoneWaveTest() {
     }, 100)
   }
 
-  // 初始化
+  /** 初始化 */
   useEffect(() => {
     initHalftoneWave()
 
@@ -160,7 +160,7 @@ export default function HalftoneWaveTest() {
     }
   }, [])
 
-  // 处理窗口大小变化
+  /** 处理窗口大小变化 */
   useEffect(() => {
     const handleResize = () => {
       if (halftoneWave) {
@@ -175,10 +175,10 @@ export default function HalftoneWaveTest() {
   }, [halftoneWave, config.width, config.height])
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+    <div className="min-h-screen from-gray-50 to-indigo-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
       {/* 页面标题 - 全宽显示 */}
       <div className="p-6 text-center">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+        <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           🌀 半调波浪效果
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
@@ -187,18 +187,18 @@ export default function HalftoneWaveTest() {
       </div>
 
       {/* 响应式布局容器 */}
-      <div className="flex flex-col lg:flex-row gap-6 px-6">
+      <div className="flex flex-col gap-6 px-6 lg:flex-row">
         {/* 左侧：效果展示区域 */}
         <div className="flex-1">
-          <Card className="p-6 min-h-[600px]">
-            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
+          <Card className="min-h-[600px] p-6">
+            <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
               半调波浪效果展示
             </h2>
-            <div className="flex justify-center items-center min-h-[500px]">
+            <div className="min-h-[500px] flex items-center justify-center">
               <canvas
-                ref={canvasRef}
-                className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl"
-                style={{ maxWidth: '100%', height: 'auto' }}
+                ref={ canvasRef }
+                className="border border-gray-300 rounded-lg shadow-xl dark:border-gray-600"
+                style={ { maxWidth: '100%', height: 'auto' } }
               />
             </div>
           </Card>
@@ -207,21 +207,21 @@ export default function HalftoneWaveTest() {
         {/* 右侧：控制面板 */}
         <div className="w-full lg:w-96">
           <Card>
-            <div className="p-6 max-h-[80vh] overflow-y-auto">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+            <div className="max-h-[80vh] overflow-y-auto p-6">
+              <h2 className="mb-4 text-xl text-gray-800 font-semibold dark:text-white">
                 控制面板
               </h2>
 
               {/* 预设配置 */}
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   预设效果
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {presets.map((preset, index) => (
                     <Button
-                      key={index}
-                      onClick={() => applyPreset(preset.config)}
+                      key={ index }
+                      onClick={ () => applyPreset(preset.config) }
                       size="sm"
                     >
                       {preset.name}
@@ -232,15 +232,17 @@ export default function HalftoneWaveTest() {
 
               {/* 颜色主题 */}
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   颜色主题
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {colorThemes.map((theme, index) => (
                     <Button
-                      key={index}
-                      onClick={() => changeColorTheme(index)}
-                      variant={selectedColorTheme === index ? 'primary' : 'default'}
+                      key={ index }
+                      onClick={ () => changeColorTheme(index) }
+                      variant={ selectedColorTheme === index
+                        ? 'primary'
+                        : 'default' }
                       size="sm"
                     >
                       {theme.name}
@@ -251,107 +253,107 @@ export default function HalftoneWaveTest() {
 
               {/* 参数配置 */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                   参数配置
                 </h3>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
                   <Input
                     type="number"
-                    value={config.width}
-                    onChange={(e) => updateConfig('width', Number(e.target.value))}
-                    min={400}
-                    max={1200}
+                    value={ config.width }
+                    onChange={ e => updateConfig('width', Number(e.target.value)) }
+                    min={ 400 }
+                    max={ 1200 }
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
                   <Input
                     type="number"
-                    value={config.height}
-                    onChange={(e) => updateConfig('height', Number(e.target.value))}
-                    min={300}
-                    max={800}
+                    value={ config.height }
+                    onChange={ e => updateConfig('height', Number(e.target.value)) }
+                    min={ 300 }
+                    max={ 800 }
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     网格大小
                   </label>
                   <Input
                     type="number"
-                    value={config.gridSize}
-                    onChange={(e) => updateConfig('gridSize', Number(e.target.value))}
-                    min={5}
-                    max={100}
+                    value={ config.gridSize }
+                    onChange={ e => updateConfig('gridSize', Number(e.target.value)) }
+                    min={ 5 }
+                    max={ 100 }
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     波浪速度
                   </label>
                   <Input
                     type="number"
-                    value={config.waveSpeed}
-                    onChange={(e) => updateConfig('waveSpeed', Number(e.target.value))}
-                    min={0.01}
-                    max={0.5}
-                    step={0.01}
+                    value={ config.waveSpeed }
+                    onChange={ e => updateConfig('waveSpeed', Number(e.target.value)) }
+                    min={ 0.01 }
+                    max={ 0.5 }
+                    step={ 0.01 }
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     波浪幅度
                   </label>
                   <Input
                     type="number"
-                    value={config.waveAmplitude}
-                    onChange={(e) => updateConfig('waveAmplitude', Number(e.target.value))}
-                    min={0.1}
-                    max={2}
-                    step={0.1}
+                    value={ config.waveAmplitude }
+                    onChange={ e => updateConfig('waveAmplitude', Number(e.target.value)) }
+                    min={ 0.1 }
+                    max={ 2 }
+                    step={ 0.1 }
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     背景颜色
                   </label>
                   <Input
                     type="text"
-                    value={config.backgroundColor}
-                    onChange={(e) => updateConfig('backgroundColor', e.target.value)}
+                    value={ config.backgroundColor }
+                    onChange={ e => updateConfig('backgroundColor', e.target.value) }
                     placeholder="rgba(0, 0, 0, 0.1)"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     波浪颜色
                   </label>
                   <Input
                     type="text"
-                    value={config.waveColor}
-                    onChange={(e) => updateConfig('waveColor', e.target.value)}
+                    value={ config.waveColor }
+                    onChange={ e => updateConfig('waveColor', e.target.value) }
                     placeholder="rgba(255, 255, 255, 0.5)"
                   />
                 </div>
 
                 {/* 使用说明 */}
-                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
-                  <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-600">
+                  <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                     参数说明
                   </h3>
-                  <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                  <div className="text-sm text-gray-600 space-y-3 dark:text-gray-300">
                     <div>
                       <strong>网格大小：</strong>
                       控制点阵的密度，值越小点越密集

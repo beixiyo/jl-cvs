@@ -163,6 +163,7 @@ export function useViewTransitionState<T>(initState: T | (() => T)) {
     }
 
     document.startViewTransition(() => {
+      // eslint-disable-next-line react-dom/no-flush-sync
       flushSync(() => setState(val))
     })
   }

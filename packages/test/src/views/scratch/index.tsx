@@ -160,9 +160,9 @@ export default function ScratchTest() {
   }, [])
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+    <div className="min-h-screen from-yellow-50 to-orange-50 bg-gradient-to-br p-6 space-y-6 dark:from-gray-900 dark:to-gray-800">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+        <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           🎯 刮刮卡效果
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
@@ -172,13 +172,13 @@ export default function ScratchTest() {
 
       {/* 控制面板 */ }
       <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+        <h2 className="mb-4 text-xl text-gray-800 font-semibold dark:text-white">
           控制面板
         </h2>
 
         {/* 预设配置 */ }
         <div className="mb-6">
-          <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+          <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
             预设样式
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -199,9 +199,9 @@ export default function ScratchTest() {
         </div>
 
         {/* 参数配置 */ }
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+            <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
               画布宽度
             </label>
             <Input
@@ -214,7 +214,7 @@ export default function ScratchTest() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+            <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
               画布高度
             </label>
             <Input
@@ -227,7 +227,7 @@ export default function ScratchTest() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+            <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
               刮线宽度
             </label>
             <Input
@@ -240,7 +240,7 @@ export default function ScratchTest() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+            <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
               背景颜色
             </label>
             <div className="flex items-center gap-2">
@@ -248,7 +248,7 @@ export default function ScratchTest() {
                 type="color"
                 value={ config.bg }
                 onChange={ e => updateConfig('bg', e.target.value) }
-                className="w-12 h-8 p-0 border-0"
+                className="h-8 w-12 border-0 p-0"
               />
               <Input
                 type="text"
@@ -260,7 +260,7 @@ export default function ScratchTest() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+            <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
               线条端点
             </label>
             <Select
@@ -276,7 +276,7 @@ export default function ScratchTest() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+            <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
               线条连接
             </label>
             <Select
@@ -294,27 +294,27 @@ export default function ScratchTest() {
       </Card>
 
       {/* 刮刮卡展示区域 */ }
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+          <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
             刮刮卡体验
           </h3>
           <div className="flex justify-center">
             <div
               ref={ containerRef }
-              className="relative border-4 border-yellow-400 rounded-lg shadow-lg overflow-hidden"
+              className="relative overflow-hidden border-4 border-yellow-400 rounded-lg shadow-lg"
               style={ { width: config.width, height: config.height } }
             >
               {/* 奖品内容 */ }
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-yellow-100 to-orange-100 p-4">
+              <div className="absolute inset-0 flex flex-col items-center justify-center from-yellow-100 to-orange-100 bg-gradient-to-br p-4">
                 <div className={ cn('text-4xl font-bold mb-2', currentPrize.color) }>
                   { currentPrize.text }
                 </div>
-                <div className="text-lg text-gray-600 text-center">
+                <div className="text-center text-lg text-gray-600">
                   { currentPrize.subtitle }
                 </div>
                 { isRevealed && (
-                  <div className="mt-4 text-sm text-gray-500 animate-pulse">
+                  <div className="mt-4 animate-pulse text-sm text-gray-500">
                     🎊 恭喜您中奖了！
                   </div>
                 ) }
@@ -332,15 +332,15 @@ export default function ScratchTest() {
 
           {/* 进度显示 */ }
           <div className="mt-4 text-center">
-            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
               刮开进度:
               {' '}
               { scratchProgress }
               %
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="h-2 w-full rounded-full bg-gray-200">
               <div
-                className="bg-yellow-500 h-2 rounded-full transition-all duration-300"
+                className="h-2 rounded-full bg-yellow-500 transition-all duration-300"
                 style={ { width: `${scratchProgress}%` } }
               />
             </div>
@@ -348,13 +348,13 @@ export default function ScratchTest() {
         </Card>
 
         <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+          <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
             使用说明
           </h3>
-          <div className="space-y-4 text-gray-600 dark:text-gray-300">
+          <div className="text-gray-600 space-y-4 dark:text-gray-300">
             <div>
-              <h4 className="font-semibold mb-2">操作方式</h4>
-              <ul className="list-disc list-inside space-y-1 text-sm">
+              <h4 className="mb-2 font-semibold">操作方式</h4>
+              <ul className="list-disc list-inside text-sm space-y-1">
                 <li>鼠标按下并拖拽进行刮奖</li>
                 <li>刮开面积达到 30% 时自动显示完整内容</li>
                 <li>支持触摸设备的手指操作</li>
@@ -362,8 +362,8 @@ export default function ScratchTest() {
             </div>
 
             <div>
-              <h4 className="font-semibold mb-2">技术特点</h4>
-              <ul className="list-disc list-inside space-y-1 text-sm">
+              <h4 className="mb-2 font-semibold">技术特点</h4>
+              <ul className="list-disc list-inside text-sm space-y-1">
                 <li>使用 Canvas 的 destination-out 混合模式</li>
                 <li>实时计算刮开进度</li>
                 <li>支持自定义刮线样式</li>
@@ -372,8 +372,8 @@ export default function ScratchTest() {
             </div>
 
             <div>
-              <h4 className="font-semibold mb-2">应用场景</h4>
-              <ul className="list-disc list-inside space-y-1 text-sm">
+              <h4 className="mb-2 font-semibold">应用场景</h4>
+              <ul className="list-disc list-inside text-sm space-y-1">
                 <li>营销活动中的刮奖游戏</li>
                 <li>优惠券或红包的展示</li>
                 <li>互动式内容揭示</li>

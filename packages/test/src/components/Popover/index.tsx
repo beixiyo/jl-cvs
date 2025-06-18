@@ -1,7 +1,7 @@
 import type { Variants } from 'framer-motion'
+import { X } from 'lucide-react'
 import { onUnmounted, useClickOutside } from '@/hooks'
 import { cn } from '@/utils'
-import { X } from 'lucide-react'
 import { AnimateShow } from '../Animate'
 
 export const Popover = memo(forwardRef<PopoverRef, PopoverProps>((

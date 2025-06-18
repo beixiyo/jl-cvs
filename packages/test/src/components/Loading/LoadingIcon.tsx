@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
-import { cn } from '@/utils'
 import { isStr } from '@jl-org/tool'
 import { memo } from 'react'
+import { cn } from '@/utils'
 
 export const LoadingIcon = memo<LoadingIconProps>((
   {

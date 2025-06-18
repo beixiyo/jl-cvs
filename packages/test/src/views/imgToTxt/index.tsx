@@ -21,7 +21,9 @@ export default function ImgToTxtTest() {
     txtStyle: {
       family: 'Microsoft YaHei',
       size: 200,
-      color: theme === 'dark' ? '#ffffff' : '#000000',
+      color: theme === 'dark'
+        ? '#ffffff'
+        : '#000000',
     },
     txt: '哎呀你干嘛',
     width: 800,
@@ -29,7 +31,6 @@ export default function ImgToTxtTest() {
   }, true)
 
   const [contentType, setContentType] = useState<ContentType>('text')
-  const [isPlaying, setIsPlaying] = useState(false)
   const [currentImage, setCurrentImage] = useState<string>('')
   const [currentVideo, setCurrentVideo] = useState<string>('')
 
@@ -115,7 +116,9 @@ export default function ImgToTxtTest() {
       config: {
         replaceText: '6',
         gap: 10,
-        txtStyle: { family: 'Microsoft YaHei', size: 200, color: theme === 'dark' ? '#ffffff' : '#000000' },
+        txtStyle: { family: 'Microsoft YaHei', size: 200, color: theme === 'dark'
+          ? '#ffffff'
+          : '#000000' },
         txt: '哎呀你干嘛',
       },
     },
@@ -151,7 +154,9 @@ export default function ImgToTxtTest() {
       config: {
         replaceText: '★',
         gap: 12,
-        txtStyle: { family: 'Microsoft YaHei', size: 180, color: theme === 'dark' ? '#64b5f6' : '#1976d2' },
+        txtStyle: { family: 'Microsoft YaHei', size: 180, color: theme === 'dark'
+          ? '#64b5f6'
+          : '#1976d2' },
         txt: '主题色',
       },
     },
@@ -160,13 +165,11 @@ export default function ImgToTxtTest() {
   /** 开始效果 */
   const startEffect = async () => {
     if (!canvasRef.current) {
-      alert('画布未准备好')
+      console.warn('画布未准备好')
       return
     }
 
     try {
-      setIsPlaying(true)
-
       /** 使用 getLatest() 获取最新配置 */
       const latestConfig = setConfig.getLatest()
 
@@ -180,8 +183,7 @@ export default function ImgToTxtTest() {
       }
       else if (contentType === 'image') {
         if (!currentImage) {
-          alert('请先选择一张图片')
-          setIsPlaying(false)
+          console.warn('请先选择一张图片')
           return
         }
         opts = {
@@ -192,8 +194,7 @@ export default function ImgToTxtTest() {
       }
       else if (contentType === 'video') {
         if (!currentVideo) {
-          alert('请先选择一个视频')
-          setIsPlaying(false)
+          console.warn('请先选择一个视频')
           return
         }
         opts = {
@@ -216,25 +217,6 @@ export default function ImgToTxtTest() {
     }
     catch (error) {
       console.error('效果启动失败:', error)
-      alert('效果启动失败，请检查配置')
-      setIsPlaying(false)
-    }
-  }
-
-  /** 停止效果 */
-  const stopEffect = () => {
-    if (effectRef.current) {
-      effectRef.current.stop()
-      effectRef.current = null
-    }
-    setIsPlaying(false)
-
-    /** 清空画布 */
-    if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext('2d')
-      if (ctx) {
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-      }
     }
   }
 
@@ -243,7 +225,6 @@ export default function ImgToTxtTest() {
     if (files.length > 0) {
       setCurrentImage(files[0].base64)
       setContentType('image')
-      stopEffect()
     }
   }
 
@@ -252,7 +233,6 @@ export default function ImgToTxtTest() {
     if (files.length > 0) {
       setCurrentVideo(files[0].base64)
       setContentType('video')
-      stopEffect()
     }
   }
 
@@ -260,21 +240,18 @@ export default function ImgToTxtTest() {
   const selectPresetImage = (url: string) => {
     setCurrentImage(url)
     setContentType('image')
-    stopEffect()
   }
 
   /** 选择预设视频 */
   const selectPresetVideo = (url: string) => {
     setCurrentVideo(url)
     setContentType('video')
-    stopEffect()
   }
 
   /** 应用预设配置 */
   const applyPreset = (presetConfig: any) => {
     setConfig(prev => ({ ...prev, ...presetConfig }))
     setContentType('text')
-    stopEffect()
   }
 
   /** 更新配置 */
@@ -302,9 +279,31 @@ export default function ImgToTxtTest() {
     }, 1000)
   }, [])
 
+  /** 监听内容类型变化，自动重新启动效果 */
+  useEffect(() => {
+    if (canvasRef.current) {
+      const timer = setTimeout(() => {
+        startEffect()
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [contentType])
+
+  /** 监听配置变化，自动重新启动效果 */
+  useEffect(() => {
+    if (canvasRef.current && effectRef.current) {
+      const timer = setTimeout(() => {
+        startEffect()
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [config.replaceText, config.gap, config.isDynamic, config.isGray, config.txt, config.txtStyle, config.width, config.height, currentImage, currentVideo])
+
   /** 主题变化时自动更新文字颜色 */
   useEffect(() => {
-    const newColor = theme === 'dark' ? '#ffffff' : '#000000'
+    const newColor = theme === 'dark'
+      ? '#ffffff'
+      : '#000000'
     updateTxtStyle('color', newColor)
   }, [theme])
 
@@ -318,10 +317,10 @@ export default function ImgToTxtTest() {
   }, [])
 
   return (
-    <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+    <div className="min-h-screen from-orange-50 to-red-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
       {/* 页面标题 - 全宽显示 */}
       <div className="p-6 text-center">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+        <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           📝 图像转文字效果
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
@@ -330,39 +329,25 @@ export default function ImgToTxtTest() {
       </div>
 
       {/* 响应式布局容器 */}
-      <div className="flex flex-col lg:flex-row gap-6 px-6">
+      <div className="flex flex-col gap-6 px-6 lg:flex-row">
         {/* 左侧：效果展示区域 */}
         <div className="flex-1">
-          <Card className="p-6 min-h-[600px]">
-            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
+          <Card className="min-h-[600px] p-6">
+            <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
               文字效果展示
             </h2>
-            <div className="flex flex-col items-center justify-center min-h-[500px] space-y-4">
+            <div className="min-h-[500px] flex flex-col items-center justify-center space-y-4">
               <canvas
                 ref={ canvasRef }
-                className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl bg-white dark:bg-gray-800"
+                className="border border-gray-300 rounded-lg bg-white shadow-xl dark:border-gray-600 dark:bg-gray-800"
                 width={ config.width }
                 height={ config.height }
                 style={ { maxWidth: '100%', height: 'auto' } }
               />
 
-              <div className="flex gap-2">
-                <Button
-                  onClick={ startEffect }
-                  disabled={ isPlaying }
-                  variant="default"
-                >
-                  { isPlaying
-                    ? '效果运行中...'
-                    : '🎬 开始效果' }
-                </Button>
-                <Button
-                  onClick={ stopEffect }
-                  disabled={ !isPlaying }
-                  variant="primary"
-                >
-                  ⏹️ 停止效果
-                </Button>
+              <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                <p>效果会在页面加载后自动开始</p>
+                <p>切换内容类型或调整参数会自动重新启动效果</p>
               </div>
 
               <div className="text-center text-sm text-gray-600 dark:text-gray-400">
@@ -389,14 +374,14 @@ export default function ImgToTxtTest() {
         {/* 右侧：控制面板 */}
         <div className="w-full lg:w-96">
           <Card>
-            <div className="p-6 max-h-[80vh] overflow-y-auto">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+            <div className="max-h-[80vh] overflow-y-auto p-6">
+              <h2 className="mb-4 text-xl text-gray-800 font-semibold dark:text-white">
                 控制面板
               </h2>
 
               {/* 预设配置 */}
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   预设效果
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
@@ -415,10 +400,10 @@ export default function ImgToTxtTest() {
 
               {/* 内容类型选择 */ }
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   内容类型
                 </h3>
-                <div className="flex gap-2 mb-4">
+                <div className="mb-4 flex gap-2">
                   <Button
                     onClick={ () => setContentType('text') }
                     variant={ contentType === 'text'
@@ -451,7 +436,7 @@ export default function ImgToTxtTest() {
                 { contentType === 'text' && (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                         显示文字
                       </label>
                       <Input
@@ -462,7 +447,7 @@ export default function ImgToTxtTest() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                         预设文字
                       </label>
                       <div className="grid grid-cols-4 gap-2">
@@ -483,9 +468,9 @@ export default function ImgToTxtTest() {
                 ) }
 
                 { contentType === 'image' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                      <h4 className="text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">
+                      <h4 className="mb-2 text-sm text-gray-600 font-medium dark:text-gray-300">
                         上传图片
                       </h4>
                       <Uploader
@@ -493,7 +478,7 @@ export default function ImgToTxtTest() {
                         onChange={ handleImageUpload }
                         className="w-full"
                       >
-                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                        <div className="border-2 border-gray-300 rounded-lg border-dashed p-4 text-center transition-colors dark:border-gray-600 hover:border-blue-400">
                           <p className="text-sm text-gray-600 dark:text-gray-400">
                             点击或拖拽上传图片
                           </p>
@@ -501,7 +486,7 @@ export default function ImgToTxtTest() {
                       </Uploader>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">
+                      <h4 className="mb-2 text-sm text-gray-600 font-medium dark:text-gray-300">
                         预设图片
                       </h4>
                       <div className="grid grid-cols-2 gap-2">
@@ -522,9 +507,9 @@ export default function ImgToTxtTest() {
                 ) }
 
                 { contentType === 'video' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                      <h4 className="text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">
+                      <h4 className="mb-2 text-sm text-gray-600 font-medium dark:text-gray-300">
                         上传视频
                       </h4>
                       <Uploader
@@ -532,7 +517,7 @@ export default function ImgToTxtTest() {
                         onChange={ handleVideoUpload }
                         className="w-full"
                       >
-                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                        <div className="border-2 border-gray-300 rounded-lg border-dashed p-4 text-center transition-colors dark:border-gray-600 hover:border-blue-400">
                           <p className="text-sm text-gray-600 dark:text-gray-400">
                             点击或拖拽上传视频文件
                           </p>
@@ -540,7 +525,7 @@ export default function ImgToTxtTest() {
                       </Uploader>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">
+                      <h4 className="mb-2 text-sm text-gray-600 font-medium dark:text-gray-300">
                         预设视频
                       </h4>
                       <div className="grid grid-cols-1 gap-2">
@@ -562,9 +547,9 @@ export default function ImgToTxtTest() {
               </div>
 
               {/* 基础参数配置 */ }
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 mb-6 gap-4 lg:grid-cols-3 md:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     填充字符
                   </label>
                   <Input
@@ -577,7 +562,7 @@ export default function ImgToTxtTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     字符间隙 (
                     { config.gap }
                     px)
@@ -602,7 +587,7 @@ export default function ImgToTxtTest() {
                 { (contentType === 'image' || contentType === 'video') && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                         画布宽度
                       </label>
                       <Input
@@ -615,7 +600,7 @@ export default function ImgToTxtTest() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                         画布高度
                       </label>
                       <Input
@@ -654,12 +639,12 @@ export default function ImgToTxtTest() {
               {/* 文字样式配置 */ }
               { contentType === 'text' && (
                 <div className="mb-6">
-                  <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                  <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                     文字样式
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 md:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                         字体
                       </label>
                       <Select
@@ -670,7 +655,7 @@ export default function ImgToTxtTest() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                         字体大小 (
                         { config.txtStyle.size }
                         px)
@@ -693,7 +678,7 @@ export default function ImgToTxtTest() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                         字体颜色
                       </label>
                       <div className="flex items-center gap-2">
@@ -701,7 +686,7 @@ export default function ImgToTxtTest() {
                           type="color"
                           value={ config.txtStyle.color }
                           onChange={ e => updateTxtStyle('color', e.target.value) }
-                          className="w-12 h-8 p-0 border-0"
+                          className="h-8 w-12 border-0 p-0"
                         />
                         <Input
                           type="text"
@@ -716,11 +701,11 @@ export default function ImgToTxtTest() {
               ) }
 
               {/* 使用说明 */}
-              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+              <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-600">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   使用说明
                 </h3>
-                <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                <div className="text-sm text-gray-600 space-y-3 dark:text-gray-300">
                   <div>
                     <strong>填充字符：</strong>
                     用于构成图像的字符

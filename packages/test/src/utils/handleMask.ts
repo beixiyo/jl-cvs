@@ -1,5 +1,5 @@
-import { BRUSH_COLOR } from '@/config'
 import { createCvs, getColorInfo, getImg } from '@jl-org/tool'
+import { BRUSH_COLOR } from '@/config'
 
 const { r, g, b, a } = getColorInfo(BRUSH_COLOR)
 
@@ -30,10 +30,10 @@ export async function getAlphaMask(mask: string) {
   for (let i = 0; i < data.length; i += 4) {
     /** 白转半透明 */
     if (
-      data[i] === 255 &&
-      data[i + 1] === 255 &&
-      data[i + 2] === 255 &&
-      data[i + 3] === 255
+      data[i] === 255
+      && data[i + 1] === 255
+      && data[i + 2] === 255
+      && data[i + 3] === 255
     ) {
       data[i] = r
       data[i + 1] = g

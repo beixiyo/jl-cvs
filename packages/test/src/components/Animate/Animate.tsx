@@ -1,8 +1,8 @@
 import type { MotionProps } from 'framer-motion'
 import type { CSSProperties } from 'react'
-import { cn } from '@/utils'
 import { motion } from 'framer-motion'
 import { memo } from 'react'
+import { cn } from '@/utils'
 import { animateVariants, DURTAION } from './constants'
 
 const InnerAnimate = forwardRef<HTMLDivElement, AnimateProps>((

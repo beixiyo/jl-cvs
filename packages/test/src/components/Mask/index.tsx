@@ -1,7 +1,7 @@
 import type { MotionProps } from 'framer-motion'
 import type { CSSProperties, HTMLAttributes } from 'react'
-import { cn } from '@/utils'
 import { motion } from 'framer-motion'
+import { cn } from '@/utils'
 
 export function Mask({
   style,

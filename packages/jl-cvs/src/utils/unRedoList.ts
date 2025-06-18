@@ -112,7 +112,6 @@ export class UnRedoLinkedList<T> {
 
   /**
    * 遍历整个链表
-   * @param endId 结束节点 id
    */
   forEach(
     callback: (node: UnRedoNode<T>) => void,

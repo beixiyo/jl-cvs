@@ -1,7 +1,7 @@
-import { useTheme } from '@/hooks'
-import { cn } from '@/utils/tool'
 import { AnimatePresence, motion } from 'framer-motion'
 import { memo, useEffect, useRef, useState } from 'react'
+import { useTheme } from '@/hooks'
+import { cn } from '@/utils/tool'
 
 export const Tooltip = memo<TooltipProps>((props) => {
   const [_theme] = useTheme()

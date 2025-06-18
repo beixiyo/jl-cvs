@@ -247,10 +247,10 @@ export default function FireworkTest() {
   }, [startFirework, stopFirework])
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+    <div className="min-h-screen from-indigo-50 to-purple-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
       {/* 页面标题 - 全宽显示 */}
       <div className="p-6 text-center">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+        <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           🎆 烟花效果
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
@@ -259,17 +259,17 @@ export default function FireworkTest() {
       </div>
 
       {/* 响应式布局容器 */}
-      <div className="flex flex-col lg:flex-row gap-6 px-6">
+      <div className="flex flex-col gap-6 px-6 lg:flex-row">
         {/* 左侧：效果展示区域 */}
         <div className="flex-1">
-          <Card className="p-6 min-h-[600px]">
-            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
+          <Card className="min-h-[600px] p-6">
+            <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
               烟花效果展示
             </h2>
-            <div className="flex justify-center items-center min-h-[500px]">
+            <div className="min-h-[500px] flex items-center justify-center">
               <canvas
                 ref={ canvasRef }
-                className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl bg-black"
+                className="border border-gray-300 rounded-lg bg-black shadow-xl dark:border-gray-600"
                 style={ { maxWidth: '100%', height: 'auto' } }
               />
             </div>
@@ -279,14 +279,14 @@ export default function FireworkTest() {
         {/* 右侧：控制面板 */}
         <div className="w-full lg:w-96">
           <Card>
-            <div className="p-6 max-h-[80vh] overflow-y-auto">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+            <div className="max-h-[80vh] overflow-y-auto p-6">
+              <h2 className="mb-4 text-xl text-gray-800 font-semibold dark:text-white">
                 控制面板
               </h2>
 
               {/* 烟花类型选择器 */}
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   烟花类型
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -332,7 +332,7 @@ export default function FireworkTest() {
 
               {/* 预设配置 */}
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   预设效果
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -351,7 +351,7 @@ export default function FireworkTest() {
               {/* 颜色主题 - 仅对经典烟花生效 */}
               { fireworkType === 'classic' && (
                 <div className="mb-6">
-                  <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                  <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                     颜色主题
                   </h3>
                   <div className="flex flex-wrap gap-2">
@@ -373,17 +373,17 @@ export default function FireworkTest() {
 
               {/* 参数配置 */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                   参数配置
                   { fireworkType === 'burst' && (
-                    <span className="text-sm text-orange-600 dark:text-orange-400 ml-2">
+                    <span className="ml-2 text-sm text-orange-600 dark:text-orange-400">
                       (二段爆炸烟花仅支持部分参数)
                     </span>
                   ) }
                 </h3>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
                   <Input
@@ -396,7 +396,7 @@ export default function FireworkTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
                   <Input
@@ -410,7 +410,7 @@ export default function FireworkTest() {
 
                 { fireworkType === 'classic' && (
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       发射范围
                     </label>
                     <Input
@@ -425,7 +425,7 @@ export default function FireworkTest() {
 
                 { fireworkType === 'classic' && (
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       运动速度
                     </label>
                     <Input
@@ -441,7 +441,7 @@ export default function FireworkTest() {
 
                 { fireworkType === 'classic' && (
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       小球半径
                     </label>
                     <Input
@@ -456,7 +456,7 @@ export default function FireworkTest() {
 
                 { fireworkType === 'classic' && (
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       小球数量
                     </label>
                     <Input
@@ -470,10 +470,10 @@ export default function FireworkTest() {
                 ) }
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     间隔时间(ms)
                     { fireworkType === 'burst' && (
-                      <span className="text-xs text-gray-500 ml-1">(发射间隔)</span>
+                      <span className="ml-1 text-xs text-gray-500">(发射间隔)</span>
                     ) }
                   </label>
                   <Input
@@ -487,7 +487,7 @@ export default function FireworkTest() {
 
                 { fireworkType === 'classic' && (
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       最大数量
                     </label>
                     <Input

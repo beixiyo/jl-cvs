@@ -1,8 +1,8 @@
 import type { Dispatch, SetStateAction } from 'react'
 
-export type SetterParam<T> =
-  | PrimitiveOrPartial<T>
-  | ((prevState: T) => PrimitiveOrPartial<T>)
+export type SetterParam<T>
+  = | PrimitiveOrPartial<T>
+    | ((prevState: T) => PrimitiveOrPartial<T>)
 
 export interface SetterFn<T> {
   (value: SetterParam<T>): void
@@ -15,8 +15,8 @@ export interface SetterFnWittGetLatest<T> {
   reset: () => void
 }
 
-export type UseGetStateReturn<T, V extends boolean> =
-  V extends false
+export type UseGetStateReturn<T, V extends boolean>
+  = V extends false
     ? [T, SetterFn<T>]
     : [T, SetterFnWittGetLatest<T>]
 

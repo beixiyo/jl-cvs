@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react'
+import { memo } from 'react'
 import { Mask } from '@/components/Mask'
 import { vShow } from '@/hooks/'
 import { cn } from '@/utils'
-import { memo } from 'react'
 import { LoadingIcon } from './LoadingIcon'
 
 export const Loading = memo<LoadingProps>((

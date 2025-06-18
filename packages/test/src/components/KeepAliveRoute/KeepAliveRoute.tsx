@@ -1,9 +1,8 @@
 import type { CSSProperties } from 'react'
 import type { KeepAliveOpts } from './useKeepAlive'
-import { Animate, AnimateShow } from '@/components/Animate'
+import { Fragment, memo } from 'react'
 import { vShow } from '@/hooks'
 import { cn } from '@/utils'
-import { Fragment, memo } from 'react'
 import { KeepAliveProvider } from './KeepAliveProvider'
 import { useKeepAlive } from './useKeepAlive'
 

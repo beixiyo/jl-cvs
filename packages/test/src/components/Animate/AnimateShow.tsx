@@ -1,9 +1,9 @@
 import type { MotionProps } from 'framer-motion'
 import type { CSSProperties } from 'react'
-import { useAsyncEffect } from '@/hooks'
-import { cn } from '@/utils'
 import { motion, useAnimationControls } from 'framer-motion'
 import { memo } from 'react'
+import { useAsyncEffect } from '@/hooks'
+import { cn } from '@/utils'
 import { animateVariants, DURTAION } from './constants'
 
 const InnerAnimateShow = forwardRef<HTMLDivElement, AnimateShowProps>((

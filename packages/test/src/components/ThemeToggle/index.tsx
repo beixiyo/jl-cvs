@@ -1,8 +1,8 @@
 import type { Theme } from '@jl-org/tool'
 import type { CSSProperties } from 'react'
+import { memo, useMemo } from 'react'
 import { useTheme } from '@/hooks'
 import { cn, toggleThemeWithTransition } from '@/utils'
-import { memo, useMemo } from 'react'
 
 export type ThemeToggleProps = {
   /**

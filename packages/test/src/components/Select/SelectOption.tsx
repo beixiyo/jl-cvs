@@ -1,6 +1,6 @@
 import type { Option } from './types'
-import { cn } from '@/utils'
 import { Check } from 'lucide-react'
+import { cn } from '@/utils'
 
 export const SelectOption = memo(({ option, selected, onClick }: SelectOptionProps) => {
   const handleClick = () => {

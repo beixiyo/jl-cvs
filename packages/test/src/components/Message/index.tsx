@@ -1,8 +1,8 @@
 import type { MessageProps, MessageRef, MessageType } from './types'
-import { cn } from '@/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { cn } from '@/utils'
 import { DURATION, variantStyles } from './constants'
 import { extendMessage } from './extendMessage'
 

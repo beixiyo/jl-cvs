@@ -19,7 +19,6 @@ export default function ImgToFadeTest() {
     bgc: '#000000',
   }, true)
 
-  const [isPlaying, setIsPlaying] = useState(false)
   const [currentImage, setCurrentImage] = useState<string>(new URL('@/assets/umr.webp', import.meta.url).href)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -68,13 +67,11 @@ export default function ImgToFadeTest() {
   /** 开始淡化效果 */
   const startFadeEffect = async () => {
     if (!canvasRef.current || !currentImage) {
-      alert('请先选择一张图片')
+      console.warn('画布或图片未准备好')
       return
     }
 
     try {
-      setIsPlaying(true)
-
       /** 使用 getLatest() 获取最新配置 */
       const latestConfig = setConfig.getLatest()
 
@@ -92,25 +89,6 @@ export default function ImgToFadeTest() {
     }
     catch (error) {
       console.error('淡化效果启动失败:', error)
-      alert('淡化效果启动失败，请检查图片是否可用')
-      setIsPlaying(false)
-    }
-  }
-
-  /** 停止效果 */
-  const stopEffect = () => {
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current)
-      animationRef.current = null
-    }
-    setIsPlaying(false)
-
-    /** 清空画布 */
-    if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext('2d')
-      if (ctx) {
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-      }
     }
   }
 
@@ -118,26 +96,43 @@ export default function ImgToFadeTest() {
   const handleImageUpload = (files: FileItem[]) => {
     if (files.length > 0) {
       setCurrentImage(files[0].base64)
-      stopEffect() // 停止当前效果
     }
   }
 
   /** 选择预设图片 */
   const selectPresetImage = (url: string) => {
     setCurrentImage(url)
-    stopEffect() // 停止当前效果
   }
 
   /** 应用预设配置 */
   const applyPreset = (presetConfig: any) => {
     setConfig(prev => ({ ...prev, ...presetConfig }))
-    stopEffect() // 停止当前效果
   }
 
   /** 更新配置 */
   const updateConfig = (key: string, value: any) => {
     setConfig(prev => ({ ...prev, [key]: value }))
   }
+
+  /** 自动启动效果 */
+  useEffect(() => {
+    if (canvasRef.current && currentImage) {
+      const timer = setTimeout(() => {
+        startFadeEffect()
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [])
+
+  /** 监听配置和图片变化，自动重新启动效果 */
+  useEffect(() => {
+    if (canvasRef.current && currentImage) {
+      const timer = setTimeout(() => {
+        startFadeEffect()
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [currentImage, config.width, config.height, config.imgWidth, config.imgHeight, config.speed, config.extraDelCount, config.ballCount, config.bgc])
 
   /** 组件卸载时清理 */
   useEffect(() => {
@@ -149,10 +144,10 @@ export default function ImgToFadeTest() {
   }, [])
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+    <div className="min-h-screen from-purple-50 to-pink-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
       {/* 页面标题 - 全宽显示 */ }
       <div className="p-6 text-center">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+        <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           🖼️ 图像淡化效果
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
@@ -161,50 +156,36 @@ export default function ImgToFadeTest() {
       </div>
 
       {/* 响应式布局容器 */ }
-      <div className="flex flex-col lg:flex-row gap-6 px-6">
+      <div className="flex flex-col gap-6 px-6 lg:flex-row">
         {/* 左侧：效果展示区域 */ }
         <div className="flex-1">
-          <Card className="p-6 min-h-[600px]">
-            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
+          <Card className="min-h-[600px] p-6">
+            <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
               图像淡化效果展示
             </h2>
-            <div className="flex flex-col items-center justify-center min-h-[500px] space-y-4">
+            <div className="min-h-[500px] flex flex-col items-center justify-center space-y-4">
               <canvas
                 ref={ canvasRef }
-                className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl"
+                className="border border-gray-300 rounded-lg shadow-xl dark:border-gray-600"
                 width={ config.width }
                 height={ config.height }
                 style={ { maxWidth: '100%', height: 'auto' } }
               />
 
-              <div className="flex gap-2">
-                <Button
-                  onClick={ startFadeEffect }
-                  disabled={ !currentImage || isPlaying }
-                  variant="default"
-                >
-                  { isPlaying
-                    ? '效果进行中...'
-                    : '🎬 开始淡化' }
-                </Button>
-                <Button
-                  onClick={ stopEffect }
-                  disabled={ !isPlaying }
-                  variant="primary"
-                >
-                  ⏹️ 停止效果
-                </Button>
+              <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                <p>效果会在图片加载后自动开始</p>
+                <p>调整参数会自动重新启动效果</p>
               </div>
 
               { currentImage && (
                 <div className="text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">
                     当前图片预览
                   </p>
                   <img
                     src={ currentImage }
                     alt="当前选择的图片"
-                    className="max-w-32 max-h-24 object-contain border border-gray-300 dark:border-gray-600 rounded"
+                    className="max-h-24 max-w-32 border border-gray-300 rounded object-contain dark:border-gray-600"
                   />
                 </div>
               ) }
@@ -215,14 +196,14 @@ export default function ImgToFadeTest() {
         {/* 右侧：控制面板 */ }
         <div className="w-full lg:w-96">
           <Card>
-            <div className="p-6 max-h-[80vh] overflow-y-auto">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+            <div className="max-h-[80vh] overflow-y-auto p-6">
+              <h2 className="mb-4 text-xl text-gray-800 font-semibold dark:text-white">
                 控制面板
               </h2>
 
               {/* 预设配置 */ }
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   预设效果
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
@@ -241,12 +222,12 @@ export default function ImgToFadeTest() {
 
               {/* 图片选择 */ }
               <div className="mb-6">
-                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   选择图片
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">
+                    <h4 className="mb-2 text-sm text-gray-600 font-medium dark:text-gray-300">
                       上传图片
                     </h4>
                     <Uploader
@@ -254,7 +235,7 @@ export default function ImgToFadeTest() {
                       onChange={ handleImageUpload }
                       className="w-full"
                     >
-                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                      <div className="border-2 border-gray-300 rounded-lg border-dashed p-4 text-center transition-colors dark:border-gray-600 hover:border-blue-400">
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           点击或拖拽上传图片
                         </p>
@@ -266,12 +247,12 @@ export default function ImgToFadeTest() {
 
               {/* 参数配置 */ }
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                   参数配置
                 </h3>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
                   <Input
@@ -284,7 +265,7 @@ export default function ImgToFadeTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
                   <Input
@@ -297,7 +278,7 @@ export default function ImgToFadeTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     图片宽度
                   </label>
                   <Input
@@ -310,7 +291,7 @@ export default function ImgToFadeTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     图片高度
                   </label>
                   <Input
@@ -323,7 +304,7 @@ export default function ImgToFadeTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     移动速度 (
                     { config.speed }
                     )
@@ -347,7 +328,7 @@ export default function ImgToFadeTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     额外删除像素 (
                     { config.extraDelCount }
                     )
@@ -370,7 +351,7 @@ export default function ImgToFadeTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     每帧小球数量 (
                     { config.ballCount }
                     )
@@ -393,7 +374,7 @@ export default function ImgToFadeTest() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     背景颜色
                   </label>
                   <div className="flex items-center gap-2">
@@ -401,7 +382,7 @@ export default function ImgToFadeTest() {
                       type="color"
                       value={ config.bgc }
                       onChange={ e => updateConfig('bgc', e.target.value) }
-                      className="w-12 h-8 p-0 border-0"
+                      className="h-8 w-12 border-0 p-0"
                     />
                     <Input
                       type="text"
@@ -413,11 +394,11 @@ export default function ImgToFadeTest() {
                 </div>
 
                 {/* 使用说明 */ }
-                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
-                  <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-600">
+                  <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                     使用说明
                   </h3>
-                  <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                  <div className="text-sm text-gray-600 space-y-3 dark:text-gray-300">
                     <div>
                       <strong>移动速度：</strong>
                       粒子飞散的速度倍数

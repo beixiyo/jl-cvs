@@ -1,8 +1,8 @@
 import type { BaseType } from '@jl-org/tool'
 import type { LucideProps } from 'lucide-react'
 import type { ForwardRefExoticComponent, RefAttributes } from 'react'
-import { cn } from '@/utils'
 import { genIcon, handleCssUnit } from '@jl-org/tool'
+import { cn } from '@/utils'
 import { Slot } from '../Slot'
 
 export const Icon = memo<IconProps>((

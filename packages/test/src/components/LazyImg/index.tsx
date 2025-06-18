@@ -1,8 +1,8 @@
 import type { MotionProps } from 'framer-motion'
-import { PreviewImg } from '@/components/PreviewImg'
-import { cn } from '@/utils'
 import { motion } from 'framer-motion'
 import { memo, useEffect, useRef, useState } from 'react'
+import { PreviewImg } from '@/components/PreviewImg'
+import { cn } from '@/utils'
 
 // WeakMap 用于存储 Observer 需要的数据 (主要是 src)
 const observerMap = new WeakMap<HTMLImageElement, { src: string }>()

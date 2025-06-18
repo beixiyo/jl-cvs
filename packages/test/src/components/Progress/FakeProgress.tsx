@@ -1,6 +1,6 @@
-import { cn } from '@/utils'
 // import { LogoLoading } from "@/components/LogoLoading"
 import { FakeProgress as Progress } from '@jl-org/tool'
+import { cn } from '@/utils'
 import { ProgressBar } from './ProgressBar'
 
 export const FakeProgress = memo<FakeProgressProps>((
