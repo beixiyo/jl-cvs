@@ -84,7 +84,7 @@ export abstract class NoteBoardBase {
     this.opts = mergeOpts(opts, NoteBoardBase.dpr)
 
     /** 设置画笔画板置顶 */
-    this.canvas.style.zIndex = '99'
+    this.canvas.style.zIndex = this.opts.canvasZIndex
     this.el = opts.el
 
     this.el.style.overflow = 'hidden'

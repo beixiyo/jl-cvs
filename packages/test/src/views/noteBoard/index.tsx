@@ -1,8 +1,11 @@
 import { type Mode, NoteBoard } from '@jl-org/cvs'
 import { downloadByUrl } from '@jl-org/tool'
+import { motion } from 'framer-motion'
+import { Download, Eye, Grid3X3, Image, Layers, List, Maximize2, Package } from 'lucide-react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input } from '@/components/Input'
+import { Modal } from '@/components/Modal'
+import { PreviewImg } from '@/components/PreviewImg'
 import { Select } from '@/components/Select'
 import { Slider } from '@/components/Slider'
 import { type FileItem, Uploader } from '@/components/Uploader'
@@ -19,8 +22,17 @@ export default function NoteBoardTest() {
     lineCap: 'round' as CanvasLineCap,
   }, true)
 
+  /** 图像预览相关状态 */
+  const [previewImages, setPreviewImages] = useState<Array<{
+    src: string
+    name: string
+    type: 'img' | 'mask' | 'all'
+  }>>([])
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null)
+
   const isFirstRender = useRef(true)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const canvasContainerRef = useRef<HTMLDivElement>(null)
 
   const width = 800
@@ -165,8 +177,21 @@ export default function NoteBoardTest() {
     if (!noteBoard)
       return
 
-    const src = await noteBoard.exportImg({ exportOnlyImgArea: true })
-    const mask = await noteBoard.exportMask({ exportOnlyImgArea: true })
+    try {
+      const src = await noteBoard.exportImg({ exportOnlyImgArea: true })
+      const mask = await noteBoard.exportMask({ exportOnlyImgArea: true })
+
+      const images = [
+        { src, name: '背景图片', type: 'img' as const },
+        { src: mask, name: '绘制内容', type: 'mask' as const },
+      ]
+
+      setPreviewImages(images)
+      setShowPreviewModal(true)
+    }
+    catch (error) {
+      console.error('导出图片失败:', error)
+    }
   }
 
   /**
@@ -176,7 +201,19 @@ export default function NoteBoardTest() {
     if (!noteBoard)
       return
 
-    const src = await noteBoard.exportAllLayer({ exportOnlyImgArea: true })
+    try {
+      const src = await noteBoard.exportAllLayer({ exportOnlyImgArea: true })
+
+      const images = [
+        { src, name: '合成图片', type: 'all' as const },
+      ]
+
+      setPreviewImages(images)
+      setShowPreviewModal(true)
+    }
+    catch (error) {
+      console.error('导出所有图层失败:', error)
+    }
   }
 
   /**
@@ -207,6 +244,39 @@ export default function NoteBoardTest() {
   /** 更新配置 */
   const updateConfig = (key: string, value: any) => {
     setConfig(prev => ({ ...prev, [key]: value }))
+  }
+
+  /** 下载图片 */
+  const handleDownloadImage = (src: string, name: string) => {
+    try {
+      downloadByUrl(src, `${name}_${Date.now()}.png`)
+    }
+    catch (error) {
+      console.error('下载图片失败:', error)
+    }
+  }
+
+  /** 关闭预览模态框 */
+  const handleClosePreview = () => {
+    setShowPreviewModal(false)
+    setPreviewImages([])
+  }
+
+  /** 打开全屏预览 */
+  const handleFullscreenPreview = (src: string) => {
+    setFullscreenImage(src)
+  }
+
+  /** 关闭全屏预览 */
+  const handleCloseFullscreen = () => {
+    setFullscreenImage(null)
+  }
+
+  /** 切换视图模式 */
+  const handleToggleViewMode = () => {
+    setViewMode(prev => prev === 'grid'
+      ? 'list'
+      : 'grid')
   }
 
   return (
@@ -255,11 +325,13 @@ export default function NoteBoardTest() {
             <Button onClick={ handleClear } variant="primary" size="sm">
               🗑️ 清空
             </Button>
-            <Button onClick={ handleExport } variant="primary" size="sm">
-              💾 单独导出图片和绘制内容
+            <Button onClick={ handleExport } variant="primary" size="sm" className="flex items-center gap-2">
+              <Image size={ 16 } />
+              单独导出图片和绘制内容
             </Button>
-            <Button onClick={ handleExportAll } variant="primary" size="sm">
-              💾 导出所有图层
+            <Button onClick={ handleExportAll } variant="primary" size="sm" className="flex items-center gap-2">
+              <Layers size={ 16 } />
+              导出所有图层
             </Button>
             <Button onClick={ handleResetSize } variant="primary" size="sm">
               🔄 重置大小
@@ -432,6 +504,168 @@ export default function NoteBoardTest() {
           </div>
         </div>
       </Card>
+
+      {/* 图像预览模态框 */ }
+      <Modal
+        isOpen={ showPreviewModal }
+        onClose={ handleClosePreview }
+        titleText="🎨 导出图像预览"
+        width={ 1000 }
+        height={ 700 }
+        footer={ null }
+        bodyClassName="p-0"
+      >
+        <div className="h-full flex flex-col">
+          {/* 工具栏 */ }
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <Image size={ 16 } />
+                <span>
+                  { previewImages.length }
+                  { ' ' }
+                  张图片
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* 视图切换按钮 */ }
+              <Button
+                onClick={ handleToggleViewMode }
+                variant="primary"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                { viewMode === 'grid'
+                  ? <List size={ 16 } />
+                  : <Grid3X3 size={ 16 } /> }
+                { viewMode === 'grid'
+                  ? '列表视图'
+                  : '网格视图' }
+              </Button>
+
+              {/* 批量下载按钮 */ }
+              { previewImages.length > 1 && (
+                <Button
+                  onClick={ () => {
+                    previewImages.forEach((image, index) => {
+                      setTimeout(() => {
+                        handleDownloadImage(image.src, `${image.name}_${index + 1}`)
+                      }, index * 100)
+                    })
+                  } }
+                  variant="primary"
+                  className="flex items-center gap-2"
+                >
+                  <Package size={ 16 } />
+                  批量下载
+                </Button>
+              ) }
+            </div>
+          </div>
+
+          {/* 图像展示区域 */ }
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className={ cn(
+              'gap-6',
+              viewMode === 'grid'
+                ? 'grid grid-cols-1 lg:grid-cols-2'
+                : 'flex flex-col space-y-6',
+            ) }>
+              { previewImages.map((image, index) => (
+                <motion.div
+                  key={ `${image.type}-${image.name}-${index}` }
+                  initial={ { opacity: 0, y: 20 } }
+                  animate={ { opacity: 1, y: 0 } }
+                  transition={ { delay: index * 0.1 } }
+                  className="group relative bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
+                >
+                  {/* 图像头部信息 */ }
+                  <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={ cn(
+                          'w-3 h-3 rounded-full',
+                          image.type === 'img' && 'bg-blue-500',
+                          image.type === 'mask' && 'bg-green-500',
+                          image.type === 'all' && 'bg-purple-500',
+                        ) } />
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">
+                            { image.name }
+                          </h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            { image.type === 'img' && '背景图片层' }
+                            { image.type === 'mask' && '绘制内容层' }
+                            { image.type === 'all' && '所有图层合成' }
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          onClick={ () => handleFullscreenPreview(image.src) }
+                          variant="primary"
+                          size="sm"
+                          className="flex items-center gap-1"
+                        >
+                          <Eye size={ 14 } />
+                          预览
+                        </Button>
+                        <Button
+                          onClick={ () => handleDownloadImage(image.src, image.name) }
+                          variant="primary"
+                          size="sm"
+                          className="flex items-center gap-1"
+                        >
+                          <Download size={ 14 } />
+                          下载
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 图像展示区域 */ }
+                  <div className="relative p-4">
+                    <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg p-4 min-h-[200px] flex items-center justify-center">
+                      <img
+                        src={ image.src }
+                        alt={ image.name }
+                        className="max-w-full max-h-64 object-contain rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                        style={ {
+                          imageRendering: 'pixelated',
+                        } }
+                        onClick={ () => handleFullscreenPreview(image.src) }
+                      />
+
+                      {/* 悬浮操作按钮 */ }
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          onClick={ () => handleFullscreenPreview(image.src) }
+                          variant="primary"
+                          size="sm"
+                          className="bg-black/50 hover:bg-black/70 text-white border-0"
+                        >
+                          <Maximize2 size={ 16 } />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )) }
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* 全屏图像预览 */ }
+      { fullscreenImage && (
+        <PreviewImg
+          src={ fullscreenImage }
+          onClose={ handleCloseFullscreen }
+        />
+      ) }
     </div>
   )
 }

@@ -9,6 +9,7 @@ export function mergeOpts(
     height: 600 * dpr,
     minScale: 0.5,
     maxScale: 8,
+    canvasZIndex: '20',
 
     lineWidth: 1,
     strokeStyle: '#000',

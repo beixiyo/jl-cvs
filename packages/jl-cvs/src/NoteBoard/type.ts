@@ -41,6 +41,10 @@ export type NoteBoardOptions = {
    * @default 8
    */
   maxScale?: number
+  /**
+   * @default '20'
+   */
+  canvasZIndex?: string
 
   onMouseDown?: MouseEventFn
   onMouseMove?: MouseEventFn
@@ -56,8 +60,9 @@ export type NoteBoardOptions = {
 
 export type NoteBoardOptionsRequired = PartRequired<
   NoteBoardOptions,
-  'width'
+  | 'width'
   | 'height'
+  | 'canvasZIndex'
   | 'minScale'
   | 'maxScale'
   | 'lineWidth'
