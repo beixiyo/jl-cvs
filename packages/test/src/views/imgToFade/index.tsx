@@ -20,38 +20,10 @@ export default function ImgToFadeTest() {
   }, true)
 
   const [isPlaying, setIsPlaying] = useState(false)
-  const [currentImage, setCurrentImage] = useState<string>('')
+  const [currentImage, setCurrentImage] = useState<string>(new URL('@/assets/umr.webp', import.meta.url).href)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number | null>(null)
-
-  /** 预设图片 - 使用稳定可靠的图片资源 */
-  const presetImages = [
-    {
-      name: '风景图片',
-      url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&crop=center',
-    },
-    {
-      name: '城市夜景',
-      url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=300&fit=crop&crop=center',
-    },
-    {
-      name: '自然风光',
-      url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop&crop=center',
-    },
-    {
-      name: '抽象艺术',
-      url: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=300&fit=crop&crop=center',
-    },
-    {
-      name: '几何图案',
-      url: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&h=300&fit=crop&crop=center',
-    },
-    {
-      name: '色彩渐变',
-      url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center',
-    },
-  ]
 
   /** 预设配置 */
   const presets = [
@@ -167,20 +139,6 @@ export default function ImgToFadeTest() {
     setConfig(prev => ({ ...prev, [key]: value }))
   }
 
-  /** 自动启动效果 */
-  useEffect(() => {
-    /** 设置默认图片并自动启动 */
-    if (presetImages.length > 0) {
-      setCurrentImage(presetImages[0].url)
-      /** 延迟启动，确保组件完全加载 */
-      setTimeout(() => {
-        if (canvasRef.current && presetImages[0].url) {
-          startFadeEffect()
-        }
-      }, 1000)
-    }
-  }, [])
-
   /** 组件卸载时清理 */
   useEffect(() => {
     return () => {
@@ -191,8 +149,8 @@ export default function ImgToFadeTest() {
   }, [])
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
-      {/* 页面标题 - 全宽显示 */}
+    <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+      {/* 页面标题 - 全宽显示 */ }
       <div className="p-6 text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
           🖼️ 图像淡化效果
@@ -202,15 +160,15 @@ export default function ImgToFadeTest() {
         </p>
       </div>
 
-      {/* 响应式布局容器 */}
-      <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-120px)]">
-        {/* 左侧：效果展示区域 */}
-        <div className="flex-1 p-6 lg:pr-3">
-          <Card className="h-full p-6">
+      {/* 响应式布局容器 */ }
+      <div className="flex flex-col lg:flex-row gap-6 px-6">
+        {/* 左侧：效果展示区域 */ }
+        <div className="flex-1">
+          <Card className="p-6 min-h-[600px]">
             <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
               图像淡化效果展示
             </h2>
-            <div className="flex flex-col items-center justify-center h-full space-y-4">
+            <div className="flex flex-col items-center justify-center min-h-[500px] space-y-4">
               <canvas
                 ref={ canvasRef }
                 className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl"
@@ -254,15 +212,15 @@ export default function ImgToFadeTest() {
           </Card>
         </div>
 
-        {/* 右侧：控制面板 */}
-        <div className="w-full lg:w-96 p-6 lg:pl-3">
-          <Card className="h-full">
-            <div className="p-6 h-full overflow-y-auto">
+        {/* 右侧：控制面板 */ }
+        <div className="w-full lg:w-96">
+          <Card>
+            <div className="p-6 max-h-[80vh] overflow-y-auto">
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
                 控制面板
               </h2>
 
-              {/* 预设配置 */}
+              {/* 预设配置 */ }
               <div className="mb-6">
                 <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
                   预设效果
@@ -281,7 +239,7 @@ export default function ImgToFadeTest() {
                 </div>
               </div>
 
-              {/* 图片选择 */}
+              {/* 图片选择 */ }
               <div className="mb-6">
                 <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
                   选择图片
@@ -303,27 +261,10 @@ export default function ImgToFadeTest() {
                       </div>
                     </Uploader>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">
-                      预设图片
-                    </h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      { presetImages.map((img, index) => (
-                        <Button
-                          key={ `preset-img-${img.name}-${index}` }
-                          onClick={ () => selectPresetImage(img.url) }
-                          size="sm"
-                          className="text-xs"
-                        >
-                          { img.name }
-                        </Button>
-                      )) }
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              {/* 参数配置 */}
+              {/* 参数配置 */ }
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
                   参数配置
@@ -471,7 +412,7 @@ export default function ImgToFadeTest() {
                   </div>
                 </div>
 
-                {/* 使用说明 */}
+                {/* 使用说明 */ }
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
                   <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
                     使用说明

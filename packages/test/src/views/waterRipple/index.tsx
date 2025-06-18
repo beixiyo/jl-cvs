@@ -141,8 +141,8 @@ export default function WaterRippleTest() {
   }, [createRipple])
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
-      {/* 页面标题 - 全宽显示 */}
+    <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
+      {/* 页面标题 - 全宽显示 */ }
       <div className="p-6 text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
           🌊 水波纹动画效果
@@ -152,15 +152,15 @@ export default function WaterRippleTest() {
         </p>
       </div>
 
-      {/* 响应式布局容器 */}
-      <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-120px)]">
-        {/* 左侧：效果展示区域 */}
-        <div className="flex-1 p-6 lg:pr-3">
-          <Card className="h-full p-6">
+      {/* 响应式布局容器 */ }
+      <div className="flex flex-col lg:flex-row gap-6 px-6">
+        {/* 左侧：效果展示区域 */ }
+        <div className="flex-1">
+          <Card className="p-6 min-h-[600px]">
             <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
               水波纹效果展示
             </h2>
-            <div className="flex justify-center items-center h-full">
+            <div className="flex justify-center items-center min-h-[500px]">
               <canvas
                 ref={ canvasRef }
                 className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl bg-black"
@@ -170,34 +170,34 @@ export default function WaterRippleTest() {
           </Card>
         </div>
 
-        {/* 右侧：控制面板 */}
-        <div className="w-full lg:w-96 p-6 lg:pl-3">
-          <Card className="h-full">
-            <div className="p-6 h-full overflow-y-auto">
+        {/* 右侧：控制面板 */ }
+        <div className="w-full lg:w-96">
+          <Card>
+            <div className="p-6 max-h-[80vh] overflow-y-auto">
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
                 控制面板
               </h2>
 
-              {/* 预设配置 */}
+              {/* 预设配置 */ }
               <div className="mb-6">
                 <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
                   预设效果
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {presets.map((preset, index) => (
+                  { presets.map((preset, index) => (
                     <Button
                       key={ `preset-${preset.name}-${index}` }
                       onClick={ () => applyPreset(preset.config) }
                       variant="primary"
                       className="text-sm"
                     >
-                      {preset.name}
+                      { preset.name }
                     </Button>
-                  ))}
+                  )) }
                 </div>
               </div>
 
-              {/* 参数配置 */}
+              {/* 参数配置 */ }
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
                   参数配置
@@ -309,7 +309,7 @@ export default function WaterRippleTest() {
                 </div>
               </div>
 
-              {/* 使用说明 */}
+              {/* 使用说明 */ }
               <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
                 <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
                   使用说明

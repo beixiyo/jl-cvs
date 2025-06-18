@@ -3,8 +3,8 @@ import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
 import { Select } from '@/components/Select'
-import { cn } from '@/utils'
 import { useGetState } from '@/hooks'
+import { cn } from '@/utils'
 
 export default function ScratchTest() {
   const [config, setConfig] = useGetState({
@@ -23,7 +23,7 @@ export default function ScratchTest() {
   const containerRef = useRef<HTMLDivElement>(null)
   const cleanupRef = useRef<(() => void) | null>(null)
 
-  // 奖品内容
+  /** 奖品内容 */
   const prizes = [
     { text: '🎉 恭喜中奖！', subtitle: '获得 100 元现金红包', color: 'text-red-500' },
     { text: '🎁 幸运奖！', subtitle: '获得精美礼品一份', color: 'text-blue-500' },
@@ -34,7 +34,7 @@ export default function ScratchTest() {
 
   const [currentPrize] = useState(() => prizes[Math.floor(Math.random() * prizes.length)])
 
-  // 预设配置
+  /** 预设配置 */
   const presets = [
     {
       name: '默认刮刮卡',
@@ -82,11 +82,12 @@ export default function ScratchTest() {
     },
   ]
 
-  // 初始化刮刮卡
+  /** 初始化刮刮卡 */
   const initScratch = () => {
-    if (!canvasRef.current) return
+    if (!canvasRef.current)
+      return
 
-    // 清理之前的事件
+    /** 清理之前的事件 */
     if (cleanupRef.current) {
       cleanupRef.current()
     }
@@ -101,7 +102,7 @@ export default function ScratchTest() {
         ctxOpts: { willReadFrequently: true },
       },
       (e) => {
-        // 计算刮开的进度
+        /** 计算刮开的进度 */
         const canvas = canvasRef.current!
         const ctx = canvas.getContext('2d')!
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
@@ -118,28 +119,28 @@ export default function ScratchTest() {
         const progress = (transparentPixels / totalPixels) * 100
         setScratchProgress(Math.round(progress))
 
-        // 当刮开超过 30% 时显示完整内容
+        /** 当刮开超过 30% 时显示完整内容 */
         if (progress > 30 && !isRevealed) {
           setIsRevealed(true)
         }
-      }
+      },
     )
 
     cleanupRef.current = cleanup
   }
 
-  // 重置刮刮卡
+  /** 重置刮刮卡 */
   const resetScratch = () => {
     initScratch()
   }
 
-  // 应用预设
+  /** 应用预设 */
   const applyPreset = (presetConfig: any) => {
     setConfig(presetConfig)
     initScratch()
   }
 
-  // 更新配置
+  /** 更新配置 */
   const updateConfig = (key: string, value: any) => {
     const newConfig = { ...config, [key]: value }
     setConfig(newConfig)
@@ -147,7 +148,7 @@ export default function ScratchTest() {
     initScratch()
   }
 
-  // 初始化
+  /** 初始化 */
   useEffect(() => {
     initScratch()
 
@@ -159,7 +160,7 @@ export default function ScratchTest() {
   }, [])
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+    <div className="p-6 space-y-6 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
           🎯 刮刮卡效果
@@ -206,7 +207,7 @@ export default function ScratchTest() {
             <Input
               type="number"
               value={ config.width }
-              onChange={ (e) => updateConfig('width', Number(e.target.value)) }
+              onChange={ e => updateConfig('width', Number(e.target.value)) }
               min={ 200 }
               max={ 600 }
             />
@@ -219,7 +220,7 @@ export default function ScratchTest() {
             <Input
               type="number"
               value={ config.height }
-              onChange={ (e) => updateConfig('height', Number(e.target.value)) }
+              onChange={ e => updateConfig('height', Number(e.target.value)) }
               min={ 150 }
               max={ 400 }
             />
@@ -232,7 +233,7 @@ export default function ScratchTest() {
             <Input
               type="number"
               value={ config.lineWidth }
-              onChange={ (e) => updateConfig('lineWidth', Number(e.target.value)) }
+              onChange={ e => updateConfig('lineWidth', Number(e.target.value)) }
               min={ 5 }
               max={ 50 }
             />
@@ -246,13 +247,13 @@ export default function ScratchTest() {
               <Input
                 type="color"
                 value={ config.bg }
-                onChange={ (e) => updateConfig('bg', e.target.value) }
+                onChange={ e => updateConfig('bg', e.target.value) }
                 className="w-12 h-8 p-0 border-0"
               />
               <Input
                 type="text"
                 value={ config.bg }
-                onChange={ (e) => updateConfig('bg', e.target.value) }
+                onChange={ e => updateConfig('bg', e.target.value) }
                 className="flex-1"
               />
             </div>
@@ -269,7 +270,7 @@ export default function ScratchTest() {
                 { value: 'butt', label: '平直' },
               ] }
               value={ config.lineCap }
-              onChange={ (value) => updateConfig('lineCap', value) }
+              onChange={ value => updateConfig('lineCap', value) }
               className="w-full"
             />
           </div>
@@ -285,7 +286,7 @@ export default function ScratchTest() {
                 { value: 'miter', label: '尖角' },
               ] }
               value={ config.lineJoin }
-              onChange={ (value) => updateConfig('lineJoin', value) }
+              onChange={ value => updateConfig('lineJoin', value) }
               className="w-full"
             />
           </div>
@@ -332,7 +333,10 @@ export default function ScratchTest() {
           {/* 进度显示 */ }
           <div className="mt-4 text-center">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              刮开进度: { scratchProgress }%
+              刮开进度:
+              {' '}
+              { scratchProgress }
+              %
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div

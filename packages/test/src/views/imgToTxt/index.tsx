@@ -6,11 +6,13 @@ import { Input } from '@/components/Input'
 import { Select } from '@/components/Select'
 import { Slider } from '@/components/Slider'
 import { type FileItem, Uploader } from '@/components/Uploader'
-import { useGetState } from '@/hooks'
+import { useGetState, useTheme } from '@/hooks'
 
 type ContentType = 'text' | 'image' | 'video'
 
 export default function ImgToTxtTest() {
+  const [theme] = useTheme()
+
   const [config, setConfig] = useGetState({
     replaceText: '6',
     gap: 10,
@@ -19,7 +21,7 @@ export default function ImgToTxtTest() {
     txtStyle: {
       family: 'Microsoft YaHei',
       size: 200,
-      color: '#000000',
+      color: theme === 'dark' ? '#ffffff' : '#000000',
     },
     txt: '哎呀你干嘛',
     width: 800,
@@ -34,8 +36,12 @@ export default function ImgToTxtTest() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const effectRef = useRef<{ start: () => void, stop: () => void } | null>(null)
 
-  /** 预设图片 - 使用稳定可靠的图片资源 */
+  /** 预设图片 - 使用本地资源 */
   const presetImages = [
+    {
+      name: '默认图片',
+      url: new URL('@/assets/umr.webp', import.meta.url).href,
+    },
     {
       name: '人物肖像',
       url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&crop=face',
@@ -102,14 +108,14 @@ export default function ImgToTxtTest() {
     '❤️💖💕💗',
   ]
 
-  /** 预设配置 */
+  /** 预设配置 - 根据主题动态调整颜色 */
   const presets = [
     {
       name: '默认文字',
       config: {
         replaceText: '6',
         gap: 10,
-        txtStyle: { family: 'Microsoft YaHei', size: 200, color: '#000000' },
+        txtStyle: { family: 'Microsoft YaHei', size: 200, color: theme === 'dark' ? '#ffffff' : '#000000' },
         txt: '哎呀你干嘛',
       },
     },
@@ -138,6 +144,15 @@ export default function ImgToTxtTest() {
         gap: 8,
         txtStyle: { family: 'SimHei', size: 150, color: '#ff6600' },
         txt: '彩色',
+      },
+    },
+    {
+      name: '主题适配',
+      config: {
+        replaceText: '★',
+        gap: 12,
+        txtStyle: { family: 'Microsoft YaHei', size: 180, color: theme === 'dark' ? '#64b5f6' : '#1976d2' },
+        txt: '主题色',
       },
     },
   ]
@@ -287,6 +302,12 @@ export default function ImgToTxtTest() {
     }, 1000)
   }, [])
 
+  /** 主题变化时自动更新文字颜色 */
+  useEffect(() => {
+    const newColor = theme === 'dark' ? '#ffffff' : '#000000'
+    updateTxtStyle('color', newColor)
+  }, [theme])
+
   /** 组件卸载时清理 */
   useEffect(() => {
     return () => {
@@ -297,7 +318,7 @@ export default function ImgToTxtTest() {
   }, [])
 
   return (
-    <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+    <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
       {/* 页面标题 - 全宽显示 */}
       <div className="p-6 text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
@@ -309,14 +330,14 @@ export default function ImgToTxtTest() {
       </div>
 
       {/* 响应式布局容器 */}
-      <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-120px)]">
+      <div className="flex flex-col lg:flex-row gap-6 px-6">
         {/* 左侧：效果展示区域 */}
-        <div className="flex-1 p-6 lg:pr-3">
-          <Card className="h-full p-6">
+        <div className="flex-1">
+          <Card className="p-6 min-h-[600px]">
             <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
               文字效果展示
             </h2>
-            <div className="flex flex-col items-center justify-center h-full space-y-4">
+            <div className="flex flex-col items-center justify-center min-h-[500px] space-y-4">
               <canvas
                 ref={ canvasRef }
                 className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl bg-white dark:bg-gray-800"
@@ -366,9 +387,9 @@ export default function ImgToTxtTest() {
         </div>
 
         {/* 右侧：控制面板 */}
-        <div className="w-full lg:w-96 p-6 lg:pl-3">
-          <Card className="h-full">
-            <div className="p-6 h-full overflow-y-auto">
+        <div className="w-full lg:w-96">
+          <Card>
+            <div className="p-6 max-h-[80vh] overflow-y-auto">
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
                 控制面板
               </h2>

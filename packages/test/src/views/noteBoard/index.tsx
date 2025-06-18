@@ -280,7 +280,7 @@ export default function NoteBoardTest() {
   }
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+    <div className="p-6 space-y-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
           🎨 图像编辑画板

@@ -4,7 +4,7 @@ export default function Index() {
   const menuWidth = 148
 
   return (
-    <div className="size-full flex overflow-hidden dark:bg-black dark:text-gray-200">
+    <div className="min-h-screen flex dark:bg-black dark:text-gray-200">
 
       <Menu style={ { width: menuWidth } } />
       <div style={ {

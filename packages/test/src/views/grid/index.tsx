@@ -1,4 +1,4 @@
-import { Grid, DotGrid } from '@jl-org/cvs'
+import { DotGrid, Grid } from '@jl-org/cvs'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
@@ -49,7 +49,7 @@ export default function GridTest() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const gridInstanceRef = useRef<Grid | DotGrid | null>(null)
 
-  // 预设配置
+  /** 预设配置 */
   const gridPresets = [
     {
       name: '默认网格',
@@ -141,11 +141,12 @@ export default function GridTest() {
     },
   ]
 
-  // 创建网格实例
+  /** 创建网格实例 */
   const createGridInstance = () => {
-    if (!canvasRef.current) return
+    if (!canvasRef.current)
+      return
 
-    // 销毁旧实例
+    /** 销毁旧实例 */
     if (gridInstanceRef.current) {
       // Grid 和 DotGrid 都没有 destroy 方法，但我们可以清空画布
       const ctx = canvasRef.current.getContext('2d')
@@ -156,24 +157,26 @@ export default function GridTest() {
     }
 
     try {
-      // 使用 getLatest() 获取最新配置
+      /** 使用 getLatest() 获取最新配置 */
       const latestGridConfig = setGridConfig.getLatest()
       const latestDotGridConfig = setDotGridConfig.getLatest()
 
       if (gridType === 'grid') {
         gridInstanceRef.current = new Grid(canvasRef.current, latestGridConfig)
-      } else {
+      }
+      else {
         gridInstanceRef.current = new DotGrid(canvasRef.current, latestDotGridConfig)
       }
       setIsActive(true)
-    } catch (error) {
+    }
+    catch (error) {
       console.error('创建网格实例失败:', error)
       alert('创建网格实例失败，请检查配置')
       setIsActive(false)
     }
   }
 
-  // 停止网格
+  /** 停止网格 */
   const stopGrid = () => {
     if (gridInstanceRef.current && canvasRef.current) {
       const ctx = canvasRef.current.getContext('2d')
@@ -185,7 +188,7 @@ export default function GridTest() {
     }
   }
 
-  // 应用预设配置
+  /** 应用预设配置 */
   const applyGridPreset = (presetConfig: any) => {
     setGridConfig(prev => ({ ...prev, ...presetConfig }))
     if (isActive && gridType === 'grid') {
@@ -200,7 +203,7 @@ export default function GridTest() {
     }
   }
 
-  // 更新配置
+  /** 更新配置 */
   const updateGridConfig = (key: string, value: any) => {
     setGridConfig(prev => ({ ...prev, [key]: value }))
     if (isActive && gridType === 'grid') {
@@ -215,15 +218,15 @@ export default function GridTest() {
     }
   }
 
-  // 切换网格类型
+  /** 切换网格类型 */
   const switchGridType = (type: GridType) => {
     setGridType(type)
     stopGrid() // 先停止当前网格
   }
 
-  // 自动启动效果
+  /** 自动启动效果 */
   useEffect(() => {
-    // 延迟启动，确保组件完全加载
+    /** 延迟启动，确保组件完全加载 */
     setTimeout(() => {
       if (canvasRef.current) {
         createGridInstance()
@@ -231,13 +234,15 @@ export default function GridTest() {
     }, 500)
   }, [])
 
-  // 处理窗口大小变化
+  /** 处理窗口大小变化 */
   useEffect(() => {
     const handleResize = () => {
       if (gridInstanceRef.current) {
         const latestGridConfig = setGridConfig.getLatest()
         const latestDotGridConfig = setDotGridConfig.getLatest()
-        const config = gridType === 'grid' ? latestGridConfig : latestDotGridConfig
+        const config = gridType === 'grid'
+          ? latestGridConfig
+          : latestDotGridConfig
         gridInstanceRef.current.onResize(config.width, config.height)
       }
     }
@@ -246,7 +251,7 @@ export default function GridTest() {
     return () => window.removeEventListener('resize', handleResize)
   }, [gridType])
 
-  // 组件卸载时清理
+  /** 组件卸载时清理 */
   useEffect(() => {
     return () => {
       if (gridInstanceRef.current && canvasRef.current) {
@@ -259,7 +264,7 @@ export default function GridTest() {
   }, [])
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+    <div className="bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
       {/* 页面标题 - 全宽显示 */}
       <div className="p-6 text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
@@ -271,20 +276,24 @@ export default function GridTest() {
       </div>
 
       {/* 响应式布局容器 */}
-      <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-120px)]">
+      <div className="flex flex-col lg:flex-row gap-6 px-6">
         {/* 左侧：效果展示区域 */}
-        <div className="flex-1 p-6 lg:pr-3">
-          <Card className="h-full p-6">
+        <div className="flex-1">
+          <Card className="p-6 min-h-[600px]">
             <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
               网格效果展示
             </h2>
-            <div className="flex flex-col items-center justify-center h-full space-y-4">
+            <div className="flex flex-col items-center justify-center min-h-[500px] space-y-4">
               <div className="relative">
                 <canvas
                   ref={ canvasRef }
                   className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl"
-                  width={ gridType === 'grid' ? gridConfig.width : dotGridConfig.width }
-                  height={ gridType === 'grid' ? gridConfig.height : dotGridConfig.height }
+                  width={ gridType === 'grid'
+                    ? gridConfig.width
+                    : dotGridConfig.width }
+                  height={ gridType === 'grid'
+                    ? gridConfig.height
+                    : dotGridConfig.height }
                   style={ { maxWidth: '100%', height: 'auto' } }
                 />
                 { !isActive && (
@@ -300,7 +309,9 @@ export default function GridTest() {
                   disabled={ isActive }
                   variant="default"
                 >
-                  { isActive ? '网格运行中...' : '🎬 启动网格' }
+                  { isActive
+                    ? '网格运行中...'
+                    : '🎬 启动网格' }
                 </Button>
                 <Button
                   onClick={ stopGrid }
@@ -320,9 +331,9 @@ export default function GridTest() {
         </div>
 
         {/* 右侧：控制面板 */}
-        <div className="w-full lg:w-96 p-6 lg:pl-3">
-          <Card className="h-full">
-            <div className="p-6 h-full overflow-y-auto">
+        <div className="w-full lg:w-96">
+          <Card>
+            <div className="p-6 max-h-[80vh] overflow-y-auto">
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
                 控制面板
               </h2>
@@ -335,14 +346,18 @@ export default function GridTest() {
                 <div className="flex gap-2 mb-4">
                   <Button
                     onClick={ () => switchGridType('grid') }
-                    variant={ gridType === 'grid' ? 'primary' : 'default' }
+                    variant={ gridType === 'grid'
+                      ? 'primary'
+                      : 'default' }
                     size="sm"
                   >
                     🔲 线条网格
                   </Button>
                   <Button
                     onClick={ () => switchGridType('dotGrid') }
-                    variant={ gridType === 'dotGrid' ? 'primary' : 'default' }
+                    variant={ gridType === 'dotGrid'
+                      ? 'primary'
+                      : 'default' }
                     size="sm"
                   >
                     ⚫ 点阵网格
@@ -358,25 +373,25 @@ export default function GridTest() {
                 <div className="grid grid-cols-2 gap-2">
                   { gridType === 'grid'
                     ? gridPresets.map((preset, index) => (
-                      <Button
-                        key={ `grid-preset-${preset.name}-${index}` }
-                        onClick={ () => applyGridPreset(preset.config) }
-                        size="sm"
-                        className="text-xs"
-                      >
-                        { preset.name }
-                      </Button>
-                    ))
+                        <Button
+                          key={ `grid-preset-${preset.name}-${index}` }
+                          onClick={ () => applyGridPreset(preset.config) }
+                          size="sm"
+                          className="text-xs"
+                        >
+                          { preset.name }
+                        </Button>
+                      ))
                     : dotGridPresets.map((preset, index) => (
-                      <Button
-                        key={ `dot-preset-${preset.name}-${index}` }
-                        onClick={ () => applyDotGridPreset(preset.config) }
-                        size="sm"
-                        className="text-xs"
-                      >
-                        { preset.name }
-                      </Button>
-                    )) }
+                        <Button
+                          key={ `dot-preset-${preset.name}-${index}` }
+                          onClick={ () => applyDotGridPreset(preset.config) }
+                          size="sm"
+                          className="text-xs"
+                        >
+                          { preset.name }
+                        </Button>
+                      )) }
                 </div>
               </div>
 
@@ -392,12 +407,15 @@ export default function GridTest() {
                   </label>
                   <Input
                     type="number"
-                    value={ gridType === 'grid' ? gridConfig.width : dotGridConfig.width }
+                    value={ gridType === 'grid'
+                      ? gridConfig.width
+                      : dotGridConfig.width }
                     onChange={ (e) => {
                       const value = Number(e.target.value)
                       if (gridType === 'grid') {
                         updateGridConfig('width', value)
-                      } else {
+                      }
+                      else {
                         updateDotGridConfig('width', value)
                       }
                     } }
@@ -412,12 +430,15 @@ export default function GridTest() {
                   </label>
                   <Input
                     type="number"
-                    value={ gridType === 'grid' ? gridConfig.height : dotGridConfig.height }
+                    value={ gridType === 'grid'
+                      ? gridConfig.height
+                      : dotGridConfig.height }
                     onChange={ (e) => {
                       const value = Number(e.target.value)
                       if (gridType === 'grid') {
                         updateGridConfig('height', value)
-                      } else {
+                      }
+                      else {
                         updateDotGridConfig('height', value)
                       }
                     } }
@@ -433,11 +454,14 @@ export default function GridTest() {
                   <div className="flex items-center gap-2">
                     <Input
                       type="color"
-                      value={ gridType === 'grid' ? gridConfig.backgroundColor : dotGridConfig.backgroundColor }
+                      value={ gridType === 'grid'
+                        ? gridConfig.backgroundColor
+                        : dotGridConfig.backgroundColor }
                       onChange={ (e) => {
                         if (gridType === 'grid') {
                           updateGridConfig('backgroundColor', e.target.value)
-                        } else {
+                        }
+                        else {
                           updateDotGridConfig('backgroundColor', e.target.value)
                         }
                       } }
@@ -445,11 +469,14 @@ export default function GridTest() {
                     />
                     <Input
                       type="text"
-                      value={ gridType === 'grid' ? gridConfig.backgroundColor : dotGridConfig.backgroundColor }
+                      value={ gridType === 'grid'
+                        ? gridConfig.backgroundColor
+                        : dotGridConfig.backgroundColor }
                       onChange={ (e) => {
                         if (gridType === 'grid') {
                           updateGridConfig('backgroundColor', e.target.value)
-                        } else {
+                        }
+                        else {
                           updateDotGridConfig('backgroundColor', e.target.value)
                         }
                       } }
@@ -468,7 +495,9 @@ export default function GridTest() {
 
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                      单元格宽度 ({ gridConfig.cellWidth }px)
+                      单元格宽度 (
+                      { gridConfig.cellWidth }
+                      px)
                     </label>
                     <div className="px-2">
                       <Slider
@@ -478,7 +507,8 @@ export default function GridTest() {
                         onChange={ (value) => {
                           if (typeof value === 'number') {
                             updateGridConfig('cellWidth', value)
-                          } else if (Array.isArray(value)) {
+                          }
+                          else if (Array.isArray(value)) {
                             updateGridConfig('cellWidth', value[0])
                           }
                         } }
@@ -488,7 +518,9 @@ export default function GridTest() {
 
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                      单元格高度 ({ gridConfig.cellHeight }px)
+                      单元格高度 (
+                      { gridConfig.cellHeight }
+                      px)
                     </label>
                     <div className="px-2">
                       <Slider
@@ -498,7 +530,8 @@ export default function GridTest() {
                         onChange={ (value) => {
                           if (typeof value === 'number') {
                             updateGridConfig('cellHeight', value)
-                          } else if (Array.isArray(value)) {
+                          }
+                          else if (Array.isArray(value)) {
                             updateGridConfig('cellHeight', value[0])
                           }
                         } }
@@ -508,7 +541,9 @@ export default function GridTest() {
 
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                      边框宽度 ({ gridConfig.borderWidth }px)
+                      边框宽度 (
+                      { gridConfig.borderWidth }
+                      px)
                     </label>
                     <div className="px-2">
                       <Slider
@@ -519,7 +554,8 @@ export default function GridTest() {
                         onChange={ (value) => {
                           if (typeof value === 'number') {
                             updateGridConfig('borderWidth', value)
-                          } else if (Array.isArray(value)) {
+                          }
+                          else if (Array.isArray(value)) {
                             updateGridConfig('borderWidth', value[0])
                           }
                         } }
@@ -535,13 +571,13 @@ export default function GridTest() {
                       <Input
                         type="color"
                         value={ gridConfig.borderColor }
-                        onChange={ (e) => updateGridConfig('borderColor', e.target.value) }
+                        onChange={ e => updateGridConfig('borderColor', e.target.value) }
                         className="w-12 h-8 p-0 border-0"
                       />
                       <Input
                         type="text"
                         value={ gridConfig.borderColor }
-                        onChange={ (e) => updateGridConfig('borderColor', e.target.value) }
+                        onChange={ e => updateGridConfig('borderColor', e.target.value) }
                         className="flex-1"
                       />
                     </div>
@@ -552,7 +588,7 @@ export default function GridTest() {
                       <input
                         type="checkbox"
                         checked={ gridConfig.dashedLines }
-                        onChange={ (e) => updateGridConfig('dashedLines', e.target.checked) }
+                        onChange={ e => updateGridConfig('dashedLines', e.target.checked) }
                         className="mr-2"
                       />
                       <span className="text-sm text-gray-700 dark:text-gray-200">虚线模式</span>
@@ -570,7 +606,9 @@ export default function GridTest() {
 
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                      水平间距 ({ dotGridConfig.dotSpacingX }px)
+                      水平间距 (
+                      { dotGridConfig.dotSpacingX }
+                      px)
                     </label>
                     <div className="px-2">
                       <Slider
@@ -580,7 +618,8 @@ export default function GridTest() {
                         onChange={ (value) => {
                           if (typeof value === 'number') {
                             updateDotGridConfig('dotSpacingX', value)
-                          } else if (Array.isArray(value)) {
+                          }
+                          else if (Array.isArray(value)) {
                             updateDotGridConfig('dotSpacingX', value[0])
                           }
                         } }
@@ -590,7 +629,9 @@ export default function GridTest() {
 
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                      垂直间距 ({ dotGridConfig.dotSpacingY }px)
+                      垂直间距 (
+                      { dotGridConfig.dotSpacingY }
+                      px)
                     </label>
                     <div className="px-2">
                       <Slider
@@ -600,7 +641,8 @@ export default function GridTest() {
                         onChange={ (value) => {
                           if (typeof value === 'number') {
                             updateDotGridConfig('dotSpacingY', value)
-                          } else if (Array.isArray(value)) {
+                          }
+                          else if (Array.isArray(value)) {
                             updateDotGridConfig('dotSpacingY', value[0])
                           }
                         } }
@@ -610,7 +652,9 @@ export default function GridTest() {
 
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                      点半径 ({ dotGridConfig.dotRadius }px)
+                      点半径 (
+                      { dotGridConfig.dotRadius }
+                      px)
                     </label>
                     <div className="px-2">
                       <Slider
@@ -621,7 +665,8 @@ export default function GridTest() {
                         onChange={ (value) => {
                           if (typeof value === 'number') {
                             updateDotGridConfig('dotRadius', value)
-                          } else if (Array.isArray(value)) {
+                          }
+                          else if (Array.isArray(value)) {
                             updateDotGridConfig('dotRadius', value[0])
                           }
                         } }
@@ -637,13 +682,13 @@ export default function GridTest() {
                       <Input
                         type="color"
                         value={ dotGridConfig.dotColor }
-                        onChange={ (e) => updateDotGridConfig('dotColor', e.target.value) }
+                        onChange={ e => updateDotGridConfig('dotColor', e.target.value) }
                         className="w-12 h-8 p-0 border-0"
                       />
                       <Input
                         type="text"
                         value={ dotGridConfig.dotColor }
-                        onChange={ (e) => updateDotGridConfig('dotColor', e.target.value) }
+                        onChange={ e => updateDotGridConfig('dotColor', e.target.value) }
                         className="flex-1"
                       />
                     </div>
@@ -651,7 +696,9 @@ export default function GridTest() {
 
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                      高亮范围 ({ dotGridConfig.highlightRange })
+                      高亮范围 (
+                      { dotGridConfig.highlightRange }
+                      )
                     </label>
                     <div className="px-2">
                       <Slider
@@ -661,7 +708,8 @@ export default function GridTest() {
                         onChange={ (value) => {
                           if (typeof value === 'number') {
                             updateDotGridConfig('highlightRange', value)
-                          } else if (Array.isArray(value)) {
+                          }
+                          else if (Array.isArray(value)) {
                             updateDotGridConfig('highlightRange', value[0])
                           }
                         } }

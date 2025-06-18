@@ -175,7 +175,7 @@ export default function HalftoneWaveTest() {
   }, [halftoneWave, config.width, config.height])
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+    <div className="bg-gradient-to-br from-gray-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 min-h-screen">
       {/* 页面标题 - 全宽显示 */}
       <div className="p-6 text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
@@ -187,14 +187,14 @@ export default function HalftoneWaveTest() {
       </div>
 
       {/* 响应式布局容器 */}
-      <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-120px)]">
+      <div className="flex flex-col lg:flex-row gap-6 px-6">
         {/* 左侧：效果展示区域 */}
-        <div className="flex-1 p-6 lg:pr-3">
-          <Card className="h-full p-6">
+        <div className="flex-1">
+          <Card className="p-6 min-h-[600px]">
             <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
               半调波浪效果展示
             </h2>
-            <div className="flex justify-center items-center h-full">
+            <div className="flex justify-center items-center min-h-[500px]">
               <canvas
                 ref={canvasRef}
                 className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl"
@@ -205,9 +205,9 @@ export default function HalftoneWaveTest() {
         </div>
 
         {/* 右侧：控制面板 */}
-        <div className="w-full lg:w-96 p-6 lg:pl-3">
-          <Card className="h-full">
-            <div className="p-6 h-full overflow-y-auto">
+        <div className="w-full lg:w-96">
+          <Card>
+            <div className="p-6 max-h-[80vh] overflow-y-auto">
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
                 控制面板
               </h2>
