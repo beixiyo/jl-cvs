@@ -247,9 +247,9 @@ export default function FireworkTest() {
   }, [startFirework, stopFirework])
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto flex flex-col">
-      {/* 标题区域 */ }
-      <div className="text-center p-6">
+    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+      {/* 页面标题 - 全宽显示 */}
+      <div className="p-6 text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
           🎆 烟花效果
         </h1>
@@ -258,240 +258,251 @@ export default function FireworkTest() {
         </p>
       </div>
 
-      {/* 烟花展示区域 - 占据主要空间 */ }
-      <div className="flex-1 px-6 pb-4">
-        <Card className="h-full p-4">
-          <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
-            烟花展示
-          </h3>
-          <div className="flex justify-center items-center h-[calc(100%-3rem)]">
-            <canvas
-              ref={ canvasRef }
-              className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg bg-black"
-              style={ { maxWidth: '100%', height: 'auto' } }
-            />
-          </div>
-        </Card>
-      </div>
-
-      {/* 控制面板 - 移到底部 */ }
-      <div className="px-6 pb-6">
-        <Card className="p-6">
-          {/* 烟花类型选择器 */ }
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
-              烟花类型
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                onClick={ () => changeFireworkType('classic') }
-                variant={ fireworkType === 'classic'
-                  ? 'primary'
-                  : 'default' }
-                size="sm"
-              >
-                🎆 经典烟花
-              </Button>
-              <Button
-                onClick={ () => changeFireworkType('burst') }
-                variant={ fireworkType === 'burst'
-                  ? 'primary'
-                  : 'default' }
-                size="sm"
-              >
-                💥 二段爆炸烟花
-              </Button>
+      {/* 响应式布局容器 */}
+      <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-120px)]">
+        {/* 左侧：效果展示区域 */}
+        <div className="flex-1 p-6 lg:pr-3">
+          <Card className="h-full p-6">
+            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
+              烟花效果展示
+            </h2>
+            <div className="flex justify-center items-center h-full">
+              <canvas
+                ref={ canvasRef }
+                className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl bg-black"
+                style={ { maxWidth: '100%', height: 'auto' } }
+              />
             </div>
-          </div>
+          </Card>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-4 mb-6">
-            <Button
-              onClick={ isPlaying
-                ? stopFirework
-                : startFirework }
-              className={ cn(
-                'px-6 py-2',
-                isPlaying
-                  ? 'bg-red-500 hover:bg-red-600'
-                  : 'bg-green-500 hover:bg-green-600',
-              ) }
-            >
-              { isPlaying
-                ? '🛑 停止烟花'
-                : '🎆 开始烟花' }
-            </Button>
+        {/* 右侧：控制面板 */}
+        <div className="w-full lg:w-96 p-6 lg:pl-3">
+          <Card className="h-full">
+            <div className="p-6 h-full overflow-y-auto">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+                控制面板
+              </h2>
 
-            <div className="h-6 w-px bg-gray-300 dark:bg-gray-600" />
-
-            {/* 预设配置 */ }
-            <div className="flex flex-wrap gap-2">
-              { presets.map(preset => (
-                <Button
-                  key={ preset.name }
-                  onClick={ () => applyPreset(preset.config) }
-                  variant="primary"
-                  size="sm"
-                >
-                  { preset.name }
-                </Button>
-              )) }
-            </div>
-          </div>
-
-          {/* 颜色主题 - 仅对经典烟花生效 */ }
-          { fireworkType === 'classic' && (
-            <div className="mb-6">
-              <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
-                颜色主题
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                { colorPresets.map((preset, index) => (
+              {/* 烟花类型选择器 */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                  烟花类型
+                </h3>
+                <div className="flex flex-wrap gap-2">
                   <Button
-                    key={ preset.name }
-                    onClick={ () => changeColorPreset(index) }
-                    variant={ selectedColorPreset === index
-                      ? 'default'
-                      : 'primary' }
+                    onClick={ () => changeFireworkType('classic') }
+                    variant={ fireworkType === 'classic'
+                      ? 'primary'
+                      : 'default' }
                     size="sm"
                   >
-                    { preset.name }
+                    🎆 经典烟花
                   </Button>
-                )) }
-              </div>
-            </div>
-          ) }
-
-          {/* 参数配置 */ }
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
-              参数配置
-              { fireworkType === 'burst' && (
-                <span className="text-sm text-orange-600 dark:text-orange-400 ml-2">
-                  (二段爆炸烟花仅支持部分参数)
-                </span>
-              ) }
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  画布宽度
-                </label>
-                <Input
-                  type="number"
-                  value={ config.width }
-                  onChange={ e => updateConfig('width', Number(e.target.value)) }
-                  min={ 400 }
-                  max={ 1200 }
-                />
+                  <Button
+                    onClick={ () => changeFireworkType('burst') }
+                    variant={ fireworkType === 'burst'
+                      ? 'primary'
+                      : 'default' }
+                    size="sm"
+                  >
+                    💥 二段爆炸烟花
+                  </Button>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  画布高度
-                </label>
-                <Input
-                  type="number"
-                  value={ config.height }
-                  onChange={ e => updateConfig('height', Number(e.target.value)) }
-                  min={ 300 }
-                  max={ 800 }
-                />
-              </div>
-
-              { fireworkType === 'classic' && (
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                    发射范围
-                  </label>
-                  <Input
-                    type="number"
-                    value={ config.yRange }
-                    onChange={ e => updateConfig('yRange', Number(e.target.value)) }
-                    min={ 20 }
-                    max={ 200 }
-                  />
-                </div>
-              ) }
-
-              { fireworkType === 'classic' && (
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                    运动速度
-                  </label>
-                  <Input
-                    type="number"
-                    value={ config.speed }
-                    onChange={ e => updateConfig('speed', Number(e.target.value)) }
-                    min={ 0.5 }
-                    max={ 10 }
-                    step={ 0.5 }
-                  />
-                </div>
-              ) }
-
-              { fireworkType === 'classic' && (
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                    小球半径
-                  </label>
-                  <Input
-                    type="number"
-                    value={ config.r }
-                    onChange={ e => updateConfig('r', Number(e.target.value)) }
-                    min={ 2 }
-                    max={ 20 }
-                  />
-                </div>
-              ) }
-
-              { fireworkType === 'classic' && (
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                    小球数量
-                  </label>
-                  <Input
-                    type="number"
-                    value={ config.ballCount }
-                    onChange={ e => updateConfig('ballCount', Number(e.target.value)) }
-                    min={ 50 }
-                    max={ 500 }
-                  />
-                </div>
-              ) }
-
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  间隔时间(ms)
-                  { fireworkType === 'burst' && (
-                    <span className="text-xs text-gray-500 ml-1">(发射间隔)</span>
+              {/* 控制按钮 */}
+              <div className="mb-6">
+                <Button
+                  onClick={ isPlaying
+                    ? stopFirework
+                    : startFirework }
+                  className={ cn(
+                    'w-full px-6 py-2 mb-4',
+                    isPlaying
+                      ? 'bg-red-500 hover:bg-red-600'
+                      : 'bg-green-500 hover:bg-green-600',
                   ) }
-                </label>
-                <Input
-                  type="number"
-                  value={ config.gapTime }
-                  onChange={ e => updateConfig('gapTime', Number(e.target.value)) }
-                  min={ 100 }
-                  max={ 2000 }
-                />
+                >
+                  { isPlaying
+                    ? '🛑 停止烟花'
+                    : '🎆 开始烟花' }
+                </Button>
               </div>
 
+              {/* 预设配置 */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                  预设效果
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  { presets.map(preset => (
+                    <Button
+                      key={ preset.name }
+                      onClick={ () => applyPreset(preset.config) }
+                      size="sm"
+                    >
+                      { preset.name }
+                    </Button>
+                  )) }
+                </div>
+              </div>
+
+              {/* 颜色主题 - 仅对经典烟花生效 */}
               { fireworkType === 'classic' && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                    颜色主题
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    { colorPresets.map((preset, index) => (
+                      <Button
+                        key={ preset.name }
+                        onClick={ () => changeColorPreset(index) }
+                        variant={ selectedColorPreset === index
+                          ? 'primary'
+                          : 'default' }
+                        size="sm"
+                      >
+                        { preset.name }
+                      </Button>
+                    )) }
+                  </div>
+                </div>
+              ) }
+
+              {/* 参数配置 */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                  参数配置
+                  { fireworkType === 'burst' && (
+                    <span className="text-sm text-orange-600 dark:text-orange-400 ml-2">
+                      (二段爆炸烟花仅支持部分参数)
+                    </span>
+                  ) }
+                </h3>
+
                 <div>
                   <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                    最大数量
+                    画布宽度
                   </label>
                   <Input
                     type="number"
-                    value={ config.maxCount }
-                    onChange={ e => updateConfig('maxCount', Number(e.target.value)) }
-                    min={ 1 }
-                    max={ 10 }
+                    value={ config.width }
+                    onChange={ e => updateConfig('width', Number(e.target.value)) }
+                    min={ 400 }
+                    max={ 1200 }
                   />
                 </div>
-              ) }
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    画布高度
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.height }
+                    onChange={ e => updateConfig('height', Number(e.target.value)) }
+                    min={ 300 }
+                    max={ 800 }
+                  />
+                </div>
+
+                { fireworkType === 'classic' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      发射范围
+                    </label>
+                    <Input
+                      type="number"
+                      value={ config.yRange }
+                      onChange={ e => updateConfig('yRange', Number(e.target.value)) }
+                      min={ 20 }
+                      max={ 200 }
+                    />
+                  </div>
+                ) }
+
+                { fireworkType === 'classic' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      运动速度
+                    </label>
+                    <Input
+                      type="number"
+                      value={ config.speed }
+                      onChange={ e => updateConfig('speed', Number(e.target.value)) }
+                      min={ 0.5 }
+                      max={ 10 }
+                      step={ 0.5 }
+                    />
+                  </div>
+                ) }
+
+                { fireworkType === 'classic' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      小球半径
+                    </label>
+                    <Input
+                      type="number"
+                      value={ config.r }
+                      onChange={ e => updateConfig('r', Number(e.target.value)) }
+                      min={ 2 }
+                      max={ 20 }
+                    />
+                  </div>
+                ) }
+
+                { fireworkType === 'classic' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      小球数量
+                    </label>
+                    <Input
+                      type="number"
+                      value={ config.ballCount }
+                      onChange={ e => updateConfig('ballCount', Number(e.target.value)) }
+                      min={ 50 }
+                      max={ 500 }
+                    />
+                  </div>
+                ) }
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    间隔时间(ms)
+                    { fireworkType === 'burst' && (
+                      <span className="text-xs text-gray-500 ml-1">(发射间隔)</span>
+                    ) }
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.gapTime }
+                    onChange={ e => updateConfig('gapTime', Number(e.target.value)) }
+                    min={ 100 }
+                    max={ 2000 }
+                  />
+                </div>
+
+                { fireworkType === 'classic' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      最大数量
+                    </label>
+                    <Input
+                      type="number"
+                      value={ config.maxCount }
+                      onChange={ e => updateConfig('maxCount', Number(e.target.value)) }
+                      min={ 1 }
+                      max={ 10 }
+                    />
+                  </div>
+                ) }
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   )

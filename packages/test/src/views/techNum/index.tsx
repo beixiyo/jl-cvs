@@ -1,11 +1,13 @@
 import { createTechNum } from '@jl-org/cvs'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
+import { Select } from '@/components/Select'
 import { cn } from '@/utils'
 
 export default function TechNumTest() {
-  const [isRunning, setIsRunning] = useState(false)
+  const [isRunning, setIsRunning] = useState(true) // 默认开始播放
   const [config, setConfig] = useState({
     width: 800,
     height: 600,
@@ -18,9 +20,9 @@ export default function TechNumTest() {
   })
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const techNumRef = useRef<{ start: () => void; stop: () => void; setSize: (w: number, h: number) => void } | null>(null)
+  const techNumRef = useRef<{ start: () => void, stop: () => void, setSize: (w: number, h: number) => void } | null>(null)
 
-  // 预设配置
+  /** 预设配置 */
   const presets = [
     {
       name: '经典黑客风格',
@@ -76,7 +78,7 @@ export default function TechNumTest() {
     },
   ]
 
-  // 字体选项
+  /** 字体选项 */
   const fontOptions = [
     'Roboto Mono',
     'Courier New',
@@ -87,11 +89,12 @@ export default function TechNumTest() {
     'Fira Code',
   ]
 
-  // 初始化科技数字
+  /** 初始化科技数字 */
   const initTechNum = () => {
-    if (!canvasRef.current) return
+    if (!canvasRef.current)
+      return
 
-    // 停止之前的动画
+    /** 停止之前的动画 */
     if (techNumRef.current) {
       techNumRef.current.stop()
     }
@@ -112,20 +115,22 @@ export default function TechNumTest() {
     }
   }
 
-  // 开始/停止动画
+  /** 开始/停止动画 */
   const toggleAnimation = () => {
-    if (!techNumRef.current) return
+    if (!techNumRef.current)
+      return
 
     if (isRunning) {
       techNumRef.current.stop()
       setIsRunning(false)
-    } else {
+    }
+    else {
       techNumRef.current.start()
       setIsRunning(true)
     }
   }
 
-  // 应用预设
+  /** 应用预设 */
   const applyPreset = (presetConfig: any) => {
     setConfig(presetConfig)
     setTimeout(() => {
@@ -133,7 +138,7 @@ export default function TechNumTest() {
     }, 100)
   }
 
-  // 更新配置
+  /** 更新配置 */
   const updateConfig = (key: string, value: any) => {
     const newConfig = { ...config, [key]: value }
     setConfig(newConfig)
@@ -143,9 +148,17 @@ export default function TechNumTest() {
     }, 100)
   }
 
-  // 初始化
+  /** 初始化 */
   useEffect(() => {
     initTechNum()
+
+    /** 延迟启动动画，确保组件完全加载 */
+    setTimeout(() => {
+      if (techNumRef.current) {
+        techNumRef.current.start()
+        setIsRunning(true)
+      }
+    }, 500)
 
     return () => {
       if (techNumRef.current) {
@@ -155,8 +168,9 @@ export default function TechNumTest() {
   }, [])
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
-      <div className="text-center">
+    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+      {/* 页面标题 - 全宽显示 */}
+      <div className="p-6 text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
           🔢 科技数字雨
         </h1>
@@ -165,192 +179,215 @@ export default function TechNumTest() {
         </p>
       </div>
 
-      {/* 控制面板 */}
-      <Card className="p-6">
-        <div className="flex flex-wrap items-center gap-4 mb-6">
-          <Button
-            onClick={toggleAnimation}
-            className={cn(
-              'px-6 py-2',
-              isRunning
-                ? 'bg-red-500 hover:bg-red-600'
-                : 'bg-green-500 hover:bg-green-600'
-            )}
-          >
-            {isRunning ? '⏹️ 停止数字雨' : '▶️ 开始数字雨'}
-          </Button>
+      {/* 响应式布局容器 */}
+      <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-120px)]">
+        {/* 左侧：效果展示区域 */}
+        <div className="flex-1 p-6 lg:pr-3">
+          <Card className="h-full p-6">
+            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
+              数字雨效果展示
+            </h2>
+            <div className="flex flex-col items-center justify-center h-full space-y-4">
+              <div className="bg-black rounded-lg p-8">
+                <canvas
+                  ref={ canvasRef }
+                  className="rounded-lg shadow-xl"
+                  style={ { maxWidth: '100%', height: 'auto' } }
+                />
+              </div>
 
-          <div className="h-6 w-px bg-gray-300 dark:bg-gray-600" />
+              <div className="flex gap-2">
+                <Button
+                  onClick={ toggleAnimation }
+                  className={ cn(
+                    'px-6 py-2',
+                    isRunning
+                      ? 'bg-red-500 hover:bg-red-600'
+                      : 'bg-green-500 hover:bg-green-600',
+                  ) }
+                >
+                  {isRunning
+                    ? '⏹️ 停止数字雨'
+                    : '▶️ 开始数字雨'}
+                </Button>
+              </div>
 
-          {/* 预设配置 */}
-          <div className="flex flex-wrap gap-2">
-            {presets.map((preset, index) => (
-              <Button
-                key={index}
-                onClick={() => applyPreset(preset.config)}
-                variant="outline"
-                size="sm"
-              >
-                {preset.name}
-              </Button>
-            ))}
-          </div>
+              <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                <p>经典黑客风格数字雨效果</p>
+                <p>绿色字符从上到下流动，营造科技感氛围</p>
+              </div>
+            </div>
+          </Card>
         </div>
 
-        {/* 参数配置 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              画布宽度
-            </label>
-            <Input
-              type="number"
-              value={config.width}
-              onChange={(e) => updateConfig('width', Number(e.target.value))}
-              min={400}
-              max={1200}
-            />
-          </div>
+        {/* 右侧：控制面板 */}
+        <div className="w-full lg:w-96 p-6 lg:pl-3">
+          <Card className="h-full">
+            <div className="p-6 h-full overflow-y-auto">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+                控制面板
+              </h2>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              画布高度
-            </label>
-            <Input
-              type="number"
-              value={config.height}
-              onChange={(e) => updateConfig('height', Number(e.target.value))}
-              min={300}
-              max={800}
-            />
-          </div>
+              {/* 预设配置 */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                  预设效果
+                </h3>
+                <div className="grid grid-cols-1 gap-2">
+                  {presets.map((preset, index) => (
+                    <Button
+                      key={ `preset-${preset.name}-${index}` }
+                      onClick={ () => applyPreset(preset.config) }
+                      size="sm"
+                      className="text-xs"
+                    >
+                      {preset.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              列宽度
-            </label>
-            <Input
-              type="number"
-              value={config.colWidth}
-              onChange={(e) => updateConfig('colWidth', Number(e.target.value))}
-              min={10}
-              max={50}
-            />
-          </div>
+              {/* 参数配置 */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                  参数配置
+                </h3>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              字体大小
-            </label>
-            <Input
-              type="number"
-              value={config.fontSize}
-              onChange={(e) => updateConfig('fontSize', Number(e.target.value))}
-              min={10}
-              max={40}
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    画布宽度
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.width }
+                    onChange={ e => updateConfig('width', Number(e.target.value)) }
+                    min={ 400 }
+                    max={ 1200 }
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              字体
-            </label>
-            <select
-              value={config.font}
-              onChange={(e) => updateConfig('font', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {fontOptions.map((font) => (
-                <option key={font} value={font}>
-                  {font}
-                </option>
-              ))}
-            </select>
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    画布高度
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.height }
+                    onChange={ e => updateConfig('height', Number(e.target.value)) }
+                    min={ 300 }
+                    max={ 800 }
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              间隔概率
-            </label>
-            <Input
-              type="number"
-              value={config.gapRate}
-              onChange={(e) => updateConfig('gapRate', Number(e.target.value))}
-              min={0.1}
-              max={1}
-              step={0.05}
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    列宽度
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.colWidth }
+                    onChange={ e => updateConfig('colWidth', Number(e.target.value)) }
+                    min={ 10 }
+                    max={ 50 }
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              动画间隔(ms)
-            </label>
-            <Input
-              type="number"
-              value={config.durationMS}
-              onChange={(e) => updateConfig('durationMS', Number(e.target.value))}
-              min={10}
-              max={100}
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    字体大小
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.fontSize }
+                    onChange={ e => updateConfig('fontSize', Number(e.target.value)) }
+                    min={ 10 }
+                    max={ 40 }
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              蒙层颜色
-            </label>
-            <Input
-              type="text"
-              value={config.maskColor}
-              onChange={(e) => updateConfig('maskColor', e.target.value)}
-              placeholder="rgba(12, 12, 12, .1)"
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    字体
+                  </label>
+                  <Select
+                    value={ config.font }
+                    onChange={ value => updateConfig('font', value) }
+                    options={ fontOptions.map(font => ({ value: font, label: font })) }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    间隔概率
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.gapRate }
+                    onChange={ e => updateConfig('gapRate', Number(e.target.value)) }
+                    min={ 0.1 }
+                    max={ 1 }
+                    step={ 0.05 }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    动画间隔(ms)
+                  </label>
+                  <Input
+                    type="number"
+                    value={ config.durationMS }
+                    onChange={ e => updateConfig('durationMS', Number(e.target.value)) }
+                    min={ 10 }
+                    max={ 100 }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    蒙层颜色
+                  </label>
+                  <Input
+                    type="text"
+                    value={ config.maskColor }
+                    onChange={ e => updateConfig('maskColor', e.target.value) }
+                    placeholder="rgba(12, 12, 12, .1)"
+                  />
+                </div>
+
+                {/* 使用说明 */}
+                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+                  <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                    参数说明
+                  </h3>
+                  <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                    <div>
+                      <strong>列宽度：</strong>
+                      控制字符列的间距
+                    </div>
+                    <div>
+                      <strong>字体大小：</strong>
+                      影响字符的显示大小
+                    </div>
+                    <div>
+                      <strong>间隔概率：</strong>
+                      控制列重置的频率
+                    </div>
+                    <div>
+                      <strong>动画间隔：</strong>
+                      控制流动的速度
+                    </div>
+                    <div>
+                      <strong>蒙层颜色：</strong>
+                      用于实现字符淡出效果
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
-      </Card>
-
-      {/* 数字雨展示区域 */}
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
-          数字雨展示
-        </h3>
-        <div className="flex justify-center">
-          <div className="bg-black rounded-lg p-4">
-            <canvas
-              ref={canvasRef}
-              className="rounded-lg shadow-lg"
-              style={{ maxWidth: '100%', height: 'auto' }}
-            />
-          </div>
-        </div>
-      </Card>
-
-      {/* 使用说明 */}
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-          效果说明
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600 dark:text-gray-300">
-          <div>
-            <h3 className="font-semibold mb-2">视觉效果</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm">
-              <li><strong>数字雨：</strong>随机字符从上到下流动</li>
-              <li><strong>渐变消失：</strong>使用蒙层实现字符淡出</li>
-              <li><strong>随机间隔：</strong>每列独立的重置时机</li>
-              <li><strong>绿色主题：</strong>经典黑客风格配色</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">参数控制</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm">
-              <li><strong>列宽度：</strong>控制字符列的间距</li>
-              <li><strong>字体大小：</strong>影响字符的显示大小</li>
-              <li><strong>间隔概率：</strong>控制列重置的频率</li>
-              <li><strong>动画间隔：</strong>控制流动的速度</li>
-            </ul>
-          </div>
-        </div>
-      </Card>
+      </div>
     </div>
   )
 }

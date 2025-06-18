@@ -1,6 +1,6 @@
 import type { SelectProps } from './types'
-import { cn } from '@/utils'
 import { ChevronDown, Loader2, Search } from 'lucide-react'
+import { cn } from '@/utils'
 import { SelectOption } from './SelectOption'
 
 export const Select = memo(({

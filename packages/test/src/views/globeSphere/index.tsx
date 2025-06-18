@@ -1,4 +1,5 @@
 import { GlobeSphere } from '@jl-org/cvs'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
@@ -146,8 +147,9 @@ export default function GlobeSphereTest() {
   }, [])
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
-      <div className="text-center">
+    <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+      {/* 页面标题 - 全宽显示 */}
+      <div className="p-6 text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
           🌍 球体地球仪
         </h1>
@@ -156,220 +158,230 @@ export default function GlobeSphereTest() {
         </p>
       </div>
 
-      {/* 控制面板 */}
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-          控制面板
-        </h2>
-
-        {/* 预设配置 */}
-        <div className="mb-6">
-          <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
-            预设效果
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {presets.map((preset, index) => (
-              <Button
-                key={index}
-                onClick={() => applyPreset(preset.config)}
-                variant="primary"
-                size="sm"
-              >
-                {preset.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* 颜色主题 */}
-        <div className="mb-6">
-          <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
-            颜色主题
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {colorThemes.map((theme, index) => (
-              <Button
-                key={index}
-                onClick={() => changeColorTheme(theme.color)}
-                variant={config.pointColor === theme.color ? 'default' : 'primary'}
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <div
-                  className="w-3 h-3 rounded-full border border-gray-300"
-                  style={{ backgroundColor: theme.color }}
+      {/* 响应式布局容器 */}
+      <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-120px)]">
+        {/* 左侧：效果展示区域 */}
+        <div className="flex-1 p-6 lg:pr-3">
+          <Card className="h-full p-6">
+            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
+              球体效果展示
+            </h2>
+            <div className="flex justify-center items-center h-full">
+              <div className="bg-gray-900 rounded-lg p-8">
+                <canvas
+                  ref={canvasRef}
+                  className="rounded-lg shadow-xl"
+                  style={{ maxWidth: '100%', height: 'auto' }}
                 />
-                {theme.name}
-              </Button>
-            ))}
-          </div>
+              </div>
+            </div>
+          </Card>
         </div>
 
-        {/* 参数配置 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              画布宽度
-            </label>
-            <Input
-              type="number"
-              value={config.width}
-              onChange={(e) => updateConfig('width', Number(e.target.value))}
-              min={200}
-              max={800}
-            />
-          </div>
+        {/* 右侧：控制面板 */}
+        <div className="w-full lg:w-96 p-6 lg:pl-3">
+          <Card className="h-full">
+            <div className="p-6 h-full overflow-y-auto">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+                控制面板
+              </h2>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              画布高度
-            </label>
-            <Input
-              type="number"
-              value={config.height}
-              onChange={(e) => updateConfig('height', Number(e.target.value))}
-              min={200}
-              max={800}
-            />
-          </div>
+              {/* 预设配置 */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                  预设效果
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {presets.map((preset, index) => (
+                    <Button
+                      key={index}
+                      onClick={() => applyPreset(preset.config)}
+                      size="sm"
+                    >
+                      {preset.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              点数量
-            </label>
-            <Input
-              type="number"
-              value={config.pointCount}
-              onChange={(e) => updateConfig('pointCount', Number(e.target.value))}
-              min={100}
-              max={5000}
-            />
-          </div>
+              {/* 颜色主题 */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                  颜色主题
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {colorThemes.map((theme, index) => (
+                    <Button
+                      key={index}
+                      onClick={() => changeColorTheme(theme.color)}
+                      variant={config.pointColor === theme.color ? 'primary' : 'default'}
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <div
+                        className="w-3 h-3 rounded-full border border-gray-300"
+                        style={{ backgroundColor: theme.color }}
+                      />
+                      {theme.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              球体半径
-            </label>
-            <Input
-              type="number"
-              value={config.radius}
-              onChange={(e) => updateConfig('radius', Number(e.target.value))}
-              min={50}
-              max={300}
-            />
-          </div>
+              {/* 参数配置 */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                  参数配置
+                </h3>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              旋转速度
-            </label>
-            <Input
-              type="number"
-              value={config.rotationSpeed}
-              onChange={(e) => updateConfig('rotationSpeed', Number(e.target.value))}
-              min={0}
-              max={0.02}
-              step={0.0001}
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    画布宽度
+                  </label>
+                  <Input
+                    type="number"
+                    value={config.width}
+                    onChange={(e) => updateConfig('width', Number(e.target.value))}
+                    min={200}
+                    max={800}
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              点大小
-            </label>
-            <Input
-              type="number"
-              value={config.pointSize}
-              onChange={(e) => updateConfig('pointSize', Number(e.target.value))}
-              min={0.5}
-              max={5}
-              step={0.1}
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    画布高度
+                  </label>
+                  <Input
+                    type="number"
+                    value={config.height}
+                    onChange={(e) => updateConfig('height', Number(e.target.value))}
+                    min={200}
+                    max={800}
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              点透明度
-            </label>
-            <Input
-              type="number"
-              value={config.pointOpacity}
-              onChange={(e) => updateConfig('pointOpacity', Number(e.target.value))}
-              min={0.1}
-              max={1}
-              step={0.1}
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    点数量
+                  </label>
+                  <Input
+                    type="number"
+                    value={config.pointCount}
+                    onChange={(e) => updateConfig('pointCount', Number(e.target.value))}
+                    min={100}
+                    max={5000}
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              透视距离
-            </label>
-            <Input
-              type="number"
-              value={config.perspectiveDistance}
-              onChange={(e) => updateConfig('perspectiveDistance', Number(e.target.value))}
-              min={200}
-              max={1000}
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    球体半径
+                  </label>
+                  <Input
+                    type="number"
+                    value={config.radius}
+                    onChange={(e) => updateConfig('radius', Number(e.target.value))}
+                    min={50}
+                    max={300}
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              点颜色
-            </label>
-            <Input
-              type="text"
-              value={config.pointColor}
-              onChange={(e) => updateConfig('pointColor', e.target.value)}
-              placeholder="rgb(100, 150, 255)"
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    旋转速度
+                  </label>
+                  <Input
+                    type="number"
+                    value={config.rotationSpeed}
+                    onChange={(e) => updateConfig('rotationSpeed', Number(e.target.value))}
+                    min={0}
+                    max={0.02}
+                    step={0.0001}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    点大小
+                  </label>
+                  <Input
+                    type="number"
+                    value={config.pointSize}
+                    onChange={(e) => updateConfig('pointSize', Number(e.target.value))}
+                    min={0.5}
+                    max={5}
+                    step={0.1}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    点透明度
+                  </label>
+                  <Input
+                    type="number"
+                    value={config.pointOpacity}
+                    onChange={(e) => updateConfig('pointOpacity', Number(e.target.value))}
+                    min={0.1}
+                    max={1}
+                    step={0.1}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    透视距离
+                  </label>
+                  <Input
+                    type="number"
+                    value={config.perspectiveDistance}
+                    onChange={(e) => updateConfig('perspectiveDistance', Number(e.target.value))}
+                    min={200}
+                    max={1000}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    点颜色
+                  </label>
+                  <Input
+                    type="text"
+                    value={config.pointColor}
+                    onChange={(e) => updateConfig('pointColor', e.target.value)}
+                    placeholder="rgb(100, 150, 255)"
+                  />
+                </div>
+
+                {/* 技术说明 */}
+                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+                  <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                    技术说明
+                  </h3>
+                  <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                    <div>
+                      <strong>球面分布：</strong>
+                      使用黄金比例螺旋均匀分布点
+                    </div>
+                    <div>
+                      <strong>透视投影：</strong>
+                      3D 坐标转换为 2D 屏幕坐标
+                    </div>
+                    <div>
+                      <strong>深度排序：</strong>
+                      根据 Z 坐标排序实现遮挡
+                    </div>
+                    <div>
+                      <strong>透明度映射：</strong>
+                      距离越远透明度越低
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
-      </Card>
-
-      {/* 球体展示区域 */}
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
-          球体展示
-        </h3>
-        <div className="flex justify-center">
-          <div className="bg-gray-900 rounded-lg p-8">
-            <canvas
-              ref={canvasRef}
-              className="rounded-lg shadow-lg"
-              style={{ maxWidth: '100%', height: 'auto' }}
-            />
-          </div>
-        </div>
-      </Card>
-
-      {/* 使用说明 */}
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-          技术说明
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600 dark:text-gray-300">
-          <div>
-            <h3 className="font-semibold mb-2">3D 渲染技术</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm">
-              <li><strong>球面分布：</strong>使用黄金比例螺旋均匀分布点</li>
-              <li><strong>透视投影：</strong>3D 坐标转换为 2D 屏幕坐标</li>
-              <li><strong>深度排序：</strong>根据 Z 坐标排序实现遮挡</li>
-              <li><strong>透明度映射：</strong>距离越远透明度越低</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">参数控制</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm">
-              <li><strong>点数量：</strong>影响球体的密度和细节</li>
-              <li><strong>旋转速度：</strong>控制球体旋转的快慢</li>
-              <li><strong>透视距离：</strong>影响 3D 效果的强弱</li>
-              <li><strong>点大小/颜色：</strong>视觉样式的调整</li>
-            </ul>
-          </div>
-        </div>
-      </Card>
+      </div>
     </div>
   )
 }

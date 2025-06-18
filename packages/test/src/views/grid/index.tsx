@@ -1,4 +1,5 @@
 import { Grid, DotGrid } from '@jl-org/cvs'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
@@ -258,8 +259,9 @@ export default function GridTest() {
   }, [])
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
-      <div className="text-center">
+    <div className="bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+      {/* 页面标题 - 全宽显示 */}
+      <div className="p-6 text-center">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
           📐 网格效果
         </h1>
@@ -268,441 +270,434 @@ export default function GridTest() {
         </p>
       </div>
 
-      {/* 控制面板 */ }
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-          控制面板
-        </h2>
+      {/* 响应式布局容器 */}
+      <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-120px)]">
+        {/* 左侧：效果展示区域 */}
+        <div className="flex-1 p-6 lg:pr-3">
+          <Card className="h-full p-6">
+            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">
+              网格效果展示
+            </h2>
+            <div className="flex flex-col items-center justify-center h-full space-y-4">
+              <div className="relative">
+                <canvas
+                  ref={ canvasRef }
+                  className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl"
+                  width={ gridType === 'grid' ? gridConfig.width : dotGridConfig.width }
+                  height={ gridType === 'grid' ? gridConfig.height : dotGridConfig.height }
+                  style={ { maxWidth: '100%', height: 'auto' } }
+                />
+                { !isActive && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 rounded-lg">
+                    <p className="text-white text-sm">点击启动查看效果</p>
+                  </div>
+                ) }
+              </div>
 
-        {/* 网格类型选择 */ }
-        <div className="mb-6">
-          <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
-            网格类型
-          </h3>
-          <div className="flex gap-2 mb-4">
-            <Button
-              onClick={ () => switchGridType('grid') }
-              variant={ gridType === 'grid' ? 'default' : 'primary' }
-              size="sm"
-            >
-              🔲 线条网格
-            </Button>
-            <Button
-              onClick={ () => switchGridType('dotGrid') }
-              variant={ gridType === 'dotGrid' ? 'default' : 'primary' }
-              size="sm"
-            >
-              ⚫ 点阵网格
-            </Button>
-          </div>
-        </div>
-
-        {/* 预设配置 */ }
-        <div className="mb-6">
-          <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
-            预设效果
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            { gridType === 'grid'
-              ? gridPresets.map((preset, index) => (
+              <div className="flex gap-2">
                 <Button
-                  key={ index }
-                  onClick={ () => applyGridPreset(preset.config) }
+                  onClick={ createGridInstance }
+                  disabled={ isActive }
                   variant="default"
-                  size="sm"
                 >
-                  { preset.name }
+                  { isActive ? '网格运行中...' : '🎬 启动网格' }
                 </Button>
-              ))
-              : dotGridPresets.map((preset, index) => (
                 <Button
-                  key={ index }
-                  onClick={ () => applyDotGridPreset(preset.config) }
-                  variant="default"
-                  size="sm"
+                  onClick={ stopGrid }
+                  disabled={ !isActive }
+                  variant="primary"
                 >
-                  { preset.name }
+                  ⏹️ 停止网格
                 </Button>
-              )) }
-          </div>
+              </div>
+
+              <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                <p>移动鼠标到画布上查看交互效果</p>
+                <p>鼠标移动会产生高亮和发光效果</p>
+              </div>
+            </div>
+          </Card>
         </div>
 
-        {/* 基础参数配置 */ }
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              画布宽度
-            </label>
-            <Input
-              type="number"
-              value={ gridType === 'grid' ? gridConfig.width : dotGridConfig.width }
-              onChange={ (e) => {
-                const value = Number(e.target.value)
-                if (gridType === 'grid') {
-                  updateGridConfig('width', value)
-                } else {
-                  updateDotGridConfig('width', value)
-                }
-              } }
-              min={ 400 }
-              max={ 1200 }
-            />
-          </div>
+        {/* 右侧：控制面板 */}
+        <div className="w-full lg:w-96 p-6 lg:pl-3">
+          <Card className="h-full">
+            <div className="p-6 h-full overflow-y-auto">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+                控制面板
+              </h2>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              画布高度
-            </label>
-            <Input
-              type="number"
-              value={ gridType === 'grid' ? gridConfig.height : dotGridConfig.height }
-              onChange={ (e) => {
-                const value = Number(e.target.value)
-                if (gridType === 'grid') {
-                  updateGridConfig('height', value)
-                } else {
-                  updateDotGridConfig('height', value)
-                }
-              } }
-              min={ 300 }
-              max={ 800 }
-            />
-          </div>
+              {/* 网格类型选择 */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                  网格类型
+                </h3>
+                <div className="flex gap-2 mb-4">
+                  <Button
+                    onClick={ () => switchGridType('grid') }
+                    variant={ gridType === 'grid' ? 'primary' : 'default' }
+                    size="sm"
+                  >
+                    🔲 线条网格
+                  </Button>
+                  <Button
+                    onClick={ () => switchGridType('dotGrid') }
+                    variant={ gridType === 'dotGrid' ? 'primary' : 'default' }
+                    size="sm"
+                  >
+                    ⚫ 点阵网格
+                  </Button>
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-              背景颜色
-            </label>
-            <div className="flex items-center gap-2">
-              <Input
-                type="color"
-                value={ gridType === 'grid' ? gridConfig.backgroundColor : dotGridConfig.backgroundColor }
-                onChange={ (e) => {
-                  if (gridType === 'grid') {
-                    updateGridConfig('backgroundColor', e.target.value)
-                  } else {
-                    updateDotGridConfig('backgroundColor', e.target.value)
-                  }
-                } }
-                className="w-12 h-8 p-0 border-0"
-              />
-              <Input
-                type="text"
-                value={ gridType === 'grid' ? gridConfig.backgroundColor : dotGridConfig.backgroundColor }
-                onChange={ (e) => {
-                  if (gridType === 'grid') {
-                    updateGridConfig('backgroundColor', e.target.value)
-                  } else {
-                    updateDotGridConfig('backgroundColor', e.target.value)
-                  }
-                } }
-                className="flex-1"
-              />
+              {/* 预设配置 */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                  预设效果
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  { gridType === 'grid'
+                    ? gridPresets.map((preset, index) => (
+                      <Button
+                        key={ `grid-preset-${preset.name}-${index}` }
+                        onClick={ () => applyGridPreset(preset.config) }
+                        size="sm"
+                        className="text-xs"
+                      >
+                        { preset.name }
+                      </Button>
+                    ))
+                    : dotGridPresets.map((preset, index) => (
+                      <Button
+                        key={ `dot-preset-${preset.name}-${index}` }
+                        onClick={ () => applyDotGridPreset(preset.config) }
+                        size="sm"
+                        className="text-xs"
+                      >
+                        { preset.name }
+                      </Button>
+                    )) }
+                </div>
+              </div>
+
+              {/* 基础参数配置 */}
+              <div className="space-y-4 mb-6">
+                <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                  基础参数
+                </h3>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    画布宽度
+                  </label>
+                  <Input
+                    type="number"
+                    value={ gridType === 'grid' ? gridConfig.width : dotGridConfig.width }
+                    onChange={ (e) => {
+                      const value = Number(e.target.value)
+                      if (gridType === 'grid') {
+                        updateGridConfig('width', value)
+                      } else {
+                        updateDotGridConfig('width', value)
+                      }
+                    } }
+                    min={ 400 }
+                    max={ 1200 }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    画布高度
+                  </label>
+                  <Input
+                    type="number"
+                    value={ gridType === 'grid' ? gridConfig.height : dotGridConfig.height }
+                    onChange={ (e) => {
+                      const value = Number(e.target.value)
+                      if (gridType === 'grid') {
+                        updateGridConfig('height', value)
+                      } else {
+                        updateDotGridConfig('height', value)
+                      }
+                    } }
+                    min={ 300 }
+                    max={ 800 }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                    背景颜色
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="color"
+                      value={ gridType === 'grid' ? gridConfig.backgroundColor : dotGridConfig.backgroundColor }
+                      onChange={ (e) => {
+                        if (gridType === 'grid') {
+                          updateGridConfig('backgroundColor', e.target.value)
+                        } else {
+                          updateDotGridConfig('backgroundColor', e.target.value)
+                        }
+                      } }
+                      className="w-12 h-8 p-0 border-0"
+                    />
+                    <Input
+                      type="text"
+                      value={ gridType === 'grid' ? gridConfig.backgroundColor : dotGridConfig.backgroundColor }
+                      onChange={ (e) => {
+                        if (gridType === 'grid') {
+                          updateGridConfig('backgroundColor', e.target.value)
+                        } else {
+                          updateDotGridConfig('backgroundColor', e.target.value)
+                        }
+                      } }
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 网格特定配置 */}
+              { gridType === 'grid' && (
+                <div className="space-y-4 mb-6">
+                  <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                    线条网格配置
+                  </h3>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      单元格宽度 ({ gridConfig.cellWidth }px)
+                    </label>
+                    <div className="px-2">
+                      <Slider
+                        min={ 10 }
+                        max={ 100 }
+                        value={ gridConfig.cellWidth }
+                        onChange={ (value) => {
+                          if (typeof value === 'number') {
+                            updateGridConfig('cellWidth', value)
+                          } else if (Array.isArray(value)) {
+                            updateGridConfig('cellWidth', value[0])
+                          }
+                        } }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      单元格高度 ({ gridConfig.cellHeight }px)
+                    </label>
+                    <div className="px-2">
+                      <Slider
+                        min={ 10 }
+                        max={ 100 }
+                        value={ gridConfig.cellHeight }
+                        onChange={ (value) => {
+                          if (typeof value === 'number') {
+                            updateGridConfig('cellHeight', value)
+                          } else if (Array.isArray(value)) {
+                            updateGridConfig('cellHeight', value[0])
+                          }
+                        } }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      边框宽度 ({ gridConfig.borderWidth }px)
+                    </label>
+                    <div className="px-2">
+                      <Slider
+                        min={ 0.1 }
+                        max={ 2 }
+                        step={ 0.1 }
+                        value={ gridConfig.borderWidth }
+                        onChange={ (value) => {
+                          if (typeof value === 'number') {
+                            updateGridConfig('borderWidth', value)
+                          } else if (Array.isArray(value)) {
+                            updateGridConfig('borderWidth', value[0])
+                          }
+                        } }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      边框颜色
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="color"
+                        value={ gridConfig.borderColor }
+                        onChange={ (e) => updateGridConfig('borderColor', e.target.value) }
+                        className="w-12 h-8 p-0 border-0"
+                      />
+                      <Input
+                        type="text"
+                        value={ gridConfig.borderColor }
+                        onChange={ (e) => updateGridConfig('borderColor', e.target.value) }
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={ gridConfig.dashedLines }
+                        onChange={ (e) => updateGridConfig('dashedLines', e.target.checked) }
+                        className="mr-2"
+                      />
+                      <span className="text-sm text-gray-700 dark:text-gray-200">虚线模式</span>
+                    </label>
+                  </div>
+                </div>
+              ) }
+
+              {/* 点阵特定配置 */}
+              { gridType === 'dotGrid' && (
+                <div className="space-y-4 mb-6">
+                  <h3 className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                    点阵网格配置
+                  </h3>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      水平间距 ({ dotGridConfig.dotSpacingX }px)
+                    </label>
+                    <div className="px-2">
+                      <Slider
+                        min={ 5 }
+                        max={ 50 }
+                        value={ dotGridConfig.dotSpacingX }
+                        onChange={ (value) => {
+                          if (typeof value === 'number') {
+                            updateDotGridConfig('dotSpacingX', value)
+                          } else if (Array.isArray(value)) {
+                            updateDotGridConfig('dotSpacingX', value[0])
+                          }
+                        } }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      垂直间距 ({ dotGridConfig.dotSpacingY }px)
+                    </label>
+                    <div className="px-2">
+                      <Slider
+                        min={ 5 }
+                        max={ 50 }
+                        value={ dotGridConfig.dotSpacingY }
+                        onChange={ (value) => {
+                          if (typeof value === 'number') {
+                            updateDotGridConfig('dotSpacingY', value)
+                          } else if (Array.isArray(value)) {
+                            updateDotGridConfig('dotSpacingY', value[0])
+                          }
+                        } }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      点半径 ({ dotGridConfig.dotRadius }px)
+                    </label>
+                    <div className="px-2">
+                      <Slider
+                        min={ 0.5 }
+                        max={ 5 }
+                        step={ 0.1 }
+                        value={ dotGridConfig.dotRadius }
+                        onChange={ (value) => {
+                          if (typeof value === 'number') {
+                            updateDotGridConfig('dotRadius', value)
+                          } else if (Array.isArray(value)) {
+                            updateDotGridConfig('dotRadius', value[0])
+                          }
+                        } }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      点颜色
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="color"
+                        value={ dotGridConfig.dotColor }
+                        onChange={ (e) => updateDotGridConfig('dotColor', e.target.value) }
+                        className="w-12 h-8 p-0 border-0"
+                      />
+                      <Input
+                        type="text"
+                        value={ dotGridConfig.dotColor }
+                        onChange={ (e) => updateDotGridConfig('dotColor', e.target.value) }
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                      高亮范围 ({ dotGridConfig.highlightRange })
+                    </label>
+                    <div className="px-2">
+                      <Slider
+                        min={ 1 }
+                        max={ 5 }
+                        value={ dotGridConfig.highlightRange }
+                        onChange={ (value) => {
+                          if (typeof value === 'number') {
+                            updateDotGridConfig('highlightRange', value)
+                          } else if (Array.isArray(value)) {
+                            updateDotGridConfig('highlightRange', value[0])
+                          }
+                        } }
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) }
+
+              {/* 使用说明 */}
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+                <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+                  使用说明
+                </h3>
+                <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+                  <div>
+                    <strong>线条网格：</strong>
+                    由线条构成的规则网格，支持虚线模式
+                  </div>
+                  <div>
+                    <strong>点阵网格：</strong>
+                    由点构成的网格，更适合科技感效果
+                  </div>
+                  <div>
+                    <strong>交互效果：</strong>
+                    鼠标悬停时会产生高亮或发光效果
+                  </div>
+                  <div>
+                    <strong>参数调节：</strong>
+                    实时调整参数查看效果变化
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          </Card>
         </div>
-
-        {/* 网格特定配置 */ }
-        { gridType === 'grid' && (
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
-              线条网格配置
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  单元格宽度 ({ gridConfig.cellWidth }px)
-                </label>
-                <div className="px-2">
-                  <Slider
-                    min={ 10 }
-                    max={ 100 }
-                    value={ gridConfig.cellWidth }
-                    onChange={ (value) => {
-                      if (typeof value === 'number') {
-                        updateGridConfig('cellWidth', value)
-                      } else if (Array.isArray(value)) {
-                        updateGridConfig('cellWidth', value[0])
-                      }
-                    } }
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  单元格高度 ({ gridConfig.cellHeight }px)
-                </label>
-                <div className="px-2">
-                  <Slider
-                    min={ 10 }
-                    max={ 100 }
-                    value={ gridConfig.cellHeight }
-                    onChange={ (value) => {
-                      if (typeof value === 'number') {
-                        updateGridConfig('cellHeight', value)
-                      } else if (Array.isArray(value)) {
-                        updateGridConfig('cellHeight', value[0])
-                      }
-                    } }
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  边框宽度 ({ gridConfig.borderWidth }px)
-                </label>
-                <div className="px-2">
-                  <Slider
-                    min={ 0.1 }
-                    max={ 2 }
-                    step={ 0.1 }
-                    value={ gridConfig.borderWidth }
-                    onChange={ (value) => {
-                      if (typeof value === 'number') {
-                        updateGridConfig('borderWidth', value)
-                      } else if (Array.isArray(value)) {
-                        updateGridConfig('borderWidth', value[0])
-                      }
-                    } }
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  边框颜色
-                </label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="color"
-                    value={ gridConfig.borderColor }
-                    onChange={ (e) => updateGridConfig('borderColor', e.target.value) }
-                    className="w-12 h-8 p-0 border-0"
-                  />
-                  <Input
-                    type="text"
-                    value={ gridConfig.borderColor }
-                    onChange={ (e) => updateGridConfig('borderColor', e.target.value) }
-                    className="flex-1"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={ gridConfig.dashedLines }
-                    onChange={ (e) => updateGridConfig('dashedLines', e.target.checked) }
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-200">虚线模式</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        ) }
-
-        {/* 点阵特定配置 */ }
-        { gridType === 'dotGrid' && (
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
-              点阵网格配置
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  水平间距 ({ dotGridConfig.dotSpacingX }px)
-                </label>
-                <div className="px-2">
-                  <Slider
-                    min={ 5 }
-                    max={ 50 }
-                    value={ dotGridConfig.dotSpacingX }
-                    onChange={ (value) => {
-                      if (typeof value === 'number') {
-                        updateDotGridConfig('dotSpacingX', value)
-                      } else if (Array.isArray(value)) {
-                        updateDotGridConfig('dotSpacingX', value[0])
-                      }
-                    } }
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  垂直间距 ({ dotGridConfig.dotSpacingY }px)
-                </label>
-                <div className="px-2">
-                  <Slider
-                    min={ 5 }
-                    max={ 50 }
-                    value={ dotGridConfig.dotSpacingY }
-                    onChange={ (value) => {
-                      if (typeof value === 'number') {
-                        updateDotGridConfig('dotSpacingY', value)
-                      } else if (Array.isArray(value)) {
-                        updateDotGridConfig('dotSpacingY', value[0])
-                      }
-                    } }
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  点半径 ({ dotGridConfig.dotRadius }px)
-                </label>
-                <div className="px-2">
-                  <Slider
-                    min={ 0.5 }
-                    max={ 5 }
-                    step={ 0.1 }
-                    value={ dotGridConfig.dotRadius }
-                    onChange={ (value) => {
-                      if (typeof value === 'number') {
-                        updateDotGridConfig('dotRadius', value)
-                      } else if (Array.isArray(value)) {
-                        updateDotGridConfig('dotRadius', value[0])
-                      }
-                    } }
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  点颜色
-                </label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="color"
-                    value={ dotGridConfig.dotColor }
-                    onChange={ (e) => updateDotGridConfig('dotColor', e.target.value) }
-                    className="w-12 h-8 p-0 border-0"
-                  />
-                  <Input
-                    type="text"
-                    value={ dotGridConfig.dotColor }
-                    onChange={ (e) => updateDotGridConfig('dotColor', e.target.value) }
-                    className="flex-1"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  高亮范围 ({ dotGridConfig.highlightRange })
-                </label>
-                <div className="px-2">
-                  <Slider
-                    min={ 1 }
-                    max={ 5 }
-                    value={ dotGridConfig.highlightRange }
-                    onChange={ (value) => {
-                      if (typeof value === 'number') {
-                        updateDotGridConfig('highlightRange', value)
-                      } else if (Array.isArray(value)) {
-                        updateDotGridConfig('highlightRange', value[0])
-                      }
-                    } }
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        ) }
-      </Card>
-
-      {/* 效果展示区域 */ }
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
-            { gridType === 'grid' ? '线条网格效果' : '点阵网格效果' }
-          </h3>
-          <div className="flex flex-col items-center space-y-4">
-            <canvas
-              ref={ canvasRef }
-              className="border border-gray-300 dark:border-gray-600 rounded-lg"
-              width={ gridType === 'grid' ? gridConfig.width : dotGridConfig.width }
-              height={ gridType === 'grid' ? gridConfig.height : dotGridConfig.height }
-              style={ { maxWidth: '100%', height: 'auto' } }
-            />
-
-            <div className="flex gap-2">
-              <Button
-                onClick={ createGridInstance }
-                disabled={ isActive }
-                variant="default"
-              >
-                { isActive ? '网格运行中...' : '🎬 启动网格' }
-              </Button>
-              <Button
-                onClick={ stopGrid }
-                disabled={ !isActive }
-                variant="primary"
-              >
-                ⏹️ 停止网格
-              </Button>
-            </div>
-
-            <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-              <p>移动鼠标到画布上查看交互效果</p>
-              <p>{ gridType === 'grid' ? '线条网格支持单元格高亮' : '点阵网格支持点光晕效果' }</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
-            使用说明
-          </h3>
-          <div className="space-y-4 text-gray-600 dark:text-gray-300">
-            <div>
-              <h4 className="font-semibold mb-2">操作步骤</h4>
-              <ol className="list-decimal list-inside space-y-1 text-sm">
-                <li>选择网格类型（线条网格或点阵网格）</li>
-                <li>调整画布尺寸和基础参数</li>
-                <li>配置网格特定参数</li>
-                <li>点击"启动网格"查看效果</li>
-                <li>移动鼠标体验交互效果</li>
-              </ol>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-2">网格类型对比</h4>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li><strong>线条网格：</strong>由线条构成的规则网格，支持虚线模式</li>
-                <li><strong>点阵网格：</strong>由点构成的网格，更适合科技感效果</li>
-                <li><strong>交互效果：</strong>鼠标悬停时会产生高亮或发光效果</li>
-                <li><strong>自适应：</strong>支持窗口大小变化时自动调整</li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-2">参数说明</h4>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li><strong>单元格尺寸：</strong>控制网格密度</li>
-                <li><strong>点间距：</strong>控制点阵密度</li>
-                <li><strong>高亮范围：</strong>鼠标影响的区域大小</li>
-                <li><strong>过渡时间：</strong>高亮效果的动画时长</li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-2">应用场景</h4>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>网页背景和装饰效果</li>
-                <li>数据可视化的网格背景</li>
-                <li>游戏界面和科技风格设计</li>
-                <li>交互式展示和演示页面</li>
-              </ul>
-            </div>
-          </div>
-        </Card>
       </div>
     </div>
   )
