@@ -1,9 +1,8 @@
+import { readdirSync, rmSync, statSync } from 'node:fs'
+import { parse, resolve } from 'node:path'
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, type Plugin } from 'vite'
 import dts from 'vite-plugin-dts'
-import { fileURLToPath, URL } from 'node:url'
-import { readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
-import { resolve, parse, extname } from 'node:path'
-
 
 const srcDir = fileURLToPath(new URL('./src', import.meta.url))
 const distDir = fileURLToPath(new URL('./dist', import.meta.url))
@@ -41,7 +40,7 @@ export default defineConfig({
       preserveEntrySignatures: 'strict',
       input: {
         index: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
-        ...getDirEntries('./src/worker')
+        ...getDirEntries('./src/worker'),
       },
       output: [
         // ESM 格式输出（主入口 + Worker）
@@ -53,11 +52,11 @@ export default defineConfig({
         {
           format: 'cjs',
           entryFileNames: '[name].cjs',
-        }
+        },
       ],
 
       external: ['@jl-org/tool'],
-    }
+    },
   },
 
   // index.html 入口文件
@@ -88,7 +87,7 @@ function cleanupPlugin(targetDir: string, exts: string[]): Plugin {
           rmSync(filePath)
         }
       }
-    }
+    },
   }
 }
 
@@ -108,7 +107,7 @@ function getDirEntries(dirPath: string) {
   else if (outputSubDir.startsWith('src/')) {
     outputSubDir = outputSubDir.substring('src/'.length)
   }
-  // 清理可能存在的前后斜杠
+  /** 清理可能存在的前后斜杠 */
   outputSubDir = outputSubDir.replace(/^\/+|\/+$/g, '')
 
   try {
@@ -117,7 +116,7 @@ function getDirEntries(dirPath: string) {
     for (const file of files) {
       const fullPathToWorkerFile = resolve(workerAbsolutePath, file)
 
-      // 确保是文件而不是子目录，并且是 .ts 或 .js 文件
+      /** 确保是文件而不是子目录，并且是 .ts 或 .js 文件 */
       if (statSync(fullPathToWorkerFile).isFile() && (file.endsWith('.ts') || file.endsWith('.js'))) {
         const { name } = parse(file) // 'my-worker' 提取 'my-worker.ts'
 
@@ -127,7 +126,7 @@ function getDirEntries(dirPath: string) {
     }
   }
   catch (error) {
-    // 如果目录不存在或无法读取，可以打印警告或忽略
+    /** 如果目录不存在或无法读取，可以打印警告或忽略 */
     console.warn(`Could not read worker directory: ${workerAbsolutePath}`, error.message)
   }
   return entries

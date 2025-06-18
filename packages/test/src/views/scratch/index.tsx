@@ -3,16 +3,17 @@ import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
 import { cn } from '@/utils'
+import { useGetState } from '@/hooks'
 
 export default function ScratchTest() {
-  const [config, setConfig] = useState({
+  const [config, setConfig] = useGetState({
     width: 400,
     height: 300,
     bg: '#999999',
     lineWidth: 15,
     lineCap: 'round' as CanvasLineCap,
     lineJoin: 'round' as CanvasLineJoin,
-  })
+  }, true)
 
   const [scratchProgress, setScratchProgress] = useState(0)
   const [isRevealed, setIsRevealed] = useState(false)
@@ -51,7 +52,7 @@ export default function ScratchTest() {
         width: 400,
         height: 300,
         bg: '#666666',
-        lineWidth: 8,
+        lineWidth: 1,
         lineCap: 'round' as CanvasLineCap,
         lineJoin: 'round' as CanvasLineJoin,
       },
@@ -94,7 +95,10 @@ export default function ScratchTest() {
 
     const cleanup = createScratch(
       canvasRef.current,
-      config,
+      {
+        ...setConfig.getLatest(),
+        ctxOpts: { willReadFrequently: true },
+      },
       (e) => {
         // 计算刮开的进度
         const canvas = canvasRef.current!
@@ -131,9 +135,7 @@ export default function ScratchTest() {
   // 应用预设
   const applyPreset = (presetConfig: any) => {
     setConfig(presetConfig)
-    setTimeout(() => {
-      initScratch()
-    }, 100)
+    initScratch()
   }
 
   // 更新配置
@@ -141,9 +143,7 @@ export default function ScratchTest() {
     const newConfig = { ...config, [key]: value }
     setConfig(newConfig)
 
-    setTimeout(() => {
-      initScratch()
-    }, 100)
+    initScratch()
   }
 
   // 初始化
@@ -168,35 +168,35 @@ export default function ScratchTest() {
         </p>
       </div>
 
-      {/* 控制面板 */}
+      {/* 控制面板 */ }
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
           控制面板
         </h2>
 
-        {/* 预设配置 */}
+        {/* 预设配置 */ }
         <div className="mb-6">
           <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
             预设样式
           </h3>
           <div className="flex flex-wrap gap-2">
-            {presets.map((preset, index) => (
+            { presets.map((preset, index) => (
               <Button
-                key={index}
-                onClick={() => applyPreset(preset.config)}
+                key={ index }
+                onClick={ () => applyPreset(preset.config) }
                 variant="default"
                 size="sm"
               >
-                {preset.name}
+                { preset.name }
               </Button>
-            ))}
-            <Button onClick={resetScratch} variant="default" size="sm">
+            )) }
+            <Button onClick={ resetScratch } variant="default" size="sm">
               🔄 重置
             </Button>
           </div>
         </div>
 
-        {/* 参数配置 */}
+        {/* 参数配置 */ }
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
@@ -204,10 +204,10 @@ export default function ScratchTest() {
             </label>
             <Input
               type="number"
-              value={config.width}
-              onChange={(e) => updateConfig('width', Number(e.target.value))}
-              min={200}
-              max={600}
+              value={ config.width }
+              onChange={ (e) => updateConfig('width', Number(e.target.value)) }
+              min={ 200 }
+              max={ 600 }
             />
           </div>
 
@@ -217,10 +217,10 @@ export default function ScratchTest() {
             </label>
             <Input
               type="number"
-              value={config.height}
-              onChange={(e) => updateConfig('height', Number(e.target.value))}
-              min={150}
-              max={400}
+              value={ config.height }
+              onChange={ (e) => updateConfig('height', Number(e.target.value)) }
+              min={ 150 }
+              max={ 400 }
             />
           </div>
 
@@ -230,10 +230,10 @@ export default function ScratchTest() {
             </label>
             <Input
               type="number"
-              value={config.lineWidth}
-              onChange={(e) => updateConfig('lineWidth', Number(e.target.value))}
-              min={5}
-              max={50}
+              value={ config.lineWidth }
+              onChange={ (e) => updateConfig('lineWidth', Number(e.target.value)) }
+              min={ 5 }
+              max={ 50 }
             />
           </div>
 
@@ -244,14 +244,14 @@ export default function ScratchTest() {
             <div className="flex items-center gap-2">
               <Input
                 type="color"
-                value={config.bg}
-                onChange={(e) => updateConfig('bg', e.target.value)}
+                value={ config.bg }
+                onChange={ (e) => updateConfig('bg', e.target.value) }
                 className="w-12 h-8 p-0 border-0"
               />
               <Input
                 type="text"
-                value={config.bg}
-                onChange={(e) => updateConfig('bg', e.target.value)}
+                value={ config.bg }
+                onChange={ (e) => updateConfig('bg', e.target.value) }
                 className="flex-1"
               />
             </div>
@@ -262,8 +262,8 @@ export default function ScratchTest() {
               线条端点
             </label>
             <select
-              value={config.lineCap}
-              onChange={(e) => updateConfig('lineCap', e.target.value)}
+              value={ config.lineCap }
+              onChange={ (e) => updateConfig('lineCap', e.target.value) }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="round">圆形</option>
@@ -277,8 +277,8 @@ export default function ScratchTest() {
               线条连接
             </label>
             <select
-              value={config.lineJoin}
-              onChange={(e) => updateConfig('lineJoin', e.target.value)}
+              value={ config.lineJoin }
+              onChange={ (e) => updateConfig('lineJoin', e.target.value) }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="round">圆形</option>
@@ -289,7 +289,7 @@ export default function ScratchTest() {
         </div>
       </Card>
 
-      {/* 刮刮卡展示区域 */}
+      {/* 刮刮卡展示区域 */ }
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-4">
           <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
@@ -297,44 +297,44 @@ export default function ScratchTest() {
           </h3>
           <div className="flex justify-center">
             <div
-              ref={containerRef}
+              ref={ containerRef }
               className="relative border-4 border-yellow-400 rounded-lg shadow-lg overflow-hidden"
-              style={{ width: config.width, height: config.height }}
+              style={ { width: config.width, height: config.height } }
             >
-              {/* 奖品内容 */}
+              {/* 奖品内容 */ }
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-yellow-100 to-orange-100 p-4">
-                <div className={cn('text-4xl font-bold mb-2', currentPrize.color)}>
-                  {currentPrize.text}
+                <div className={ cn('text-4xl font-bold mb-2', currentPrize.color) }>
+                  { currentPrize.text }
                 </div>
                 <div className="text-lg text-gray-600 text-center">
-                  {currentPrize.subtitle}
+                  { currentPrize.subtitle }
                 </div>
-                {isRevealed && (
+                { isRevealed && (
                   <div className="mt-4 text-sm text-gray-500 animate-pulse">
                     🎊 恭喜您中奖了！
                   </div>
-                )}
+                ) }
               </div>
 
-              {/* 刮奖层 */}
+              {/* 刮奖层 */ }
               <canvas
-                ref={canvasRef}
+                ref={ canvasRef }
                 className="absolute inset-0 cursor-crosshair"
-                width={config.width}
-                height={config.height}
+                width={ config.width }
+                height={ config.height }
               />
             </div>
           </div>
 
-          {/* 进度显示 */}
+          {/* 进度显示 */ }
           <div className="mt-4 text-center">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              刮开进度: {scratchProgress}%
+              刮开进度: { scratchProgress }%
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className="bg-yellow-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${scratchProgress}%` }}
+                style={ { width: `${scratchProgress}%` } }
               />
             </div>
           </div>

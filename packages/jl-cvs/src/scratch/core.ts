@@ -32,7 +32,11 @@ function setStyle(canvas: HTMLCanvasElement, opts: ScratchOpts) {
   width && (canvas.width = width)
   height && (canvas.height = height)
 
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d', opts.ctxOpts)
+  if (!ctx) {
+    throw new Error('Failed to get canvas context')
+  }
+
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -63,26 +67,74 @@ function bindEvent(
   canvas.addEventListener('mousedown', onMouseDown)
   canvas.addEventListener('mouseup', onMouseUp)
 
+  /** 移动端支持 */
+  canvas.addEventListener('touchstart', onTouchStart)
+  canvas.addEventListener('touchend', onTouchEnd)
+  canvas.addEventListener('touchcancel', onTouchEnd)
+
   return rmEvent
 
-  function onMouseDown({ clientX, clientY }: MouseEvent) {
-    ctx.moveTo(clientX, clientY)
+  function getCanvasCoordinates(clientX: number, clientY: number) {
+    const rect = canvas.getBoundingClientRect()
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+    }
+  }
+
+  function onMouseDown(e: MouseEvent) {
+    e.preventDefault()
+    const { x, y } = getCanvasCoordinates(e.clientX, e.clientY)
+    ctx.beginPath()
+    ctx.moveTo(x, y)
     canvas.addEventListener('mousemove', onMouseMove)
   }
 
   function onMouseMove(e: MouseEvent) {
-    ctx.lineTo(e.clientX, e.clientY)
+    e.preventDefault()
+    const { x, y } = getCanvasCoordinates(e.clientX, e.clientY)
+    ctx.lineTo(x, y)
     ctx.stroke()
     onScratch?.(e)
+  }
+
+  function onTouchStart(e: TouchEvent) {
+    e.preventDefault()
+    if (e.touches.length > 0) {
+      const touch = e.touches[0]
+      const { x, y } = getCanvasCoordinates(touch.clientX, touch.clientY)
+      ctx.beginPath()
+      ctx.moveTo(x, y)
+      canvas.addEventListener('touchmove', onTouchMove)
+    }
+  }
+
+  function onTouchMove(e: TouchEvent) {
+    e.preventDefault()
+    if (e.touches.length > 0) {
+      const touch = e.touches[0]
+      const { x, y } = getCanvasCoordinates(touch.clientX, touch.clientY)
+      ctx.lineTo(x, y)
+      ctx.stroke()
+      onScratch?.(e as any)
+    }
   }
 
   function onMouseUp() {
     canvas.removeEventListener('mousemove', onMouseMove)
   }
 
+  function onTouchEnd() {
+    canvas.removeEventListener('touchmove', onTouchMove)
+  }
+
   function rmEvent() {
     canvas.removeEventListener('mousedown', onMouseDown)
     canvas.removeEventListener('mousemove', onMouseMove)
     canvas.removeEventListener('mouseup', onMouseUp)
+    canvas.removeEventListener('touchstart', onTouchStart)
+    canvas.removeEventListener('touchmove', onTouchMove)
+    canvas.removeEventListener('touchend', onTouchEnd)
+    canvas.removeEventListener('touchcancel', onTouchEnd)
   }
 }

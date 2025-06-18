@@ -7,6 +7,8 @@ export type ScratchOpts = {
   lineWidth?: number
   lineCap?: CanvasPathDrawingStyles['lineCap']
   lineJoin?: CanvasPathDrawingStyles['lineJoin']
+
+  ctxOpts?: CanvasRenderingContext2DSettings
 }
 
 export type mouseMoveCb = (e: MouseEvent) => void

@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
       }),
       codeInspectorPlugin({
         bundler: 'vite',
-        editor: 'code',
+        editor: 'cursor',
       }),
     ],
     envDir: fileURLToPath(new URL('./env', import.meta.url)),
