@@ -3,6 +3,7 @@ import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
 import { Select } from '@/components/Select'
+import { Slider } from '@/components/Slider'
 import { Uploader, type FileItem } from '@/components/Uploader'
 import { cn } from '@/utils'
 import { downloadByUrl } from '@jl-org/tool'
@@ -221,14 +222,22 @@ export default function NoteBoardTest() {
                 <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
                   线条宽度
                 </label>
-                <Input
-                  type="range"
-                  min="1"
-                  max="20"
-                  value={ config.lineWidth }
-                  onChange={ (e) => updateConfig('lineWidth', Number(e.target.value)) }
-                />
-                <span className="text-sm text-gray-500">{ config.lineWidth }px</span>
+                <div className="px-2">
+                  <Slider
+                    min={1}
+                    max={20}
+                    value={config.lineWidth}
+                    onChange={(value) => {
+                      if (typeof value === 'number') {
+                        updateConfig('lineWidth', value)
+                      } else if (Array.isArray(value)) {
+                        updateConfig('lineWidth', value[0])
+                      }
+                    }}
+                    tooltip={{ formatter: (val) => `${val}px` }}
+                  />
+                </div>
+                <span className="text-sm text-gray-500 mt-1 block">{ config.lineWidth }px</span>
               </div>
 
               <div>

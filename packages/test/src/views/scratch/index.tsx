@@ -184,7 +184,7 @@ export default function ScratchTest() {
               <Button
                 key={index}
                 onClick={() => applyPreset(preset.config)}
-                variant="outline"
+                variant="default"
                 size="sm"
               >
                 {preset.name}
