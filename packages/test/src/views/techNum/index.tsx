@@ -1,13 +1,11 @@
 import { createTechNum } from '@jl-org/cvs'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
 import { Select } from '@/components/Select'
-import { cn } from '@/utils'
 
 export default function TechNumTest() {
-  const [isRunning, setIsRunning] = useState(true) // 默认开始播放
   const [config, setConfig] = useState({
     width: 800,
     height: 600,
@@ -90,7 +88,7 @@ export default function TechNumTest() {
   ]
 
   /** 初始化科技数字 */
-  const initTechNum = () => {
+  const initTechNum = useCallback(() => {
     if (!canvasRef.current)
       return
 
@@ -109,26 +107,9 @@ export default function TechNumTest() {
     })
 
     techNumRef.current = techNum
-
-    if (isRunning) {
-      techNum.start()
-    }
-  }
-
-  /** 开始/停止动画 */
-  const toggleAnimation = () => {
-    if (!techNumRef.current)
-      return
-
-    if (isRunning) {
-      techNumRef.current.stop()
-      setIsRunning(false)
-    }
-    else {
-      techNumRef.current.start()
-      setIsRunning(true)
-    }
-  }
+    /** 自动开始数字雨效果 */
+    techNum.start()
+  }, [config])
 
   /** 应用预设 */
   const applyPreset = (presetConfig: any) => {
@@ -152,20 +133,12 @@ export default function TechNumTest() {
   useEffect(() => {
     initTechNum()
 
-    /** 延迟启动动画，确保组件完全加载 */
-    setTimeout(() => {
-      if (techNumRef.current) {
-        techNumRef.current.start()
-        setIsRunning(true)
-      }
-    }, 500)
-
     return () => {
       if (techNumRef.current) {
         techNumRef.current.stop()
       }
     }
-  }, [])
+  }, [initTechNum])
 
   return (
     <div className="min-h-screen from-green-50 to-emerald-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
@@ -196,25 +169,10 @@ export default function TechNumTest() {
                 />
               </div>
 
-              <div className="flex gap-2">
-                <Button
-                  onClick={ toggleAnimation }
-                  className={ cn(
-                    'px-6 py-2',
-                    isRunning
-                      ? 'bg-red-500 hover:bg-red-600'
-                      : 'bg-green-500 hover:bg-green-600',
-                  ) }
-                >
-                  {isRunning
-                    ? '⏹️ 停止数字雨'
-                    : '▶️ 开始数字雨'}
-                </Button>
-              </div>
-
               <div className="text-center text-sm text-gray-600 dark:text-gray-400">
                 <p>经典黑客风格数字雨效果</p>
                 <p>绿色字符从上到下流动，营造科技感氛围</p>
+                <p className="mt-2 text-green-600 dark:text-green-400">✨ 数字雨自动运行中...</p>
               </div>
             </div>
           </Card>
@@ -234,9 +192,9 @@ export default function TechNumTest() {
                   预设效果
                 </h3>
                 <div className="grid grid-cols-1 gap-2">
-                  {presets.map((preset, index) => (
+                  {presets.map(preset => (
                     <Button
-                      key={ `preset-${preset.name}-${index}` }
+                      key={ preset.name }
                       onClick={ () => applyPreset(preset.config) }
                       size="sm"
                       className="text-xs"

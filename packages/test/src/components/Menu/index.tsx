@@ -37,7 +37,7 @@ export function Menu(
   return (
     <div
       className={ cn(
-        `flex h-full flex-col gap-4
+        `flex min-h-screen flex-col gap-4
       bg-black text-white p-3 overflow-y-auto overflow-x-hidden`,
         className,
       ) }
