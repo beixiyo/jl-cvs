@@ -2,6 +2,7 @@ import { createScratch } from '@jl-org/cvs'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
+import { Select } from '@/components/Select'
 import { cn } from '@/utils'
 import { useGetState } from '@/hooks'
 
@@ -261,30 +262,32 @@ export default function ScratchTest() {
             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
               线条端点
             </label>
-            <select
+            <Select
+              options={ [
+                { value: 'round', label: '圆形' },
+                { value: 'square', label: '方形' },
+                { value: 'butt', label: '平直' },
+              ] }
               value={ config.lineCap }
-              onChange={ (e) => updateConfig('lineCap', e.target.value) }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="round">圆形</option>
-              <option value="square">方形</option>
-              <option value="butt">平直</option>
-            </select>
+              onChange={ (value) => updateConfig('lineCap', value) }
+              className="w-full"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
               线条连接
             </label>
-            <select
+            <Select
+              options={ [
+                { value: 'round', label: '圆形' },
+                { value: 'bevel', label: '斜角' },
+                { value: 'miter', label: '尖角' },
+              ] }
               value={ config.lineJoin }
-              onChange={ (e) => updateConfig('lineJoin', e.target.value) }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="round">圆形</option>
-              <option value="bevel">斜角</option>
-              <option value="miter">尖角</option>
-            </select>
+              onChange={ (value) => updateConfig('lineJoin', value) }
+              className="w-full"
+            />
           </div>
         </div>
       </Card>
