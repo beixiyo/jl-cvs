@@ -1,0 +1,389 @@
+import { StarField } from '@jl-org/cvs'
+import { Button } from '@/components/Button'
+import { Card } from '@/components/Card'
+import { Input } from '@/components/Input'
+import { cn } from '@/utils'
+
+export default function StarFieldTest() {
+  const [starField, setStarField] = useState<StarField | null>(null)
+  const [config, setConfig] = useState({
+    starCount: 300,
+    sizeRange: [0.5, 2] as [number, number],
+    speedRange: 0.1,
+    backgroundColor: '#001122',
+    flickerSpeed: 0.01,
+    width: 800,
+    height: 600,
+  })
+
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  // 预设配置
+  const presets = [
+    {
+      name: '默认星空',
+      config: {
+        starCount: 300,
+        sizeRange: [0.5, 2] as [number, number],
+        speedRange: 0.1,
+        backgroundColor: '#001122',
+        flickerSpeed: 0.01,
+        width: 800,
+        height: 600,
+      },
+    },
+    {
+      name: '密集星空',
+      config: {
+        starCount: 500,
+        sizeRange: [0.3, 1.5] as [number, number],
+        speedRange: 0.05,
+        backgroundColor: '#000011',
+        flickerSpeed: 0.02,
+        width: 800,
+        height: 600,
+      },
+    },
+    {
+      name: '大星星',
+      config: {
+        starCount: 150,
+        sizeRange: [1, 4] as [number, number],
+        speedRange: 0.2,
+        backgroundColor: '#001133',
+        flickerSpeed: 0.005,
+        width: 800,
+        height: 600,
+      },
+    },
+    {
+      name: '快速移动',
+      config: {
+        starCount: 200,
+        sizeRange: [0.5, 2] as [number, number],
+        speedRange: 0.5,
+        backgroundColor: '#000022',
+        flickerSpeed: 0.03,
+        width: 800,
+        height: 600,
+      },
+    },
+  ]
+
+  // 颜色主题
+  const colorThemes = [
+    {
+      name: '经典白色',
+      colors: ['#ffffff', '#ffe9c4', '#d4fbff'],
+    },
+    {
+      name: '暖色调',
+      colors: ['#ffddaa', '#ffcc88', '#ff9966'],
+    },
+    {
+      name: '冷色调',
+      colors: ['#aaddff', '#88ccff', '#6699ff'],
+    },
+    {
+      name: '彩虹色',
+      colors: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'],
+    },
+    {
+      name: '紫色系',
+      colors: ['#a8e6cf', '#dda0dd', '#98d8c8', '#f7dc6f'],
+    },
+  ]
+
+  const [selectedColorTheme, setSelectedColorTheme] = useState(0)
+
+  // 初始化星空
+  const initStarField = () => {
+    if (!canvasRef.current) return
+
+    const currentColorTheme = colorThemes[selectedColorTheme]
+    const starFieldInstance = new StarField(canvasRef.current, {
+      ...config,
+      colors: currentColorTheme.colors,
+    })
+
+    setStarField(starFieldInstance)
+  }
+
+  // 应用预设
+  const applyPreset = (presetConfig: any) => {
+    setConfig(presetConfig)
+    setTimeout(() => {
+      initStarField()
+    }, 100)
+  }
+
+  // 更新配置
+  const updateConfig = (key: string, value: any) => {
+    const newConfig = { ...config, [key]: value }
+    setConfig(newConfig)
+
+    setTimeout(() => {
+      initStarField()
+    }, 100)
+  }
+
+  // 更新尺寸范围
+  const updateSizeRange = (index: number, value: number) => {
+    const newSizeRange = [...config.sizeRange] as [number, number]
+    newSizeRange[index] = value
+    updateConfig('sizeRange', newSizeRange)
+  }
+
+  // 切换颜色主题
+  const changeColorTheme = (index: number) => {
+    setSelectedColorTheme(index)
+    setTimeout(() => {
+      initStarField()
+    }, 100)
+  }
+
+  // 初始化
+  useEffect(() => {
+    initStarField()
+  }, [selectedColorTheme])
+
+  // 处理窗口大小变化
+  useEffect(() => {
+    const handleResize = () => {
+      if (starField) {
+        starField.onResize(config.width, config.height)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [starField, config.width, config.height])
+
+  return (
+    <div className="p-6 space-y-6 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+          ⭐ 星空场景
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          Canvas 星空动画效果，支持自定义星星数量、大小、颜色和运动参数
+        </p>
+      </div>
+
+      {/* 控制面板 */}
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+          控制面板
+        </h2>
+
+        {/* 预设配置 */}
+        <div className="mb-6">
+          <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+            预设效果
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {presets.map((preset, index) => (
+              <Button
+                key={index}
+                onClick={() => applyPreset(preset.config)}
+                variant="outline"
+                size="sm"
+              >
+                {preset.name}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* 颜色主题 */}
+        <div className="mb-6">
+          <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+            颜色主题
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {colorThemes.map((theme, index) => (
+              <Button
+                key={index}
+                onClick={() => changeColorTheme(index)}
+                variant={selectedColorTheme === index ? 'default' : 'outline'}
+                size="sm"
+              >
+                {theme.name}
+              </Button>
+            ))}
+          </div>
+          <div className="mt-2 flex gap-1">
+            {colorThemes[selectedColorTheme].colors.map((color, index) => (
+              <div
+                key={index}
+                className="w-4 h-4 rounded border border-gray-300"
+                style={{ backgroundColor: color }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* 参数配置 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              画布宽度
+            </label>
+            <Input
+              type="number"
+              value={config.width}
+              onChange={(e) => updateConfig('width', Number(e.target.value))}
+              min={400}
+              max={1200}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              画布高度
+            </label>
+            <Input
+              type="number"
+              value={config.height}
+              onChange={(e) => updateConfig('height', Number(e.target.value))}
+              min={300}
+              max={800}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              星星数量
+            </label>
+            <Input
+              type="number"
+              value={config.starCount}
+              onChange={(e) => updateConfig('starCount', Number(e.target.value))}
+              min={50}
+              max={1000}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              最小尺寸
+            </label>
+            <Input
+              type="number"
+              value={config.sizeRange[0]}
+              onChange={(e) => updateSizeRange(0, Number(e.target.value))}
+              min={0.1}
+              max={5}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              最大尺寸
+            </label>
+            <Input
+              type="number"
+              value={config.sizeRange[1]}
+              onChange={(e) => updateSizeRange(1, Number(e.target.value))}
+              min={0.1}
+              max={10}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              运动速度
+            </label>
+            <Input
+              type="number"
+              value={config.speedRange}
+              onChange={(e) => updateConfig('speedRange', Number(e.target.value))}
+              min={0}
+              max={2}
+              step={0.01}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              闪烁速度
+            </label>
+            <Input
+              type="number"
+              value={config.flickerSpeed}
+              onChange={(e) => updateConfig('flickerSpeed', Number(e.target.value))}
+              min={0.001}
+              max={0.1}
+              step={0.001}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              背景颜色
+            </label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="color"
+                value={config.backgroundColor}
+                onChange={(e) => updateConfig('backgroundColor', e.target.value)}
+                className="w-12 h-8 p-0 border-0"
+              />
+              <Input
+                type="text"
+                value={config.backgroundColor}
+                onChange={(e) => updateConfig('backgroundColor', e.target.value)}
+                className="flex-1"
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* 星空展示区域 */}
+      <Card className="p-4">
+        <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+          星空展示
+        </h3>
+        <div className="flex justify-center">
+          <canvas
+            ref={canvasRef}
+            className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg"
+            style={{ maxWidth: '100%', height: 'auto' }}
+          />
+        </div>
+      </Card>
+
+      {/* 使用说明 */}
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+          参数说明
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600 dark:text-gray-300">
+          <div>
+            <h3 className="font-semibold mb-2">基础参数</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm">
+              <li><strong>星星数量：</strong>场景中星星的总数量</li>
+              <li><strong>尺寸范围：</strong>星星大小的最小值和最大值</li>
+              <li><strong>运动速度：</strong>星星移动的速度范围</li>
+              <li><strong>背景颜色：</strong>星空的背景色</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-semibold mb-2">视觉效果</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm">
+              <li><strong>闪烁速度：</strong>星星闪烁的频率</li>
+              <li><strong>颜色主题：</strong>不同的星星颜色搭配</li>
+              <li><strong>径向渐变：</strong>星星具有光晕效果</li>
+              <li><strong>边缘环绕：</strong>星星移出边界后从对面出现</li>
+            </ul>
+          </div>
+        </div>
+      </Card>
+    </div>
+  )
+}

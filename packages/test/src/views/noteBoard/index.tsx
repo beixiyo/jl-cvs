@@ -1,306 +1,352 @@
-import { NoteBoard, createCvs } from '@jl-org/cvs'
-import { useEffect, useRef, useState } from 'react'
+import { NoteBoard } from '@jl-org/cvs'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
+import { Input } from '@/components/Input'
+import { Select } from '@/components/Select'
+import { Uploader, type FileItem } from '@/components/Uploader'
+import { cn } from '@/utils'
+import { downloadByUrl } from '@jl-org/tool'
 
-export default function Test() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const boardRef = useRef<NoteBoard | null>(null)
-  const [currentMode, setCurrentMode] = useState<'draw' | 'erase' | 'drag' | 'rect' | 'circle' | 'arrow' | 'none'>('draw')
+type Mode = 'draw' | 'erase' | 'drag' | 'none' | 'rect' | 'circle' | 'arrow'
+
+export default function NoteBoardTest() {
+  const [noteBoard, setNoteBoard] = useState<NoteBoard | null>(null)
+  const [currentMode, setCurrentMode] = useState<Mode>('draw')
   const [config, setConfig] = useState({
-    lineWidth: 30,
-    strokeStyle: '#409eff55',
-    globalCompositeOperation: 'xor' as GlobalCompositeOperation,
+    strokeStyle: '#000000',
+    lineWidth: 2,
+    fillStyle: '#ff0000',
+    lineCap: 'round' as CanvasLineCap,
   })
 
-  const WIDTH = 800
-  const HEIGHT = 600
+  const canvasContainerRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // 模式选项
+  const modeOptions = [
+    { value: 'draw', label: '✏️ 绘制', color: 'bg-blue-500' },
+    { value: 'erase', label: '🧽 擦除', color: 'bg-red-500' },
+    { value: 'drag', label: '✋ 拖拽', color: 'bg-green-500' },
+    { value: 'rect', label: '⬜ 矩形', color: 'bg-purple-500' },
+    { value: 'circle', label: '⭕ 圆形', color: 'bg-yellow-500' },
+    { value: 'arrow', label: '➡️ 箭头', color: 'bg-pink-500' },
+    { value: 'none', label: '🚫 无操作', color: 'bg-gray-500' },
+  ]
+
+  // 预设颜色
+  const presetColors = [
+    '#000000', '#FF0000', '#00FF00', '#0000FF',
+    '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500',
+    '#800080', '#FFC0CB', '#A52A2A', '#808080'
+  ]
+
+  // 初始化画板
   useEffect(() => {
-    if (!containerRef.current) return
+    if (!canvasContainerRef.current) return
 
-    // 创建画板实例
     const board = new NoteBoard({
-      el: containerRef.current,
-      width: WIDTH,
-      height: HEIGHT,
-      lineWidth: config.lineWidth,
+      el: canvasContainerRef.current,
+      width: 800,
+      height: 600,
       strokeStyle: config.strokeStyle,
-      globalCompositeOperation: config.globalCompositeOperation,
-
-      onWheel({ scale }) {
-        console.log('onWheel 同步笔刷大小')
-        if (scale < 1) return
-
-        board.setStyle({
-          lineWidth: config.lineWidth / scale
-        })
-        board.setCursor()
+      lineWidth: config.lineWidth,
+      fillStyle: config.fillStyle,
+      lineCap: config.lineCap,
+      onMouseDown: (e) => {
+        console.log('Mouse down:', e)
+      },
+      onMouseMove: (e) => {
+        // console.log('Mouse move:', e)
+      },
+      onMouseUp: (e) => {
+        console.log('Mouse up:', e)
+      },
+      onWheel: ({ scale, e }) => {
+        console.log('Wheel:', scale)
+      },
+      onDrag: ({ translateX, translateY }) => {
+        console.log('Drag:', translateX, translateY)
+      },
+      onUndo: (params) => {
+        console.log('Undo:', params)
+      },
+      onRedo: (params) => {
+        console.log('Redo:', params)
       },
     })
 
-    boardRef.current = board
-
-    // 绘制示例图片
-    board.drawImg(
-      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzMzMzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuekuuS+i+WbvueJhzwvdGV4dD4KPC9zdmc+',
-      {
-        center: true,
-        autoFit: true,
-      },
-    )
+    setNoteBoard(board)
 
     return () => {
-      board.rmEvent?.()
+      board.rmEvent()
     }
-  }, [config])
+  }, [])
 
-  const handleModeChange = (mode: typeof currentMode) => {
-    if (boardRef.current) {
-      boardRef.current.setMode(mode)
-      setCurrentMode(mode)
-    }
-  }
+  // 更新画板配置
+  useEffect(() => {
+    if (!noteBoard) return
 
-  const handleConfigChange = (key: keyof typeof config, value: any) => {
-    setConfig(prev => ({ ...prev, [key]: value }))
-    if (boardRef.current) {
-      boardRef.current.setStyle({ [key]: value })
-    }
-  }
-
-  const handleUndo = () => {
-    boardRef.current?.undo()
-  }
-
-  const handleRedo = () => {
-    boardRef.current?.redo()
-  }
-
-  const handleClear = () => {
-    boardRef.current?.clear()
-  }
-
-  const handleResetSize = () => {
-    boardRef.current?.resetSize()
-  }
-
-  const handleExportImg = async () => {
-    if (!boardRef.current) return
-    const src = await boardRef.current.exportImg({ exportOnlyImgArea: true })
-    const link = document.createElement('a')
-    link.download = 'noteboard-export.png'
-    link.href = src
-    link.click()
-  }
-
-  const handleExportMask = async () => {
-    if (!boardRef.current) return
-    const src = await boardRef.current.exportMask({ exportOnlyImgArea: true })
-    const link = document.createElement('a')
-    link.download = 'noteboard-mask.png'
-    link.href = src
-    link.click()
-  }
-
-  const handleExportAllLayer = async () => {
-    if (!boardRef.current) return
-    const src = await boardRef.current.exportAllLayer({ exportOnlyImgArea: true })
-    const link = document.createElement('a')
-    link.download = 'noteboard-all-layers.png'
-    link.href = src
-    link.click()
-  }
-
-  const handleAddRedCanvas = () => {
-    if (!boardRef.current) return
-    const { ctx, cvs } = createCvs()
-    boardRef.current.addCanvas('redCanvs', {
-      canvas: cvs,
+    noteBoard.setStyle({
+      strokeStyle: config.strokeStyle,
+      lineWidth: config.lineWidth,
+      fillStyle: config.fillStyle,
+      lineCap: config.lineCap,
     })
+  }, [noteBoard, config])
 
-    ctx.scale(NoteBoard.dpr, NoteBoard.dpr)
-    ctx.fillStyle = '#f405'
-    ctx.fillRect(0, 0, cvs.width, cvs.height)
+  // 切换模式
+  const handleModeChange = (mode: Mode) => {
+    if (!noteBoard) return
+    setCurrentMode(mode)
+    noteBoard.setMode(mode)
   }
 
-  const setShapeStyle = (fillStyle: string, strokeStyle: string) => {
-    if (boardRef.current) {
-      boardRef.current.drawShape.setShapeStyle({
-        fillStyle,
-        lineWidth: 2,
-        strokeStyle,
-      })
-    }
+  // 撤销
+  const handleUndo = () => {
+    if (!noteBoard) return
+    noteBoard.undo()
   }
 
-  const modeButtons = [
-    { mode: 'draw' as const, label: '绘制', variant: 'primary' as const },
-    { mode: 'erase' as const, label: '擦除', variant: 'warning' as const },
-    { mode: 'drag' as const, label: '拖拽', variant: 'info' as const },
-    { mode: 'none' as const, label: '无操作', variant: 'default' as const },
-  ]
+  // 重做
+  const handleRedo = () => {
+    if (!noteBoard) return
+    noteBoard.redo()
+  }
 
-  const shapeButtons = [
-    { mode: 'rect' as const, label: '矩形', fillStyle: '#fff', strokeStyle: '#409eff' },
-    { mode: 'circle' as const, label: '圆形', fillStyle: '#f405', strokeStyle: '#000' },
-    { mode: 'arrow' as const, label: '箭头', fillStyle: '#000', strokeStyle: '#000' },
-  ]
+  // 清空画布
+  const handleClear = () => {
+    if (!noteBoard) return
+    noteBoard.clear()
+  }
+
+  // 导出图片
+  const handleExport = async () => {
+    if (!noteBoard) return
+    const dataURL = await noteBoard.exportImg()
+    downloadByUrl(dataURL, 'noteBoard.png')
+  }
+
+  // 上传图片
+  const handleImageUpload = (file: FileItem[]) => {
+    if (!noteBoard) return
+
+    noteBoard.drawImg(file[0].base64, {
+      center: true,
+      autoFit: true,
+      needClear: true,
+    })
+  }
+
+  // 更新配置
+  const updateConfig = (key: string, value: any) => {
+    setConfig(prev => ({ ...prev, [key]: value }))
+  }
 
   return (
-    <div className="flex size-full bg-gray-50">
-      {/* 左侧控制面板 */}
-      <div className="w-80 p-6 bg-white shadow-lg overflow-y-auto">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">图像编辑画板</h1>
+    <div className="p-6 space-y-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+          🎨 图像编辑画板
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          功能完整的 Canvas 画板组件，支持绘图、擦除、图形绘制、撤销重做等功能
+        </p>
+      </div>
 
-        <Card className="mb-6 border-gray-200">
-          <div className="p-4">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">绘制配置</h3>
+      {/* 工具栏 */ }
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center gap-4">
+          {/* 模式切换 */ }
+          <div className="flex flex-wrap gap-2">
+            { modeOptions.map((option) => (
+              <Button
+                key={ option.value }
+                onClick={ () => handleModeChange(option.value as Mode) }
+                variant={ currentMode === option.value ? 'default' : 'primary' }
+                className={ cn(
+                  'text-sm',
+                  currentMode === option.value && option.color
+                ) }
+              >
+                { option.label }
+              </Button>
+            )) }
+          </div>
 
-            <div className="space-y-4">
+          <div className="h-6 w-px bg-gray-300 dark:bg-gray-600" />
+
+          {/* 操作按钮 */ }
+          <div className="flex gap-2">
+            <Button onClick={ handleUndo } variant="primary" size="sm">
+              ↶ 撤销
+            </Button>
+            <Button onClick={ handleRedo } variant="primary" size="sm">
+              ↷ 重做
+            </Button>
+            <Button onClick={ handleClear } variant="primary" size="sm">
+              🗑️ 清空
+            </Button>
+            <Button onClick={ handleExport } variant="primary" size="sm">
+              💾 导出
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      {/* 主要内容区域 */ }
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* 画布区域 */ }
+        <div className="lg:col-span-3">
+          <Card className="p-4">
+            <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+              画布区域
+            </h3>
+            <div
+              ref={ canvasContainerRef }
+              className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden"
+              style={ { width: '800px', height: '600px', maxWidth: '100%' } }
+            />
+          </Card>
+        </div>
+
+        {/* 配置面板 */ }
+        <div className="space-y-4">
+          {/* 画笔设置 */ }
+          <Card className="p-4">
+            <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+              画笔设置
+            </h3>
+            <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-600">
-                  笔刷大小: {config.lineWidth}px
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  线条宽度
                 </label>
-                <input
+                <Input
                   type="range"
                   min="1"
-                  max="100"
-                  value={config.lineWidth}
-                  onChange={(e) => handleConfigChange('lineWidth', Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  max="20"
+                  value={ config.lineWidth }
+                  onChange={ (e) => updateConfig('lineWidth', Number(e.target.value)) }
+                />
+                <span className="text-sm text-gray-500">{ config.lineWidth }px</span>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  线条样式
+                </label>
+                <Select
+                  value={ config.lineCap }
+                  onChange={ (value) => updateConfig('lineCap', value) }
+                  options={ [
+                    { value: 'round', label: '圆形' },
+                    { value: 'square', label: '方形' },
+                    { value: 'butt', label: '平直' },
+                  ] }
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-600">
-                  笔刷颜色
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  描边颜色
                 </label>
-                <input
-                  type="color"
-                  value={config.strokeStyle.replace('55', '')}
-                  onChange={(e) => handleConfigChange('strokeStyle', e.target.value + '55')}
-                  className="w-full h-10 border border-gray-300 rounded cursor-pointer"
-                />
+                <div className="flex items-center gap-2 mb-2">
+                  <Input
+                    type="color"
+                    value={ config.strokeStyle }
+                    onChange={ (e) => updateConfig('strokeStyle', e.target.value) }
+                    className="w-12 h-8 p-0 border-0"
+                  />
+                  <Input
+                    type="text"
+                    value={ config.strokeStyle }
+                    onChange={ (e) => updateConfig('strokeStyle', e.target.value) }
+                    className="flex-1"
+                  />
+                </div>
+                <div className="grid grid-cols-4 gap-1">
+                  { presetColors.map((color) => (
+                    <button
+                      key={ color }
+                      className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600"
+                      style={ { backgroundColor: color } }
+                      onClick={ () => updateConfig('strokeStyle', color) }
+                    />
+                  )) }
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-600">
-                  混合模式
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                  填充颜色
                 </label>
-                <select
-                  value={config.globalCompositeOperation}
-                  onChange={(e) => handleConfigChange('globalCompositeOperation', e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="source-over">正常</option>
-                  <option value="xor">异或</option>
-                  <option value="multiply">正片叠底</option>
-                  <option value="screen">滤色</option>
-                  <option value="overlay">叠加</option>
-                </select>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="color"
+                    value={ config.fillStyle }
+                    onChange={ (e) => updateConfig('fillStyle', e.target.value) }
+                    className="w-12 h-8 p-0 border-0"
+                  />
+                  <Input
+                    type="text"
+                    value={ config.fillStyle }
+                    onChange={ (e) => updateConfig('fillStyle', e.target.value) }
+                    className="flex-1"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </Card>
+          </Card>
 
-        <Card className="mb-6 border-gray-200">
-          <div className="p-4">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">操作模式</h3>
-
-            <div className="grid grid-cols-2 gap-2">
-              {modeButtons.map((btn) => (
-                <Button
-                  key={btn.mode}
-                  onClick={() => handleModeChange(btn.mode)}
-                  variant={currentMode === btn.mode ? btn.variant : 'default'}
-                  className="text-sm"
-                >
-                  {btn.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        <Card className="mb-6 border-gray-200">
-          <div className="p-4">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">形状绘制</h3>
-
-            <div className="space-y-2">
-              {shapeButtons.map((btn) => (
-                <Button
-                  key={btn.mode}
-                  onClick={() => {
-                    setShapeStyle(btn.fillStyle, btn.strokeStyle)
-                    handleModeChange(btn.mode)
-                  }}
-                  variant={currentMode === btn.mode ? 'primary' : 'default'}
-                  className="w-full text-sm"
-                >
-                  {btn.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        <Card className="mb-6 border-gray-200">
-          <div className="p-4">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">操作控制</h3>
-
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                <Button onClick={handleUndo} variant="info" className="text-sm">
-                  撤销
-                </Button>
-                <Button onClick={handleRedo} variant="info" className="text-sm">
-                  重做
-                </Button>
+          {/* 图片上传 */ }
+          <Card className="p-4">
+            <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+              背景图片
+            </h3>
+            <Uploader
+              accept="image/*"
+              onChange={ handleImageUpload }
+              className="w-full"
+            >
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  点击或拖拽上传图片
+                </p>
               </div>
-
-              <Button onClick={handleClear} variant="danger" className="w-full text-sm">
-                清空画布
-              </Button>
-
-              <Button onClick={handleResetSize} variant="default" className="w-full text-sm">
-                重置大小
-              </Button>
-
-              <Button onClick={handleAddRedCanvas} variant="warning" className="w-full text-sm">
-                添加红色图层
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-gray-200">
-          <div className="p-4">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">导出功能</h3>
-
-            <div className="space-y-2">
-              <Button onClick={handleExportImg} variant="success" className="w-full text-sm">
-                导出图片
-              </Button>
-              <Button onClick={handleExportMask} variant="success" className="w-full text-sm">
-                导出蒙版
-              </Button>
-              <Button onClick={handleExportAllLayer} variant="success" className="w-full text-sm">
-                导出所有图层
-              </Button>
-            </div>
-          </div>
-        </Card>
+            </Uploader>
+          </Card>
+        </div>
       </div>
 
-      {/* 右侧画布区域 */}
-      <div className="flex-1 p-6 flex items-center justify-center">
-        <div
-          ref={containerRef}
-          className="border-2 border-gray-300 rounded-lg shadow-lg bg-white"
-          style={{ width: WIDTH, height: HEIGHT }}
-        />
-      </div>
+      {/* 使用说明 */ }
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+          功能说明
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600 dark:text-gray-300">
+          <div>
+            <h3 className="font-semibold mb-2">绘图模式</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm">
+              <li><strong>绘制：</strong>自由绘制线条</li>
+              <li><strong>擦除：</strong>擦除已绘制内容</li>
+              <li><strong>拖拽：</strong>拖拽移动画布</li>
+              <li><strong>矩形：</strong>绘制矩形图形</li>
+              <li><strong>圆形：</strong>绘制圆形图形</li>
+              <li><strong>箭头：</strong>绘制箭头图形</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-semibold mb-2">快捷操作</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm">
+              <li><strong>撤销/重做：</strong>支持多步操作历史</li>
+              <li><strong>缩放：</strong>鼠标滚轮缩放画布</li>
+              <li><strong>导出：</strong>保存为 PNG 图片</li>
+              <li><strong>背景图：</strong>上传图片作为背景</li>
+              <li><strong>清空：</strong>清除所有绘制内容</li>
+            </ul>
+          </div>
+        </div>
+      </Card>
     </div>
   )
 }

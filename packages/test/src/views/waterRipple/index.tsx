@@ -1,157 +1,359 @@
-import { WaterRipple, getColor } from '@jl-org/cvs'
-import { cn } from '@/utils'
-import { memo, useEffect, useRef, useState } from 'react'
+import { WaterRipple } from '@jl-org/cvs'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
+import { Input } from '@/components/Input'
+import { Select } from '@/components/Select'
+import { cn } from '@/utils'
 
-export default function WaterRippleView() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const rippleRef = useRef<WaterRipple | null>(null)
-  const [isPlaying, setIsPlaying] = useState(true)
+export default function WaterRippleTest() {
+  const [rippleInstances, setRippleInstances] = useState<WaterRipple[]>([])
   const [config, setConfig] = useState({
-    circleCount: 25,
+    width: 800,
+    height: 600,
+    yOffset: 180,
+    xOffset: 0,
+    lineWidth: 2,
+    circleCount: 13,
     intensity: 1,
-    randomColor: false,
+    strokeStyle: '',
   })
 
-  useEffect(() => {
-    if (!canvasRef.current) return
+  const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([])
 
-    // 创建水波纹实例
-    const ripple = new WaterRipple({
-      canvas: canvasRef.current,
-      onResize() {
-        const container = canvasRef.current?.parentElement
-        if (container && ripple) {
-          ripple.setSize(container.clientWidth, container.clientHeight)
-        }
+  // 预设配置
+  const presets = [
+    {
+      name: '默认效果',
+      config: {
+        width: 800,
+        height: 600,
+        yOffset: 180,
+        xOffset: 0,
+        lineWidth: 2,
+        circleCount: 13,
+        intensity: 1,
+        strokeStyle: '',
       },
-      circleCount: config.circleCount,
-      intensity: config.intensity,
-      strokeStyle: config.randomColor ? getColor : '#00bcd4',
+    },
+    {
+      name: '快速波纹',
+      config: {
+        width: 800,
+        height: 600,
+        yOffset: 100,
+        xOffset: 0,
+        lineWidth: 1,
+        circleCount: 20,
+        intensity: 3,
+        strokeStyle: 'rgba(0, 150, 255, 0.3)',
+      },
+    },
+    {
+      name: '慢速大波纹',
+      config: {
+        width: 800,
+        height: 600,
+        yOffset: 200,
+        xOffset: 0,
+        lineWidth: 4,
+        circleCount: 8,
+        intensity: 0.5,
+        strokeStyle: 'rgba(255, 100, 100, 0.2)',
+      },
+    },
+    {
+      name: '彩色渐变',
+      config: {
+        width: 800,
+        height: 600,
+        yOffset: 150,
+        xOffset: 0,
+        lineWidth: 3,
+        circleCount: 15,
+        intensity: 2,
+        strokeStyle: '', // 将使用动态颜色函数
+      },
+    },
+  ]
+
+  // 创建水波纹实例
+  const createRipple = (canvas: HTMLCanvasElement, customConfig?: any) => {
+    const rippleConfig = customConfig || config
+
+    const ripple = new WaterRipple({
+      canvas,
+      width: rippleConfig.width,
+      height: rippleConfig.height,
+      yOffset: rippleConfig.yOffset,
+      xOffset: rippleConfig.xOffset,
+      lineWidth: rippleConfig.lineWidth,
+      circleCount: rippleConfig.circleCount,
+      intensity: rippleConfig.intensity,
+      strokeStyle: rippleConfig.strokeStyle || undefined,
+      onResize: () => {
+        console.log('Canvas resized')
+      },
     })
 
-    rippleRef.current = ripple
-
-    // 设置画布样式
-    const canvas = canvasRef.current
-    canvas.style.background = '#1a1a1a'
-    canvas.style.width = '100%'
-    canvas.style.height = '100%'
-
-    // 初始化大小
-    const container = canvas.parentElement
-    if (container) {
-      ripple.setSize(container.clientWidth, container.clientHeight)
-    }
-
-    // 窗口大小变化监听
-    const handleResize = () => {
-      const container = canvasRef.current?.parentElement
-      if (container && ripple) {
-        ripple.setSize(container.clientWidth, container.clientHeight)
-      }
-    }
-
-    window.addEventListener('resize', handleResize)
-
-    return () => {
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [config])
-
-  const handleConfigChange = (key: keyof typeof config, value: any) => {
-    setConfig(prev => ({ ...prev, [key]: value }))
+    return ripple
   }
 
+  // 应用预设配置
+  const applyPreset = (presetConfig: any) => {
+    setConfig(presetConfig)
+
+    // 重新创建所有实例
+    rippleInstances.forEach(instance => instance.stop())
+    const newInstances: WaterRipple[] = []
+
+    canvasRefs.current.forEach((canvas, index) => {
+      if (canvas) {
+        const ripple = createRipple(canvas, presetConfig)
+        newInstances.push(ripple)
+      }
+    })
+
+    setRippleInstances(newInstances)
+  }
+
+  // 更新配置
+  const updateConfig = (key: string, value: any) => {
+    const newConfig = { ...config, [key]: value }
+    setConfig(newConfig)
+
+    // 重新创建实例
+    rippleInstances.forEach(instance => instance.stop())
+    const newInstances: WaterRipple[] = []
+
+    canvasRefs.current.forEach((canvas) => {
+      if (canvas) {
+        const ripple = createRipple(canvas, newConfig)
+        newInstances.push(ripple)
+      }
+    })
+
+    setRippleInstances(newInstances)
+  }
+
+  // 初始化画布
+  useEffect(() => {
+    const instances: WaterRipple[] = []
+
+    canvasRefs.current.forEach((canvas) => {
+      if (canvas) {
+        const ripple = createRipple(canvas)
+        instances.push(ripple)
+      }
+    })
+
+    setRippleInstances(instances)
+
+    return () => {
+      instances.forEach(instance => instance.stop())
+    }
+  }, [])
+
   return (
-    <div className="flex size-full bg-gray-900">
-      {/* 左侧控制面板 */ }
-      <div className="w-80 p-6 bg-gray-800 text-white overflow-y-auto">
-        <h1 className="text-2xl font-bold mb-6 text-cyan-400">水波纹效果</h1>
+    <div className="p-6 space-y-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 h-screen overflow-auto">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+          🌊 水波纹动画效果
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          Canvas 水波纹动画组件，支持多种配置参数和预设效果
+        </p>
+      </div>
 
-        <Card className="mb-6 bg-gray-700 border-gray-600">
-          <div className="p-4">
-            <h3 className="text-lg font-semibold mb-4 text-cyan-300">配置参数</h3>
+      {/* 控制面板 */}
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+          控制面板
+        </h2>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  圈数: { config.circleCount }
-                </label>
-                <input
-                  type="range"
-                  min="5"
-                  max="50"
-                  value={ config.circleCount }
-                  onChange={ (e) => handleConfigChange('circleCount', Number(e.target.value)) }
-                  className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-                />
-              </div>
+        {/* 预设配置 */}
+        <div className="mb-6">
+          <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">
+            预设效果
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {presets.map((preset, index) => (
+              <Button
+                key={index}
+                onClick={() => applyPreset(preset.config)}
+                variant="primary"
+                className="text-sm"
+              >
+                {preset.name}
+              </Button>
+            ))}
+          </div>
+        </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  波纹强度: { config.intensity }
-                </label>
-                <input
-                  type="range"
-                  min="0.1"
-                  max="3"
-                  step="0.1"
-                  value={ config.intensity }
-                  onChange={ (e) => handleConfigChange('intensity', Number(e.target.value)) }
-                  className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-                />
-              </div>
+        {/* 参数配置 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              画布宽度
+            </label>
+            <Input
+              type="number"
+              value={config.width}
+              onChange={(e) => updateConfig('width', Number(e.target.value))}
+              min={200}
+              max={1200}
+            />
+          </div>
 
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="randomColor"
-                  checked={ config.randomColor }
-                  onChange={ (e) => handleConfigChange('randomColor', e.target.checked) }
-                  className="w-4 h-4 text-cyan-600 bg-gray-600 border-gray-500 rounded focus:ring-cyan-500"
-                />
-                <label htmlFor="randomColor" className="text-sm font-medium">
-                  随机颜色 (癫痫患者慎选)
-                </label>
-              </div>
-            </div>
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              画布高度
+            </label>
+            <Input
+              type="number"
+              value={config.height}
+              onChange={(e) => updateConfig('height', Number(e.target.value))}
+              min={200}
+              max={800}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              Y轴偏移
+            </label>
+            <Input
+              type="number"
+              value={config.yOffset}
+              onChange={(e) => updateConfig('yOffset', Number(e.target.value))}
+              min={-200}
+              max={400}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              X轴偏移
+            </label>
+            <Input
+              type="number"
+              value={config.xOffset}
+              onChange={(e) => updateConfig('xOffset', Number(e.target.value))}
+              min={-200}
+              max={200}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              线条宽度
+            </label>
+            <Input
+              type="number"
+              value={config.lineWidth}
+              onChange={(e) => updateConfig('lineWidth', Number(e.target.value))}
+              min={1}
+              max={10}
+              step={0.5}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              波纹圈数
+            </label>
+            <Input
+              type="number"
+              value={config.circleCount}
+              onChange={(e) => updateConfig('circleCount', Number(e.target.value))}
+              min={5}
+              max={30}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              动画强度
+            </label>
+            <Input
+              type="number"
+              value={config.intensity}
+              onChange={(e) => updateConfig('intensity', Number(e.target.value))}
+              min={0.1}
+              max={5}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+              描边颜色
+            </label>
+            <Input
+              type="color"
+              value={config.strokeStyle}
+              onChange={(e) => updateConfig('strokeStyle', e.target.value)}
+              placeholder="rgba(255,255,255,0.5)"
+            />
+          </div>
+        </div>
+      </Card>
+
+      {/* 效果展示 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+            当前配置效果
+          </h3>
+          <div className="flex justify-center">
+            <canvas
+              ref={(el) => (canvasRefs.current[0] = el)}
+              className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg bg-black"
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
           </div>
         </Card>
 
-        <Card className="bg-gray-700 border-gray-600">
-          <div className="p-4">
-            <h3 className="text-lg font-semibold mb-3 text-cyan-300">使用说明</h3>
-            <ul className="text-sm space-y-2 text-gray-300">
-              <li>• 点击画布任意位置产生水波纹</li>
-              <li>• 调整圈数控制波纹的密度</li>
-              <li>• 调整强度控制波纹的激烈程度</li>
-              <li>• 开启随机颜色获得炫彩效果</li>
-            </ul>
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
+            对比效果
+          </h3>
+          <div className="flex justify-center">
+            <canvas
+              ref={(el) => (canvasRefs.current[1] = el)}
+              className="border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg bg-black"
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
           </div>
         </Card>
       </div>
 
-      {/* 右侧画布区域 */ }
-      <div className="flex-1 relative">
-        <canvas
-          ref={ canvasRef }
-          className={ cn(
-            'absolute inset-0 cursor-crosshair',
-            'transition-opacity duration-300',
-            isPlaying ? 'opacity-100' : 'opacity-75'
-          ) }
-        />
-
-        { !isPlaying && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="bg-black/50 text-white px-4 py-2 rounded-lg">
-              已暂停
-            </div>
-          </div>
-        ) }
-      </div>
+      {/* 使用说明 */}
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+          使用说明
+        </h2>
+        <div className="space-y-3 text-gray-600 dark:text-gray-300">
+          <p>
+            <strong>基本用法：</strong>
+            创建 WaterRipple 实例，传入 canvas 元素和配置参数
+          </p>
+          <p>
+            <strong>主要参数：</strong>
+          </p>
+          <ul className="list-disc list-inside ml-4 space-y-1">
+            <li><code>width/height</code>: 画布尺寸</li>
+            <li><code>xOffset/yOffset</code>: 波纹中心偏移量</li>
+            <li><code>lineWidth</code>: 波纹线条宽度</li>
+            <li><code>circleCount</code>: 同时显示的波纹圈数</li>
+            <li><code>intensity</code>: 动画速度强度</li>
+            <li><code>strokeStyle</code>: 自定义描边样式</li>
+          </ul>
+          <p>
+            <strong>方法：</strong>
+            <code>stop()</code> 停止动画，<code>setSize(width, height)</code> 调整尺寸
+          </p>
+        </div>
+      </Card>
     </div>
   )
 }
