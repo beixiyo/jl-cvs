@@ -1,29 +1,32 @@
-import { NoteBoard } from '@jl-org/cvs'
+import { type Mode, NoteBoard } from '@jl-org/cvs'
+import { downloadByUrl } from '@jl-org/tool'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
 import { Select } from '@/components/Select'
 import { Slider } from '@/components/Slider'
-import { Uploader, type FileItem } from '@/components/Uploader'
+import { type FileItem, Uploader } from '@/components/Uploader'
+import { BRUSH_COLOR, DEFAULT_STROKE_WIDTH } from '@/config'
+import { onMounted, useGetState } from '@/hooks'
 import { cn } from '@/utils'
-import { downloadByUrl } from '@jl-org/tool'
-
-type Mode = 'draw' | 'erase' | 'drag' | 'none' | 'rect' | 'circle' | 'arrow'
 
 export default function NoteBoardTest() {
   const [noteBoard, setNoteBoard] = useState<NoteBoard | null>(null)
   const [currentMode, setCurrentMode] = useState<Mode>('draw')
-  const [config, setConfig] = useState({
-    strokeStyle: '#000000',
-    lineWidth: 2,
-    fillStyle: '#ff0000',
+  const [config, setConfig] = useGetState({
+    strokeStyle: BRUSH_COLOR,
+    lineWidth: DEFAULT_STROKE_WIDTH,
     lineCap: 'round' as CanvasLineCap,
-  })
+  }, true)
 
-  const canvasContainerRef = useRef<HTMLDivElement>(null)
+  const isFirstRender = useRef(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const canvasContainerRef = useRef<HTMLDivElement>(null)
 
-  // 模式选项
+  const width = 800
+  const height = 600
+
+  /** 模式选项 */
   const modeOptions = [
     { value: 'draw', label: '✏️ 绘制', color: 'bg-blue-500' },
     { value: 'erase', label: '🧽 擦除', color: 'bg-red-500' },
@@ -32,113 +35,176 @@ export default function NoteBoardTest() {
     { value: 'circle', label: '⭕ 圆形', color: 'bg-yellow-500' },
     { value: 'arrow', label: '➡️ 箭头', color: 'bg-pink-500' },
     { value: 'none', label: '🚫 无操作', color: 'bg-gray-500' },
-  ]
+  ] as const
 
-  // 预设颜色
+  /** 预设颜色 */
   const presetColors = [
-    '#000000', '#FF0000', '#00FF00', '#0000FF',
-    '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500',
-    '#800080', '#FFC0CB', '#A52A2A', '#808080'
+    '#000000',
+    '#FF0000',
+    '#00FF00',
+    '#0000FF',
+    '#FFFF00',
+    '#FF00FF',
+    '#00FFFF',
+    '#FFA500',
+    '#800080',
+    '#FFC0CB',
+    '#A52A2A',
+    '#808080',
   ]
 
-  // 初始化画板
-  useEffect(() => {
-    if (!canvasContainerRef.current) return
+  /** 初始化画板 */
+  onMounted(() => {
+    if (!canvasContainerRef.current)
+      return
 
     const board = new NoteBoard({
       el: canvasContainerRef.current,
-      width: 800,
-      height: 600,
+      width,
+      height,
       strokeStyle: config.strokeStyle,
       lineWidth: config.lineWidth,
-      fillStyle: config.fillStyle,
       lineCap: config.lineCap,
-      onMouseDown: (e) => {
-        console.log('Mouse down:', e)
-      },
-      onMouseMove: (e) => {
-        // console.log('Mouse move:', e)
-      },
-      onMouseUp: (e) => {
-        console.log('Mouse up:', e)
-      },
+      globalCompositeOperation: 'xor',
+
+      onMouseDown: (e) => { },
+      onMouseMove: (e) => { },
+      onMouseUp: (e) => { },
       onWheel: ({ scale, e }) => {
-        console.log('Wheel:', scale)
+        syncBrushSize(scale)
       },
-      onDrag: ({ translateX, translateY }) => {
-        console.log('Drag:', translateX, translateY)
-      },
-      onUndo: (params) => {
-        console.log('Undo:', params)
-      },
-      onRedo: (params) => {
-        console.log('Redo:', params)
-      },
+      onDrag: ({ translateX, translateY }) => { },
+      onUndo: (params) => { },
+      onRedo: (params) => { },
     })
+
+    if (isFirstRender.current) {
+      const imgURL = new URL('@/assets/umr.webp', import.meta.url).href
+      board.drawImg(imgURL, {
+        center: true,
+        autoFit: true,
+      })
+
+      isFirstRender.current = false
+    }
 
     setNoteBoard(board)
 
     return () => {
       board.rmEvent()
     }
-  }, [])
+  })
 
-  // 更新画板配置
+  /** 更新画板配置 */
   useEffect(() => {
-    if (!noteBoard) return
+    if (!noteBoard)
+      return
 
     noteBoard.setStyle({
       strokeStyle: config.strokeStyle,
       lineWidth: config.lineWidth,
-      fillStyle: config.fillStyle,
       lineCap: config.lineCap,
     })
   }, [noteBoard, config])
 
-  // 切换模式
+  useEffect(() => {
+    syncBrushSize(undefined, config.lineWidth)
+  }, [noteBoard, config.lineWidth])
+
+  const syncBrushSize = (scale?: number, size?: number) => {
+    if (!noteBoard)
+      return
+
+    if (scale !== undefined && scale > 1) {
+      const lineWidth = setConfig.getLatest().lineWidth / scale
+      noteBoard.setStyle({ lineWidth })
+      noteBoard.setCursor()
+      return
+    }
+
+    if (size !== undefined && size > 0) {
+      noteBoard.setStyle({ lineWidth: size })
+      noteBoard.setCursor()
+      return
+    }
+  }
+
+  /** 切换模式 */
   const handleModeChange = (mode: Mode) => {
-    if (!noteBoard) return
+    if (!noteBoard)
+      return
     setCurrentMode(mode)
     noteBoard.setMode(mode)
   }
 
-  // 撤销
+  /** 撤销 */
   const handleUndo = () => {
-    if (!noteBoard) return
+    if (!noteBoard)
+      return
     noteBoard.undo()
   }
 
-  // 重做
+  /** 重做 */
   const handleRedo = () => {
-    if (!noteBoard) return
+    if (!noteBoard)
+      return
     noteBoard.redo()
   }
 
-  // 清空画布
+  /** 清空画布 */
   const handleClear = () => {
-    if (!noteBoard) return
+    if (!noteBoard)
+      return
     noteBoard.clear()
   }
 
-  // 导出图片
+  /**
+   * 单独导出图片和绘制内容
+   */
   const handleExport = async () => {
-    if (!noteBoard) return
-    const dataURL = await noteBoard.exportImg()
-    downloadByUrl(dataURL, 'noteBoard.png')
+    if (!noteBoard)
+      return
+
+    const src = await noteBoard.exportImg({ exportOnlyImgArea: true })
+    const mask = await noteBoard.exportMask({ exportOnlyImgArea: true })
   }
 
-  // 上传图片
-  const handleImageUpload = (file: FileItem[]) => {
-    if (!noteBoard) return
+  /**
+   * 导出所有图层
+   */
+  const handleExportAll = async () => {
+    if (!noteBoard)
+      return
 
+    const src = await noteBoard.exportAllLayer({ exportOnlyImgArea: true })
+  }
+
+  /**
+   * 重置大小
+   */
+  const handleResetSize = () => {
+    if (!noteBoard)
+      return
+    noteBoard.resetSize()
+  }
+
+  /** 上传图片 */
+  const handleImageUpload = (file: FileItem[]) => {
+    if (!noteBoard)
+      return
+
+    noteBoard.clear(true)
+    /**
+     * 居中绘制图片，并自动拉伸大小
+     */
     noteBoard.drawImg(file[0].base64, {
       center: true,
       autoFit: true,
-      needClear: true,
+      needRecordImgInfo: true,
     })
   }
 
-  // 更新配置
+  /** 更新配置 */
   const updateConfig = (key: string, value: any) => {
     setConfig(prev => ({ ...prev, [key]: value }))
   }
@@ -159,14 +225,16 @@ export default function NoteBoardTest() {
         <div className="flex flex-wrap items-center gap-4">
           {/* 模式切换 */ }
           <div className="flex flex-wrap gap-2">
-            { modeOptions.map((option) => (
+            { modeOptions.map(option => (
               <Button
                 key={ option.value }
                 onClick={ () => handleModeChange(option.value as Mode) }
-                variant={ currentMode === option.value ? 'default' : 'primary' }
+                variant={ currentMode === option.value
+                  ? 'default'
+                  : 'primary' }
                 className={ cn(
                   'text-sm',
-                  currentMode === option.value && option.color
+                  currentMode === option.value && option.color,
                 ) }
               >
                 { option.label }
@@ -188,7 +256,13 @@ export default function NoteBoardTest() {
               🗑️ 清空
             </Button>
             <Button onClick={ handleExport } variant="primary" size="sm">
-              💾 导出
+              💾 单独导出图片和绘制内容
+            </Button>
+            <Button onClick={ handleExportAll } variant="primary" size="sm">
+              💾 导出所有图层
+            </Button>
+            <Button onClick={ handleResetSize } variant="primary" size="sm">
+              🔄 重置大小
             </Button>
           </div>
         </div>
@@ -198,16 +272,11 @@ export default function NoteBoardTest() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* 画布区域 */ }
         <div className="lg:col-span-3">
-          <Card className="p-4">
-            <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
-              画布区域
-            </h3>
-            <div
-              ref={ canvasContainerRef }
-              className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden"
-              style={ { width: '800px', height: '600px', maxWidth: '100%' } }
-            />
-          </Card>
+          <div
+            ref={ canvasContainerRef }
+            className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-slate-100"
+            style={ { width, height } }
+          />
         </div>
 
         {/* 配置面板 */ }
@@ -224,20 +293,24 @@ export default function NoteBoardTest() {
                 </label>
                 <div className="px-2">
                   <Slider
-                    min={1}
-                    max={20}
-                    value={config.lineWidth}
-                    onChange={(value) => {
+                    min={ 1 }
+                    max={ 100 }
+                    value={ config.lineWidth }
+                    onChange={ (value) => {
                       if (typeof value === 'number') {
                         updateConfig('lineWidth', value)
-                      } else if (Array.isArray(value)) {
+                      }
+                      else if (Array.isArray(value)) {
                         updateConfig('lineWidth', value[0])
                       }
-                    }}
-                    tooltip={{ formatter: (val) => `${val}px` }}
+                    } }
+                    tooltip={ { formatter: val => `${val}px` } }
                   />
                 </div>
-                <span className="text-sm text-gray-500 mt-1 block">{ config.lineWidth }px</span>
+                <span className="text-sm text-gray-500 mt-1 block">
+                  { config.lineWidth }
+                  px
+                </span>
               </div>
 
               <div>
@@ -246,7 +319,7 @@ export default function NoteBoardTest() {
                 </label>
                 <Select
                   value={ config.lineCap }
-                  onChange={ (value) => updateConfig('lineCap', value) }
+                  onChange={ value => updateConfig('lineCap', value) }
                   options={ [
                     { value: 'round', label: '圆形' },
                     { value: 'square', label: '方形' },
@@ -255,54 +328,29 @@ export default function NoteBoardTest() {
                 />
               </div>
 
-              <div>
+              <div className="flex gap-4">
                 <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
                   描边颜色
                 </label>
                 <div className="flex items-center gap-2 mb-2">
-                  <Input
+                  <input
                     type="color"
                     value={ config.strokeStyle }
-                    onChange={ (e) => updateConfig('strokeStyle', e.target.value) }
+                    onChange={ e => updateConfig('strokeStyle', e.target.value) }
                     className="w-12 h-8 p-0 border-0"
                   />
-                  <Input
-                    type="text"
-                    value={ config.strokeStyle }
-                    onChange={ (e) => updateConfig('strokeStyle', e.target.value) }
-                    className="flex-1"
-                  />
-                </div>
-                <div className="grid grid-cols-4 gap-1">
-                  { presetColors.map((color) => (
-                    <button
-                      key={ color }
-                      className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600"
-                      style={ { backgroundColor: color } }
-                      onClick={ () => updateConfig('strokeStyle', color) }
-                    />
-                  )) }
                 </div>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
-                  填充颜色
-                </label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="color"
-                    value={ config.fillStyle }
-                    onChange={ (e) => updateConfig('fillStyle', e.target.value) }
-                    className="w-12 h-8 p-0 border-0"
+              {/* 色块选择 */ }
+              <div className="grid grid-cols-4 gap-1 my-6">
+                { presetColors.map(color => (
+                  <button
+                    key={ color }
+                    className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600"
+                    style={ { backgroundColor: color } }
+                    onClick={ () => updateConfig('strokeStyle', color) }
                   />
-                  <Input
-                    type="text"
-                    value={ config.fillStyle }
-                    onChange={ (e) => updateConfig('fillStyle', e.target.value) }
-                    className="flex-1"
-                  />
-                </div>
+                )) }
               </div>
             </div>
           </Card>
@@ -317,11 +365,6 @@ export default function NoteBoardTest() {
               onChange={ handleImageUpload }
               className="w-full"
             >
-              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  点击或拖拽上传图片
-                </p>
-              </div>
             </Uploader>
           </Card>
         </div>
@@ -336,22 +379,55 @@ export default function NoteBoardTest() {
           <div>
             <h3 className="font-semibold mb-2">绘图模式</h3>
             <ul className="list-disc list-inside space-y-1 text-sm">
-              <li><strong>绘制：</strong>自由绘制线条</li>
-              <li><strong>擦除：</strong>擦除已绘制内容</li>
-              <li><strong>拖拽：</strong>拖拽移动画布</li>
-              <li><strong>矩形：</strong>绘制矩形图形</li>
-              <li><strong>圆形：</strong>绘制圆形图形</li>
-              <li><strong>箭头：</strong>绘制箭头图形</li>
+              <li>
+                <strong>绘制：</strong>
+                自由绘制线条
+              </li>
+              <li>
+                <strong>擦除：</strong>
+                擦除已绘制内容
+              </li>
+              <li>
+                <strong>拖拽：</strong>
+                拖拽移动画布
+              </li>
+              <li>
+                <strong>矩形：</strong>
+                绘制矩形图形
+              </li>
+              <li>
+                <strong>圆形：</strong>
+                绘制圆形图形
+              </li>
+              <li>
+                <strong>箭头：</strong>
+                绘制箭头图形
+              </li>
             </ul>
           </div>
           <div>
             <h3 className="font-semibold mb-2">快捷操作</h3>
             <ul className="list-disc list-inside space-y-1 text-sm">
-              <li><strong>撤销/重做：</strong>支持多步操作历史</li>
-              <li><strong>缩放：</strong>鼠标滚轮缩放画布</li>
-              <li><strong>导出：</strong>保存为 PNG 图片</li>
-              <li><strong>背景图：</strong>上传图片作为背景</li>
-              <li><strong>清空：</strong>清除所有绘制内容</li>
+              <li>
+                <strong>撤销/重做：</strong>
+                支持多步操作历史
+              </li>
+              <li>
+                <strong>缩放：</strong>
+                鼠标滚轮缩放画布
+              </li>
+              <li>
+                <strong>导出：</strong>
+                保存为 PNG 图片
+              </li>
+              <li>
+                <strong>背景图：</strong>
+                上传图片作为背景
+              </li>
+              <li>
+                <strong>清空：</strong>
+                清除所有绘制内容
+              </li>
             </ul>
           </div>
         </div>
