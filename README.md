@@ -1,13 +1,38 @@
 # Canvas 的各种令人惊叹效果，以及辅助工具
 
+一个功能丰富的 Canvas 效果库，提供了多种令人惊叹的视觉效果和实用工具。包含烟花、星空、水波纹、科技数字雨等多种动画效果，以及图像处理、截图、绘图等实用功能。
+
+## ✨ 特性
+
+- 🎨 **丰富的视觉效果**：烟花、星空、水波纹、科技数字雨等多种动画效果
+- 🖼️ **图像处理工具**：图像转文字、图像淡化、抠图、边缘提取等
+- 🎯 **交互式组件**：刮刮卡、截图工具、绘图画板等
+- 📱 **响应式设计**：支持多种屏幕尺寸和设备
+- 🌙 **主题支持**：支持明暗主题切换
+- 🔧 **高度可配置**：所有效果都提供丰富的配置选项
+- 📚 **完整文档**：所有配置都有中文的文档注释，详见 TS 类型文件和文档注释
+
 ## 安装
 
 ```bash
 npm i @jl-org/cvs
 ```
 
-- **所有配置都有中文的文档注释**
-- **配置详见 TS 类型文件和文档注释**
+## 🎬 效果预览
+
+<div align="center">
+  <img src="./docAssets/firework.webp" width="200" alt="烟花效果" />
+  <img src="./docAssets/techNum.gif" width="200" alt="科技数字雨" />
+  <img src="./docAssets/waterRipple.gif" width="200" alt="水波纹效果" />
+  <img src="./docAssets/starField.webp" width="200" alt="星空场景" />
+</div>
+
+<div align="center">
+  <img src="./docAssets/halftoneWave.gif" width="200" alt="半调波浪" />
+  <img src="./docAssets/wavyLines.gif" width="200" alt="波浪线条" />
+  <img src="./docAssets/imgFade.gif" width="200" alt="图像淡化" />
+  <img src="./docAssets/shotImg.gif" width="200" alt="截图工具" />
+</div>
 
 ## 示例页面目录
 
@@ -41,11 +66,14 @@ pnpm test
 ## 项目结构
 
 ```
-packages/
-├── jl-cvs/           # 主要组件库
-└── test/             # 测试页面
-    └── src/
-        └── views/    # 所有测试页面
+├── docAssets/        # 文档资源文件（效果预览图、演示动图）
+├── packages/
+│   ├── jl-cvs/       # 主要组件库
+│   │   └── src/      # 组件源码
+│   └── test/         # 测试页面
+│       └── src/
+│           └── views/ # 所有测试页面
+└── README.md         # 项目文档
 ```
 
 ---
@@ -55,7 +83,7 @@ packages/
 **访问路径**: `/firework`
 **文件位置**: `packages/test/src/views/firework/index.tsx`
 
-![烟花效果预览](./docs/images/firework.png)
+![烟花效果预览](./docAssets/firework.webp)
 
 **功能特性**:
 - 两种烟花类型：经典烟花和二段爆炸烟花
@@ -73,7 +101,7 @@ packages/
 **访问路径**: `/globeSphere`
 **文件位置**: `packages/test/src/views/globeSphere/index.tsx`
 
-![球体地球仪预览](./docs/images/globe-sphere.png)
+![球体地球仪预览](./docAssets/globesphere.webp)
 
 **功能特性**:
 - 3D 球体旋转效果
@@ -86,7 +114,7 @@ packages/
 **访问路径**: `/grid`
 **文件位置**: `packages/test/src/views/grid/index.tsx`
 
-![网格效果预览](./docs/images/grid.png)
+![网格效果预览](./docAssets/grid.webp)
 
 **功能特性**:
 - 动态网格背景
@@ -99,7 +127,7 @@ packages/
 **访问路径**: `/halftoneWave`
 **文件位置**: `packages/test/src/views/halftoneWave/index.tsx`
 
-![半调波浪预览](./docs/images/halftone-wave.png)
+![半调波浪预览](./docAssets/halftoneWave.gif)
 
 **功能特性**:
 - 半调风格的波浪动画
@@ -112,7 +140,7 @@ packages/
 **访问路径**: `/imgToFade`
 **文件位置**: `packages/test/src/views/imgToFade/index.tsx`
 
-![图像灰飞烟灭预览](./docs/images/img-to-fade.png)
+![图像灰飞烟灭预览](./docAssets/imgFade.gif)
 
 **功能特性**:
 - 图像渐变淡化效果
@@ -125,7 +153,7 @@ packages/
 **访问路径**: `/imgToTxt`
 **文件位置**: `packages/test/src/views/imgToTxt/index.tsx`
 
-![图像转文字预览](./docs/images/img-to-txt.png)
+![图像转文字预览](./docAssets/imgToTxt.webp)
 
 **功能特性**:
 - 将图像转换为 ASCII 字符
@@ -138,7 +166,8 @@ packages/
 **访问路径**: `/noteBoard`
 **文件位置**: `packages/test/src/views/noteBoard/index.tsx`
 
-![图像编辑画板预览](./docs/images/note-board.png)
+![图像编辑画板预览](./docAssets/noteBoard.webp)
+![图像编辑画板预览](./docAssets/noteBoardEditor.gif)
 
 **功能特性**:
 - 功能完整的 Canvas 画板组件
@@ -161,7 +190,7 @@ packages/
 **访问路径**: `/scratch`
 **文件位置**: `packages/test/src/views/scratch/index.tsx`
 
-![刮刮卡效果预览](./docs/images/scratch.png)
+![刮刮卡效果预览](./docAssets/scratch.webp)
 
 **功能特性**:
 - 真实的刮刮卡交互体验
@@ -181,7 +210,7 @@ packages/
 **访问路径**: `/shotImg`
 **文件位置**: `packages/test/src/views/shotImg/index.tsx`
 
-![截图工具预览](./docs/images/shot-img.png)
+![截图工具预览](./docAssets/shotImg.gif)
 
 **功能特性**:
 - 拖拽选择截图区域
@@ -200,7 +229,7 @@ packages/
 **访问路径**: `/starField`
 **文件位置**: `packages/test/src/views/starField/index.tsx`
 
-![星空场景预览](./docs/images/star-field.png)
+![星空场景预览](./docAssets/starField.webp)
 
 **功能特性**:
 - 动态星空背景效果
@@ -222,7 +251,7 @@ packages/
 **访问路径**: `/techNum`
 **文件位置**: `packages/test/src/views/techNum/index.tsx`
 
-![科技数字预览](./docs/images/tech-num.png)
+![科技数字预览](./docAssets/techNum.gif)
 
 **功能特性**:
 - 《黑客帝国》风格数字雨效果
@@ -246,7 +275,7 @@ packages/
 **访问路径**: `/waterRipple`
 **文件位置**: `packages/test/src/views/waterRipple/index.tsx`
 
-![水波纹效果预览](./docs/images/water-ripple.png)
+![水波纹效果预览](./docAssets/waterRipple.gif)
 
 **功能特性**:
 - 逼真的水波纹扩散动画
@@ -268,7 +297,7 @@ packages/
 **访问路径**: `/wavyLines`
 **文件位置**: `packages/test/src/views/wavyLines/index.tsx`
 
-![波浪线条预览](./docs/images/wavy-lines.png)
+![波浪线条预览](./docAssets/wavyLines.gif)
 
 **功能特性**:
 - 动态波浪线条背景
