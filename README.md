@@ -1,22 +1,12 @@
 # Canvas 的各种令人惊叹效果，以及辅助工具
 
+<p align="center">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white" />
+  <img src="https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white" />
+</p>
+
 一个功能丰富的 Canvas 效果库，提供了多种令人惊叹的视觉效果和实用工具。包含烟花、星空、水波纹、科技数字雨等多种动画效果，以及图像处理、截图、绘图等实用功能。
-
-## ✨ 特性
-
-- 🎨 **丰富的视觉效果**：烟花、星空、水波纹、科技数字雨等多种动画效果
-- 🖼️ **图像处理工具**：图像转文字、图像淡化、抠图、边缘提取等
-- 🎯 **交互式组件**：刮刮卡、截图工具、绘图画板等
-- 📱 **响应式设计**：支持多种屏幕尺寸和设备
-- 🌙 **主题支持**：支持明暗主题切换
-- 🔧 **高度可配置**：所有效果都提供丰富的配置选项
-- 📚 **完整文档**：所有配置都有中文的文档注释，详见 TS 类型文件和文档注释
-
-## 安装
-
-```bash
-npm i @jl-org/cvs
-```
 
 ## 🎬 效果预览
 
@@ -33,6 +23,22 @@ npm i @jl-org/cvs
   <img src="./docAssets/imgFade.gif" width="200" alt="图像淡化" />
   <img src="./docAssets/shotImg.gif" width="200" alt="截图工具" />
 </div>
+
+## ✨ 特性
+
+- 🎨 **丰富的视觉效果**：烟花、星空、水波纹、科技数字雨等多种动画效果
+- 🖼️ **图像处理工具**：图像转文字、图像淡化、抠图、边缘提取等
+- 🎯 **交互式组件**：刮刮卡、截图工具、绘图画板等
+- 📱 **响应式设计**：支持多种屏幕尺寸和设备
+- 🌙 **主题支持**：支持明暗主题切换
+- 🔧 **高度可配置**：所有效果都提供丰富的配置选项
+- 📚 **完整文档**：所有配置都有中文的文档注释，详见 TS 类型文件和文档注释
+
+## 安装
+
+```bash
+npm i @jl-org/cvs
+```
 
 ## 示例页面目录
 

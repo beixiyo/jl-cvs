@@ -1,5 +1,5 @@
 import { imgToTxt } from '@jl-org/cvs'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
@@ -44,8 +44,8 @@ export default function ImgToTxtTest() {
   /** 预设视频 - 使用稳定可靠的视频资源 */
   const presetVideos = [
     {
-      name: '抽象动画',
-      url: 'https://sample-videos.com/zip/10/mp4/SampleVideo_360x240_1mb.mp4',
+      name: '动画',
+      url: new URL('@/assets/video.mp4', import.meta.url).href,
     },
   ]
 
@@ -136,10 +136,10 @@ export default function ImgToTxtTest() {
 
   const [contentType, setContentType] = useState<ContentType>('image')
   const [currentImage, setCurrentImage] = useState<string>(presetImages[0].url)
-  const [currentVideo, setCurrentVideo] = useState<string>('')
+  const [currentVideo, setCurrentVideo] = useState<string>(presetVideos[0].url)
 
   /** 开始效果 */
-  const startEffect = async () => {
+  const startEffect = useCallback(async () => {
     if (!canvasRef.current) {
       console.warn('画布未准备好')
       return
@@ -194,7 +194,7 @@ export default function ImgToTxtTest() {
     catch (error) {
       console.error('效果启动失败:', error)
     }
-  }
+  }, [contentType, currentImage, currentVideo, setConfig])
 
   /** 上传图片 */
   const handleImageUpload = (files: FileItem[]) => {
@@ -231,26 +231,27 @@ export default function ImgToTxtTest() {
   }
 
   /** 更新配置 */
-  const updateConfig = (key: string, value: any) => {
+  const updateConfig = useCallback((key: string, value: any) => {
     setConfig(prev => ({ ...prev, [key]: value }))
-  }
+  }, [setConfig])
 
   /** 更新文字样式 */
-  const updateTxtStyle = (key: string, value: any) => {
+  const updateTxtStyle = useCallback((key: string, value: any) => {
     setConfig(prev => ({
       ...prev,
       txtStyle: { ...prev.txtStyle, [key]: value },
     }))
-  }
+  }, [setConfig])
 
   /** 自动启动效果 */
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (canvasRef.current) {
         startEffect()
       }
     }, 100)
-  }, [])
+    return () => clearTimeout(timer)
+  }, [startEffect])
 
   /** 监听内容类型变化，自动重新启动效果 */
   useEffect(() => {
@@ -260,17 +261,17 @@ export default function ImgToTxtTest() {
       }, 300)
       return () => clearTimeout(timer)
     }
-  }, [contentType])
+  }, [contentType, startEffect])
 
   /** 监听配置变化，自动重新启动效果 */
   useEffect(() => {
-    if (canvasRef.current && effectRef.current) {
+    if (canvasRef.current) {
       const timer = setTimeout(() => {
         startEffect()
       }, 300)
       return () => clearTimeout(timer)
     }
-  }, [config, currentImage, currentVideo])
+  }, [config, currentImage, currentVideo, startEffect])
 
   /** 主题变化时自动更新文字颜色 */
   useEffect(() => {
@@ -278,7 +279,7 @@ export default function ImgToTxtTest() {
       ? '#ffffff'
       : '#000000'
     updateTxtStyle('color', newColor)
-  }, [theme])
+  }, [theme, updateTxtStyle])
 
   /** 组件卸载时清理 */
   useEffect(() => {
@@ -424,9 +425,9 @@ export default function ImgToTxtTest() {
                         预设文字
                       </label>
                       <div className="grid grid-cols-4 gap-2">
-                        { presetTexts.map((text, index) => (
+                        { presetTexts.map(text => (
                           <Button
-                            key={ index }
+                            key={ `preset-text-${text}` }
                             onClick={ () => updateConfig('txt', text) }
                             variant="primary"
                             size="sm"
@@ -462,10 +463,10 @@ export default function ImgToTxtTest() {
                       <h4 className="mb-2 text-sm text-gray-600 font-medium dark:text-gray-300">
                         预设图片
                       </h4>
-                      <div className="grid grid-cols-2 gap-2">
-                        { presetImages.map((img, index) => (
+                      <div className="flex">
+                        { presetImages.map(img => (
                           <Button
-                            key={ index }
+                            key={ `preset-image-${img.name}` }
                             onClick={ () => selectPresetImage(img.url) }
                             variant="primary"
                             size="sm"
@@ -502,9 +503,9 @@ export default function ImgToTxtTest() {
                         预设视频
                       </h4>
                       <div className="grid grid-cols-1 gap-2">
-                        { presetVideos.map((video, index) => (
+                        { presetVideos.map(video => (
                           <Button
-                            key={ index }
+                            key={ `preset-video-${video.name}` }
                             onClick={ () => selectPresetVideo(video.url) }
                             variant="primary"
                             size="sm"
@@ -520,104 +521,129 @@ export default function ImgToTxtTest() {
               </div>
 
               {/* 基础参数配置 */ }
-              <div className="grid grid-cols-1 mb-6 gap-4 lg:grid-cols-3 md:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
-                    填充字符
-                  </label>
-                  <Input
-                    type="text"
-                    value={ config.replaceText }
-                    onChange={ e => updateConfig('replaceText', e.target.value) }
-                    placeholder="用于填充的字符"
-                    maxLength={ 5 }
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
-                    字符间隙 (
-                    { config.gap }
-                    px)
-                  </label>
-                  <div className="px-2">
-                    <Slider
-                      min={ 1 }
-                      max={ 20 }
-                      value={ config.gap }
-                      onChange={ (value) => {
-                        if (typeof value === 'number') {
-                          updateConfig('gap', value)
-                        }
-                        else if (Array.isArray(value)) {
-                          updateConfig('gap', value[0])
-                        }
-                      } }
+              <div className="mb-6">
+                <h3 className="mb-4 text-lg text-gray-700 font-medium dark:text-gray-200">
+                  基础参数
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="mb-2 block text-sm text-gray-700 font-medium dark:text-gray-200">
+                      填充字符
+                    </label>
+                    <Input
+                      type="text"
+                      value={ config.replaceText }
+                      onChange={ e => updateConfig('replaceText', e.target.value) }
+                      placeholder="用于填充的字符"
+                      maxLength={ 5 }
                     />
                   </div>
-                </div>
 
-                { (contentType === 'image' || contentType === 'video') && (
-                  <>
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
-                        画布宽度
-                      </label>
-                      <Input
-                        type="number"
-                        value={ config.width }
-                        onChange={ e => updateConfig('width', Number(e.target.value)) }
-                        min={ 200 }
-                        max={ 1200 }
+                  <div>
+                    <label className="mb-2 block text-sm text-gray-700 font-medium dark:text-gray-200">
+                      字符间隙 (
+                      { config.gap }
+                      px)
+                    </label>
+                    <div className="px-2">
+                      <Slider
+                        min={ 1 }
+                        max={ 20 }
+                        value={ config.gap }
+                        onChange={ (value) => {
+                          if (typeof value === 'number') {
+                            updateConfig('gap', value)
+                          }
+                          else if (Array.isArray(value)) {
+                            updateConfig('gap', value[0])
+                          }
+                        } }
                       />
                     </div>
+                  </div>
 
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
-                        画布高度
-                      </label>
-                      <Input
-                        type="number"
-                        value={ config.height }
-                        onChange={ e => updateConfig('height', Number(e.target.value)) }
-                        min={ 150 }
-                        max={ 800 }
-                      />
+                  { (contentType === 'image' || contentType === 'video') && (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <label className="mb-2 block text-sm text-gray-700 font-medium dark:text-gray-200">
+                          画布宽度 (
+                          { config.width }
+                          px)
+                        </label>
+                        <div className="px-2">
+                          <Slider
+                            min={ 200 }
+                            max={ 1200 }
+                            value={ config.width }
+                            onChange={ (value) => {
+                              if (typeof value === 'number') {
+                                updateConfig('width', value)
+                              }
+                              else if (Array.isArray(value)) {
+                                updateConfig('width', value[0])
+                              }
+                            } }
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block text-sm text-gray-700 font-medium dark:text-gray-200">
+                          画布高度 (
+                          { config.height }
+                          px)
+                        </label>
+                        <div className="px-2">
+                          <Slider
+                            min={ 150 }
+                            max={ 800 }
+                            value={ config.height }
+                            onChange={ (value) => {
+                              if (typeof value === 'number') {
+                                updateConfig('height', value)
+                              }
+                              else if (Array.isArray(value)) {
+                                updateConfig('height', value[0])
+                              }
+                            } }
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </>
-                ) }
+                  ) }
 
-                <div className="flex items-center space-x-4">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={ config.isDynamic }
-                      onChange={ e => updateConfig('isDynamic', e.target.checked) }
-                      className="mr-2"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-200">动态效果</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={ config.isGray }
-                      onChange={ e => updateConfig('isGray', e.target.checked) }
-                      className="mr-2"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-200">灰度模式</span>
-                  </label>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <label className="flex items-center space-x-2 rounded-lg border border-gray-200 p-3 transition-colors dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={ config.isDynamic }
+                        onChange={ e => updateConfig('isDynamic', e.target.checked) }
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700 font-medium dark:text-gray-200">动态效果</span>
+                    </label>
+                    <label className="flex items-center space-x-2 rounded-lg border border-gray-200 p-3 transition-colors dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={ config.isGray }
+                        onChange={ e => updateConfig('isGray', e.target.checked) }
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700 font-medium dark:text-gray-200">灰度模式</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
               {/* 文字样式配置 */ }
               { contentType === 'text' && (
                 <div className="mb-6">
-                  <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
+                  <h3 className="mb-4 text-lg text-gray-700 font-medium dark:text-gray-200">
                     文字样式
                   </h3>
-                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 md:grid-cols-2">
+                  <div className="space-y-4">
                     <div>
-                      <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
+                      <label className="mb-2 block text-sm text-gray-700 font-medium dark:text-gray-200">
                         字体
                       </label>
                       <Select
@@ -628,7 +654,7 @@ export default function ImgToTxtTest() {
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
+                      <label className="mb-2 block text-sm text-gray-700 font-medium dark:text-gray-200">
                         字体大小 (
                         { config.txtStyle.size }
                         px)
@@ -651,7 +677,7 @@ export default function ImgToTxtTest() {
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
+                      <label className="mb-2 block text-sm text-gray-700 font-medium dark:text-gray-200">
                         字体颜色
                       </label>
                       <div className="flex items-center gap-2">
@@ -659,13 +685,14 @@ export default function ImgToTxtTest() {
                           type="color"
                           value={ config.txtStyle.color }
                           onChange={ e => updateTxtStyle('color', e.target.value) }
-                          className="h-8 w-12 border-0 p-0"
+                          className="h-10 w-16 rounded border-0 p-1"
                         />
                         <Input
                           type="text"
                           value={ config.txtStyle.color }
                           onChange={ e => updateTxtStyle('color', e.target.value) }
                           className="flex-1"
+                          placeholder="#000000"
                         />
                       </div>
                     </div>
