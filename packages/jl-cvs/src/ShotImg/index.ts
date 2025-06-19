@@ -26,6 +26,9 @@ export class ShotImg {
   /** 蒙层透明度 */
   opacity = 0.7
 
+  /** Canvas显示尺寸与图片原始尺寸的比例 */
+  private scaleRatio = { x: 1, y: 1 }
+
   /**
    * 把你传入的 Canvas 变成一个可拖动的截图区域
    * 传入一个 Canvas 元素，图片可选，你可以在后续调用 `setImg` 方法设置图片
@@ -51,6 +54,9 @@ export class ShotImg {
 
     this.img = img
     this.drawImg()
+
+    /** 计算缩放比例 */
+    this.updateScaleRatio()
   }
 
   /**
@@ -112,15 +118,43 @@ export class ShotImg {
     this.cvs.addEventListener('mousedown', this.onMouseDown)
   }
 
+  /** 更新Canvas显示尺寸与图片原始尺寸的比例 */
+  private updateScaleRatio() {
+    if (!this.img)
+      return
+
+    const { naturalWidth, naturalHeight } = this.img
+    const { width, height } = this.cvs.getBoundingClientRect()
+
+    this.scaleRatio = {
+      x: naturalWidth / width,
+      y: naturalHeight / height,
+    }
+  }
+
+  /** 转换鼠标坐标为图片原始尺寸下的坐标 */
+  private transformCoordinates(offsetX: number, offsetY: number): Point {
+    return [
+      offsetX * this.scaleRatio.x,
+      offsetY * this.scaleRatio.y,
+    ]
+  }
+
   private onMouseDown = (e: MouseEvent) => {
-    this.stPos = [e.offsetX, e.offsetY]
+    /** 更新缩放比例 */
+    this.updateScaleRatio()
+
+    /** 转换坐标 */
+    this.stPos = this.transformCoordinates(e.offsetX, e.offsetY)
 
     this.cvs.addEventListener('mousemove', this.onMouseMove)
     this.cvs.addEventListener('mouseup', this.onMouseUp)
   }
 
   private onMouseMove = (e: MouseEvent) => {
-    this.endPos = [e.offsetX, e.offsetY]
+    /** 转换坐标 */
+    this.endPos = this.transformCoordinates(e.offsetX, e.offsetY)
+
     const [stX, stY] = this.stPos
     const [endX, endY] = this.endPos
 
