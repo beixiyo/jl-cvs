@@ -533,21 +533,21 @@ export default function ImgToTxtTest() {
                   ) }
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <label className="flex items-center space-x-2 rounded-lg border border-gray-200 p-3 transition-colors dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <label className="flex items-center border border-gray-200 rounded-lg p-3 transition-colors space-x-2 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
                       <input
                         type="checkbox"
                         checked={ config.isDynamic }
                         onChange={ e => updateConfig('isDynamic', e.target.checked) }
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="h-4 w-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500"
                       />
                       <span className="text-sm text-gray-700 font-medium dark:text-gray-200">动态效果</span>
                     </label>
-                    <label className="flex items-center space-x-2 rounded-lg border border-gray-200 p-3 transition-colors dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <label className="flex items-center border border-gray-200 rounded-lg p-3 transition-colors space-x-2 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
                       <input
                         type="checkbox"
                         checked={ config.isGray }
                         onChange={ e => updateConfig('isGray', e.target.checked) }
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="h-4 w-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500"
                       />
                       <span className="text-sm text-gray-700 font-medium dark:text-gray-200">灰度模式</span>
                     </label>
@@ -605,7 +605,7 @@ export default function ImgToTxtTest() {
                           type="color"
                           value={ config.txtStyle.color }
                           onChange={ e => updateTxtStyle('color', e.target.value) }
-                          className="h-10 w-16 rounded border-0 p-1"
+                          className="h-10 w-16 border-0 rounded p-1"
                         />
                         <Input
                           type="text"

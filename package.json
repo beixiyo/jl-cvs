@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm --filter @jl-org/cvs build",
+    "build:test": "pnpm --filter test-page build",
     "test": "pnpm --filter test-page dev",
     "lint": "pnpm --filter @jl-org/cvs lint && pnpm --filter test-page lint"
   },

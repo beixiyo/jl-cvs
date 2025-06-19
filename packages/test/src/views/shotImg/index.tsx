@@ -1,6 +1,5 @@
 import { ShotImg } from '@jl-org/cvs'
-import { getImg } from '@jl-org/tool'
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { type FileItem, Uploader } from '@/components/Uploader'
 import { useAsyncEffect } from '@/hooks'
