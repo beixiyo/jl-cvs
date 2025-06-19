@@ -6,7 +6,7 @@ import { Input } from '@/components/Input'
 import { Select } from '@/components/Select'
 import { Slider } from '@/components/Slider'
 import { type FileItem, Uploader } from '@/components/Uploader'
-import { useGetState, useTheme } from '@/hooks'
+import { onMounted, useGetState, useTheme, useUpdateEffect } from '@/hooks'
 
 type ContentType = 'text' | 'image' | 'video'
 
@@ -32,22 +32,6 @@ export default function ImgToTxtTest() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const effectRef = useRef<{ start: () => void, stop: () => void } | null>(null)
-
-  /** 预设图片 - 使用本地资源 */
-  const presetImages = [
-    {
-      name: '默认图片',
-      url: new URL('@/assets/umr.webp', import.meta.url).href,
-    },
-  ]
-
-  /** 预设视频 - 使用稳定可靠的视频资源 */
-  const presetVideos = [
-    {
-      name: '动画',
-      url: new URL('@/assets/video.mp4', import.meta.url).href,
-    },
-  ]
 
   /** 字体选项 */
   const fontOptions = [
@@ -135,17 +119,18 @@ export default function ImgToTxtTest() {
   ]
 
   const [contentType, setContentType] = useState<ContentType>('image')
-  const [currentImage, setCurrentImage] = useState<string>(presetImages[0].url)
-  const [currentVideo, setCurrentVideo] = useState<string>(presetVideos[0].url)
+  const [currentImage, setCurrentImage] = useState<string>(() => new URL('@/assets/umr.webp', import.meta.url).href)
+  const [currentVideo, setCurrentVideo] = useState<string>(() => new URL('@/assets/video.mp4', import.meta.url).href)
 
   /** 开始效果 */
-  const startEffect = useCallback(async () => {
+  const startEffect = async () => {
     if (!canvasRef.current) {
       console.warn('画布未准备好')
       return
     }
 
     try {
+      effectRef.current?.stop()
       /** 使用 getLatest() 获取最新配置 */
       const latestConfig = setConfig.getLatest()
 
@@ -194,7 +179,7 @@ export default function ImgToTxtTest() {
     catch (error) {
       console.error('效果启动失败:', error)
     }
-  }, [contentType, currentImage, currentVideo, setConfig])
+  }
 
   /** 上传图片 */
   const handleImageUpload = (files: FileItem[]) => {
@@ -210,18 +195,6 @@ export default function ImgToTxtTest() {
       setCurrentVideo(files[0].base64)
       setContentType('video')
     }
-  }
-
-  /** 选择预设图片 */
-  const selectPresetImage = (url: string) => {
-    setCurrentImage(url)
-    setContentType('image')
-  }
-
-  /** 选择预设视频 */
-  const selectPresetVideo = (url: string) => {
-    setCurrentVideo(url)
-    setContentType('video')
   }
 
   /** 应用预设配置 */
@@ -243,38 +216,21 @@ export default function ImgToTxtTest() {
     }))
   }, [setConfig])
 
-  /** 自动启动效果 */
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (canvasRef.current) {
-        startEffect()
-      }
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [startEffect])
-
-  /** 监听内容类型变化，自动重新启动效果 */
-  useEffect(() => {
+  onMounted(() => {
     if (canvasRef.current) {
-      const timer = setTimeout(() => {
-        startEffect()
-      }, 300)
-      return () => clearTimeout(timer)
+      startEffect()
     }
-  }, [contentType, startEffect])
+  })
 
   /** 监听配置变化，自动重新启动效果 */
-  useEffect(() => {
+  useUpdateEffect(() => {
     if (canvasRef.current) {
-      const timer = setTimeout(() => {
-        startEffect()
-      }, 300)
-      return () => clearTimeout(timer)
+      startEffect()
     }
-  }, [config, currentImage, currentVideo, startEffect])
+  }, [config, contentType])
 
   /** 主题变化时自动更新文字颜色 */
-  useEffect(() => {
+  useUpdateEffect(() => {
     const newColor = theme === 'dark'
       ? '#ffffff'
       : '#000000'
@@ -459,24 +415,6 @@ export default function ImgToTxtTest() {
                         </div>
                       </Uploader>
                     </div>
-                    <div>
-                      <h4 className="mb-2 text-sm text-gray-600 font-medium dark:text-gray-300">
-                        预设图片
-                      </h4>
-                      <div className="flex">
-                        { presetImages.map(img => (
-                          <Button
-                            key={ `preset-image-${img.name}` }
-                            onClick={ () => selectPresetImage(img.url) }
-                            variant="primary"
-                            size="sm"
-                            className="text-xs"
-                          >
-                            { img.name }
-                          </Button>
-                        )) }
-                      </div>
-                    </div>
                   </div>
                 ) }
 
@@ -497,24 +435,6 @@ export default function ImgToTxtTest() {
                           </p>
                         </div>
                       </Uploader>
-                    </div>
-                    <div>
-                      <h4 className="mb-2 text-sm text-gray-600 font-medium dark:text-gray-300">
-                        预设视频
-                      </h4>
-                      <div className="grid grid-cols-1 gap-2">
-                        { presetVideos.map(video => (
-                          <Button
-                            key={ `preset-video-${video.name}` }
-                            onClick={ () => selectPresetVideo(video.url) }
-                            variant="primary"
-                            size="sm"
-                            className="text-xs"
-                          >
-                            { video.name }
-                          </Button>
-                        )) }
-                      </div>
                     </div>
                   </div>
                 ) }
