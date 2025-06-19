@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+packages/jl-cvs/README.md
 *.local
 
 test/assets

@@ -7,7 +7,8 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "./dist",
+    "./README.md"
   ],
   "exports": {
     "require": {
@@ -20,7 +21,11 @@
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "npm run copy-readme && vite build",
+    "copy-readme": "node scripts/copy-readme.js",
+    "clean": "node scripts/clean.js",
+    "prepublishOnly": "npm run build",
+    "postpublish": "npm run clean",
     "lint": "eslint ./src --fix"
   },
   "dependencies": {

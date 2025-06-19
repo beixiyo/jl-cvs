@@ -13,6 +13,8 @@
 
 ## 🎬 效果预览
 
+请到 Github 查看: https://github.com/beixiyo/jl-cvs
+
 <div align="center">
   <img src="./docAssets/firework.webp" width="200" alt="烟花效果" />
   <img src="./docAssets/techNum.gif" width="200" alt="科技数字雨" />
@@ -71,19 +73,6 @@ pnpm test
 ```
 
 访问 `http://localhost:5173` 即可查看所有测试页面
-
-## 项目结构
-
-```
-├── docAssets/        # 文档资源文件（效果预览图、演示动图）
-├── packages/
-│   ├── jl-cvs/       # 主要组件库
-│   │   └── src/      # 组件源码
-│   └── test/         # 测试页面
-│       └── src/
-│           └── views/ # 所有测试页面
-└── README.md         # 项目文档
-```
 
 ---
 
