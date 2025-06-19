@@ -1,6 +1,9 @@
 import { ShotImg } from '@jl-org/cvs'
+import { getImg } from '@jl-org/tool'
 import { memo, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
+import { type FileItem, Uploader } from '@/components/Uploader'
+import { useAsyncEffect } from '@/hooks'
 import { cn } from '@/utils'
 
 export default function ShotImgTest() {
@@ -17,41 +20,31 @@ export default function ShotImgTest() {
 const ShotImgDemo = memo(() => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [shotInstance, setShotInstance] = useState<ShotImg | null>(null)
-  const [imageUrl, setImageUrl] = useState<string>('')
-  const [resultImage, setResultImage] = useState<string>('')
+  const [imageUrl, setImageUrl] = useState<string>(() => new URL('@/assets/umr.webp', import.meta.url).href)
+  const [resultImage, setResultImage] = useState<string>()
   const [isLoading, setIsLoading] = useState(false)
 
   /** 初始化ShotImg实例 */
-  useEffect(() => {
-    if (canvasRef.current && imageUrl) {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => {
-        const shotImg = new ShotImg(canvasRef.current!, img, 0.5)
-        setShotInstance(shotImg)
-        setIsLoading(false)
-      }
-      img.onerror = () => {
-        console.error('图片加载失败')
-        setIsLoading(false)
-      }
-      setIsLoading(true)
-      img.src = imageUrl
+  useAsyncEffect(async () => {
+    if (!canvasRef.current) {
+      return
     }
-  }, [imageUrl, canvasRef])
+
+    const shotImg = new ShotImg(canvasRef.current)
+    setShotInstance(shotImg)
+    shotImg.setImg(new URL('@/assets/umr.webp', import.meta.url).href)
+  }, [canvasRef])
 
   /** 处理文件选择 */
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file)
+  const handleFileChange = (files: FileItem[]) => {
+    if (!shotInstance) {
       return
-
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      setImageUrl(event.target?.result as string)
-      setResultImage('')
     }
-    reader.readAsDataURL(file)
+
+    const imageUrl = files[0].base64
+    setImageUrl(imageUrl)
+    shotInstance.setImg(imageUrl)
+    setResultImage('')
   }
 
   /** 获取截图 */
@@ -76,7 +69,6 @@ const ShotImgDemo = memo(() => {
   const handleReset = () => {
     setImageUrl('')
     setResultImage('')
-    setShotInstance(null)
   }
 
   return (
@@ -84,21 +76,15 @@ const ShotImgDemo = memo(() => {
       <div className="flex flex-col gap-2">
         <h2 className="text-xl text-gray-800 font-semibold dark:text-gray-200">上传图片</h2>
         <div className="flex items-center gap-4">
-          <input
-            type="file"
-            accept="image/*"
+
+          <Uploader
             onChange={ handleFileChange }
-            className="hidden"
-            id="image-upload"
+            accept="image/*"
+            className="w-72"
           />
-          <label
-            htmlFor="image-upload"
-            className="cursor-pointer rounded bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
-          >
-            选择图片
-          </label>
+
           { imageUrl && (
-            <Button onClick={ handleReset } className="bg-gray-500 hover:bg-gray-600">
+            <Button onClick={ handleReset } className="shrink-0">
               重置
             </Button>
           ) }

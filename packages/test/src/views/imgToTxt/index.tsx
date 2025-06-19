@@ -15,7 +15,7 @@ export default function ImgToTxtTest() {
 
   const [config, setConfig] = useGetState({
     replaceText: '6',
-    gap: 10,
+    gap: 6,
     isDynamic: false,
     isGray: false,
     txtStyle: {
@@ -30,10 +30,6 @@ export default function ImgToTxtTest() {
     height: 600,
   }, true)
 
-  const [contentType, setContentType] = useState<ContentType>('text')
-  const [currentImage, setCurrentImage] = useState<string>('')
-  const [currentVideo, setCurrentVideo] = useState<string>('')
-
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const effectRef = useRef<{ start: () => void, stop: () => void } | null>(null)
 
@@ -43,30 +39,6 @@ export default function ImgToTxtTest() {
       name: '默认图片',
       url: new URL('@/assets/umr.webp', import.meta.url).href,
     },
-    {
-      name: '人物肖像',
-      url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&crop=face',
-    },
-    {
-      name: '建筑轮廓',
-      url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop&crop=center',
-    },
-    {
-      name: '动物图案',
-      url: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop&crop=center',
-    },
-    {
-      name: '简约图形',
-      url: 'https://images.unsplash.com/photo-1557683304-673a23048d34?w=400&h=300&fit=crop&crop=center',
-    },
-    {
-      name: '文字标识',
-      url: 'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=400&h=300&fit=crop&crop=center',
-    },
-    {
-      name: '高对比度',
-      url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=300&fit=crop&crop=center',
-    },
   ]
 
   /** 预设视频 - 使用稳定可靠的视频资源 */
@@ -74,14 +46,6 @@ export default function ImgToTxtTest() {
     {
       name: '抽象动画',
       url: 'https://sample-videos.com/zip/10/mp4/SampleVideo_360x240_1mb.mp4',
-    },
-    {
-      name: '几何图形',
-      url: 'https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4',
-    },
-    {
-      name: '色彩变化',
-      url: 'https://file-examples.com/storage/fe86c86b9b66f0c2ccf1e8f/2017/10/file_example_MP4_480_1_5MG.mp4',
     },
   ]
 
@@ -116,9 +80,13 @@ export default function ImgToTxtTest() {
       config: {
         replaceText: '6',
         gap: 10,
-        txtStyle: { family: 'Microsoft YaHei', size: 200, color: theme === 'dark'
-          ? '#ffffff'
-          : '#000000' },
+        txtStyle: {
+          family: 'Microsoft YaHei',
+          size: 200,
+          color: theme === 'dark'
+            ? '#ffffff'
+            : '#000000',
+        },
         txt: '哎呀你干嘛',
       },
     },
@@ -154,13 +122,21 @@ export default function ImgToTxtTest() {
       config: {
         replaceText: '★',
         gap: 12,
-        txtStyle: { family: 'Microsoft YaHei', size: 180, color: theme === 'dark'
-          ? '#64b5f6'
-          : '#1976d2' },
+        txtStyle: {
+          family: 'Microsoft YaHei',
+          size: 180,
+          color: theme === 'dark'
+            ? '#64b5f6'
+            : '#1976d2',
+        },
         txt: '主题色',
       },
     },
   ]
+
+  const [contentType, setContentType] = useState<ContentType>('image')
+  const [currentImage, setCurrentImage] = useState<string>(presetImages[0].url)
+  const [currentVideo, setCurrentVideo] = useState<string>('')
 
   /** 开始效果 */
   const startEffect = async () => {
@@ -269,14 +245,11 @@ export default function ImgToTxtTest() {
 
   /** 自动启动效果 */
   useEffect(() => {
-    /** 默认使用文字模式自动启动 */
-    setContentType('text')
-    /** 延迟启动，确保组件完全加载 */
     setTimeout(() => {
       if (canvasRef.current) {
         startEffect()
       }
-    }, 1000)
+    }, 100)
   }, [])
 
   /** 监听内容类型变化，自动重新启动效果 */
@@ -297,7 +270,7 @@ export default function ImgToTxtTest() {
       }, 300)
       return () => clearTimeout(timer)
     }
-  }, [config.replaceText, config.gap, config.isDynamic, config.isGray, config.txt, config.txtStyle, config.width, config.height, currentImage, currentVideo])
+  }, [config, currentImage, currentVideo])
 
   /** 主题变化时自动更新文字颜色 */
   useEffect(() => {
@@ -318,7 +291,7 @@ export default function ImgToTxtTest() {
 
   return (
     <div className="min-h-screen from-orange-50 to-red-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
-      {/* 页面标题 - 全宽显示 */}
+      {/* 页面标题 - 全宽显示 */ }
       <div className="p-6 text-center">
         <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           📝 图像转文字效果
@@ -328,9 +301,9 @@ export default function ImgToTxtTest() {
         </p>
       </div>
 
-      {/* 响应式布局容器 */}
+      {/* 响应式布局容器 */ }
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
-        {/* 左侧：效果展示区域 */}
+        {/* 左侧：效果展示区域 */ }
         <div className="flex-1">
           <Card className="min-h-[600px] p-6">
             <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
@@ -371,7 +344,7 @@ export default function ImgToTxtTest() {
           </Card>
         </div>
 
-        {/* 右侧：控制面板 */}
+        {/* 右侧：控制面板 */ }
         <div className="w-full lg:w-96">
           <Card>
             <div className="max-h-[80vh] overflow-y-auto p-6">
@@ -379,7 +352,7 @@ export default function ImgToTxtTest() {
                 控制面板
               </h2>
 
-              {/* 预设配置 */}
+              {/* 预设配置 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   预设效果
@@ -407,8 +380,8 @@ export default function ImgToTxtTest() {
                   <Button
                     onClick={ () => setContentType('text') }
                     variant={ contentType === 'text'
-                      ? 'default'
-                      : 'primary' }
+                      ? 'primary'
+                      : 'default' }
                     size="sm"
                   >
                     📝 文字
@@ -416,8 +389,8 @@ export default function ImgToTxtTest() {
                   <Button
                     onClick={ () => setContentType('image') }
                     variant={ contentType === 'image'
-                      ? 'default'
-                      : 'primary' }
+                      ? 'primary'
+                      : 'default' }
                     size="sm"
                   >
                     🖼️ 图片
@@ -425,8 +398,8 @@ export default function ImgToTxtTest() {
                   <Button
                     onClick={ () => setContentType('video') }
                     variant={ contentType === 'video'
-                      ? 'default'
-                      : 'primary' }
+                      ? 'primary'
+                      : 'default' }
                     size="sm"
                   >
                     🎥 视频
@@ -570,7 +543,7 @@ export default function ImgToTxtTest() {
                   <div className="px-2">
                     <Slider
                       min={ 1 }
-                      max={ 30 }
+                      max={ 20 }
                       value={ config.gap }
                       onChange={ (value) => {
                         if (typeof value === 'number') {
@@ -700,7 +673,7 @@ export default function ImgToTxtTest() {
                 </div>
               ) }
 
-              {/* 使用说明 */}
+              {/* 使用说明 */ }
               <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-600">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   使用说明

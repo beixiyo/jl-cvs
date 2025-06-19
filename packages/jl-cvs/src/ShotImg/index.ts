@@ -1,5 +1,5 @@
-import type { TransferType } from '@jl-org/tool'
 import type { HandleImgReturn } from '@/canvasTool'
+import { getImg, isStr, type TransferType } from '@jl-org/tool'
 import { cutImg } from '@/canvasTool'
 
 export class ShotImg {
@@ -48,11 +48,26 @@ export class ShotImg {
   }
 
   /** 设置 Canvas 图片 */
-  setImg(img: HTMLImageElement) {
-    const { naturalWidth, naturalHeight } = img
+  async setImg(img: HTMLImageElement | string) {
+    let _img: HTMLImageElement
+
+    if (isStr(img)) {
+      const newImg = await getImg(img)
+      if (newImg) {
+        _img = newImg
+      }
+      else {
+        throw new Error('[ShowImg]: 图片加载失败')
+      }
+    }
+    else {
+      _img = img
+    }
+
+    const { naturalWidth, naturalHeight } = _img
     this.setSize(naturalWidth, naturalHeight)
 
-    this.img = img
+    this.img = _img
     this.drawImg()
 
     /** 计算缩放比例 */
