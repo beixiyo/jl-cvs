@@ -31,6 +31,7 @@ const InnerTextarea = forwardRef<HTMLTextAreaElement, TextareaProps>((props, ref
     errorMessage,
     required = false,
     className,
+    focusedClassName,
     containerClassName,
     size = 'md',
     enableRichPaste = false,
@@ -45,6 +46,7 @@ const InnerTextarea = forwardRef<HTMLTextAreaElement, TextareaProps>((props, ref
 
     label,
     labelPosition = 'top',
+    value,
 
     /** 计数器属性 */
     counterPosition,
@@ -55,7 +57,20 @@ const InnerTextarea = forwardRef<HTMLTextAreaElement, TextareaProps>((props, ref
 
   const textareaRef = useRef<HTMLTextAreaElement | null>()
   const [isFocused, setIsFocused] = useState(false)
-  const [textValue, setTextValue] = useState('')
+
+  const [internalVal, setInternalVal] = useState('')
+  const isControlMode = value !== undefined
+  const realValue = isControlMode
+    ? value
+    : internalVal
+  const handleChangeVal = useCallback(
+    (val: string, e: ChangeEvent<HTMLTextAreaElement>) => {
+      isControlMode
+        ? onChange?.(val, e)
+        : setInternalVal(val)
+    },
+    [isControlMode, onChange],
+  )
 
   /** 调整高度的函数 */
   const adjustHeight = useCallback(() => {
@@ -74,15 +89,14 @@ const InnerTextarea = forwardRef<HTMLTextAreaElement, TextareaProps>((props, ref
     (e: ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value.slice(0, maxLength)
       e.target.value = value
-      onChange?.(e)
-      setTextValue(value)
+      handleChangeVal?.(value, e)
 
       if (autoResize) {
         /** 使用 requestAnimationFrame 确保在 DOM 更新后（特别是值更新后）计算 scrollHeight */
         requestAnimationFrame(() => adjustHeight())
       }
     },
-    [onChange, autoResize, adjustHeight],
+    [adjustHeight, autoResize, handleChangeVal, maxLength],
   )
 
   /** 处理粘贴事件 */
@@ -167,7 +181,7 @@ const InnerTextarea = forwardRef<HTMLTextAreaElement, TextareaProps>((props, ref
       }
       /** 如果 enableRichPaste 为 false，则不执行任何操作，允许默认粘贴行为 */
     },
-    [enableRichPaste, disabled, readOnly, handleChange, onPaste],
+    [disabled, enableRichPaste, handleChange, onPaste, readOnly],
   )
 
   /** 处理聚焦 */
@@ -209,15 +223,17 @@ const InnerTextarea = forwardRef<HTMLTextAreaElement, TextareaProps>((props, ref
   /** 组合所有样式 */
   const textareaClasses = cn(
     'w-full h-full border transition-all duration-200 ease-in-out outline-none',
-    'resize-none dark:bg-slate-900 dark:text-slate-300 focus-ring-none rounded-xl',
+    'resize-none dark:bg-slate-900 dark:text-slate-300 rounded-xl',
     autoResize && 'overflow-y-hidden',
     sizeClasses[size],
     {
-      'border-slate-300 dark:border-slate-700 bg-white text-slate-800': !error && !disabled,
-      // '': !error && !disabled && !isFocused,
-      // '': isFocused && !error && !disabled,
-      'border-rose-500 hover:border-rose-600 focus:border-rose-500 focus:ring-rose-100': error && !disabled,
-      'border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed': disabled,
+      'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900': !error && !disabled,
+      'border-rose-500 hover:border-rose-600 focus-within:border-rose-500': error && !disabled,
+      'border-slate-200 bg-slate-50 dark:bg-slate-800 text-slate-400 cursor-not-allowed': disabled,
+      '': isFocused && !error && !disabled,
+      'hover:border-slate-400 dark:hover:border-slate-600': !isFocused && !error && !disabled,
+
+      [focusedClassName || '']: isFocused,
     },
     className,
   )
@@ -229,9 +245,9 @@ const InnerTextarea = forwardRef<HTMLTextAreaElement, TextareaProps>((props, ref
     error,
     errorMessage,
     isFocused,
-    value: textValue || '',
+    value: realValue || '',
     maxLength,
-  }), [disabled, error, errorMessage, isFocused, maxLength, required, textValue])
+  }), [disabled, error, errorMessage, isFocused, maxLength, realValue, required])
 
   return (
     <TextareaProvider value={ contextValue }>
@@ -280,6 +296,7 @@ const InnerTextarea = forwardRef<HTMLTextAreaElement, TextareaProps>((props, ref
               }
               textareaRef.current = node
             } }
+            value={ realValue }
             onChange={ handleChange }
             onFocus={ handleFocus }
             onBlur={ handleBlur }
@@ -324,7 +341,7 @@ const InnerTextarea = forwardRef<HTMLTextAreaElement, TextareaProps>((props, ref
 export const Textarea = memo(InnerTextarea) as typeof InnerTextarea
 
 export type TextareaProps
-  = Omit<React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>, 'onPaste'>
+  = Omit<React.PropsWithChildren<React.TextareaHTMLAttributes<HTMLTextAreaElement>>, 'onPaste' | 'onChange' | 'value'>
     & {
     /**
      * 占位文本
@@ -371,7 +388,7 @@ export type TextareaProps
       /**
        * 类名
        */
-      className?: string
+      focusedClassName?: string
       /**
        * 容器类名
        */
@@ -381,10 +398,11 @@ export type TextareaProps
        * @default 'md'
        */
       size?: 'sm' | 'md' | 'lg'
+      value?: string
       /**
        * 输入内容变化时的回调
        */
-      onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void
+      onChange?: (value: string, e: ChangeEvent<HTMLTextAreaElement>) => void
       /**
        * 聚焦时的回调
        */

@@ -1,8 +1,9 @@
 import type { ChangeEvent } from 'react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import { forwardRef, memo, useCallback, useState } from 'react'
 import { cn } from '@/utils'
 
-export const Input = memo<InputProps>(forwardRef<HTMLInputElement, InputProps>((
+export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, NumberInputProps>((
   props,
   ref,
 ) => {
@@ -26,22 +27,63 @@ export const Input = memo<InputProps>(forwardRef<HTMLInputElement, InputProps>((
     onKeyDown,
     onChange,
     value,
-    type,
+    min: _min,
+    max: _max,
+    step = 1,
+    precision = 0,
     ...rest
   } = props
 
-  const [isFocused, setIsFocused] = useState(false)
+  const min = typeof _min === 'string'
+    ? Number.parseFloat(_min)
+    : _min
+  const max = typeof _max === 'string'
+    ? Number.parseFloat(_max)
+    : _max
 
+  const [isFocused, setIsFocused] = useState(false)
   const [internalVal, setInternalVal] = useState('')
   const isControlMode = value !== undefined
   const realValue = isControlMode
     ? value
     : internalVal
+
+  /** 格式化数字 */
+  const formatNumber = useCallback((value: string): string => {
+    if (!value)
+      return ''
+
+    let numValue = Number.parseFloat(value)
+
+    /** 应用最小值和最大值限制 */
+    if (min !== undefined && numValue < min)
+      numValue = min
+    if (max !== undefined && numValue > max)
+      numValue = max
+
+    /** 处理精度 */
+    if (precision !== undefined) {
+      return numValue.toFixed(precision)
+    }
+
+    return String(numValue)
+  }, [min, max, precision])
+
+  /** 处理值变化 */
   const handleChangeVal = useCallback(
     (val: string, e: ChangeEvent<HTMLInputElement>) => {
+      /** 只允许数字和小数点 */
+      const regex = /^-?\d*\.?\d*$/
+      if (val !== '' && !regex.test(val))
+        return
+
+      const formattedVal = val === ''
+        ? ''
+        : val
+
       isControlMode
-        ? onChange?.(val, e)
-        : setInternalVal(val)
+        ? onChange?.(Number(formattedVal), e)
+        : setInternalVal(formattedVal)
     },
     [isControlMode, onChange],
   )
@@ -50,32 +92,98 @@ export const Input = memo<InputProps>(forwardRef<HTMLInputElement, InputProps>((
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value
-      handleChangeVal?.(value, e)
+      handleChangeVal(value, e)
     },
     [handleChangeVal],
   )
 
+  /** 处理步进增加 */
+  const handleIncrement = useCallback(() => {
+    if (disabled || readOnly)
+      return
+
+    const currentValue = realValue === ''
+      ? 0
+      : Number.parseFloat(realValue.toString())
+    const newValue = currentValue + (step || 1)
+    const formattedValue = formatNumber(String(newValue))
+
+    const mockEvent = {
+      target: { value: formattedValue },
+    } as ChangeEvent<HTMLInputElement>
+
+    handleChangeVal(formattedValue, mockEvent)
+  }, [realValue, step, disabled, readOnly, formatNumber, handleChangeVal])
+
+  /** 处理步进减少 */
+  const handleDecrement = useCallback(() => {
+    if (disabled || readOnly)
+      return
+
+    const currentValue = realValue === ''
+      ? 0
+      : Number.parseFloat(realValue.toString())
+    const newValue = currentValue - (step || 1)
+    const formattedValue = formatNumber(String(newValue))
+
+    const mockEvent = {
+      target: { value: formattedValue },
+    } as ChangeEvent<HTMLInputElement>
+
+    handleChangeVal(formattedValue, mockEvent)
+  }, [realValue, step, disabled, readOnly, formatNumber, handleChangeVal])
+
+  /** 处理聚焦 */
   const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(true)
     onFocus?.(e)
   }, [onFocus])
 
+  /** 处理失焦 */
   const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(false)
-    onBlur?.(e)
-  }, [onBlur])
 
+    /** 在失焦时格式化数字 */
+    if (realValue !== '') {
+      const formattedValue = formatNumber(realValue.toString())
+
+      const mockEvent = {
+        target: { value: formattedValue },
+      } as ChangeEvent<HTMLInputElement>
+
+      handleChangeVal(formattedValue, mockEvent)
+    }
+
+    onBlur?.(e)
+  }, [onBlur, realValue, formatNumber, handleChangeVal])
+
+  /** 处理键盘事件 */
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     onKeyDown?.(e)
-    if (e.key === 'Enter' && onPressEnter) {
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      handleIncrement()
+    }
+    else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      handleDecrement()
+    }
+    else if (e.key === 'Enter' && onPressEnter) {
       onPressEnter(e)
     }
-  }, [onKeyDown, onPressEnter])
+  }, [onKeyDown, onPressEnter, handleIncrement, handleDecrement])
 
   const sizeClasses = {
     sm: 'h-8 text-sm',
     md: 'h-10 text-base',
     lg: 'h-12 text-lg',
+  }
+
+  const stepperSize = {
+    sm: 14,
+    md: 16,
+    lg: 18,
   }
 
   const inputClasses = cn(
@@ -97,6 +205,14 @@ export const Input = memo<InputProps>(forwardRef<HTMLInputElement, InputProps>((
     },
   )
 
+  const stepperButtonClasses = cn(
+    'flex items-center justify-center p-0.5 text-slate-400',
+    'hover:text-slate-600 dark:hover:text-slate-300',
+    'transition-colors duration-200',
+    disabled && 'opacity-50 cursor-not-allowed hover:text-slate-400',
+    readOnly && 'opacity-50 cursor-not-allowed hover:text-slate-400',
+  )
+
   const renderInput = () => (
     <div className={ containerClasses }>
       { prefix && (
@@ -106,16 +222,13 @@ export const Input = memo<InputProps>(forwardRef<HTMLInputElement, InputProps>((
       ) }
       <input
         ref={ ref }
-        type={ type }
         value={ realValue }
         className={ cn(
           inputClasses,
           prefix
             ? 'pl-2'
             : 'pl-3',
-          suffix
-            ? 'pr-2'
-            : 'pr-3',
+          'pr-2', // 为步进按钮留出空间
         ) }
         disabled={ disabled }
         readOnly={ readOnly }
@@ -123,8 +236,29 @@ export const Input = memo<InputProps>(forwardRef<HTMLInputElement, InputProps>((
         onBlur={ handleBlur }
         onKeyDown={ handleKeyDown }
         onChange={ handleChange }
+        inputMode="decimal"
         { ...rest }
       />
+      <div className="mr-1 flex flex-col">
+        <button
+          type="button"
+          className={ stepperButtonClasses }
+          onClick={ handleIncrement }
+          disabled={ disabled || readOnly || (max !== undefined && Number.parseFloat(realValue.toString() || '0') >= max) }
+          tabIndex={ -1 }
+        >
+          <ChevronUp size={ stepperSize[size] } />
+        </button>
+        <button
+          type="button"
+          className={ stepperButtonClasses }
+          onClick={ handleDecrement }
+          disabled={ disabled || readOnly || (min !== undefined && Number.parseFloat(realValue.toString() || '0') <= min) }
+          tabIndex={ -1 }
+        >
+          <ChevronDown size={ stepperSize[size] } />
+        </button>
+      </div>
       { suffix && (
         <div className="flex items-center justify-center pr-3 text-slate-400">
           { suffix }
@@ -137,7 +271,7 @@ export const Input = memo<InputProps>(forwardRef<HTMLInputElement, InputProps>((
     <div
       style={ style }
       className={ cn(
-        'InputContainer',
+        'NumberInputContainer',
         {
           'flex flex-col gap-1': labelPosition === 'top',
           'flex flex-row items-center gap-2': labelPosition === 'left',
@@ -172,12 +306,12 @@ export const Input = memo<InputProps>(forwardRef<HTMLInputElement, InputProps>((
   )
 }))
 
-Input.displayName = 'Input'
+NumberInput.displayName = 'NumberInput'
 
 type Size = 'sm' | 'md' | 'lg'
 
-export type InputProps
-  = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'size' | 'prefix'>
+export type NumberInputProps
+  = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'size' | 'prefix' | 'type'>
     & {
     /**
      * 容器类名
@@ -232,11 +366,29 @@ export type InputProps
       /**
        * 输入值（受控模式）
        */
-      value?: string
+      value?: string | number
+      /**
+       * 最小值
+       */
+      min?: number | string
+      /**
+       * 最大值
+       */
+      max?: number | string
+      /**
+       * 步进值
+       * @default 1
+       */
+      step?: number
+      /**
+       * 精度（小数位数）
+       * @default 0
+       */
+      precision?: number
       /**
        * 输入内容变化时的回调
        */
-      onChange?: (value: string, e: ChangeEvent<HTMLInputElement>) => void
+      onChange?: (value: number, e: ChangeEvent<HTMLInputElement>) => void
       /**
        * 聚焦时的回调
        */
