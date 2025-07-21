@@ -12,13 +12,15 @@ import { createCvs, eachPixel, getColorInfo, getImg, getImgData } from '@jl-org/
 export async function cutoutImgToMask(
   imgUrl: string,
   replaceColor: string,
-  {
+  opts: CutImgToMaskOpts = {},
+) {
+  const {
     smoothEdge = true,
     smoothRadius = 1,
     alphaThreshold = 0,
     ignoreAlpha = true,
-  }: CutImgToMaskOpts = {},
-) {
+  } = opts
+
   const imgData = await getImgData(imgUrl)
   const { r, g, b, a } = getColorInfo(replaceColor)
   const { width, height } = imgData
@@ -31,18 +33,26 @@ export async function cutoutImgToMask(
     const data = imgData.imgData.data
 
     if (A > alphaThreshold) {
-      data[index] = r // Set Red
-      data[index + 1] = g // Set Green
-      data[index + 2] = b // Set Blue
-      /**
-       * 保留原始 alpha 值以实现平滑边缘
-       * 如果 alpha 值大于 alphaThreshold，则保留原始 alpha 值
-       */
+      if (opts.handleAlpha) {
+        data[index + 3] = opts.handleAlpha(
+          { r: R, g: G, b: B, a: A },
+          { x, y, index },
+        )
+      }
+      else {
+        data[index] = r // Set Red
+        data[index + 1] = g // Set Green
+        data[index + 2] = b // Set Blue
+        /**
+         * 保留原始 alpha 值以实现平滑边缘
+         * 如果 alpha 值大于 alphaThreshold，则保留原始 alpha 值
+         */
 
-      if (!ignoreAlpha) {
-        data[index + 3] = A > 0
-          ? a * A
-          : 0
+        if (!ignoreAlpha) {
+          data[index + 3] = A > 0
+            ? a * A
+            : 0
+        }
       }
     }
     else {
@@ -308,7 +318,7 @@ export type CutImgToMaskOpts = {
    */
   smoothRadius?: number
   /**
-   * alpha 值阈值
+   * alpha 阈值，当目标像素的 alpha 小于此值时，将被视为透明
    * @default 0
    */
   alphaThreshold?: number
@@ -317,4 +327,22 @@ export type CutImgToMaskOpts = {
    * @default true
    */
   ignoreAlpha?: boolean
+  /**
+   * 当 alpha 值大于 alphaThreshold 时，如果传递了 handleAlpha 函数，则调用此函数处理 alpha 值
+   * @returns 返回值作为此像素的透明度
+   */
+  handleAlpha?: (rgba: RGBAObj, pixelPosition: PixelPostion) => number
+}
+
+export type RGBAObj = {
+  r: number
+  g: number
+  b: number
+  a: number
+}
+
+type PixelPostion = {
+  x: number
+  y: number
+  index: number
 }
