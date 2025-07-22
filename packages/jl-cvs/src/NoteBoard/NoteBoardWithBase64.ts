@@ -67,51 +67,73 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
 
   /**
    * 撤销
+   * @param drawImg 绘制图像的回调函数，如果传入，则不使用默认的绘制方式
    */
-  async undo() {
-    return new Promise<boolean>((resolve) => {
-      this.history.undo(async (base64) => {
-        this.clear(false)
-        if (!base64)
-          return resolve(false)
+  async undo(drawImg?: (img: HTMLImageElement) => Promise<any>) {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        this.history.undo(async (base64) => {
+          this.clear(false)
+          if (!base64)
+            return resolve(false)
 
-        /** 保存当前的混合模式 */
-        const currentCompositeOperation = this.ctx.globalCompositeOperation
-        /** 临时设置为默认混合模式 */
-        this.ctx.globalCompositeOperation = 'source-over'
+          /** 保存当前的混合模式 */
+          const currentCompositeOperation = this.ctx.globalCompositeOperation
+          /** 临时设置为默认混合模式 */
+          this.ctx.globalCompositeOperation = 'source-over'
 
-        const img = await getImg(base64, img => img.crossOrigin = 'anonymous') as HTMLImageElement
-        this.ctx.drawImage(img, 0, 0)
-        this.ctx.globalCompositeOperation = currentCompositeOperation
+          const img = await getImg(base64, img => img.crossOrigin = 'anonymous') as HTMLImageElement
+          if (drawImg) {
+            await drawImg(img)
+          }
+          else {
+            this.ctx.drawImage(img, 0, 0)
+          }
 
-        this.opts.onUndo?.(base64)
-        resolve(true)
-      })
+          this.ctx.globalCompositeOperation = currentCompositeOperation
+          this.opts.onUndo?.(base64)
+          resolve(true)
+        })
+      }
+      catch (error) {
+        reject(error)
+      }
     })
   }
 
   /**
    * 重做
+   * @param drawImg 绘制图像的回调函数，如果传入，则不使用默认的绘制方式
    */
-  async redo() {
-    return new Promise<boolean>((resolve) => {
-      this.history.redo(async (base64) => {
-        this.clear(false)
-        if (!base64)
-          return resolve(false)
+  async redo(drawImg?: (img: HTMLImageElement) => Promise<any>) {
+    return new Promise<boolean>((resolve, reject) => {
+      try {
+        this.history.redo(async (base64) => {
+          this.clear(false)
+          if (!base64)
+            return resolve(false)
 
-        /** 保存当前的混合模式 */
-        const currentCompositeOperation = this.ctx.globalCompositeOperation
-        /** 临时设置为默认混合模式 */
-        this.ctx.globalCompositeOperation = 'source-over'
+          /** 保存当前的混合模式 */
+          const currentCompositeOperation = this.ctx.globalCompositeOperation
+          /** 临时设置为默认混合模式 */
+          this.ctx.globalCompositeOperation = 'source-over'
 
-        const img = await getImg(base64, img => img.crossOrigin = 'anonymous') as HTMLImageElement
-        this.ctx.drawImage(img, 0, 0)
-        this.ctx.globalCompositeOperation = currentCompositeOperation
+          const img = await getImg(base64, img => img.crossOrigin = 'anonymous') as HTMLImageElement
+          if (drawImg) {
+            await drawImg(img)
+          }
+          else {
+            this.ctx.drawImage(img, 0, 0)
+          }
 
-        this.opts.onRedo?.(base64)
-        resolve(true)
-      })
+          this.ctx.globalCompositeOperation = currentCompositeOperation
+          this.opts.onRedo?.(base64)
+          resolve(true)
+        })
+      }
+      catch (error) {
+        reject(error)
+      }
     })
   }
 
