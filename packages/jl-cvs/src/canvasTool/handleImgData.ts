@@ -1,5 +1,8 @@
+import { createCvs, eachPixel, getColorInfo, getImgData, type Pixel } from '@jl-org/tool'
+
 /**
  * 灰度化算法：加权灰度化
+ * @param imageData 图片数据
  */
 export function adaptiveGrayscale(imageData: ImageData): ImageData {
   const data = imageData.data
@@ -13,6 +16,7 @@ export function adaptiveGrayscale(imageData: ImageData): ImageData {
 
 /**
  * 对比度增强
+ * @param imageData 图片数据
  * @param factor 因数，默认 1.2
  */
 export function enhanceContrast(imageData: ImageData, factor: number = 1.2): ImageData {
@@ -32,6 +36,7 @@ export function enhanceContrast(imageData: ImageData, factor: number = 1.2): Ima
  *
  * 最后再调用此函数，以获得最好的图像效果
  *
+ * @param imageData 图片数据
  * @param threshold 阈值边界，默认 128
  */
 export function adaptiveBinarize(imageData: ImageData, threshold = 128): ImageData {
@@ -44,4 +49,63 @@ export function adaptiveBinarize(imageData: ImageData, threshold = 128): ImageDa
     data[i] = data[i + 1] = data[i + 2] = value
   }
   return imageData
+}
+
+/**
+ * 将图片中的指定颜色替换为另一种颜色
+ * @param imgOrUrl 图片或图片地址
+ * @param fromColor 需要替换的颜色
+ * @param toColor 替换后的颜色
+ * @returns 替换后的图片
+ */
+export async function changeImgColor(
+  imgOrUrl: HTMLImageElement | string,
+  fromColor: string,
+  toColor: string,
+  opts: ChangeImgColorOpts = {},
+) {
+  const fromC = getColorInfo(fromColor)
+  const toC = getColorInfo(toColor)
+  const imgData = await getImgData(imgOrUrl)
+  const cpImgData = (await getImgData(imgOrUrl)).imgData
+
+  const formatFromColorAlpha = Math.round(fromC.a * 255)
+  const formatToColorAlpha = Math.round(toC.a * 255)
+
+  eachPixel(imgData.imgData, ([r, g, b, a], x, y, index) => {
+    const isSame = opts.isSameColor
+      ? opts.isSameColor([r, g, b, a], x, y, index)
+      : r === fromC.r
+        && g === fromC.g
+        && b === fromC.b
+        && a === formatFromColorAlpha
+
+    if (isSame) {
+      cpImgData.data[index] = toC.r
+      cpImgData.data[index + 1] = toC.g
+      cpImgData.data[index + 2] = toC.b
+      cpImgData.data[index + 3] = formatToColorAlpha
+    }
+  })
+
+  const { cvs, ctx } = createCvs(imgData.width, imgData.height)
+  ctx.putImageData(cpImgData, 0, 0)
+  const base64 = cvs.toDataURL()
+
+  return {
+    base64,
+    imgData: cpImgData,
+  }
+}
+
+export type ChangeImgColorOpts = {
+  /**
+   * 用户自定义判断是否为需要替换的颜色
+   * @param pixel 像素
+   * @param x 像素x坐标
+   * @param y 像素y坐标
+   * @param index 像素索引
+   * @returns 是否为需要替换的颜色
+   */
+  isSameColor?: (pixel: Pixel, x: number, y: number, index: number) => boolean
 }
