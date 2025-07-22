@@ -1,4 +1,4 @@
-import type { DrawMapVal, Mode, NoteBoardOptions, RecordPath } from './type'
+import type { DisposeOpts, DrawMapVal, Mode, NoteBoardOptions, RecordPath } from './type'
 import { DrawShape } from '@/Shapes'
 import { excludeKeys, UnRedoLinkedList } from '@/utils'
 import { NoteBoardBase } from './NoteBoardBase'
@@ -157,6 +157,17 @@ export class NoteBoard extends NoteBoardBase {
     canvas.removeEventListener('mouseup', this.onMouseup)
     canvas.removeEventListener('mouseleave', this.onMouseLeave)
     canvas.removeEventListener('wheel', this.onWheel)
+  }
+
+  /**
+   * 清理并释放所有资源
+   */
+  dispose(opts: DisposeOpts = {}) {
+    super.dispose(opts)
+    /** 清理DRAW_MAP中的引用 */
+    DRAW_MAP.delete(this.drawShape)
+    /** 清理历史记录 */
+    this.history.cleanAll()
   }
 
   /***************************************************

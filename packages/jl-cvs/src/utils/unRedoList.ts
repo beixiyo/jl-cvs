@@ -191,8 +191,9 @@ export function createUnReDoList<T>() {
     },
     /** 获取最后一项 */
     getLast: () => undoList[undoList.length - 1],
+
     /** 清空 */
-    clear: () => {
+    cleanAll: () => {
       undoList.splice(0)
       redoList.splice(0)
     },

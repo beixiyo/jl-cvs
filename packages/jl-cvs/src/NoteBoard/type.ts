@@ -250,3 +250,7 @@ export type DrawMapVal = {
   setCursor: (cursor: string) => void
   isShapeMode: () => boolean
 }
+
+export type DisposeOpts = {
+  handleCleanCanvasList?: (canvasList: CanvasItem[]) => void
+}

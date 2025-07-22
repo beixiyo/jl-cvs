@@ -1,4 +1,4 @@
-import type { Mode, NoteBoardOptions } from './type'
+import type { DisposeOpts, Mode, NoteBoardOptions } from './type'
 import type { ShapeType } from '@/Shapes'
 import { getImg } from '@/canvasTool'
 import { createUnReDoList } from '@/utils'
@@ -126,6 +126,15 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
     canvas.removeEventListener('mouseup', this.onMouseup)
     canvas.removeEventListener('mouseleave', this.onMouseLeave)
     canvas.removeEventListener('wheel', this.onWheel)
+  }
+
+  /**
+   * 清理并释放所有资源
+   */
+  dispose(opts: DisposeOpts = {}) {
+    super.dispose(opts)
+    /** 清理历史记录 */
+    this.history.cleanAll()
   }
 
   /**

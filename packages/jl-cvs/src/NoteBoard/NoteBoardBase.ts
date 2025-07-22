@@ -1,4 +1,4 @@
-import type { AddCanvasOpts, CanvasAttrs, CanvasItem, DrawImgOptions, ExportOptions, ImgInfo, Mode, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
+import type { AddCanvasOpts, CanvasAttrs, CanvasItem, DisposeOpts, DrawImgOptions, ExportOptions, ImgInfo, Mode, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
 import type { ShapeType } from '@/Shapes'
 import { clearAllCvs, createCvs, cutImg, getCvsImg, getDPR, getImg } from '@/canvasTool'
 import { getCircleCursor } from '@/utils'
@@ -79,6 +79,42 @@ export abstract class NoteBoardBase {
    * 设置模式
    */
   abstract setMode(mode: any): void
+
+  /**
+   * 清理并释放所有资源
+   */
+  dispose(opts: DisposeOpts = {}) {
+    if (opts.handleCleanCanvasList) {
+      opts.handleCleanCanvasList(this.canvasList)
+    }
+    else {
+      /** 移除所有画布元素 */
+      this.canvasList.forEach((item) => {
+        if (item.canvas.parentNode) {
+          item.canvas.parentNode.removeChild(item.canvas)
+        }
+      })
+      /** 清空画布列表 */
+      this.canvasList.splice(0)
+    }
+
+    /** 移除所有事件监听器 */
+    this.rmEvent()
+
+    /** 清空画布内容 */
+    this.clear(true, true)
+
+    /** 重置变换 */
+    this.resetSize()
+
+    /** 清理引用 */
+    this.imgInfo = undefined
+    this.el = null as any
+    this.canvas = null as any
+    this.ctx = null as any
+    this.imgCanvas = null as any
+    this.imgCtx = null as any
+  }
 
   constructor(opts: NoteBoardOptions) {
     this.opts = mergeOpts(opts, NoteBoardBase.dpr)
