@@ -2,7 +2,7 @@ import { StarField } from '@jl-org/cvs'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input } from '@/components/Input'
+import { Input, NumberInput } from '@/components/Input'
 
 export default function StarFieldTest() {
   const [starField, setStarField] = useState<StarField | null>(null)
@@ -164,7 +164,7 @@ export default function StarFieldTest() {
 
   return (
     <div className="min-h-screen from-slate-50 to-blue-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
-      {/* 页面标题 - 全宽显示 */}
+      {/* 页面标题 - 全宽显示 */ }
       <div className="p-6 text-center">
         <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           ⭐ 星空场景
@@ -174,9 +174,9 @@ export default function StarFieldTest() {
         </p>
       </div>
 
-      {/* 响应式布局容器 */}
+      {/* 响应式布局容器 */ }
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
-        {/* 左侧：效果展示区域 */}
+        {/* 左侧：效果展示区域 */ }
         <div className="flex-1">
           <Card className="min-h-[600px] p-6">
             <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
@@ -192,7 +192,7 @@ export default function StarFieldTest() {
           </Card>
         </div>
 
-        {/* 右侧：控制面板 */}
+        {/* 右侧：控制面板 */ }
         <div className="w-full lg:w-96">
           <Card>
             <div className="max-h-[80vh] overflow-y-auto p-6">
@@ -200,7 +200,7 @@ export default function StarFieldTest() {
                 控制面板
               </h2>
 
-              {/* 预设配置 */}
+              {/* 预设配置 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   预设效果
@@ -218,7 +218,7 @@ export default function StarFieldTest() {
                 </div>
               </div>
 
-              {/* 颜色主题 */}
+              {/* 颜色主题 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   颜色主题
@@ -248,7 +248,7 @@ export default function StarFieldTest() {
                 </div>
               </div>
 
-              {/* 参数配置 */}
+              {/* 参数配置 */ }
               <div className="space-y-4">
                 <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                   参数配置
@@ -258,10 +258,9 @@ export default function StarFieldTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.width }
-                    onChange={ e => updateConfig('width', Number(e.target.value)) }
+                    onChange={ v => updateConfig('width', v) }
                     min={ 400 }
                     max={ 1200 }
                   />
@@ -271,10 +270,9 @@ export default function StarFieldTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.height }
-                    onChange={ e => updateConfig('height', Number(e.target.value)) }
+                    onChange={ v => updateConfig('height', v) }
                     min={ 300 }
                     max={ 800 }
                   />
@@ -284,10 +282,9 @@ export default function StarFieldTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     星星数量
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.starCount }
-                    onChange={ e => updateConfig('starCount', Number(e.target.value)) }
+                    onChange={ v => updateConfig('starCount', v) }
                     min={ 50 }
                     max={ 1000 }
                   />
@@ -297,10 +294,9 @@ export default function StarFieldTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     最小尺寸
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.sizeRange[0] }
-                    onChange={ e => updateSizeRange(0, Number(e.target.value)) }
+                    onChange={ v => updateSizeRange(0, v) }
                     min={ 0.1 }
                     max={ 5 }
                     step={ 0.1 }
@@ -311,10 +307,9 @@ export default function StarFieldTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     最大尺寸
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.sizeRange[1] }
-                    onChange={ e => updateSizeRange(1, Number(e.target.value)) }
+                    onChange={ v => updateSizeRange(1, v) }
                     min={ 0.1 }
                     max={ 10 }
                     step={ 0.1 }
@@ -325,10 +320,9 @@ export default function StarFieldTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     运动速度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.speedRange }
-                    onChange={ e => updateConfig('speedRange', Number(e.target.value)) }
+                    onChange={ v => updateConfig('speedRange', v) }
                     min={ 0 }
                     max={ 2 }
                     step={ 0.01 }
@@ -339,10 +333,9 @@ export default function StarFieldTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     闪烁速度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.flickerSpeed }
-                    onChange={ e => updateConfig('flickerSpeed', Number(e.target.value)) }
+                    onChange={ v => updateConfig('flickerSpeed', v) }
                     min={ 0.001 }
                     max={ 0.1 }
                     step={ 0.001 }
@@ -354,14 +347,14 @@ export default function StarFieldTest() {
                     背景颜色
                   </label>
                   <div className="flex items-center gap-2">
-                    <Input
+                    <input
                       type="color"
                       value={ config.backgroundColor }
                       onChange={ e => updateConfig('backgroundColor', e.target.value) }
                       className="h-8 w-12 border-0 p-0"
                     />
-                    <Input
-                      type="text"
+                    <input
+                      type="color"
                       value={ config.backgroundColor }
                       onChange={ e => updateConfig('backgroundColor', e.target.value) }
                       className="flex-1"
@@ -370,7 +363,7 @@ export default function StarFieldTest() {
                 </div>
               </div>
 
-              {/* 使用说明 */}
+              {/* 使用说明 */ }
               <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-600">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   参数说明

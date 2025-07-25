@@ -2,7 +2,7 @@ import { GlobeSphere } from '@jl-org/cvs'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input } from '@/components/Input'
+import { Input, NumberInput } from '@/components/Input'
 
 export default function GlobeSphereTest() {
   const [globeSphere, setGlobeSphere] = useState<GlobeSphere | null>(null)
@@ -241,10 +241,9 @@ export default function GlobeSphereTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.width }
-                    onChange={ e => updateConfig('width', Number(e.target.value)) }
+                    onChange={ v => updateConfig('width', v) }
                     min={ 200 }
                     max={ 800 }
                   />
@@ -254,10 +253,9 @@ export default function GlobeSphereTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.height }
-                    onChange={ e => updateConfig('height', Number(e.target.value)) }
+                    onChange={ v => updateConfig('height', v) }
                     min={ 200 }
                     max={ 800 }
                   />
@@ -267,10 +265,9 @@ export default function GlobeSphereTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     点数量
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.pointCount }
-                    onChange={ e => updateConfig('pointCount', Number(e.target.value)) }
+                    onChange={ v => updateConfig('pointCount', v) }
                     min={ 100 }
                     max={ 5000 }
                   />
@@ -280,10 +277,9 @@ export default function GlobeSphereTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     球体半径
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.radius }
-                    onChange={ e => updateConfig('radius', Number(e.target.value)) }
+                    onChange={ v => updateConfig('radius', v) }
                     min={ 50 }
                     max={ 300 }
                   />
@@ -293,10 +289,9 @@ export default function GlobeSphereTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     旋转速度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.rotationSpeed }
-                    onChange={ e => updateConfig('rotationSpeed', Number(e.target.value)) }
+                    onChange={ v => updateConfig('rotationSpeed', v) }
                     min={ 0 }
                     max={ 0.02 }
                     step={ 0.0001 }
@@ -307,10 +302,9 @@ export default function GlobeSphereTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     点大小
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.pointSize }
-                    onChange={ e => updateConfig('pointSize', Number(e.target.value)) }
+                    onChange={ v => updateConfig('pointSize', v) }
                     min={ 0.5 }
                     max={ 5 }
                     step={ 0.1 }
@@ -321,10 +315,9 @@ export default function GlobeSphereTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     点透明度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.pointOpacity }
-                    onChange={ e => updateConfig('pointOpacity', Number(e.target.value)) }
+                    onChange={ v => updateConfig('pointOpacity', v) }
                     min={ 0.1 }
                     max={ 1 }
                     step={ 0.1 }
@@ -335,10 +328,9 @@ export default function GlobeSphereTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     透视距离
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.perspectiveDistance }
-                    onChange={ e => updateConfig('perspectiveDistance', Number(e.target.value)) }
+                    onChange={ v => updateConfig('perspectiveDistance', v) }
                     min={ 200 }
                     max={ 1000 }
                   />
@@ -348,11 +340,10 @@ export default function GlobeSphereTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     点颜色
                   </label>
-                  <Input
-                    type="text"
+                  <input
+                    type="color"
                     value={ config.pointColor }
                     onChange={ e => updateConfig('pointColor', e.target.value) }
-                    placeholder="rgb(100, 150, 255)"
                   />
                 </div>
 

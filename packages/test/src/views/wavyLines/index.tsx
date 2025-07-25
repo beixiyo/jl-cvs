@@ -2,7 +2,7 @@ import { WavyLines } from '@jl-org/cvs'
 import { useEffect, useRef } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input } from '@/components/Input'
+import { Input, NumberInput } from '@/components/Input'
 import { Slider } from '@/components/Slider'
 import { useGetState } from '@/hooks'
 
@@ -256,10 +256,9 @@ export default function WavyLinesTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.width }
-                    onChange={ e => updateConfig('width', Number(e.target.value)) }
+                    onChange={ v => updateConfig('width', v) }
                     min={ 400 }
                     max={ 1200 }
                   />
@@ -269,10 +268,9 @@ export default function WavyLinesTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.height }
-                    onChange={ e => updateConfig('height', Number(e.target.value)) }
+                    onChange={ v => updateConfig('height', v) }
                     min={ 300 }
                     max={ 800 }
                   />
@@ -401,14 +399,14 @@ export default function WavyLinesTest() {
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Input
+                    <input
                       type="color"
                       value={ config.strokeStyle }
                       onChange={ e => updateConfig('strokeStyle', e.target.value) }
                       className="h-8 w-12 border-0 p-0"
                     />
-                    <Input
-                      type="text"
+                    <input
+                      type="color"
                       value={ config.strokeStyle }
                       onChange={ e => updateConfig('strokeStyle', e.target.value) }
                       className="flex-1"

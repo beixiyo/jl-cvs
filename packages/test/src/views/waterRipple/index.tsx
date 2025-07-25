@@ -2,7 +2,7 @@ import { WaterRipple } from '@jl-org/cvs'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input } from '@/components/Input'
+import { Input, NumberInput } from '@/components/Input'
 
 export default function WaterRippleTest() {
   const [rippleInstance, setRippleInstance] = useState<WaterRipple | null>(null)
@@ -207,10 +207,9 @@ export default function WaterRippleTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.width }
-                    onChange={ e => updateConfig('width', Number(e.target.value)) }
+                    onChange={ v => updateConfig('width', v) }
                     min={ 200 }
                     max={ 1200 }
                   />
@@ -220,10 +219,9 @@ export default function WaterRippleTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.height }
-                    onChange={ e => updateConfig('height', Number(e.target.value)) }
+                    onChange={ v => updateConfig('height', v) }
                     min={ 200 }
                     max={ 800 }
                   />
@@ -233,10 +231,9 @@ export default function WaterRippleTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     Y轴偏移
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.yOffset }
-                    onChange={ e => updateConfig('yOffset', Number(e.target.value)) }
+                    onChange={ v => updateConfig('yOffset', v) }
                     min={ -200 }
                     max={ 400 }
                   />
@@ -246,10 +243,9 @@ export default function WaterRippleTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     X轴偏移
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.xOffset }
-                    onChange={ e => updateConfig('xOffset', Number(e.target.value)) }
+                    onChange={ v => updateConfig('xOffset', v) }
                     min={ -200 }
                     max={ 200 }
                   />
@@ -259,10 +255,9 @@ export default function WaterRippleTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     线条宽度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.lineWidth }
-                    onChange={ e => updateConfig('lineWidth', Number(e.target.value)) }
+                    onChange={ v => updateConfig('lineWidth', v) }
                     min={ 1 }
                     max={ 10 }
                     step={ 0.5 }
@@ -273,10 +268,9 @@ export default function WaterRippleTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     波纹圈数
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.circleCount }
-                    onChange={ e => updateConfig('circleCount', Number(e.target.value)) }
+                    onChange={ v => updateConfig('circleCount', v) }
                     min={ 5 }
                     max={ 30 }
                   />
@@ -286,10 +280,9 @@ export default function WaterRippleTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     动画强度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.intensity }
-                    onChange={ e => updateConfig('intensity', Number(e.target.value)) }
+                    onChange={ v => updateConfig('intensity', v) }
                     min={ 0.1 }
                     max={ 5 }
                     step={ 0.1 }
@@ -300,7 +293,7 @@ export default function WaterRippleTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     描边颜色
                   </label>
-                  <Input
+                  <input
                     type="color"
                     value={ config.strokeStyle }
                     onChange={ e => updateConfig('strokeStyle', e.target.value) }

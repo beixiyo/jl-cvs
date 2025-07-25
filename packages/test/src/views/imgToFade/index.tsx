@@ -2,7 +2,7 @@ import { imgToFade } from '@jl-org/cvs'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input } from '@/components/Input'
+import { Input, NumberInput } from '@/components/Input'
 import { Slider } from '@/components/Slider'
 import { type FileItem, Uploader } from '@/components/Uploader'
 import { useGetState } from '@/hooks'
@@ -19,7 +19,7 @@ export default function ImgToFadeTest() {
     bgc: '#000000',
   }, true)
 
-  const [currentImage, setCurrentImage] = useState<string>(new URL('@/assets/umr.webp', import.meta.url).href)
+  const [currentImage, setCurrentImage] = useState<string>(() => new URL('@/assets/img/umr.webp', import.meta.url).href)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number | null>(null)
@@ -255,10 +255,9 @@ export default function ImgToFadeTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.width }
-                    onChange={ e => updateConfig('width', Number(e.target.value)) }
+                    onChange={ v => updateConfig('width', v) }
                     min={ 400 }
                     max={ 1200 }
                   />
@@ -268,10 +267,9 @@ export default function ImgToFadeTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.height }
-                    onChange={ e => updateConfig('height', Number(e.target.value)) }
+                    onChange={ v => updateConfig('height', v) }
                     min={ 300 }
                     max={ 800 }
                   />
@@ -281,10 +279,9 @@ export default function ImgToFadeTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     图片宽度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.imgWidth }
-                    onChange={ e => updateConfig('imgWidth', Number(e.target.value)) }
+                    onChange={ v => updateConfig('imgWidth', v) }
                     min={ 200 }
                     max={ 600 }
                   />
@@ -294,10 +291,9 @@ export default function ImgToFadeTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     图片高度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.imgHeight }
-                    onChange={ e => updateConfig('imgHeight', Number(e.target.value)) }
+                    onChange={ v => updateConfig('imgHeight', v) }
                     min={ 150 }
                     max={ 400 }
                   />
@@ -378,14 +374,14 @@ export default function ImgToFadeTest() {
                     背景颜色
                   </label>
                   <div className="flex items-center gap-2">
-                    <Input
+                    <input
                       type="color"
                       value={ config.bgc }
                       onChange={ e => updateConfig('bgc', e.target.value) }
                       className="h-8 w-12 border-0 p-0"
                     />
-                    <Input
-                      type="text"
+                    <input
+                      type="color"
                       value={ config.bgc }
                       onChange={ e => updateConfig('bgc', e.target.value) }
                       className="flex-1"

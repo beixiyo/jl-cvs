@@ -1,7 +1,7 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { cn } from '@/utils/tool'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
-export const Slider = memo<SliderProps>((
+export function InnerSlider<T extends number | [number, number] = number>(
   {
     style,
     className,
@@ -22,17 +22,19 @@ export const Slider = memo<SliderProps>((
     onChangeComplete,
     styleConfig,
     ...rest
-  },
-) => {
+  }: SliderProps<T>,
+) {
   const sliderRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [dragIndex, setDragIndex] = useState<number>(0)
-  const [internalValue, setInternalValue] = useState<number | [number, number]>(() => {
+  const [internalValue, setInternalValue] = useState<T>(() => {
     if (value !== undefined)
-      return value
+      return value as T
+
     if (range)
-      return [min, min]
-    return min
+      return [min, min] as T
+
+    return min as T
   })
 
   /** 默认样式配置 */
@@ -134,7 +136,7 @@ export const Slider = memo<SliderProps>((
   }, [min, max, vertical, reverse])
 
   /** 更新值 */
-  const updateValue = useCallback((newValue: number | [number, number]) => {
+  const updateValue = useCallback((newValue: T) => {
     setInternalValue(newValue)
     onChange?.(newValue)
   }, [onChange])
@@ -159,17 +161,17 @@ export const Slider = memo<SliderProps>((
       : clientX)
 
     if (range && Array.isArray(currentValue)) {
-      const newRangeValue: [number, number] = [...currentValue]
+      const newRangeValue: [number, number] = [...currentValue] as [number, number]
       newRangeValue[index] = newValue
       /** 确保范围值的顺序正确 */
       if (newRangeValue[0] > newRangeValue[1]) {
         newRangeValue.reverse()
         setDragIndex(1 - index)
       }
-      updateValue(newRangeValue)
+      updateValue(newRangeValue as T)
     }
     else {
-      updateValue(newValue)
+      updateValue(newValue as T)
     }
   }, [disabled, vertical, pixelToValue, range, currentValue, updateValue])
 
@@ -189,17 +191,17 @@ export const Slider = memo<SliderProps>((
       : clientX)
 
     if (range && Array.isArray(currentValue)) {
-      const newRangeValue: [number, number] = [...currentValue]
+      const newRangeValue: [number, number] = [...currentValue] as [number, number]
       newRangeValue[dragIndex] = newValue
       /** 确保范围值的顺序正确 */
       if (newRangeValue[0] > newRangeValue[1]) {
         [newRangeValue[0], newRangeValue[1]] = [newRangeValue[1], newRangeValue[0]]
         setDragIndex(1 - dragIndex)
       }
-      updateValue(newRangeValue)
+      updateValue(newRangeValue as T)
     }
     else {
-      updateValue(newValue)
+      updateValue(newValue as T)
     }
   }, [isDragging, disabled, vertical, pixelToValue, range, currentValue, dragIndex, updateValue])
 
@@ -229,22 +231,32 @@ export const Slider = memo<SliderProps>((
       case 'ArrowUp':
         delta = stepValue
         break
+
       case 'Home':
-        delta = min - (Array.isArray(currentValue)
-          ? currentValue[index]
-          : currentValue)
+        const v1 = (
+          Array.isArray(currentValue)
+            ? currentValue[index]
+            : currentValue
+        ) as number
+        delta = min - v1
         break
+
       case 'End':
-        delta = max - (Array.isArray(currentValue)
-          ? currentValue[index]
-          : currentValue)
+        const v2 = (
+          Array.isArray(currentValue)
+            ? currentValue[index]
+            : currentValue
+        ) as number
+        delta = max - v2
         break
+
       case 'PageDown':
         delta = -stepValue * 10
         break
       case 'PageUp':
         delta = stepValue * 10
         break
+
       default:
         return
     }
@@ -252,19 +264,19 @@ export const Slider = memo<SliderProps>((
     event.preventDefault()
 
     if (range && Array.isArray(currentValue)) {
-      const newRangeValue: [number, number] = [...currentValue]
+      const newRangeValue: [number, number] = [...currentValue] as [number, number]
       newRangeValue[index] = clampValue(currentValue[index] + delta)
       /** 确保范围值的顺序正确 */
       if (newRangeValue[0] > newRangeValue[1]) {
         [newRangeValue[0], newRangeValue[1]] = [newRangeValue[1], newRangeValue[0]]
       }
-      updateValue(newRangeValue)
-      onChangeComplete?.(newRangeValue)
+      updateValue(newRangeValue as T)
+      onChangeComplete?.(newRangeValue as T)
     }
     else if (typeof currentValue === 'number') {
       const newValue = clampValue(currentValue + delta)
-      updateValue(newValue)
-      onChangeComplete?.(newValue)
+      updateValue(newValue as T)
+      onChangeComplete?.(newValue as T)
     }
   }, [keyboard, disabled, step, min, max, range, currentValue, clampValue, updateValue, onChangeComplete])
 
@@ -304,7 +316,7 @@ export const Slider = memo<SliderProps>((
       const position = valueToPixel(value)
       const isActive = Array.isArray(currentValue)
         ? value >= currentValue[0] && value <= currentValue[1]
-        : value <= currentValue
+        : value <= (currentValue as number)
 
       const markStyle = vertical
         ? { bottom: `${position}%` }
@@ -341,7 +353,7 @@ export const Slider = memo<SliderProps>((
           />
           { label && (
             <span className={ cn(
-              'text-xs whitespace-nowrap',
+              'text-xs whitespace-nowrap dark:text-gray-200 text-gray-700',
               finalStyleConfig.marks.labelColor,
               vertical
                 ? 'ml-1'
@@ -509,7 +521,7 @@ export const Slider = memo<SliderProps>((
         'relative select-none',
         vertical
           ? 'h-full w-6 py-2'
-          : 'w-full h-6 px-2',
+          : 'w-full px-2',
         disabled && 'cursor-not-allowed',
         className,
       ) }
@@ -568,9 +580,11 @@ export const Slider = memo<SliderProps>((
       </div>
     </div>
   )
-})
+}
 
-Slider.displayName = 'Slider'
+InnerSlider.displayName = 'Slider'
+
+export const Slider = memo(InnerSlider) as typeof InnerSlider
 
 /** 类型定义 */
 export type TooltipConfig = {
@@ -689,7 +703,7 @@ export type SliderStyleConfig = {
   }
 }
 
-export type SliderProps = {
+export type SliderProps<T extends number | [number, number] = number> = {
   /**
    * 值为 true 时，滑块为禁用状态
    * @default false
@@ -746,7 +760,7 @@ export type SliderProps = {
   /**
    * 设置当前取值。当 range 为 false 时，使用 number，否则用 [number, number]
    */
-  value?: number | [number, number]
+  value?: T
   /**
    * 值为 true 时，Slider 为垂直方向
    * @default false
@@ -755,13 +769,14 @@ export type SliderProps = {
   /**
    * 与 mouseup 和 keyup 触发时机一致，把当前值作为参数传入
    */
-  onChangeComplete?: (value: number | [number, number]) => void
+  onChangeComplete?: (value: T) => void
   /**
    * 当 Slider 的值发生改变时，会触发 onChange 事件，并把改变后的值作为参数传入
    */
-  onChange?: (value: number | [number, number]) => void
+  onChange?: (value: T) => void
   /**
    * 样式配置
    */
   styleConfig?: SliderStyleConfig
-} & React.HTMLAttributes<HTMLDivElement>
+}
+& Omit<React.PropsWithChildren<React.HTMLAttributes<HTMLElement>>, 'onChange'>

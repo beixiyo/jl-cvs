@@ -2,7 +2,7 @@ import { DotGrid, Grid } from '@jl-org/cvs'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input } from '@/components/Input'
+import { Input, NumberInput } from '@/components/Input'
 import { Slider } from '@/components/Slider'
 import { useGetState } from '@/hooks'
 
@@ -265,7 +265,7 @@ export default function GridTest() {
 
   return (
     <div className="min-h-screen from-gray-50 to-slate-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
-      {/* 页面标题 - 全宽显示 */}
+      {/* 页面标题 - 全宽显示 */ }
       <div className="p-6 text-center">
         <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           📐 网格效果
@@ -275,9 +275,9 @@ export default function GridTest() {
         </p>
       </div>
 
-      {/* 响应式布局容器 */}
+      {/* 响应式布局容器 */ }
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
-        {/* 左侧：效果展示区域 */}
+        {/* 左侧：效果展示区域 */ }
         <div className="flex-1">
           <Card className="min-h-[600px] p-6">
             <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
@@ -306,7 +306,7 @@ export default function GridTest() {
           </Card>
         </div>
 
-        {/* 右侧：控制面板 */}
+        {/* 右侧：控制面板 */ }
         <div className="w-full lg:w-96">
           <Card>
             <div className="max-h-[80vh] overflow-y-auto p-6">
@@ -314,7 +314,7 @@ export default function GridTest() {
                 控制面板
               </h2>
 
-              {/* 网格类型选择 */}
+              {/* 网格类型选择 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   网格类型
@@ -341,7 +341,7 @@ export default function GridTest() {
                 </div>
               </div>
 
-              {/* 预设配置 */}
+              {/* 预设配置 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   预设效果
@@ -371,7 +371,7 @@ export default function GridTest() {
                 </div>
               </div>
 
-              {/* 基础参数配置 */}
+              {/* 基础参数配置 */ }
               <div className="mb-6 space-y-4">
                 <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                   基础参数
@@ -381,18 +381,16 @@ export default function GridTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ gridType === 'grid'
                       ? gridConfig.width
                       : dotGridConfig.width }
-                    onChange={ (e) => {
-                      const value = Number(e.target.value)
+                    onChange={ (v) => {
                       if (gridType === 'grid') {
-                        updateGridConfig('width', value)
+                        updateGridConfig('width', v)
                       }
                       else {
-                        updateDotGridConfig('width', value)
+                        updateDotGridConfig('width', v)
                       }
                     } }
                     min={ 400 }
@@ -404,18 +402,16 @@ export default function GridTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ gridType === 'grid'
                       ? gridConfig.height
                       : dotGridConfig.height }
-                    onChange={ (e) => {
-                      const value = Number(e.target.value)
+                    onChange={ (v) => {
                       if (gridType === 'grid') {
-                        updateGridConfig('height', value)
+                        updateGridConfig('height', v)
                       }
                       else {
-                        updateDotGridConfig('height', value)
+                        updateDotGridConfig('height', v)
                       }
                     } }
                     min={ 300 }
@@ -427,42 +423,25 @@ export default function GridTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     背景颜色
                   </label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="color"
-                      value={ gridType === 'grid'
-                        ? gridConfig.backgroundColor
-                        : dotGridConfig.backgroundColor }
-                      onChange={ (e) => {
-                        if (gridType === 'grid') {
-                          updateGridConfig('backgroundColor', e.target.value)
-                        }
-                        else {
-                          updateDotGridConfig('backgroundColor', e.target.value)
-                        }
-                      } }
-                      className="h-8 w-12 border-0 p-0"
-                    />
-                    <Input
-                      type="text"
-                      value={ gridType === 'grid'
-                        ? gridConfig.backgroundColor
-                        : dotGridConfig.backgroundColor }
-                      onChange={ (e) => {
-                        if (gridType === 'grid') {
-                          updateGridConfig('backgroundColor', e.target.value)
-                        }
-                        else {
-                          updateDotGridConfig('backgroundColor', e.target.value)
-                        }
-                      } }
-                      className="flex-1"
-                    />
-                  </div>
+                  <input
+                    type="color"
+                    value={ gridType === 'grid'
+                      ? gridConfig.backgroundColor
+                      : dotGridConfig.backgroundColor }
+                    onChange={ (e) => {
+                      if (gridType === 'grid') {
+                        updateGridConfig('backgroundColor', e.target.value)
+                      }
+                      else {
+                        updateDotGridConfig('backgroundColor', e.target.value)
+                      }
+                    } }
+                    className="h-8 w-12 border-0 p-0"
+                  />
                 </div>
               </div>
 
-              {/* 网格特定配置 */}
+              {/* 网格特定配置 */ }
               { gridType === 'grid' && (
                 <div className="mb-6 space-y-4">
                   <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
@@ -543,20 +522,12 @@ export default function GridTest() {
                     <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       边框颜色
                     </label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="color"
-                        value={ gridConfig.borderColor }
-                        onChange={ e => updateGridConfig('borderColor', e.target.value) }
-                        className="h-8 w-12 border-0 p-0"
-                      />
-                      <Input
-                        type="text"
-                        value={ gridConfig.borderColor }
-                        onChange={ e => updateGridConfig('borderColor', e.target.value) }
-                        className="flex-1"
-                      />
-                    </div>
+                    <input
+                      type="color"
+                      value={ gridConfig.borderColor }
+                      onChange={ e => updateGridConfig('borderColor', e.target.value) }
+                      className="h-8 w-12 border-0 p-0"
+                    />
                   </div>
 
                   <div className="flex items-center">
@@ -573,7 +544,7 @@ export default function GridTest() {
                 </div>
               ) }
 
-              {/* 点阵特定配置 */}
+              {/* 点阵特定配置 */ }
               { gridType === 'dotGrid' && (
                 <div className="mb-6 space-y-4">
                   <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
@@ -655,14 +626,14 @@ export default function GridTest() {
                       点颜色
                     </label>
                     <div className="flex items-center gap-2">
-                      <Input
+                      <input
                         type="color"
                         value={ dotGridConfig.dotColor }
                         onChange={ e => updateDotGridConfig('dotColor', e.target.value) }
                         className="h-8 w-12 border-0 p-0"
                       />
-                      <Input
-                        type="text"
+                      <input
+                        type="color"
                         value={ dotGridConfig.dotColor }
                         onChange={ e => updateDotGridConfig('dotColor', e.target.value) }
                         className="flex-1"
@@ -695,7 +666,7 @@ export default function GridTest() {
                 </div>
               ) }
 
-              {/* 使用说明 */}
+              {/* 使用说明 */ }
               <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-600">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   使用说明

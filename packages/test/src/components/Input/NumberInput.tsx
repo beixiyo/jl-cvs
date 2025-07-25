@@ -1,6 +1,8 @@
 import type { ChangeEvent } from 'react'
+import { numFixed } from '@jl-org/tool'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { forwardRef, memo, useCallback, useState } from 'react'
+import { useFormField } from '@/components/Form'
 import { cn } from '@/utils'
 
 export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, NumberInputProps>((
@@ -30,9 +32,30 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
     min: _min,
     max: _max,
     step = 1,
-    precision = 0,
+    precision,
+    name,
     ...rest
   } = props
+
+  const actualPrecision = precision ?? step < 1
+    ? 1
+    : 0
+
+  /** 使用 useFormField hook 处理表单集成 */
+  const {
+    actualValue,
+    actualError,
+    actualErrorMessage,
+    handleChangeVal,
+    handleBlur: handleFieldBlur,
+  } = useFormField<string | number, ChangeEvent<HTMLInputElement>, number | undefined>({
+    name,
+    value,
+    error,
+    errorMessage,
+    onChange: onChange as any,
+    defaultValue: '',
+  })
 
   const min = typeof _min === 'string'
     ? Number.parseFloat(_min)
@@ -42,59 +65,47 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
     : _max
 
   const [isFocused, setIsFocused] = useState(false)
-  const [internalVal, setInternalVal] = useState('')
-  const isControlMode = value !== undefined
-  const realValue = isControlMode
-    ? value
-    : internalVal
-
-  /** 格式化数字 */
-  const formatNumber = useCallback((value: string): string => {
-    if (!value)
-      return ''
-
-    let numValue = Number.parseFloat(value)
-
-    /** 应用最小值和最大值限制 */
-    if (min !== undefined && numValue < min)
-      numValue = min
-    if (max !== undefined && numValue > max)
-      numValue = max
-
-    /** 处理精度 */
-    if (precision !== undefined) {
-      return numValue.toFixed(precision)
-    }
-
-    return String(numValue)
-  }, [min, max, precision])
-
-  /** 处理值变化 */
-  const handleChangeVal = useCallback(
-    (val: string, e: ChangeEvent<HTMLInputElement>) => {
-      /** 只允许数字和小数点 */
-      const regex = /^-?\d*\.?\d*$/
-      if (val !== '' && !regex.test(val))
-        return
-
-      const formattedVal = val === ''
-        ? ''
-        : val
-
-      isControlMode
-        ? onChange?.(Number(formattedVal), e)
-        : setInternalVal(formattedVal)
-    },
-    [isControlMode, onChange],
-  )
 
   /** 处理输入变化 */
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      handleChangeVal(value, e)
+      const val = e.target.value
+      if (val === '') {
+        handleChangeVal(0, e)
+        return
+      }
+
+      const allowNegative = min === undefined || min < 0
+      const allowDecimal = actualPrecision > 0
+
+      let pattern = '\\d*'
+      if (allowDecimal) {
+        /** 允许一个小数点 */
+        pattern = '\\d*\\.?\\d*'
+      }
+
+      if (allowNegative) {
+        pattern = `-?${pattern}`
+      }
+
+      const regex = new RegExp(`^${pattern}$`)
+
+      if (!regex.test(val)) {
+        return
+      }
+
+      /** 允许输入中间状态，如 '-' 或以 '.' 结尾 */
+      if ((allowNegative && val === '-') || (allowDecimal && val.endsWith('.'))) {
+        handleChangeVal(val as any, e)
+      }
+      else {
+        const num = Number.parseFloat(val)
+        if (!Number.isNaN(num)) {
+          handleChangeVal(num, e)
+        }
+      }
     },
-    [handleChangeVal],
+    [handleChangeVal, actualPrecision, min],
   )
 
   /** 处理步进增加 */
@@ -102,36 +113,54 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
     if (disabled || readOnly)
       return
 
-    const currentValue = realValue === ''
-      ? 0
-      : Number.parseFloat(realValue.toString())
+    const valStr = (actualValue ?? '').toString()
+    if (max !== undefined && Number.parseFloat(valStr) >= max)
+      return
+
+    let currentValue = Number.parseFloat(valStr)
+    if (Number.isNaN(currentValue))
+      currentValue = 0
+
     const newValue = currentValue + (step || 1)
-    const formattedValue = formatNumber(String(newValue))
+    let clampedValue = newValue
+    if (max !== undefined && clampedValue > max)
+      clampedValue = max
+
+    const formattedValue = numFixed(clampedValue, actualPrecision)
 
     const mockEvent = {
-      target: { value: formattedValue },
+      target: { value: String(formattedValue) },
     } as ChangeEvent<HTMLInputElement>
 
     handleChangeVal(formattedValue, mockEvent)
-  }, [realValue, step, disabled, readOnly, formatNumber, handleChangeVal])
+  }, [actualValue, step, disabled, readOnly, max, actualPrecision, handleChangeVal])
 
   /** 处理步进减少 */
   const handleDecrement = useCallback(() => {
     if (disabled || readOnly)
       return
 
-    const currentValue = realValue === ''
-      ? 0
-      : Number.parseFloat(realValue.toString())
+    const valStr = (actualValue ?? '').toString()
+    if (min !== undefined && Number.parseFloat(valStr) <= min)
+      return
+
+    let currentValue = Number.parseFloat(valStr)
+    if (Number.isNaN(currentValue))
+      currentValue = 0
+
     const newValue = currentValue - (step || 1)
-    const formattedValue = formatNumber(String(newValue))
+    let clampedValue = newValue
+    if (min !== undefined && clampedValue < min)
+      clampedValue = min
+
+    const formattedValue = numFixed(clampedValue, actualPrecision)
 
     const mockEvent = {
-      target: { value: formattedValue },
+      target: { value: String(formattedValue) },
     } as ChangeEvent<HTMLInputElement>
 
     handleChangeVal(formattedValue, mockEvent)
-  }, [realValue, step, disabled, readOnly, formatNumber, handleChangeVal])
+  }, [actualValue, step, disabled, readOnly, min, actualPrecision, handleChangeVal])
 
   /** 处理聚焦 */
   const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
@@ -142,20 +171,48 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
   /** 处理失焦 */
   const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(false)
+    handleFieldBlur()
 
-    /** 在失焦时格式化数字 */
-    if (realValue !== '') {
-      const formattedValue = formatNumber(realValue.toString())
+    let valueToSet: number | undefined
+    const valueStr = (actualValue ?? '').toString()
 
-      const mockEvent = {
-        target: { value: formattedValue },
-      } as ChangeEvent<HTMLInputElement>
+    if (valueStr !== '') {
+      /** 如果值是无效的中间状态，则清空 */
+      if (valueStr === '-' || valueStr.endsWith('.')) {
+        valueToSet = undefined
+      }
+      else {
+        let numValue = Number.parseFloat(valueStr)
+        if (!Number.isNaN(numValue)) {
+          /** 应用范围限制 */
+          if (min !== undefined && numValue < min)
+            numValue = min
+          if (max !== undefined && numValue > max)
+            numValue = max
 
-      handleChangeVal(formattedValue, mockEvent)
+          /** 格式化精度 */
+          valueToSet = numFixed(numValue, actualPrecision)
+        }
+        else {
+          valueToSet = undefined
+        }
+      }
+    }
+    else {
+      valueToSet = undefined
     }
 
+    const mockEvent = {
+      target: {
+        value: valueToSet === undefined
+          ? ''
+          : String(valueToSet),
+      },
+    } as ChangeEvent<HTMLInputElement>
+    handleChangeVal(valueToSet ?? 0, mockEvent)
+
     onBlur?.(e)
-  }, [onBlur, realValue, formatNumber, handleChangeVal])
+  }, [onBlur, actualValue, min, max, actualPrecision, handleChangeVal, handleFieldBlur])
 
   /** 处理键盘事件 */
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -194,14 +251,14 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
   )
 
   const containerClasses = cn(
-    'relative w-full flex items-center rounded-xl border',
+    'relative w-full flex items-center rounded-lg border',
     sizeClasses[size],
     {
-      'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900': !error && !disabled,
-      'border-rose-500 hover:border-rose-600 focus-within:border-rose-500': error && !disabled,
+      'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900': !actualError && !disabled,
+      'border-rose-500 hover:border-rose-600 focus-within:border-rose-500': actualError && !disabled,
       'border-slate-200 bg-slate-50 dark:bg-slate-800 text-slate-400 cursor-not-allowed': disabled,
-      '': isFocused && !error && !disabled,
-      'hover:border-slate-400 dark:hover:border-slate-600': !isFocused && !error && !disabled,
+      '': isFocused && !actualError && !disabled,
+      'hover:border-slate-400 dark:hover:border-slate-600': !isFocused && !actualError && !disabled,
     },
   )
 
@@ -222,7 +279,7 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
       ) }
       <input
         ref={ ref }
-        value={ realValue }
+        value={ actualValue }
         className={ cn(
           inputClasses,
           prefix
@@ -237,6 +294,7 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
         onKeyDown={ handleKeyDown }
         onChange={ handleChange }
         inputMode="decimal"
+        name={ name }
         { ...rest }
       />
       <div className="mr-1 flex flex-col">
@@ -244,7 +302,7 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
           type="button"
           className={ stepperButtonClasses }
           onClick={ handleIncrement }
-          disabled={ disabled || readOnly || (max !== undefined && Number.parseFloat(realValue.toString() || '0') >= max) }
+          disabled={ disabled || readOnly || (max !== undefined && Number.parseFloat(actualValue?.toString() || '0') >= max) }
           tabIndex={ -1 }
         >
           <ChevronUp size={ stepperSize[size] } />
@@ -253,7 +311,7 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
           type="button"
           className={ stepperButtonClasses }
           onClick={ handleDecrement }
-          disabled={ disabled || readOnly || (min !== undefined && Number.parseFloat(realValue.toString() || '0') <= min) }
+          disabled={ disabled || readOnly || (min !== undefined && Number.parseFloat(actualValue?.toString() || '0') <= min) }
           tabIndex={ -1 }
         >
           <ChevronDown size={ stepperSize[size] } />
@@ -288,7 +346,7 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
               'text-base': size === 'md',
               'text-lg': size === 'lg',
               'min-w-24': labelPosition === 'left',
-              'text-rose-500': error,
+              'text-rose-500': actualError,
             },
           ) }
         >
@@ -297,9 +355,9 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
         </label>
       ) }
       { renderInput() }
-      { error && errorMessage && (
+      { actualError && actualErrorMessage && (
         <div className="mt-1 text-sm text-rose-500">
-          { errorMessage }
+          { actualErrorMessage }
         </div>
       ) }
     </div>

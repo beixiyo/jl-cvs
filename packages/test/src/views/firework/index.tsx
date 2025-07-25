@@ -2,7 +2,7 @@ import { createFirework, createFirework2 } from '@jl-org/cvs'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input } from '@/components/Input'
+import { Input, NumberInput } from '@/components/Input'
 import { cn } from '@/utils'
 
 type FireworkType = 'classic' | 'burst'
@@ -386,10 +386,9 @@ export default function FireworkTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.width }
-                    onChange={ e => updateConfig('width', Number(e.target.value)) }
+                    onChange={ v => updateConfig('width', v) }
                     min={ 400 }
                     max={ 1200 }
                   />
@@ -399,10 +398,9 @@ export default function FireworkTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.height }
-                    onChange={ e => updateConfig('height', Number(e.target.value)) }
+                    onChange={ v => updateConfig('height', v) }
                     min={ 300 }
                     max={ 800 }
                   />
@@ -413,10 +411,9 @@ export default function FireworkTest() {
                     <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       发射范围
                     </label>
-                    <Input
-                      type="number"
+                    <NumberInput
                       value={ config.yRange }
-                      onChange={ e => updateConfig('yRange', Number(e.target.value)) }
+                      onChange={ v => updateConfig('yRange', v) }
                       min={ 20 }
                       max={ 200 }
                     />
@@ -428,10 +425,9 @@ export default function FireworkTest() {
                     <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       运动速度
                     </label>
-                    <Input
-                      type="number"
+                    <NumberInput
                       value={ config.speed }
-                      onChange={ e => updateConfig('speed', Number(e.target.value)) }
+                      onChange={ v => updateConfig('speed', v) }
                       min={ 0.5 }
                       max={ 10 }
                       step={ 0.5 }
@@ -444,10 +440,9 @@ export default function FireworkTest() {
                     <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       小球半径
                     </label>
-                    <Input
-                      type="number"
+                    <NumberInput
                       value={ config.r }
-                      onChange={ e => updateConfig('r', Number(e.target.value)) }
+                      onChange={ v => updateConfig('r', v) }
                       min={ 2 }
                       max={ 20 }
                     />
@@ -459,10 +454,9 @@ export default function FireworkTest() {
                     <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       小球数量
                     </label>
-                    <Input
-                      type="number"
+                    <NumberInput
                       value={ config.ballCount }
-                      onChange={ e => updateConfig('ballCount', Number(e.target.value)) }
+                      onChange={ v => updateConfig('ballCount', v) }
                       min={ 50 }
                       max={ 500 }
                     />
@@ -476,10 +470,9 @@ export default function FireworkTest() {
                       <span className="ml-1 text-xs text-gray-500">(发射间隔)</span>
                     ) }
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.gapTime }
-                    onChange={ e => updateConfig('gapTime', Number(e.target.value)) }
+                    onChange={ v => updateConfig('gapTime', v) }
                     min={ 100 }
                     max={ 2000 }
                   />
@@ -490,10 +483,9 @@ export default function FireworkTest() {
                     <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                       最大数量
                     </label>
-                    <Input
-                      type="number"
+                    <NumberInput
                       value={ config.maxCount }
-                      onChange={ e => updateConfig('maxCount', Number(e.target.value)) }
+                      onChange={ v => updateConfig('maxCount', v) }
                       min={ 1 }
                       max={ 10 }
                     />

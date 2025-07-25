@@ -1,4 +1,5 @@
 import { imgToTxt } from '@jl-org/cvs'
+import { debounce } from '@jl-org/tool'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
@@ -15,7 +16,7 @@ export default function ImgToTxtTest() {
 
   const [config, setConfig] = useGetState({
     replaceText: '6',
-    gap: 6,
+    gap: 9,
     isDynamic: false,
     isGray: false,
     txtStyle: {
@@ -119,11 +120,11 @@ export default function ImgToTxtTest() {
   ]
 
   const [contentType, setContentType] = useState<ContentType>('image')
-  const [currentImage, setCurrentImage] = useState<string>(() => new URL('@/assets/umr.webp', import.meta.url).href)
-  const [currentVideo, setCurrentVideo] = useState<string>(() => new URL('@/assets/video.mp4', import.meta.url).href)
+  const [currentImage, setCurrentImage] = useState<string>(() => new URL('@/assets/img/umr.webp', import.meta.url).href)
+  const [currentVideo, setCurrentVideo] = useState<string>(() => new URL('@/assets/video/video.mp4', import.meta.url).href)
 
   /** 开始效果 */
-  const startEffect = async () => {
+  const startEffect = useCallback(async () => {
     if (!canvasRef.current) {
       console.warn('画布未准备好')
       return
@@ -179,7 +180,11 @@ export default function ImgToTxtTest() {
     catch (error) {
       console.error('效果启动失败:', error)
     }
-  }
+  }, [contentType, currentImage, currentVideo])
+
+  const debouncedStartEffect = useCallback(debounce(startEffect, 50), [
+    startEffect,
+  ])
 
   /** 上传图片 */
   const handleImageUpload = (files: FileItem[]) => {
@@ -225,7 +230,7 @@ export default function ImgToTxtTest() {
   /** 监听配置变化，自动重新启动效果 */
   useUpdateEffect(() => {
     if (canvasRef.current) {
-      startEffect()
+      debouncedStartEffect()
     }
   }, [config, contentType])
 
@@ -372,7 +377,7 @@ export default function ImgToTxtTest() {
                       <Input
                         type="text"
                         value={ config.txt }
-                        onChange={ e => updateConfig('txt', e.target.value) }
+                        onChange={ v => updateConfig('txt', v) }
                         placeholder="输入要显示的文字"
                       />
                     </div>
@@ -453,7 +458,7 @@ export default function ImgToTxtTest() {
                     <Input
                       type="text"
                       value={ config.replaceText }
-                      onChange={ e => updateConfig('replaceText', e.target.value) }
+                      onChange={ v => updateConfig('replaceText', v) }
                       placeholder="用于填充的字符"
                       maxLength={ 5 }
                     />
@@ -604,13 +609,13 @@ export default function ImgToTxtTest() {
                         <Input
                           type="color"
                           value={ config.txtStyle.color }
-                          onChange={ e => updateTxtStyle('color', e.target.value) }
+                          onChange={ v => updateTxtStyle('color', v) }
                           className="h-10 w-16 border-0 rounded p-1"
                         />
                         <Input
                           type="text"
                           value={ config.txtStyle.color }
-                          onChange={ e => updateTxtStyle('color', e.target.value) }
+                          onChange={ v => updateTxtStyle('color', v) }
                           className="flex-1"
                           placeholder="#000000"
                         />

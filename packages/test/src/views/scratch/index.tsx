@@ -1,7 +1,7 @@
 import { createScratch } from '@jl-org/cvs'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input } from '@/components/Input'
+import { Input, NumberInput } from '@/components/Input'
 import { Select } from '@/components/Select'
 import { useGetState } from '@/hooks'
 import { cn } from '@/utils'
@@ -204,10 +204,9 @@ export default function ScratchTest() {
             <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
               画布宽度
             </label>
-            <Input
-              type="number"
+            <NumberInput
               value={ config.width }
-              onChange={ e => updateConfig('width', Number(e.target.value)) }
+              onChange={ v => updateConfig('width', v) }
               min={ 200 }
               max={ 600 }
             />
@@ -217,10 +216,9 @@ export default function ScratchTest() {
             <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
               画布高度
             </label>
-            <Input
-              type="number"
+            <NumberInput
               value={ config.height }
-              onChange={ e => updateConfig('height', Number(e.target.value)) }
+              onChange={ v => updateConfig('height', v) }
               min={ 150 }
               max={ 400 }
             />
@@ -230,10 +228,9 @@ export default function ScratchTest() {
             <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
               刮线宽度
             </label>
-            <Input
-              type="number"
+            <NumberInput
               value={ config.lineWidth }
-              onChange={ e => updateConfig('lineWidth', Number(e.target.value)) }
+              onChange={ v => updateConfig('lineWidth', v) }
               min={ 5 }
               max={ 50 }
             />
@@ -244,14 +241,14 @@ export default function ScratchTest() {
               背景颜色
             </label>
             <div className="flex items-center gap-2">
-              <Input
+              <input
                 type="color"
                 value={ config.bg }
                 onChange={ e => updateConfig('bg', e.target.value) }
                 className="h-8 w-12 border-0 p-0"
               />
-              <Input
-                type="text"
+              <input
+                type="color"
                 value={ config.bg }
                 onChange={ e => updateConfig('bg', e.target.value) }
                 className="flex-1"

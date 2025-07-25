@@ -20,56 +20,13 @@ export function addTimestampParam(url: string) {
 }
 
 /**
- * 模拟打字效果
+ * 拼接成图片的 base64
  */
-export function typeTxt(options: TypeTxtOptions) {
-  const {
-    content,
-    callback,
-    speed = 16,
-    continueFromIndex = 0,
-  } = options
-
-  let startTime = Date.now() - continueFromIndex * speed
-  let currentIndex = continueFromIndex
-  const { resolve, promise } = Promise.withResolvers<void>()
-
-  /** 处理页面可见性变化 */
-  const handleVisibilityChange = () => {
-    if (document.visibilityState === 'visible') {
-      /** 重新计算时间差 */
-      startTime = Date.now() - currentIndex * speed
-    }
+export function composeBase64(base64: string) {
+  if (base64.startsWith('http') || base64.startsWith('data:image')) {
+    return base64
   }
-
-  document.addEventListener('visibilitychange', handleVisibilityChange)
-
-  const update = () => {
-    const elapsed = Date.now() - startTime
-    const targetIndex = Math.floor(elapsed / speed)
-    currentIndex = Math.min(targetIndex, content.length)
-
-    callback?.(content.slice(0, currentIndex))
-
-    /** 双重检测保证及时停止 */
-    if (currentIndex >= content.length) {
-      clearInterval(interval)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      resolve()
-    }
-  }
-
-  /** 初始立即执行一次 */
-  update()
-
-  const interval = setInterval(update, speed)
-  const stop = () => {
-    clearInterval(interval)
-    document.removeEventListener('visibilitychange', handleVisibilityChange)
-    resolve()
-  }
-
-  return { promise, stop }
+  return `data:image/[png];base64,${base64}`
 }
 
 /**
@@ -124,19 +81,4 @@ export function txtToJson<T>(txt: string, fallback: T, enableExtractLinks = true
   }
 
   return data
-}
-
-type TypeTxtOptions = {
-  /**
-   * 打字速度，单位：ms
-   * @default 16
-   */
-  speed?: number
-  callback?: (txt: string) => void
-  content: string
-  /**
-   * 从指定索引继续打字，用于内容变化时不重新开始
-   * @default 0
-   */
-  continueFromIndex?: number
 }

@@ -2,7 +2,7 @@ import { createTechNum } from '@jl-org/cvs'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input } from '@/components/Input'
+import { Input, NumberInput } from '@/components/Input'
 import { Select } from '@/components/Select'
 
 export default function TechNumTest() {
@@ -215,10 +215,9 @@ export default function TechNumTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布宽度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.width }
-                    onChange={ e => updateConfig('width', Number(e.target.value)) }
+                    onChange={ v => updateConfig('width', v) }
                     min={ 400 }
                     max={ 1200 }
                   />
@@ -228,10 +227,9 @@ export default function TechNumTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     画布高度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.height }
-                    onChange={ e => updateConfig('height', Number(e.target.value)) }
+                    onChange={ v => updateConfig('height', v) }
                     min={ 300 }
                     max={ 800 }
                   />
@@ -241,10 +239,9 @@ export default function TechNumTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     列宽度
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.colWidth }
-                    onChange={ e => updateConfig('colWidth', Number(e.target.value)) }
+                    onChange={ v => updateConfig('colWidth', v) }
                     min={ 10 }
                     max={ 50 }
                   />
@@ -254,10 +251,9 @@ export default function TechNumTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     字体大小
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.fontSize }
-                    onChange={ e => updateConfig('fontSize', Number(e.target.value)) }
+                    onChange={ v => updateConfig('fontSize', v) }
                     min={ 10 }
                     max={ 40 }
                   />
@@ -278,10 +274,9 @@ export default function TechNumTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     间隔概率
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.gapRate }
-                    onChange={ e => updateConfig('gapRate', Number(e.target.value)) }
+                    onChange={ v => updateConfig('gapRate', v) }
                     min={ 0.1 }
                     max={ 1 }
                     step={ 0.05 }
@@ -292,10 +287,9 @@ export default function TechNumTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     动画间隔(ms)
                   </label>
-                  <Input
-                    type="number"
+                  <NumberInput
                     value={ config.durationMS }
-                    onChange={ e => updateConfig('durationMS', Number(e.target.value)) }
+                    onChange={ v => updateConfig('durationMS', v) }
                     min={ 10 }
                     max={ 100 }
                   />
@@ -305,8 +299,8 @@ export default function TechNumTest() {
                   <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
                     蒙层颜色
                   </label>
-                  <Input
-                    type="text"
+                  <input
+                    type="color"
                     value={ config.maskColor }
                     onChange={ e => updateConfig('maskColor', e.target.value) }
                     placeholder="rgba(12, 12, 12, .1)"

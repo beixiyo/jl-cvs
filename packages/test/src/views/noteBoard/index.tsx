@@ -91,7 +91,7 @@ export default function NoteBoardTest() {
     })
 
     if (isFirstRender.current) {
-      const imgURL = new URL('@/assets/umr.webp', import.meta.url).href
+      const imgURL = new URL('@/assets/img/umr.webp', import.meta.url).href
       board.drawImg(imgURL, {
         center: true,
         autoFit: true,

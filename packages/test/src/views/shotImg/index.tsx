@@ -19,7 +19,7 @@ export default function ShotImgTest() {
 const ShotImgDemo = memo(() => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [shotInstance, setShotInstance] = useState<ShotImg | null>(null)
-  const [imageUrl, setImageUrl] = useState<string>(() => new URL('@/assets/umr.webp', import.meta.url).href)
+  const [imageUrl, setImageUrl] = useState<string>(() => new URL('@/assets/img/umr.webp', import.meta.url).href)
   const [resultImage, setResultImage] = useState<string>()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -31,7 +31,7 @@ const ShotImgDemo = memo(() => {
 
     const shotImg = new ShotImg(canvasRef.current)
     setShotInstance(shotImg)
-    shotImg.setImg(new URL('@/assets/umr.webp', import.meta.url).href)
+    shotImg.setImg(new URL('@/assets/img/umr.webp', import.meta.url).href)
   }, [canvasRef])
 
   /** 处理文件选择 */
