@@ -29,10 +29,15 @@
   <img src="./docAssets/shotImg.gif" width="200" alt="截图工具" />
 </div>
 
+<div align="center">
+  <img src="./docAssets/cutoutImg.webp" width="200" alt="抠图工具" />
+  <img src="./docAssets/smartSelectImg.webp" width="200" alt="智能选取" />
+</div>
+
 ## ✨ 特性
 
 - 🎨 **丰富的视觉效果**：烟花、星空、水波纹、科技数字雨等多种动画效果
-- 🖼️ **图像处理工具**：图像转文字、图像淡化、抠图、边缘提取等
+- 🖼️ **图像处理工具**：抠图、智能选取、图像转文字、图像淡化、边缘提取等
 - 🎯 **交互式组件**：刮刮卡、截图工具、绘图画板等
 - 📱 **响应式设计**：支持多种屏幕尺寸和设备
 - 🌙 **主题支持**：支持明暗主题切换
@@ -58,6 +63,8 @@ npm i @jl-org/cvs
 - [🎯 刮刮卡效果 (Scratch)](#-刮刮卡效果-scratch) - `/scratch`
 - [📸 截图工具 (ShotImg)](#-截图工具-shotimg) - `/shotImg`
 - [⭐ 星空场景 (StarField)](#-星空场景-starfield) - `/starField`
+- [💡 智能选取 (SmartSelection)](#-智能选取-smartselection) - `/smartSelection`
+- [✂️ 抠图工具 (CutoutImg)](#️-抠图工具-cutoutimg) - `/cutoutImg`
 - [🔢 科技数字 (TechNum)](#-科技数字-technum) - `/techNum`
 - [🌊 水波纹效果 (WaterRipple)](#-水波纹效果-waterripple) - `/waterRipple`
 - [〰️ 波浪线条 (WavyLines)](#️-波浪线条-wavylines) - `/wavyLines`
@@ -106,6 +113,49 @@ pnpm test
 - 地球仪样式渲染
 - 交互式控制
 - 平滑动画过渡
+
+---
+
+## ✂️ 抠图工具 (CutoutImg)
+
+**访问路径**: `/cutoutImg`
+**文件位置**: `packages/test/src/views/cutoutImg/index.tsx`
+
+![抠图工具预览](./docAssets/cutoutImg.webp)
+
+**功能特性**:
+- **画笔编辑**: 支持画笔涂抹和擦除，实时预览抠图效果
+- **参数调整**: 可自定义画笔粗细
+- **交互控制**: 支持撤销、重做、拖拽和清空画布
+- **图片导出**: 可下载编辑后的图片
+
+**使用方法**:
+- 在左侧画布使用画笔涂抹需要保留的区域
+- 右侧将实时预览抠图效果
+- 可通过工具栏调整画笔大小或切换为拖拽模式
+- 完成后可下载图片
+
+---
+
+## 💡 智能选取 (SmartSelection)
+
+**访问路径**: `/smartSelection`
+**文件位置**: `packages/test/src/views/smartSelection/index.tsx`
+
+![智能选取预览](./docAssets/smartSelectImg.webp)
+
+**功能特性**:
+- **智能识别**: 自动识别图像中的不同区域
+- **悬停高亮**: 鼠标悬停时高亮显示可选择区域
+- **点击选择**: 单击即可选中或取消选中区域
+- **多区域选择**: 支持同时选择多个独立区域
+
+**使用方法**:
+- 鼠标在图像上移动，可交互区域会高亮显示
+- 点击高亮区域即可将其选中
+- 再次点击可取消选择
+
+---
 
 ## 📐 网格效果 (Grid)
 
