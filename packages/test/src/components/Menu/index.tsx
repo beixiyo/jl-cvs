@@ -1,3 +1,6 @@
+import { Github } from 'lucide-react'
+import { useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import { useBindWinEvent } from '@/hooks'
 import { cn } from '@/utils'
 import { ThemeToggle } from '../ThemeToggle'
@@ -44,7 +47,17 @@ export function Menu(
       ) }
       style={ style }
     >
-      <ThemeToggle className="my-0" />
+      <div className="flex justify-between items-center mb-4">
+        <ThemeToggle className="my-0" size={ 70 } />
+        <a
+          href="https://github.com/beixiyo/jl-cvs"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-2 rounded-md bg-gray-800 hover:bg-gray-700 transition-colors flex items-center justify-center"
+        >
+          <Github size={ 20 } />
+        </a>
+      </div>
 
       { pathArr.map((item, index) => (
         <NavLink
