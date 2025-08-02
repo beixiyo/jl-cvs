@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 import type { SetStateParam } from './types'
 import { debounce, isBrowser, isFn, throttle } from '@jl-org/tool'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 
 /**
@@ -32,7 +32,7 @@ export function useThrottle<T>(initState: T, delayMS: number = 500) {
     () => {
       return throttle(_setState, delayMS)
     },
-    [],
+    [delayMS],
   )
   ) as unknown as typeof _setState
 
@@ -53,7 +53,7 @@ export function useDebounce<T>(initState: T, delayMS: number = 500) {
     () => {
       return debounce(_setState, delayMS)
     },
-    [],
+    [delayMS],
   )
   ) as unknown as typeof _setState
 
@@ -68,7 +68,7 @@ export function useDebounce<T>(initState: T, delayMS: number = 500) {
  * @param value 监听的值
  * @param delayMS 防抖时间
  */
-export function useWatchDebounce<T>(value: T, delayMS: number = 500) {
+export function useWatchDebounce<T>(value: T, delayMS: number = 100) {
   const [state, setState] = useDebounce<T>(value, delayMS)
   useEffect(
     () => {
@@ -84,15 +84,34 @@ export function useWatchDebounce<T>(value: T, delayMS: number = 500) {
  * @param value 监听的值
  * @param delayMS 节流时间
  */
-export function useWatchThrottle<T>(value: T, delayMS: number = 500) {
+export function useWatchThrottle<T>(value: T, delayMS: number = 100, options: UseWatchThrottleOptions = {}) {
+  const {
+    enable = true,
+    syncLastValueTime = 1000,
+  } = options
+
+  const actualSyncLastValueTime = Math.max(syncLastValueTime, delayMS + 2)
+  const timerRef = useRef<number>()
   const [state, setState] = useThrottle<T>(value, delayMS)
+
   useEffect(
     () => {
-      setState(value)
+      if (enable) {
+        setState(value)
+      }
+
+      timerRef.current = window.setTimeout(() => {
+        setState(value)
+      }, actualSyncLastValueTime)
+
+      return () => clearTimeout(timerRef.current)
     },
-    [value, setState],
+    [value, setState, enable, actualSyncLastValueTime],
   )
-  return state
+
+  return enable
+    ? state
+    : value
 }
 
 /**
@@ -169,4 +188,16 @@ export function useViewTransitionState<T>(initState: T | (() => T)) {
   }
 
   return [state, setTransiton] as const
+}
+
+export type UseWatchThrottleOptions = {
+  /**
+   * @default true
+   */
+  enable?: boolean
+  /**
+   * 同步最新值的时间（毫秒 MS）
+   * @default 1000
+   */
+  syncLastValueTime?: number
 }

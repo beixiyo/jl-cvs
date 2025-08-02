@@ -113,8 +113,11 @@ export function useGetState<T, V extends boolean = false>(
 
   (setter as SetterFnWittGetLatest<T>).reset = useCallback(() => {
     setState(getInitData())
-    stateRef.current = getInitData()
-  }, [getInitData])
+
+    if (enableGetter) {
+      stateRef.current = getInitData()
+    }
+  }, [enableGetter, getInitData])
 
   return [state, setter] as UseGetStateReturn<T, V>
 }

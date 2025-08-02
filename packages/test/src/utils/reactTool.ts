@@ -15,10 +15,30 @@ export function getCompKey(
 }
 
 /**
- * 排除非元素组件
+ * 从React子节点中过滤出有效的组件元素
+ *
+ * @param children - 要过滤的React子节点
+ * @param condition - 可选的额外过滤条件函数，接收ReactElement参数并返回布尔值
+ * @returns 过滤后的有效ReactElement数组
+ *
+ * @example
+ * // 过滤出所有有效的React元素
+ * const validElements = filterValidComps(children)
+ *
+ * @example
+ * // 过滤出类型为Button的组件
+ * const buttons = filterValidComps(children, child => child.type === Button)
  */
-export function filterValidComps(children: ReactNode): ReactElement<any>[] {
-  return Children.toArray(children).filter(isValidElement)
+export function filterValidComps(
+  children: ReactNode,
+  condition?: (child: ReactElement<any>) => boolean,
+): ReactElement<any>[] {
+  return Children.toArray(children)
+    .filter(
+      child => isValidElement(child) && (condition
+        ? condition(child)
+        : true),
+    ) as ReactElement<any>[]
 }
 
 /**

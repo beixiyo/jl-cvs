@@ -46,16 +46,16 @@ export function useWorker<T = any>(
   })
 
   // Post message to worker
-  const postMessage = <TData>(data: TData, transfer?: Transferable[]) => {
+  const postMessage = useCallback(<TData>(data: TData, transfer?: Transferable[]) => {
     if (!workerRef.current) {
       console.warn('Worker not initialized')
       return
     }
     workerRef.current.postMessage(data, transfer || [])
-  }
+  }, [])
 
   // Listen to worker messages
-  const onMessage = (handler: WorkerMessageHandler<T>) => {
+  const onMessage = useCallback((handler: WorkerMessageHandler<T>) => {
     if (!workerRef.current)
       return
 
@@ -65,10 +65,10 @@ export function useWorker<T = any>(
       event: 'message',
       fn: handler,
     })
-  }
+  }, [])
 
   // Listen to worker errors
-  const onError = (handler: WorkerErrorHandler) => {
+  const onError = useCallback((handler: WorkerErrorHandler) => {
     if (!workerRef.current)
       return
 
@@ -78,10 +78,17 @@ export function useWorker<T = any>(
       event: 'error',
       fn: handler,
     })
-  }
+  }, [])
+
+  const unbindEvent = useCallback(() => {
+    cbsRef.current.forEach(({ event, fn }) => {
+      // @ts-ignore
+      workerRef.current?.removeEventListener(event, fn)
+    })
+  }, [])
 
   // Manually terminate worker
-  const terminate = () => {
+  const terminate = useCallback(() => {
     if (!workerRef.current) {
       return
     }
@@ -94,14 +101,7 @@ export function useWorker<T = any>(
     if (debug) {
       console.log('Worker manually terminated')
     }
-  }
-
-  const unbindEvent = () => {
-    cbsRef.current.forEach(({ event, fn }) => {
-      // @ts-ignore
-      workerRef.current?.removeEventListener(event, fn)
-    })
-  }
+  }, [debug, unbindEvent])
 
   return {
     worker: workerRef.current,

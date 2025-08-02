@@ -2,7 +2,7 @@ import type { BaseShape } from '../BaseShape'
 import type { ShapeStyle } from '../type'
 
 /**
- * 绘制箭头
+ * 箭头图形类，实现BaseShape接口
  */
 export class Arrow implements BaseShape {
   ctx: CanvasRenderingContext2D
@@ -14,46 +14,69 @@ export class Arrow implements BaseShape {
 
   shapeStyle: ShapeStyle = {}
 
-  // Arrowhead properties (can be adjusted)
-  private headLength: number = 10 // Logical length of the arrowhead sides
-  private headAngle: number = Math.PI / 6 // Angle of arrowhead sides relative to the line (30 degrees)
+  /**
+   * 箭头头部长度（可调整）
+   * @default 10
+   */
+  private headLength: number = 10
 
+  /**
+   * 箭头头部与主线的夹角（弧度制）
+   * @default Math.PI / 6 (30度)
+   */
+  private headAngle: number = Math.PI / 6
+
+  /**
+   * 构造函数
+   * @param opts 箭头配置选项
+   */
   constructor(opts: ArrowOpts) {
     this.ctx = opts.ctx
-    // Default line cap for arrows is usually 'round' or 'butt'
-    this.ctx.lineCap = 'round' // Or 'butt', 'square' depending on desired look
+    /** 默认线条端点为圆形，可根据需要改为'butt'或'square' */
+    this.ctx.lineCap = 'round'
 
     this.startX = opts.startX
     this.startY = opts.startY
-    this.endX = opts.startX // Initially, end is same as start
+    this.endX = opts.startX // 初始时终点与起点相同
     this.endY = opts.startY
 
-    // Initialize with provided styles, applying defaults if necessary
+    /** 使用提供的样式初始化，必要时应用默认值 */
     this.setShapeStyle(opts.shapeStyle)
   }
 
+  /**
+   * 绘制箭头图形
+   */
   draw(): void {
     const { ctx, startX, startY, endX, endY } = this
 
-    // Use logical coordinates directly - ctx is already scaled by DPR
+    /** 直接使用逻辑坐标 - ctx已经被DPR缩放 */
     const angle = Math.atan2(endY - startY, endX - startX)
 
-    // Apply styles from shapeStyle (ensure these are logical values)
+    /** 应用shapeStyle中的样式（确保这些是逻辑值） */
     ctx.lineWidth = this.shapeStyle.lineWidth || 1
     ctx.strokeStyle = this.shapeStyle.strokeStyle || '#000000'
-    ctx.fillStyle = this.shapeStyle.fillStyle || ctx.strokeStyle // Arrowhead fill defaults to stroke color
+    ctx.fillStyle = this.shapeStyle.fillStyle || ctx.strokeStyle // 箭头填充色默认为描边颜色
 
-    // Draw the main line segment
+    /**
+     * 计算主线缩短后的终点
+     * 防止主线与箭头头部重叠
+     */
+    const shortenBy = this.headLength * 1 // 根据需要调整此系数
+    const shortenedEndX = endX - shortenBy * Math.cos(angle)
+    const shortenedEndY = endY - shortenBy * Math.sin(angle)
+
+    /** 绘制主线（缩短以避免与箭头头部重叠） */
     ctx.beginPath()
     ctx.moveTo(startX, startY)
-    ctx.lineTo(endX, endY)
-    ctx.stroke() // Stroke the line
+    ctx.lineTo(shortenedEndX, shortenedEndY)
+    ctx.stroke()
 
-    // Draw the arrowhead (filled triangle)
+    /** 绘制箭头头部（填充三角形） */
     ctx.beginPath()
-    ctx.moveTo(endX, endY) // Tip of the arrow
+    ctx.moveTo(endX, endY) // 箭头尖端
 
-    // Calculate points for the base of the arrowhead using logical headLength
+    /** 使用逻辑headLength计算箭头头部基点的坐标 */
     const point1X = endX - this.headLength * Math.cos(angle - this.headAngle)
     const point1Y = endY - this.headLength * Math.sin(angle - this.headAngle)
     const point2X = endX - this.headLength * Math.cos(angle + this.headAngle)
@@ -61,84 +84,94 @@ export class Arrow implements BaseShape {
 
     ctx.lineTo(point1X, point1Y)
     ctx.lineTo(point2X, point2Y)
-    ctx.closePath() // Close the triangle path
-    ctx.fill() // Fill the arrowhead
+    ctx.closePath() // 闭合三角形路径
+    ctx.fill() // 填充箭头头部
   }
 
+  /**
+   * 判断点是否在箭头路径内
+   * @param x 点的x坐标
+   * @param y 点的y坐标
+   * @returns 如果点在路径内返回true，否则返回false
+   */
   isInPath(x: number, y: number): boolean {
-    // Hit detection for an arrow is more complex than a rectangle.
-    // A simple approach is to check the bounding box, but this isn't very accurate for thin lines.
-    // A slightly better approach: check distance to the line segment.
-
     const { startX, startY, endX, endY } = this
-    const lineWidth = (this.shapeStyle.lineWidth || 1) + 5 // Add a buffer for easier clicking
+    const lineWidth = (this.shapeStyle.lineWidth || 1) + 5 // 添加缓冲区域便于点击
 
-    // Bounding box check (quick elimination) - uses logical coordinates
+    /** 边界框检查（快速排除）- 使用逻辑坐标 */
     const minX = Math.min(startX, endX) - lineWidth / 2
     const minY = Math.min(startY, endY) - lineWidth / 2
     const maxX = Math.max(startX, endX) + lineWidth / 2
     const maxY = Math.max(startY, endY) + lineWidth / 2
 
     if (x < minX || x > maxX || y < minY || y > maxY) {
-      return false // Point is outside the rough bounding box
+      return false // 点在粗略边界框外
     }
 
-    // Check distance from point (x, y) to the line segment (startX, startY) -> (endX, endY)
-    // Using perpendicular distance formula + segment check
+    /**
+     * 检查点(x,y)到线段(startX,startY)->(endX,endY)的距离
+     * 使用垂直距离公式+线段检查
+     */
     const dx = endX - startX
     const dy = endY - startY
-    const lenSq = dx * dx + dy * dy // Squared length of the segment
+    const lenSq = dx * dx + dy * dy // 线段长度的平方
 
-    if (lenSq === 0) { // Start and end points are the same
+    if (lenSq === 0) { // 起点和终点相同
       return Math.sqrt((x - startX) ** 2 + (y - startY) ** 2) < lineWidth / 2
     }
 
-    // Project point (x,y) onto the line containing the segment
-    // t = [(x - startX) * dx + (y - startY) * dy] / lenSq
+    /** 将点(x,y)投影到包含线段的直线上 */
     const t = ((x - startX) * dx + (y - startY) * dy) / lenSq
 
     let closestX, closestY
-    if (t < 0) { // Closest point is startX, startY
+    if (t < 0) { // 最近点是startX, startY
       closestX = startX
       closestY = startY
     }
-    else if (t > 1) { // Closest point is endX, endY
+    else if (t > 1) { // 最近点是endX, endY
       closestX = endX
       closestY = endY
     }
-    else { // Closest point is on the segment
+    else { // 最近点在线段上
       closestX = startX + t * dx
       closestY = startY + t * dy
     }
 
-    // Calculate distance from (x, y) to the closest point on the segment
+    /** 计算点(x,y)到线段上最近点的距离平方 */
     const distSq = (x - closestX) ** 2 + (y - closestY) ** 2
 
-    // Check if the distance is within the line width buffer
+    /** 检查距离是否在线宽缓冲区内 */
     return distSq < (lineWidth / 2) ** 2
   }
 
+  /**
+   * 设置图形样式
+   * @param shapeStyle 样式对象
+   */
   setShapeStyle(shapeStyle: ShapeStyle = {}): void {
-    // You might want default arrow styles here
+    /** 可以在这里设置默认箭头样式 */
     const defaultArrowStyle: ShapeStyle = {
       lineWidth: 2,
       strokeStyle: '#000000',
-      fillStyle: '#000000', // Default arrowhead fill
+      fillStyle: '#000000', // 默认箭头填充色
     }
     Object.assign(this.shapeStyle, defaultArrowStyle, shapeStyle)
 
-    // Optionally adjust arrowhead size based on line width
+    /** 根据线宽可选调整箭头头部大小 */
     this.headLength = Math.max(8, (this.shapeStyle.lineWidth || 2) * 4)
   }
-
-  // No need for minX/Y/maxX/Y getters like Rect unless specifically needed elsewhere.
-  // They don't need DPR multiplication here because all internal coordinates and drawing
-  // use logical CSS pixels, compatible with the scaled context.
 }
 
+/**
+ * 箭头配置选项接口
+ */
 export type ArrowOpts = {
+  /** 起点x坐标 */
   startX: number
+  /** 起点y坐标 */
   startY: number
+  /** 画布上下文 */
   ctx: CanvasRenderingContext2D
+  /** 图形样式（可选） */
   shapeStyle?: ShapeStyle
 }

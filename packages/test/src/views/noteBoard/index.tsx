@@ -267,11 +267,8 @@ export default function NoteBoardTest() {
   return (
     <div className="min-h-screen from-purple-50 to-pink-50 bg-gradient-to-br p-6 space-y-6 dark:from-gray-900 dark:to-gray-800">
       <div className="text-center">
-        <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
-          🎨 图像编辑画板
-        </h1>
         <p className="text-gray-600 dark:text-gray-300">
-          功能完整的 Canvas 画板组件，支持绘图、擦除、图形绘制、撤销重做等功能
+          🎨 功能完整的 Canvas 画板组件，支持绘图、擦除、拖拽、图形绘制、撤销重做等功能
         </p>
       </div>
 
@@ -320,7 +317,7 @@ export default function NoteBoardTest() {
               </li>
               <li>
                 <strong>拖拽：</strong>
-                拖拽移动画布
+                右键拖拽移动画布
               </li>
               <li>
                 <strong>矩形：</strong>

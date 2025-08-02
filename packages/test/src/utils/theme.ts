@@ -1,7 +1,7 @@
 import type { Theme } from '@jl-org/tool'
-import { getCurTheme } from '@jl-org/tool'
 import { THEME_KEY } from '@/config'
 import { useInsertStyle } from '@/hooks'
+import { getCurTheme, onChangeTheme } from '@jl-org/tool'
 
 /**
  * 获取当前主题
@@ -23,8 +23,35 @@ export function getCurrentTheme() {
   }
 }
 
+export function watchThemeChange(onLight?: VoidFunction, onDark?: VoidFunction) {
+  const unbind = onChangeTheme(
+    () => {
+      onLight?.()
+    },
+    () => {
+      onLight?.()
+    },
+  )
+
+  const mutationObserver = new MutationObserver(() => {
+    const theme = getCurrentTheme().theme
+    theme === 'dark'
+      ? onDark?.()
+      : onLight?.()
+  })
+
+  mutationObserver.observe(document.documentElement, {
+    attributeFilter: ['class'],
+  })
+
+  return () => {
+    unbind()
+    mutationObserver.disconnect()
+  }
+}
+
 /**
- * 设置主题色
+ * 设置主题色，包含 html、LocalStorage
  * @param theme 主题色，不传则为切换主题色
  */
 export function toggleTheme(theme?: Theme) {
@@ -44,6 +71,10 @@ export function toggleTheme(theme?: Theme) {
   return nextTheme
 }
 
+/**
+ * 设置 html 元素的主题属性
+ * @param theme
+ */
 export function setHTMLTheme(theme: Theme) {
   const root = document.documentElement
   const isDark = theme === 'dark'

@@ -1,8 +1,9 @@
 import type { Theme } from '@jl-org/tool'
 import { onChangeTheme } from '@jl-org/tool'
 import { useEffect } from 'react'
-import { getCurrentTheme, setHTMLTheme, toggleTheme } from '@/utils'
+import { getCurrentTheme, setHTMLTheme, toggleTheme, watchThemeChange } from '@/utils'
 import { useMutationObserver } from './ob'
+import { useWatchRef } from './state'
 
 /**
  * 监听用户主题变化，自动设置主题色，触发对应回调
@@ -14,22 +15,24 @@ export function useChangeTheme(
   onLight?: VoidFunction,
   onDark?: VoidFunction,
 ) {
+  const handleLight = useWatchRef(onLight)
+  const handleDark = useWatchRef(onDark)
+
   useEffect(
     () => {
-      toggleTheme(getCurrentTheme().theme)
-      const unbind = onChangeTheme(
-        () => {
-          setHTMLTheme('light')
-          onLight?.()
-        },
-        () => {
-          setHTMLTheme('dark')
-          onDark?.()
-        },
+      const { theme } = getCurrentTheme()
+      toggleTheme(theme)
+
+      theme === 'dark'
+        ? handleDark.current?.()
+        : handleLight.current?.()
+
+      return watchThemeChange(
+        () => handleLight.current?.(),
+        () => handleDark.current?.(),
       )
-      return unbind
     },
-    [onDark, onLight],
+    [],
   )
 }
 
@@ -37,7 +40,7 @@ export function useChangeTheme(
  * 获取和设置当前主题
  */
 export function useTheme(defaultTheme: Theme = 'light') {
-  const [theme, setTheme] = useState(defaultTheme)
+  const [theme, setTheme] = useState(() => getCurrentTheme().theme || defaultTheme)
   const htmlRef = useRef<HTMLElement>(document.documentElement)
 
   const _setTheme = useCallback(

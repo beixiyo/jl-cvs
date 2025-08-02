@@ -20,16 +20,6 @@ export function addTimestampParam(url: string) {
 }
 
 /**
- * 拼接成图片的 base64
- */
-export function composeBase64(base64: string) {
-  if (base64.startsWith('http') || base64.startsWith('data:image')) {
-    return base64
-  }
-  return `data:image/[png];base64,${base64}`
-}
-
-/**
  * 提取文本中的所有链接
  * @param text 要提取链接的文本
  * @returns 提取到的链接数组
@@ -81,4 +71,37 @@ export function txtToJson<T>(txt: string, fallback: T, enableExtractLinks = true
   }
 
   return data
+}
+
+/**
+ * 检查文件是否匹配 accept 规则
+ * @param file 文件对象
+ * @param accept 规则字符串（如 ".pdf,image/*"）
+ * @returns 是否合法
+ */
+export function isValidFileType(file: File, accept: string): boolean {
+  if (!accept)
+    return true // 无限制时直接通过
+
+  const acceptedTypes = accept.split(',').map(type => type.trim())
+  const fileName = file.name.toLowerCase()
+  const fileType = file.type
+
+  return acceptedTypes.some((type) => {
+    /** 检查文件扩展名（如 .pdf） */
+    if (type.startsWith('.')) {
+      return fileName.endsWith(type.toLowerCase())
+    }
+
+    /** 检查 MIME 类型（如 image/* 或 application/pdf） */
+    if (type.includes('/')) {
+      const [mainType, subType] = type.split('/')
+      if (subType === '*') {
+        return fileType.startsWith(`${mainType}/`)
+      }
+      return fileType === type
+    }
+
+    return false
+  })
 }

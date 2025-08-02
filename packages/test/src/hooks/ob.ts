@@ -31,12 +31,7 @@ export function useResizeObserver<E extends HTMLElement>(
 export function useMutationObserver<E extends HTMLElement>(
   el: MutableRefObject<E | null>,
   callback: MutationCallback,
-  options: MutationObserverInit & { immediate?: boolean } = {
-    childList: true,
-    subtree: true,
-    characterData: true,
-    immediate: true,
-  },
+  options: MutationObserverInit & { immediate?: boolean } = {},
 ) {
   const latestCallback = useWatchRef(callback)
 
@@ -47,7 +42,7 @@ export function useMutationObserver<E extends HTMLElement>(
         return
 
       let ob: MutationObserver | null = null
-      const { immediate, ...obOptions } = options
+      const { immediate = true, ...obOptions } = options
 
       /** 在挂载时立即调用一次回调，以处理初始状态 */
       if (immediate) {
@@ -57,7 +52,12 @@ export function useMutationObserver<E extends HTMLElement>(
       if (!ob) {
         ob = new MutationObserver(latestCallback.current)
       }
-      ob.observe(element, obOptions)
+      ob.observe(element, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        ...obOptions,
+      })
 
       return () => {
         ob.disconnect()
