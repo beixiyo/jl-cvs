@@ -50,6 +50,14 @@ export type NoteBoardOptions = {
   onMouseMove?: MouseEventFn
   onMouseUp?: MouseEventFn
   onMouseLeave?: MouseEventFn
+  /** contextmenu 事件 */
+  onContextMenu?: MouseEventFn
+
+  /**
+   * 是否允许通过鼠标右键进行拖拽
+   * @default true
+   */
+  enableRightDrag?: boolean
 
   onWheel?: ZoomFn
   onDrag?: DragFn

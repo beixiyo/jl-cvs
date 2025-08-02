@@ -33,6 +33,11 @@ export class NoteBoard extends NoteBoardBase {
   drawShape: DrawShape
 
   /**
+   * 右键拖拽状态
+   */
+  private rightMouseDragging = false
+
+  /**
    * 历史记录
    */
   history = new UnRedoLinkedList<RecordPath[]>()
@@ -157,6 +162,7 @@ export class NoteBoard extends NoteBoardBase {
     canvas.removeEventListener('mouseup', this.onMouseup)
     canvas.removeEventListener('mouseleave', this.onMouseLeave)
     canvas.removeEventListener('wheel', this.onWheel)
+    canvas.removeEventListener('contextmenu', this.onContextMenu)
   }
 
   /**
@@ -196,6 +202,7 @@ export class NoteBoard extends NoteBoardBase {
     canvas.addEventListener('mouseup', this.onMouseup)
     canvas.addEventListener('mouseleave', this.onMouseLeave)
     canvas.addEventListener('wheel', this.onWheel)
+    canvas.addEventListener('contextmenu', this.onContextMenu)
   }
 
   onMousedown = (e: MouseEvent) => {
@@ -204,6 +211,15 @@ export class NoteBoard extends NoteBoardBase {
     /** 拖拽模式 */
     if (this.mode === 'drag') {
       this.isDragging = true
+      this.dragStart = { x: e.offsetX, y: e.offsetY }
+      return
+    }
+
+    /** 右键拖拽判断 */
+    if (e.button === 2 && this.opts.enableRightDrag !== false) {
+      e.preventDefault()
+      this.isDragging = true
+      this.rightMouseDragging = true
       this.dragStart = { x: e.offsetX, y: e.offsetY }
       return
     }
@@ -285,6 +301,15 @@ export class NoteBoard extends NoteBoardBase {
   onMouseup = (e: MouseEvent) => {
     this.opts.onMouseUp?.(e)
 
+    /** 右键拖拽结束 */
+    if (this.rightMouseDragging) {
+      this.isDragging = false
+      this.rightMouseDragging = false
+      this.translateX += e.offsetX - this.dragStart.x
+      this.translateY += e.offsetY - this.dragStart.y
+      return
+    }
+
     if (this.mode === 'drag') {
       this.isDragging = false
       this.translateX += e.offsetX - this.dragStart.x
@@ -300,6 +325,12 @@ export class NoteBoard extends NoteBoardBase {
   onMouseLeave = (e: MouseEvent) => {
     this.opts.onMouseLeave?.(e)
 
+    if (this.rightMouseDragging) {
+      this.isDragging = false
+      this.rightMouseDragging = false
+      return
+    }
+
     if (this.mode === 'drag') {
       this.isDragging = false
       return
@@ -308,6 +339,12 @@ export class NoteBoard extends NoteBoardBase {
     if (!this.canDraw)
       return
     this.isDrawing = false
+  }
+
+  onContextMenu = (e: MouseEvent) => {
+    this.opts.onContextMenu?.(e)
+    if (this.opts.enableRightDrag !== false)
+      e.preventDefault()
   }
 
   onWheel = (e: WheelEvent) => {

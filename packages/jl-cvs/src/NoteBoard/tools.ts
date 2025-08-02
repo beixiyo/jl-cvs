@@ -10,6 +10,7 @@ export function mergeOpts(
     minScale: 0.5,
     maxScale: 8,
     canvasZIndex: '20',
+    enableRightDrag: true,
 
     lineWidth: 1,
     strokeStyle: '#000',
