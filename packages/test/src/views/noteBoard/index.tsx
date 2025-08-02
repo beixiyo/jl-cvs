@@ -2,14 +2,14 @@ import type { FileItem } from '@/components/Uploader'
 import { type Mode, NoteBoard } from '@jl-org/cvs'
 import { downloadByUrl } from '@jl-org/tool'
 import { motion } from 'framer-motion'
-import { Download, Eye, Grid3X3, Image, List, Maximize2, Package } from 'lucide-react'
+import { Download, Eye, Grid3X3, Image, Keyboard, List, Maximize2, Package } from 'lucide-react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Modal } from '@/components/Modal'
 import { PreviewImg } from '@/components/PreviewImg'
 import { Toolbar, type ToolbarMode } from '@/components/Toolbar'
 import { BRUSH_COLOR, DEFAULT_STROKE_WIDTH } from '@/config'
-import { onMounted, useGetState } from '@/hooks'
+import { onMounted, useGetState, useShortCutKey } from '@/hooks'
 import { cn } from '@/utils'
 
 export default function NoteBoardTest() {
@@ -30,6 +30,7 @@ export default function NoteBoardTest() {
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null)
+  const [showShortcutModal, setShowShortcutModal] = useState(false)
 
   const isFirstRender = useRef(true)
   const canvasContainerRef = useRef<HTMLDivElement>(null)
@@ -46,6 +47,23 @@ export default function NoteBoardTest() {
     { value: 'circle', label: '圆形' },
     { value: 'arrow', label: '箭头' },
     { value: 'none', label: '无操作' },
+  ]
+
+  /** 快捷键配置 */
+  const shortcutKeys = [
+    { key: 'Ctrl + Z', desc: '撤销' },
+    { key: 'Ctrl + Shift + Z', desc: '重做' },
+    { key: 'Ctrl + 1', desc: '绘制模式' },
+    { key: 'Ctrl + 2', desc: '擦除模式' },
+    { key: 'Ctrl + 3', desc: '拖拽模式' },
+    { key: 'Ctrl + 4', desc: '矩形模式' },
+    { key: 'Ctrl + 5', desc: '圆形模式' },
+    { key: 'Ctrl + 6', desc: '箭头模式' },
+    { key: 'Ctrl + 0', desc: '无操作模式' },
+    { key: 'Ctrl + E', desc: '导出图片' },
+    { key: 'Ctrl + Shift + E', desc: '导出所有图层' },
+    { key: 'Ctrl + R', desc: '重置大小' },
+    { key: 'Ctrl + Delete', desc: '清空画布' },
   ]
 
   /** 初始化画板 */
@@ -133,6 +151,139 @@ export default function NoteBoardTest() {
     setCurrentMode(mode)
     noteBoard.setMode(mode)
   }
+
+  /** 快捷键事件处理 */
+  /** 撤销 Ctrl+Z */
+  useShortCutKey({
+    key: 'z',
+    ctrl: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleUndo()
+    },
+  })
+
+  /** 重做 Ctrl+Shift+Z */
+  useShortCutKey({
+    key: 'z',
+    ctrl: true,
+    shift: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleRedo()
+    },
+  })
+
+  /** 绘制模式 Ctrl+1 */
+  useShortCutKey({
+    key: '1',
+    ctrl: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleModeChange('draw')
+    },
+  })
+
+  /** 擦除模式 Ctrl+2 */
+  useShortCutKey({
+    key: '2',
+    ctrl: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleModeChange('erase')
+    },
+  })
+
+  /** 拖拽模式 Ctrl+3 */
+  useShortCutKey({
+    key: '3',
+    ctrl: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleModeChange('drag')
+    },
+  })
+
+  /** 矩形模式 Ctrl+4 */
+  useShortCutKey({
+    key: '4',
+    ctrl: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleModeChange('rect')
+    },
+  })
+
+  /** 圆形模式 Ctrl+5 */
+  useShortCutKey({
+    key: '5',
+    ctrl: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleModeChange('circle')
+    },
+  })
+
+  /** 箭头模式 Ctrl+6 */
+  useShortCutKey({
+    key: '6',
+    ctrl: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleModeChange('arrow')
+    },
+  })
+
+  /** 无操作模式 Ctrl+0 */
+  useShortCutKey({
+    key: '0',
+    ctrl: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleModeChange('none')
+    },
+  })
+
+  /** 导出图片 Ctrl+E */
+  useShortCutKey({
+    key: 'e',
+    ctrl: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleExport()
+    },
+  })
+
+  /** 导出所有图层 Ctrl+Shift+E */
+  useShortCutKey({
+    key: 'e',
+    ctrl: true,
+    shift: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleExportAll()
+    },
+  })
+
+  /** 重置大小 Ctrl+R */
+  useShortCutKey({
+    key: 'r',
+    ctrl: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleResetSize()
+    },
+  })
+
+  /** 清空画布 Ctrl+Delete */
+  useShortCutKey({
+    key: 'Delete',
+    ctrl: true,
+    fn: (e) => {
+      e.preventDefault()
+      handleClear()
+    },
+  })
 
   /** 撤销 */
   const handleUndo = () => {
@@ -288,6 +439,19 @@ export default function NoteBoardTest() {
         onResetSize={ handleResetSize }
       />
 
+      {/* 快捷键提示按钮 */ }
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          onClick={ () => setShowShortcutModal(true) }
+          variant="primary"
+          size="sm"
+          className="flex items-center gap-2 rounded-full bg-indigo-500 text-white shadow-lg hover:bg-indigo-600"
+        >
+          <Keyboard size={ 16 } />
+          快捷键
+        </Button>
+      </div>
+
       {/* 主要内容区域 */ }
       <div className="grid grid-cols-1 gap-6">
         {/* 画布区域 */ }
@@ -338,7 +502,11 @@ export default function NoteBoardTest() {
             <ul className="list-disc list-inside text-sm space-y-1">
               <li>
                 <strong>撤销/重做：</strong>
-                支持多步操作历史
+                支持多步操作历史 (Ctrl+Z / Ctrl+Shift+Z)
+              </li>
+              <li>
+                <strong>快捷键：</strong>
+                支持键盘快捷键操作，点击右下角快捷键按钮查看
               </li>
               <li>
                 <strong>缩放：</strong>
@@ -346,7 +514,7 @@ export default function NoteBoardTest() {
               </li>
               <li>
                 <strong>导出：</strong>
-                保存为 PNG 图片
+                保存为 PNG 图片 (Ctrl+E)
               </li>
               <li>
                 <strong>背景图：</strong>
@@ -354,7 +522,7 @@ export default function NoteBoardTest() {
               </li>
               <li>
                 <strong>清空：</strong>
-                清除所有绘制内容
+                清除所有绘制内容 (Ctrl+Delete)
               </li>
             </ul>
           </div>
@@ -511,6 +679,95 @@ export default function NoteBoardTest() {
                 </motion.div>
               )) }
             </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* 快捷键说明模态框 */ }
+      <Modal
+        isOpen={ showShortcutModal }
+        onClose={ () => setShowShortcutModal(false) }
+        titleText="⌨️ 快捷键说明"
+        width={ 600 }
+        height={ 500 }
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600 dark:text-gray-300">
+            使用以下快捷键可以快速操作画板功能：
+          </p>
+
+          <div className="grid grid-cols-1 gap-4">
+            {/* 基础操作 */ }
+            <div>
+              <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
+                基础操作
+              </h3>
+              <div className="space-y-2">
+                { shortcutKeys.slice(0, 2).map((shortcut, index) => (
+                  <div
+                    key={ index }
+                    className="flex items-center justify-between border border-gray-200 rounded-lg bg-gray-50 p-3 dark:border-gray-600 dark:bg-gray-700"
+                  >
+                    <span className="text-gray-700 dark:text-gray-300">
+                      { shortcut.desc }
+                    </span>
+                    <kbd className="rounded bg-gray-200 px-2 py-1 text-sm text-gray-700 font-mono dark:bg-gray-600 dark:text-gray-300">
+                      { shortcut.key }
+                    </kbd>
+                  </div>
+                )) }
+              </div>
+            </div>
+
+            {/* 绘图模式 */ }
+            <div>
+              <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
+                绘图模式切换
+              </h3>
+              <div className="space-y-2">
+                { shortcutKeys.slice(2, 9).map((shortcut, index) => (
+                  <div
+                    key={ index }
+                    className="flex items-center justify-between border border-gray-200 rounded-lg bg-gray-50 p-3 dark:border-gray-600 dark:bg-gray-700"
+                  >
+                    <span className="text-gray-700 dark:text-gray-300">
+                      { shortcut.desc }
+                    </span>
+                    <kbd className="rounded bg-gray-200 px-2 py-1 text-sm text-gray-700 font-mono dark:bg-gray-600 dark:text-gray-300">
+                      { shortcut.key }
+                    </kbd>
+                  </div>
+                )) }
+              </div>
+            </div>
+
+            {/* 高级功能 */ }
+            <div>
+              <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
+                高级功能
+              </h3>
+              <div className="space-y-2">
+                { shortcutKeys.slice(9).map((shortcut, index) => (
+                  <div
+                    key={ index }
+                    className="flex items-center justify-between border border-gray-200 rounded-lg bg-gray-50 p-3 dark:border-gray-600 dark:bg-gray-700"
+                  >
+                    <span className="text-gray-700 dark:text-gray-300">
+                      { shortcut.desc }
+                    </span>
+                    <kbd className="rounded bg-gray-200 px-2 py-1 text-sm text-gray-700 font-mono dark:bg-gray-600 dark:text-gray-300">
+                      { shortcut.key }
+                    </kbd>
+                  </div>
+                )) }
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-600">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              💡 **提示**：快捷键在画板获得焦点时生效，确保鼠标在画板区域内或点击画板后再使用快捷键。
+            </p>
           </div>
         </div>
       </Modal>
