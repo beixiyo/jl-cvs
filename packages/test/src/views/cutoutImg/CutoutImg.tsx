@@ -9,8 +9,9 @@ import {
 import { memo, useCallback, useState } from 'react'
 import { Loading } from '@/components/Loading'
 import { Toolbar, type ToolbarMode } from '@/components/Toolbar'
+import { BRUSH_COLOR, DEFAULT_STROKE_WIDTH } from '@/config'
 import { onMounted, useAsyncEffect, useGetState, useUpdateEffect } from '@/hooks'
-import { addTimestampParam, BRUSH_COLOR, cn, DEFAULT_STROKE_WIDTH } from '@/utils'
+import { addTimestampParam, cn } from '@/utils'
 
 /**
  * 抠图组件

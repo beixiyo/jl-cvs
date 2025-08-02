@@ -77,24 +77,20 @@ export default function NoteBoardTest() {
         </p>
 
         {/* 工具栏容器 */ }
-        <div className="max-w-7xl mx-auto">
-          <div className="backdrop-blur-lg bg-white/70 border border-white/20 rounded-2xl p-6 shadow-xl dark:bg-gray-800/70 dark:border-gray-700/30">
-            <Toolbar
-              modes={ MODE_OPTIONS }
-              activeMode={ currentMode }
-              onModeChange={ handleModeChange as any }
-              brushSize={ config.lineWidth }
-              onBrushSizeChange={ val => updateConfig('lineWidth', val) }
-              onImageUpload={ handleImageUpload }
-              onExport={ handleExport }
-              onExportAll={ handleExportAll }
-              onUndo={ actions.undo }
-              onRedo={ actions.redo }
-              onClear={ actions.clear }
-              onResetSize={ actions.resetSize }
-            />
-          </div>
-        </div>
+        <Toolbar
+          modes={ MODE_OPTIONS }
+          activeMode={ currentMode }
+          onModeChange={ handleModeChange as any }
+          brushSize={ config.lineWidth }
+          onBrushSizeChange={ val => updateConfig('lineWidth', val) }
+          onImageUpload={ handleImageUpload }
+          onExport={ handleExport }
+          onExportAll={ handleExportAll }
+          onUndo={ actions.undo }
+          onRedo={ actions.redo }
+          onClear={ actions.clear }
+          onResetSize={ actions.resetSize }
+        />
 
         {/* 画布区域 */ }
         <CanvasArea

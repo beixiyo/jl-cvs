@@ -105,3 +105,13 @@ export function isValidFileType(file: File, accept: string): boolean {
     return false
   })
 }
+
+/**
+ * 拼接成图片的 base64
+ */
+export function composeBase64(base64: string) {
+  if (base64.startsWith('http') || base64.startsWith('data:image')) {
+    return base64
+  }
+  return `data:image/[png];base64,${base64}`
+}
