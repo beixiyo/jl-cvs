@@ -34,6 +34,22 @@ type OnUnRedoParams = {
 export type NoteBoardOptions = {
   el: HTMLElement
   /**
+   * @default 800
+   */
+  width?: number
+  /**
+   * @default 600
+   */
+  height?: number
+  /**
+   * @default 0.5
+   */
+  /**
+   * @default '20'
+   */
+  canvasZIndex?: string
+
+  /**
    * @default 0.5
    */
   minScale?: number
@@ -41,10 +57,39 @@ export type NoteBoardOptions = {
    * @default 8
    */
   maxScale?: number
+
   /**
-   * @default '20'
+   * @default 1
    */
-  canvasZIndex?: string
+  lineWidth?: number
+  /**
+   * @default '#000'
+   */
+  strokeStyle?: string
+  /**
+   * @default 'round'
+   */
+  lineCap?: CanvasPathDrawingStyles['lineCap']
+  /**
+   * 默认使用的混合模式
+   * @default 'source-over'
+   */
+  globalCompositeOperation?: GlobalCompositeOperation
+  /**
+   * 绘图（画笔 / 图形）默认使用的混合模式
+   * @default 'source-over'
+   */
+  drawGlobalCompositeOperation?: GlobalCompositeOperation
+  /**
+   * 绘制 **形状** (rect/circle/arrow...) 时的混合模式
+   * @default 'source-over'
+   */
+  shapeGlobalCompositeOperation?: GlobalCompositeOperation
+  /**
+   * 是否允许通过鼠标右键进行拖拽
+   * @default true
+   */
+  enableRightDrag?: boolean
 
   onMouseDown?: MouseEventFn
   onMouseMove?: MouseEventFn
@@ -52,12 +97,6 @@ export type NoteBoardOptions = {
   onMouseLeave?: MouseEventFn
   /** contextmenu 事件 */
   onContextMenu?: MouseEventFn
-
-  /**
-   * 是否允许通过鼠标右键进行拖拽
-   * @default true
-   */
-  enableRightDrag?: boolean
 
   onWheel?: ZoomFn
   onDrag?: DragFn
@@ -78,6 +117,8 @@ export type NoteBoardOptionsRequired = PartRequired<
   | 'lineCap'
   | 'globalCompositeOperation'
   | 'drawGlobalCompositeOperation'
+  | 'shapeGlobalCompositeOperation'
+  | 'enableRightDrag'
 >
 
 export type CanvasAttrs = {

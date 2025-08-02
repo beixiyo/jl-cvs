@@ -17,6 +17,7 @@ export function mergeOpts(
     lineCap: 'round' as CanvasLineCap,
     globalCompositeOperation: 'source-over',
     drawGlobalCompositeOperation: 'source-over',
+    shapeGlobalCompositeOperation: 'source-over',
   }
 
   return {

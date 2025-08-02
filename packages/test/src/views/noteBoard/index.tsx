@@ -61,6 +61,8 @@ export default function NoteBoardTest() {
       lineWidth: config.lineWidth,
       lineCap: config.lineCap,
       globalCompositeOperation: 'xor',
+      drawGlobalCompositeOperation: 'xor',
+      shapeGlobalCompositeOperation: 'source-over',
 
       onMouseDown: (e) => { },
       onMouseMove: (e) => { },

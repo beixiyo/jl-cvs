@@ -45,6 +45,7 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
    */
   setMode(mode: NoteBoardWithBase64Mode) {
     this.mode = mode
+    this.ctx.globalCompositeOperation = this.opts.globalCompositeOperation
 
     switch (mode) {
       case 'draw':

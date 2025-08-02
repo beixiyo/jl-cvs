@@ -68,6 +68,7 @@ export class NoteBoard extends NoteBoardBase {
     switch (mode) {
       case 'draw':
         this.setCursor()
+        this.ctx.globalCompositeOperation = this.opts.drawGlobalCompositeOperation
         break
 
       case 'erase':
@@ -86,18 +87,21 @@ export class NoteBoard extends NoteBoardBase {
       case 'rect':
         drawShape.shapeType = 'rect'
         drawShape.disable = false
+        this.ctx.globalCompositeOperation = this.opts.shapeGlobalCompositeOperation
         this.canvas.style.cursor = 'crosshair'
         break
 
       case 'circle':
         drawShape.shapeType = 'circle'
         drawShape.disable = false
+        this.ctx.globalCompositeOperation = this.opts.shapeGlobalCompositeOperation
         this.canvas.style.cursor = 'crosshair'
         break
 
       case 'arrow':
         drawShape.shapeType = 'arrow'
         drawShape.disable = false
+        this.ctx.globalCompositeOperation = this.opts.shapeGlobalCompositeOperation
         this.canvas.style.cursor = 'crosshair'
         break
 
