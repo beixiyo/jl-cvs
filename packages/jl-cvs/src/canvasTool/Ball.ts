@@ -1,8 +1,11 @@
 import { getColor } from './color'
 
-export class Ball {
-  /** 留给外部使用，用于记录绘制次数 */
-  count = 0
+/**
+ * 在 canvas 上下文绘制一个粒子
+ */
+export class Ball<Context extends object = any> {
+  /** 留给外部使用记录任意内容的上下文，比如记录绘制次数 */
+  extraContext: Context = {} as any
 
   x: number
   y: number
@@ -11,15 +14,6 @@ export class Ball {
   ctx: CanvasRenderingContext2D
   opacity: number
 
-  /**
-   * 在 canvas 上下文绘制一个球
-   * @param x x 坐标
-   * @param y y 坐标
-   * @param r 半径
-   * @param color 默认随机颜色
-   * @param ctx 上下文
-   * @param opacity 透明度
-   */
   constructor(opts: BallOpts) {
     const {
       x,
@@ -28,6 +22,7 @@ export class Ball {
       color = getColor(),
       opacity = 1,
       ctx,
+      extraContext = {},
     } = opts
 
     this.x = x
@@ -36,6 +31,7 @@ export class Ball {
     this.color = color
     this.opacity = opacity ?? 1
     this.ctx = ctx
+    this.extraContext = extraContext
 
     if (this.opacity !== 1) {
       ctx.globalAlpha = this.opacity
@@ -53,11 +49,13 @@ export class Ball {
   }
 }
 
-export type BallOpts = {
+export type BallOpts<Context = any> = {
   x: number
   y: number
   r: number
   color?: string
   opacity?: number
+  /** 留给外部使用记录任意内容的上下文，比如记录绘制次数 */
+  extraContext?: Context
   ctx: CanvasRenderingContext2D
 }

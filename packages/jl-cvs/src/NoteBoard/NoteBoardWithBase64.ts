@@ -69,7 +69,7 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
    * 撤销
    * @param drawImg 绘制图像的回调函数，如果传入，则不使用默认的绘制方式
    */
-  async undo(drawImg?: (img: HTMLImageElement) => Promise<any>) {
+  async undo(drawImg?: (img: HTMLImageElement) => Promise<boolean>) {
     return new Promise<boolean>((resolve, reject) => {
       try {
         this.history.undo(async (base64) => {
@@ -105,7 +105,7 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
    * 重做
    * @param drawImg 绘制图像的回调函数，如果传入，则不使用默认的绘制方式
    */
-  async redo(drawImg?: (img: HTMLImageElement) => Promise<any>) {
+  async redo(drawImg?: (img: HTMLImageElement) => Promise<boolean>) {
     return new Promise<boolean>((resolve, reject) => {
       try {
         this.history.redo(async (base64) => {

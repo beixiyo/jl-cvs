@@ -1,16 +1,16 @@
-import { cutoutImg as cutoutImgFn, cutoutImgToMask, getImg, NoteBoardWithBase64 } from '@jl-org/cvs'
+import { cutoutImg as cutoutImgFn, cutoutImgToMask, getImg, NoteBoardWithBase64, type NoteBoardWithBase64Mode } from '@jl-org/cvs'
 import { colorAddOpacity, downloadByUrl, resizeImg } from '@jl-org/tool'
 import {
   ImageIcon,
   Info,
   Sparkles,
 } from 'lucide-react'
-import { memo, useCallback } from 'react'
 
+import { memo, useCallback, useState } from 'react'
 import { Loading } from '@/components/Loading'
+import { Toolbar, type ToolbarMode } from '@/components/Toolbar'
 import { onMounted, useAsyncEffect, useGetState, useUpdateEffect } from '@/hooks'
 import { addTimestampParam, BRUSH_COLOR, cn, DEFAULT_STROKE_WIDTH } from '@/utils'
-import { Toolbar } from './Toolbar'
 
 /**
  * 抠图组件
@@ -31,8 +31,8 @@ export const CutoutImg = memo<CutoutImgProps>((
   const brushColor = colorAddOpacity(BRUSH_COLOR, 1)
   const [loading, setLoading] = useState(false)
   const [maskImg, setMaskImg] = useState('')
-
-  const [lineWidth, setLineWidth] = useGetState(DEFAULT_STROKE_WIDTH, true)
+  const [activeMode, setActiveMode] = useState<NoteBoardWithBase64Mode>('draw')
+  const [brushSize, setBrushSize] = useGetState(DEFAULT_STROKE_WIDTH, true)
   const size = {
     width: 500,
     height: 500,
@@ -122,6 +122,27 @@ export const CutoutImg = memo<CutoutImgProps>((
     brushNoteboard.current?.history.add(resizedBase64)
   }, [brushColor, cutoutImg, size.height, size.width])
 
+  const drawUnRedoReizeMask = useCallback(
+    async (img: HTMLImageElement) => {
+      const board = brushNoteboard.current
+      if (!board) {
+        return false
+      }
+      const size = board.imgInfo
+      if (!size) {
+        return false
+      }
+
+      const resizedMask = await resizeImg(img.src, size.rawWidth, size.rawHeight)
+      await board.drawImg(resizedMask, {
+        autoFit: true,
+        context: board.ctx,
+      })
+      return true
+    },
+    [],
+  )
+
   // ======================
   // * Init
   // ======================
@@ -151,7 +172,7 @@ export const CutoutImg = memo<CutoutImgProps>((
   // ======================
   useEffect(
     () => {
-      const lineWidth = setLineWidth.getLatest()
+      const lineWidth = setBrushSize.getLatest()
 
       /**
        * 涂抹画板
@@ -168,7 +189,7 @@ export const CutoutImg = memo<CutoutImgProps>((
 
         onMouseUp: drawPreviewImg,
         onWheel({ scale }) {
-          const lineWidth = setLineWidth.getLatest()
+          const lineWidth = setBrushSize.getLatest()
           noteBoard.setStyle({
             lineWidth: lineWidth / scale,
           })
@@ -187,7 +208,7 @@ export const CutoutImg = memo<CutoutImgProps>((
         brushNoteboard.current?.dispose()
       }
     },
-    [brushColor, drawInitImg, drawInitMask, drawPreviewImg, setLineWidth, size.height, size.width],
+    [brushColor, drawInitImg, drawInitMask, drawPreviewImg, setBrushSize, size.height, size.width],
   )
 
   /**
@@ -240,10 +261,10 @@ export const CutoutImg = memo<CutoutImgProps>((
       if (!noteBoard)
         return
 
-      noteBoard.setStyle({ lineWidth })
+      noteBoard.setStyle({ lineWidth: brushSize })
       noteBoard.setCursor()
     },
-    [lineWidth],
+    [brushSize],
   )
 
   // ======================
@@ -256,16 +277,9 @@ export const CutoutImg = memo<CutoutImgProps>((
     }
   }, [])
 
-  const handleDraw = useCallback(() => {
-    brushNoteboard.current?.setMode('draw')
-  }, [])
-
-  const handleErase = useCallback(() => {
-    brushNoteboard.current?.setMode('erase')
-  }, [])
-
-  const handleDrag = useCallback(() => {
-    brushNoteboard.current?.setMode('drag')
+  const handleModeChange = useCallback((mode: NoteBoardWithBase64Mode) => {
+    setActiveMode(mode)
+    brushNoteboard.current?.setMode(mode)
   }, [])
 
   const handleResetSize = useCallback(() => {
@@ -273,19 +287,24 @@ export const CutoutImg = memo<CutoutImgProps>((
   }, [])
 
   const handleUndo = useCallback(async () => {
-    await brushNoteboard.current?.undo()
+    await brushNoteboard.current?.undo(drawUnRedoReizeMask)
     drawPreviewImg()
-  }, [drawPreviewImg])
+  }, [drawPreviewImg, drawUnRedoReizeMask])
 
   const handleRedo = useCallback(async () => {
-    await brushNoteboard.current?.redo()
+    await brushNoteboard.current?.redo(drawUnRedoReizeMask)
     drawPreviewImg()
-  }, [drawPreviewImg])
+  }, [drawPreviewImg, drawUnRedoReizeMask])
 
   const handleClear = useCallback(() => {
     brushNoteboard.current?.clear(false, true)
     drawPreviewImg()
   }, [drawPreviewImg])
+
+  const modes: ToolbarMode[] = [
+    { value: 'draw', label: '涂抹', hasBrushSlider: true },
+    { value: 'erase', label: '擦除', hasBrushSlider: true },
+  ]
 
   return <div
     className={ cn(
@@ -296,11 +315,12 @@ export const CutoutImg = memo<CutoutImgProps>((
     style={ style }
   >
     <Toolbar
+      modes={ modes }
+      activeMode={ activeMode }
+      onModeChange={ handleModeChange as any }
+      brushSize={ brushSize }
+      onBrushSizeChange={ setBrushSize }
       onDownload={ handleDownload }
-      onBrushSizeChange={ setLineWidth }
-      onDraw={ handleDraw }
-      onErase={ handleErase }
-      onDrag={ handleDrag }
       onResetSize={ handleResetSize }
       onUndo={ handleUndo }
       onRedo={ handleRedo }

@@ -1,11 +1,11 @@
-import type { ImgToFadeOpts } from './types'
+import type { BallContext, ImgToFadeOpts } from './types'
 import { createCvs, getImg, getPixel } from '@/canvasTool'
 import { Ball } from '@/canvasTool/Ball'
 
 /**
  * 让图片灰飞烟灭效果
- * @param bgCanvas
- * @param opts
+ * @param bgCanvas 背景画布
+ * @param opts 配置
  */
 export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts) {
   const {
@@ -18,6 +18,7 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
     extraDelCount,
     ballCount,
     bgc,
+    lifetime,
   } = await checkAndInit(opts)
 
   const bgCtx = bgCanvas.getContext('2d')!
@@ -31,7 +32,7 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
 
   imgCtx.drawImage(img, 0, 0, imgWidth, imgHeight)
 
-  const destroyBalls: Ball[] = []
+  const destroyBalls: Ball<BallContext>[] = []
   const imgData = imgCtx.getImageData(0, 0, imgWidth, imgHeight)
   const pixelIndexs: number[] = []
 
@@ -82,6 +83,7 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
         r: Math.random() * 2.2,
         color,
         ctx: bgCtx,
+        extraContext: { count: 0 },
       })
       /** 记录当前消失的某个像素点 */
       destroyBalls.push(point)
@@ -104,11 +106,11 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
 
       ball.x += Math.random() * speed
       ball.y -= Math.random() * speed
-      ball.count++
+      ball.extraContext.count++
       ball.draw()
 
       /** 大于这个距离，才删除此像素点，达到像素移动的效果 */
-      if (ball.count > 100) {
+      if (ball.extraContext.count > lifetime) {
         destroyBalls.splice(i, 1)
       }
     }
@@ -124,10 +126,9 @@ export async function imgToFade(bgCanvas: HTMLCanvasElement, opts: ImgToFadeOpts
 
   /** 获取随机像素点坐标 */
   function getXY(): [x: number, y: number, index: number] {
-    const
-      /** 随机像素点索引 */
-      index = Math.floor(Math.random() * pixelIndexs.length)
-      /** 获取随机像素点 */
+    /** 随机像素点索引 */
+    const index = Math.floor(Math.random() * pixelIndexs.length)
+    /** 获取随机像素点 */
     const pixelIndex = pixelIndexs[index]
     /** 数组位置对宽度取余，获取行 */
     const x = pixelIndex % imgWidth
@@ -149,6 +150,7 @@ async function checkAndInit(opts: ImgToFadeOpts) {
     extraDelCount = 20,
     ballCount = 15,
     bgc = '#000',
+    lifetime = 100,
   } = opts
 
   if (
@@ -176,5 +178,6 @@ async function checkAndInit(opts: ImgToFadeOpts) {
     bgc,
     extraDelCount,
     ballCount,
+    lifetime,
   }
 }

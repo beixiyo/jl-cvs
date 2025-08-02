@@ -1,14 +1,13 @@
+import type { FileItem } from '@/components/Uploader'
 import { type Mode, NoteBoard } from '@jl-org/cvs'
 import { downloadByUrl } from '@jl-org/tool'
 import { motion } from 'framer-motion'
-import { Download, Eye, Grid3X3, Image, Layers, List, Maximize2, Package } from 'lucide-react'
+import { Download, Eye, Grid3X3, Image, List, Maximize2, Package } from 'lucide-react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Modal } from '@/components/Modal'
 import { PreviewImg } from '@/components/PreviewImg'
-import { Select } from '@/components/Select'
-import { Slider } from '@/components/Slider'
-import { type FileItem, Uploader } from '@/components/Uploader'
+import { Toolbar, type ToolbarMode } from '@/components/Toolbar'
 import { BRUSH_COLOR, DEFAULT_STROKE_WIDTH } from '@/config'
 import { onMounted, useGetState } from '@/hooks'
 import { cn } from '@/utils'
@@ -39,30 +38,14 @@ export default function NoteBoardTest() {
   const height = 600
 
   /** 模式选项 */
-  const modeOptions = [
-    { value: 'draw', label: '✏️ 绘制', color: 'bg-blue-500' },
-    { value: 'erase', label: '🧽 擦除', color: 'bg-red-500' },
-    { value: 'drag', label: '✋ 拖拽', color: 'bg-green-500' },
-    { value: 'rect', label: '⬜ 矩形', color: 'bg-purple-500' },
-    { value: 'circle', label: '⭕ 圆形', color: 'bg-yellow-500' },
-    { value: 'arrow', label: '➡️ 箭头', color: 'bg-pink-500' },
-    { value: 'none', label: '🚫 无操作', color: 'bg-gray-500' },
-  ] as const
-
-  /** 预设颜色 */
-  const presetColors = [
-    '#000000',
-    '#FF0000',
-    '#00FF00',
-    '#0000FF',
-    '#FFFF00',
-    '#FF00FF',
-    '#00FFFF',
-    '#FFA500',
-    '#800080',
-    '#FFC0CB',
-    '#A52A2A',
-    '#808080',
+  const modeOptions: ToolbarMode[] = [
+    { value: 'draw', label: '绘制', hasBrushSlider: true },
+    { value: 'erase', label: '擦除', hasBrushSlider: true },
+    { value: 'drag', label: '拖拽' },
+    { value: 'rect', label: '矩形' },
+    { value: 'circle', label: '圆形' },
+    { value: 'arrow', label: '箭头' },
+    { value: 'none', label: '无操作' },
   ]
 
   /** 初始化画板 */
@@ -291,155 +274,29 @@ export default function NoteBoardTest() {
       </div>
 
       {/* 工具栏 */ }
-      <Card className="p-4">
-        <div className="flex flex-wrap items-center gap-4">
-          {/* 模式切换 */ }
-          <div className="flex flex-wrap gap-2">
-            { modeOptions.map(option => (
-              <Button
-                key={ option.value }
-                onClick={ () => handleModeChange(option.value as Mode) }
-                variant={ currentMode === option.value
-                  ? 'default'
-                  : 'primary' }
-                className={ cn(
-                  'text-sm',
-                  currentMode === option.value && option.color,
-                ) }
-              >
-                { option.label }
-              </Button>
-            )) }
-          </div>
-
-          <div className="h-6 w-px bg-gray-300 dark:bg-gray-600" />
-
-          {/* 操作按钮 */ }
-          <div className="flex gap-2">
-            <Button onClick={ handleUndo } variant="primary" size="sm">
-              ↶ 撤销
-            </Button>
-            <Button onClick={ handleRedo } variant="primary" size="sm">
-              ↷ 重做
-            </Button>
-            <Button onClick={ handleClear } variant="primary" size="sm">
-              🗑️ 清空
-            </Button>
-            <Button onClick={ handleExport } variant="primary" size="sm" className="flex items-center gap-2">
-              <Image size={ 16 } />
-              单独导出图片和绘制内容
-            </Button>
-            <Button onClick={ handleExportAll } variant="primary" size="sm" className="flex items-center gap-2">
-              <Layers size={ 16 } />
-              导出所有图层
-            </Button>
-            <Button onClick={ handleResetSize } variant="primary" size="sm">
-              🔄 重置大小
-            </Button>
-          </div>
-        </div>
-      </Card>
+      <Toolbar
+        modes={ modeOptions }
+        activeMode={ currentMode }
+        onModeChange={ handleModeChange as any }
+        brushSize={ config.lineWidth }
+        onBrushSizeChange={ val => updateConfig('lineWidth', val) }
+        onImageUpload={ handleImageUpload }
+        onExport={ handleExport }
+        onExportAll={ handleExportAll }
+        onUndo={ handleUndo }
+        onRedo={ handleRedo }
+        onClear={ handleClear }
+        onResetSize={ handleResetSize }
+      />
 
       {/* 主要内容区域 */ }
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6">
         {/* 画布区域 */ }
-        <div className="lg:col-span-3">
-          <div
-            ref={ canvasContainerRef }
-            className="overflow-hidden border-2 border-gray-300 rounded-lg border-dashed bg-slate-100 dark:border-gray-600"
-            style={ { width, height } }
-          />
-        </div>
-
-        {/* 配置面板 */ }
-        <div className="space-y-4">
-          {/* 画笔设置 */ }
-          <Card className="p-4">
-            <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
-              画笔设置
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
-                  线条宽度
-                </label>
-                <div className="px-2">
-                  <Slider
-                    min={ 1 }
-                    max={ 100 }
-                    value={ config.lineWidth }
-                    onChange={ (value) => {
-                      if (typeof value === 'number') {
-                        updateConfig('lineWidth', value)
-                      }
-                      else if (Array.isArray(value)) {
-                        updateConfig('lineWidth', value[0])
-                      }
-                    } }
-                    tooltip={ { formatter: val => `${val}px` } }
-                  />
-                </div>
-                <span className="mt-1 block text-sm text-gray-500">
-                  { config.lineWidth }
-                  px
-                </span>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
-                  线条样式
-                </label>
-                <Select
-                  value={ config.lineCap }
-                  onChange={ value => updateConfig('lineCap', value) }
-                  options={ [
-                    { value: 'round', label: '圆形' },
-                    { value: 'square', label: '方形' },
-                    { value: 'butt', label: '平直' },
-                  ] }
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
-                  描边颜色
-                </label>
-                <div className="mb-2 flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={ config.strokeStyle }
-                    onChange={ e => updateConfig('strokeStyle', e.target.value) }
-                    className="h-8 w-12 border-0 p-0"
-                  />
-                </div>
-              </div>
-              {/* 色块选择 */ }
-              <div className="grid grid-cols-4 my-6 gap-1">
-                { presetColors.map(color => (
-                  <button
-                    key={ color }
-                    className="h-6 w-6 border border-gray-300 rounded dark:border-gray-600"
-                    style={ { backgroundColor: color } }
-                    onClick={ () => updateConfig('strokeStyle', color) }
-                  />
-                )) }
-              </div>
-            </div>
-          </Card>
-
-          {/* 图片上传 */ }
-          <Card className="p-4">
-            <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
-              背景图片
-            </h3>
-            <Uploader
-              accept="image/*"
-              onChange={ handleImageUpload }
-              className="w-full"
-            >
-            </Uploader>
-          </Card>
-        </div>
+        <div
+          ref={ canvasContainerRef }
+          className="overflow-hidden border-2 border-gray-300 rounded-lg border-dashed bg-slate-100 dark:border-gray-600 mx-auto"
+          style={ { width, height } }
+        />
       </div>
 
       {/* 使用说明 */ }
