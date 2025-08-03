@@ -13,6 +13,7 @@ const pathArr = [
   { path: '/shotImg', name: '📸 图片截图' },
   { path: '/cutoutImg', name: '✂️ 图像抠图' },
   { path: '/smartSelection', name: '🔍 图片智能选取' },
+  { path: '/captureVideoFrame', name: '🎥 截取视频帧' },
   { path: '/firework', name: '🎆 烟花效果' },
   { path: '/starField', name: '⭐ 星空场景' },
   { path: '/halftoneWave', name: '🌀 半调波浪' },
