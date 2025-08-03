@@ -329,7 +329,7 @@ export default function CaptureVideoFramePage() {
         {/* 控制面板 */ }
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* 视频上传区域 */ }
-          <Card className="p-4">
+          <Card className="">
             <h3 className="text-lg font-semibold mb-4">视频文件</h3>
             <div className="space-y-4">
               <Uploader
@@ -350,7 +350,7 @@ export default function CaptureVideoFramePage() {
           </Card>
 
           {/* 操作控制 */ }
-          <Card className="p-4">
+          <Card className="">
             <h3 className="text-lg font-semibold mb-4">操作控制</h3>
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

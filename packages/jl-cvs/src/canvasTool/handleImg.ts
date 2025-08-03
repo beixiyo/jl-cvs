@@ -1,6 +1,6 @@
 import type { TransferType } from '@jl-org/tool'
 import { blobToBase64, getImg, isStr } from '@jl-org/tool'
-import { createCvs, getDPR } from './'
+import { createCvs } from './'
 
 export {
   base64ToBlob,
@@ -21,8 +21,7 @@ export {
  */
 export function imgToNoise(img: HTMLImageElement, level = 100) {
   const { width, height } = img
-  const dpr = getDPR()
-  const { ctx, cvs } = createCvs(width, height, { dpr })
+  const { ctx, cvs } = createCvs(width, height)
   ctx.drawImage(img, 0, 0)
 
   const imgData = ctx.getImageData(0, 0, width, height)
@@ -62,15 +61,14 @@ export function waterMark({
   color = '#fff5',
   rotate = 35,
 }: WaterMarkOpts) {
-  const dpr = getDPR()
-  const { cvs, ctx } = createCvs(0, 0, { dpr })
-  const _fontSize = fontSize * getDPR()
+  const { cvs, ctx } = createCvs(0, 0)
+  const _fontSize = fontSize
   const font = `${_fontSize}px serif`
 
   /** 获取文字宽度 */
   ctx.font = font
   const { width } = ctx.measureText(text)
-  const canvasSize = Math.max(100, width) + gap * getDPR()
+  const canvasSize = Math.max(100, width) + gap
 
   cvs.width = canvasSize
   cvs.height = canvasSize
@@ -86,7 +84,7 @@ export function waterMark({
 
   return {
     base64: cvs.toDataURL(),
-    size: canvasSize / getDPR(),
+    size: canvasSize,
   }
 }
 
@@ -103,8 +101,7 @@ export async function composeImg(
   width: number,
   height: number,
 ) {
-  const dpr = getDPR()
-  const { cvs, ctx } = createCvs(width, height, { dpr })
+  const { cvs, ctx } = createCvs(width, height)
   for (const item of srcs) {
     const url = isStr(item.src)
       ? item.src

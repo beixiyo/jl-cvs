@@ -1,5 +1,4 @@
 import { createCvs, eachPixel, getColorInfo, getImgData, type Pixel } from '@jl-org/tool'
-import { getDPR } from './tools'
 
 /**
  * 灰度化算法：加权灰度化
@@ -9,7 +8,11 @@ export function adaptiveGrayscale(imageData: ImageData): ImageData {
   const data = imageData.data
   for (let i = 0; i < data.length; i += 4) {
     /** 灰度公式: Y = 0.299*R + 0.587*G + 0.114*B */
-    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
+    const gray
+      = 0.299 * data[i]
+        + 0.587 * data[i + 1]
+        + 0.114 * data[i + 2]
+
     data[i] = data[i + 1] = data[i + 2] = gray
   }
   return imageData
@@ -89,8 +92,7 @@ export async function changeImgColor(
     }
   })
 
-  const dpr = getDPR()
-  const { cvs, ctx } = createCvs(imgData.width, imgData.height, { dpr })
+  const { cvs, ctx } = createCvs(imgData.width, imgData.height)
   ctx.putImageData(cpImgData, 0, 0)
   const base64 = cvs.toDataURL()
 
@@ -98,6 +100,26 @@ export async function changeImgColor(
     base64,
     imgData: cpImgData,
   }
+}
+
+/**
+ * 获取图像灰度化后，每个像素的颜色值
+ * @param imageData 图片数据
+ * @returns 0~255 Uint8Array 灰度化后的颜色值类型化数组
+ */
+export function getGrayscaleArray(imageData: ImageData): Uint8Array {
+  const grayData = new Uint8Array(imageData.width * imageData.height)
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    /** 灰度公式: Y = 0.299*R + 0.587*G + 0.114*B */
+    const gray = Math.round(
+      0.299 * imageData.data[i]
+      + 0.587 * imageData.data[i + 1]
+      + 0.114 * imageData.data[i + 2],
+    )
+    grayData[i / 4] = gray
+  }
+
+  return grayData
 }
 
 export type ChangeImgColorOpts = {

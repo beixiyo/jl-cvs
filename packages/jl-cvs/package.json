@@ -29,7 +29,7 @@
     "lint": "eslint ./src --fix"
   },
   "dependencies": {
-    "@jl-org/tool": "3.0.2"
+    "@jl-org/tool": "3.0.3"
   },
   "keywords": [
     "canvas",

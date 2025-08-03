@@ -1,4 +1,6 @@
+/* eslint-disable */
 import { getImgData } from '@jl-org/tool'
+import { getGrayscaleArray } from './handleImgData'
 
 /**
  * 提取图片边缘
@@ -7,9 +9,7 @@ import { getImgData } from '@jl-org/tool'
  */
 export async function getImgEdge(
   source: string | ImageData,
-  options: {
-    threshold?: number // 边缘检测阈值 (0-255)
-  } = {},
+  options: GetImgEdgeOpts = {},
 ): Promise<ImageData> {
   /** 参数默认值 */
   const { threshold = 128 } = options
@@ -20,7 +20,7 @@ export async function getImgEdge(
     : Promise.resolve(source))
 
   /** 转换为灰度图 */
-  const grayscaleData = rgbToGrayscale(imageData)
+  const grayscaleData = getGrayscaleArray(imageData)
 
   // Sobel边缘检测
   const edgeData = sobelEdgeDetection(grayscaleData, imageData.width, imageData.height, threshold)
@@ -28,22 +28,9 @@ export async function getImgEdge(
   return edgeData
 }
 
-// ---------------------- 工具函数 ----------------------
-
-/** RGB转灰度图 (返回Uint8Array) */
-function rgbToGrayscale(imageData: ImageData): Uint8Array {
-  const grayData = new Uint8Array(imageData.width * imageData.height)
-  for (let i = 0; i < imageData.data.length; i += 4) {
-    /** 灰度公式: Y = 0.299*R + 0.587*G + 0.114*B */
-    const gray = Math.round(
-      0.299 * imageData.data[i]
-      + 0.587 * imageData.data[i + 1]
-      + 0.114 * imageData.data[i + 2],
-    )
-    grayData[i / 4] = gray
-  }
-  return grayData
-}
+// ======================
+// * 工具函数
+// ======================
 
 /** Sobel 边缘检测 */
 function sobelEdgeDetection(
@@ -53,8 +40,16 @@ function sobelEdgeDetection(
   threshold: number,
 ): ImageData {
   const edgeData = new ImageData(width, height)
-  const sobelXKernel = [-1, 0, 1, -2, 0, 2, -1, 0, 1]
-  const sobelYKernel = [-1, -2, -1, 0, 0, 0, 1, 2, 1]
+  const sobelXKernel = [
+    -1, 0, 1,
+    -2, 0, 2,
+    -1, 0, 1,
+  ]
+  const sobelYKernel = [
+    -1, -2, -1,
+    0, 0, 0,
+    1, 2, 1,
+  ]
 
   for (let y = 1; y < height - 1; y++) {
     for (let x = 1; x < width - 1; x++) {
@@ -85,4 +80,12 @@ function sobelEdgeDetection(
     }
   }
   return edgeData
+}
+
+export type GetImgEdgeOpts = {
+  /**
+   * 边缘检测阈值 (0-255)
+   * @default 128
+   */
+  threshold?: number
 }

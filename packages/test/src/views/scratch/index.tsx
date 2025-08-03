@@ -289,7 +289,7 @@ export default function ScratchTest() {
 
       {/* 刮刮卡展示区域 */ }
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card className="p-4">
+        <Card className="">
           <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
             刮刮卡体验
           </h3>
@@ -339,7 +339,7 @@ export default function ScratchTest() {
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="">
           <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
             使用说明
           </h3>
