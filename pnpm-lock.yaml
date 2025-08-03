@@ -45,8 +45,8 @@ importers:
   packages/jl-cvs:
     dependencies:
       '@jl-org/tool':
-        specifier: ^2.0.3
-        version: 2.0.3
+        specifier: 3.0.2
+        version: 3.0.2
 
   packages/test:
     dependencies:
@@ -54,8 +54,8 @@ importers:
         specifier: workspace:*
         version: link:../jl-cvs
       '@jl-org/tool':
-        specifier: ^2.0.6
-        version: 2.1.3
+        specifier: 3.0.2
+        version: 3.0.2
       '@jl-org/vite-auto-route':
         specifier: ^1.0.6
         version: 1.0.6
@@ -861,11 +861,8 @@ packages:
   '@jl-org/js-to-style@0.0.2':
     resolution: {integrity: sha512-O0pMjVimZrZJXSoxei6G60ruKO7ezwyljoCeay7/Us0qlRdmyzFdVWk+47YkSaLZ/EmWXfUqReY7S1YtgJgFCA==}
 
-  '@jl-org/tool@2.0.3':
-    resolution: {integrity: sha512-Z4H++2rP0EQfVg9iBOw3fh0eF7VgF2blznlO+p72PMTPnEAl3ddayCiWoOBuOhgEln0v78F4HxgwuPdCyN+gRw==}
-
-  '@jl-org/tool@2.1.3':
-    resolution: {integrity: sha512-MZPEpH/oS8Ei35tpLdCnyiNQWZHh6S//FPhuh046bEXOjgeyM2cR8NaybCZzv7CbCqKkVRBlqxRd5BHrd2Jmog==}
+  '@jl-org/tool@3.0.2':
+    resolution: {integrity: sha512-ttZH/ciJWeDSRtAABblpjnIvAfEaw39KQme0p337R14tpxBLYlnnj7/GGocPb0RuXE2+E178lOb8xW2YvmKGpg==}
 
   '@jl-org/ts-tool@0.0.8':
     resolution: {integrity: sha512-2YwGmzod5LBOi7cKknRXn2H9xcp99OhokZJ55t+kg7wvPST4obcwLxO03ji0gVuFoHp5BgrkwzDICV+z1a3TDg==}
@@ -3914,9 +3911,7 @@ snapshots:
 
   '@jl-org/js-to-style@0.0.2': {}
 
-  '@jl-org/tool@2.0.3': {}
-
-  '@jl-org/tool@2.1.3': {}
+  '@jl-org/tool@3.0.2': {}
 
   '@jl-org/ts-tool@0.0.8': {}
 

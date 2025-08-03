@@ -1,4 +1,5 @@
 import { createCvs, eachPixel, getColorInfo, getImgData, type Pixel } from '@jl-org/tool'
+import { getDPR } from './tools'
 
 /**
  * 灰度化算法：加权灰度化
@@ -88,7 +89,8 @@ export async function changeImgColor(
     }
   })
 
-  const { cvs, ctx } = createCvs(imgData.width, imgData.height)
+  const dpr = getDPR()
+  const { cvs, ctx } = createCvs(imgData.width, imgData.height, { dpr })
   ctx.putImageData(cpImgData, 0, 0)
   const base64 = cvs.toDataURL()
 

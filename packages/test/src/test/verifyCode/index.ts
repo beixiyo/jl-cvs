@@ -3,8 +3,8 @@
  */
 
 import type { BinaryRow } from './type'
-import { blobToBase64, createCvs } from '@jl-org/tool'
-import { adaptiveBinarize, getImgData, scaleImgData } from '@/canvasTool'
+import { adaptiveBinarize, scaleImgData } from '@jl-org/cvs'
+import { blobToBase64, createCvs, getImgData } from '@jl-org/tool'
 import { convolution } from './convolution'
 
 const SCALE = 4
@@ -35,7 +35,7 @@ async function main() {
  * 还原二值化数据的缩放
  * @returns
  */
-function restoreDataScale(data: BinaryRow[], scale: number) {
+function restoreDataScale(data: BinaryRow[], scale: number): BinaryRow[] {
   const scaleData = []
   const w = data[0].length
   const h = data.length
@@ -47,7 +47,7 @@ function restoreDataScale(data: BinaryRow[], scale: number) {
     }
     scaleData.push(row)
   }
-  return scaleData
+  return scaleData as BinaryRow[]
 }
 
 /**

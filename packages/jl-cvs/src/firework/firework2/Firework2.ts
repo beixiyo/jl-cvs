@@ -1,4 +1,4 @@
-import { getColor } from '@/canvasTool'
+import { getColor, getDPR } from '@/canvasTool'
 import { delFromItem } from '@/utils'
 import { Debris, type DebrisOpts } from './Debris'
 import { Explosive } from './Explosive'
@@ -17,6 +17,7 @@ export class Firework2 {
   private explosive?: Explosive
 
   ctx: CanvasRenderingContext2D
+  dpr: number
 
   constructor(opts: Firework2Opts) {
     const {
@@ -25,16 +26,19 @@ export class Firework2 {
       width,
       y,
       ctx,
+      dpr = getDPR(),
     } = opts
 
     this.color = color
     this.ctx = ctx
+    this.dpr = dpr
     this.launcher = new Launcher({
       color: this.color,
       firework: this,
       height,
       width,
       y,
+      dpr: this.dpr,
     })
   }
 
@@ -91,6 +95,7 @@ export class Firework2 {
       x,
       y,
       color: this.color,
+      dpr: this.dpr,
     })
     this.explosive.start()
   }
@@ -102,6 +107,7 @@ export class Firework2 {
     const debris = new Debris({
       ...opts,
       color: opts.color || this.color,
+      dpr: this.dpr,
     })
     debris.start()
     this.debrisArr.push(debris)
@@ -118,6 +124,7 @@ export type Firework2Opts = {
   width: number
   y?: number
   ctx: CanvasRenderingContext2D
+  dpr?: number
 }
 
 type Firework2Status = 'waiting' | 'launching' | 'booming' | 'end'

@@ -1,7 +1,7 @@
 import type { PartRequired } from '@jl-org/ts-tool'
 import type { CaptureVideoFrameData } from '@/worker/captureVideoFrame'
 import { blobToBase64, isFn, splitWorkerTask, type TransferType } from '@jl-org/tool'
-import { createCvs } from './'
+import { createCvs, getDPR } from './'
 import { getCvsImg, type HandleImgReturn } from './handleImg'
 
 /**
@@ -29,6 +29,7 @@ export async function captureVideoFrame<
   >
 
   const src = getUrl()
+  const dpr = getDPR()
   const times = (Array.isArray(time)
     ? time
     : [time])
@@ -44,7 +45,7 @@ export async function captureVideoFrame<
     return data
   }
 
-  const { ctx, cvs } = createCvs()
+  const { ctx, cvs } = createCvs(undefined, undefined, { dpr })
   const resPromises = times.map(time => onVideoSeeked(
     time,
     videoEl => videoToCanvas(videoEl),
@@ -135,8 +136,8 @@ export async function captureVideoFrame<
       h = video.videoHeight
     }
 
-    cvs.width = w
-    cvs.height = h
+    cvs.width = w * dpr
+    cvs.height = h * dpr
     ctx.drawImage(video, 0, 0, cvs.width, cvs.height)
 
     return getCvsImg(

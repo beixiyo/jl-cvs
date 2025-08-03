@@ -130,6 +130,9 @@ export async function cutoutImgToMask(
     }
   }
 
+  /**
+   * 不要计算 DPR，这里应该让调用者决定
+   */
   const { cvs, ctx } = createCvs(imgData.width, imgData.height)
   ctx.putImageData(imgData.imgData, 0, 0)
   const base64 = cvs.toDataURL('image/png')
@@ -175,6 +178,9 @@ export async function cutoutImg(
     throw new Error(`Image dimension mismatch: Original (${width}x${height}), Mask (${maskWidth}x${maskHeight}). They must be identical.`)
   }
 
+  /**
+   * 不要计算 DPR，这里应该让调用者决定
+   */
   const { cvs, ctx } = createCvs(width, height)
 
   ctx.drawImage(originalImage, 0, 0, width, height)
@@ -200,8 +206,10 @@ export async function cutoutImgSmoothed(
     featherAmount = 3,
   }: CutoutImgOpts = {},
 ) {
-  const originalImgDataObj = await getImgData(originalImg)
-  const maskImgDataObj = await getImgData(maskImg)
+  const [originalImgDataObj, maskImgDataObj] = await Promise.all([
+    getImgData(originalImg),
+    getImgData(maskImg),
+  ])
 
   return edgeSmooth(
     originalImgDataObj.imgData,
@@ -232,6 +240,9 @@ function edgeSmooth(
   }
 
   const { width, height } = maskData
+  /**
+   * 不要计算 DPR，这里应该让调用者决定
+   */
   const { ctx } = createCvs(width, height)
   const resultData = ctx.createImageData(width, height)
 

@@ -2,11 +2,13 @@ import { WaterRipple } from '@jl-org/cvs'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input, NumberInput } from '@/components/Input'
+import { NumberInput } from '@/components/Input'
+import { useGetState } from '@/hooks'
 
-export default function WaterRippleTest() {
-  const [rippleInstance, setRippleInstance] = useState<WaterRipple | null>(null)
-  const [config, setConfig] = useState({
+/** 预设配置 */
+const presets = [
+  {
+    name: '默认效果',
     width: 800,
     height: 600,
     yOffset: 180,
@@ -14,53 +16,37 @@ export default function WaterRippleTest() {
     lineWidth: 2,
     circleCount: 13,
     intensity: 1,
-    strokeStyle: '',
-  })
+    strokeStyle: 'rgba(99, 99, 99, 0.3)',
+  },
+  {
+    name: '快速波纹',
+    width: 800,
+    height: 600,
+    yOffset: 100,
+    xOffset: 0,
+    lineWidth: 1,
+    circleCount: 20,
+    intensity: 3,
+    strokeStyle: 'rgba(0, 150, 255, 0.3)',
+  },
+  {
+    name: '慢速大波纹',
+    width: 800,
+    height: 600,
+    yOffset: 200,
+    xOffset: 0,
+    lineWidth: 4,
+    circleCount: 8,
+    intensity: 0.5,
+    strokeStyle: 'rgba(255, 100, 100, 0.2)',
+  },
+]
+
+export default function WaterRippleTest() {
+  const [rippleInstance, setRippleInstance] = useState<WaterRipple | null>(null)
+  const [config, setConfig] = useGetState(presets[0], true)
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-
-  /** 预设配置 */
-  const presets = [
-    {
-      name: '默认效果',
-      config: {
-        width: 800,
-        height: 600,
-        yOffset: 180,
-        xOffset: 0,
-        lineWidth: 2,
-        circleCount: 13,
-        intensity: 1,
-        strokeStyle: '',
-      },
-    },
-    {
-      name: '快速波纹',
-      config: {
-        width: 800,
-        height: 600,
-        yOffset: 100,
-        xOffset: 0,
-        lineWidth: 1,
-        circleCount: 20,
-        intensity: 3,
-        strokeStyle: 'rgba(0, 150, 255, 0.3)',
-      },
-    },
-    {
-      name: '慢速大波纹',
-      config: {
-        width: 800,
-        height: 600,
-        yOffset: 200,
-        xOffset: 0,
-        lineWidth: 4,
-        circleCount: 8,
-        intensity: 0.5,
-        strokeStyle: 'rgba(255, 100, 100, 0.2)',
-      },
-    },
-  ]
 
   /** 创建水波纹实例 */
   const createRipple = useCallback((canvas: HTMLCanvasElement, customConfig?: any) => {
@@ -174,8 +160,12 @@ export default function WaterRippleTest() {
                   { presets.map((preset, index) => (
                     <Button
                       key={ `preset-${preset.name}-${index}` }
-                      onClick={ () => applyPreset(preset.config) }
-                      variant="primary"
+                      onClick={ () => applyPreset(preset) }
+                      variant={
+                        preset.name === config.name
+                          ? 'primary'
+                          : 'default'
+                      }
                       className="text-sm"
                     >
                       { preset.name }

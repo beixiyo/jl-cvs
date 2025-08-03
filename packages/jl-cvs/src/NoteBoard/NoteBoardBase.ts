@@ -207,7 +207,7 @@ export abstract class NoteBoardBase implements ILifecycleManager {
       height = this.opts.height
     }
 
-    const { ctx, cvs } = createCvs(width, height)
+    const { ctx, cvs } = createCvs(width, height, { dpr: NoteBoardBase.dpr })
     for (const img of imgs) {
       ctx.drawImage(img, 0, 0)
     }

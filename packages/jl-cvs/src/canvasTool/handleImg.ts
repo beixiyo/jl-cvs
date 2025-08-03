@@ -21,7 +21,8 @@ export {
  */
 export function imgToNoise(img: HTMLImageElement, level = 100) {
   const { width, height } = img
-  const { ctx, cvs } = createCvs(width, height)
+  const dpr = getDPR()
+  const { ctx, cvs } = createCvs(width, height, { dpr })
   ctx.drawImage(img, 0, 0)
 
   const imgData = ctx.getImageData(0, 0, width, height)
@@ -61,7 +62,8 @@ export function waterMark({
   color = '#fff5',
   rotate = 35,
 }: WaterMarkOpts) {
-  const { cvs, ctx } = createCvs(0, 0)
+  const dpr = getDPR()
+  const { cvs, ctx } = createCvs(0, 0, { dpr })
   const _fontSize = fontSize * getDPR()
   const font = `${_fontSize}px serif`
 
@@ -101,7 +103,8 @@ export async function composeImg(
   width: number,
   height: number,
 ) {
-  const { cvs, ctx } = createCvs(width, height)
+  const dpr = getDPR()
+  const { cvs, ctx } = createCvs(width, height, { dpr })
   for (const item of srcs) {
     const url = isStr(item.src)
       ? item.src

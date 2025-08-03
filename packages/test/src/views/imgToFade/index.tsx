@@ -44,8 +44,8 @@ export default function ImgToFadeTest() {
   const [config, setConfig] = useGetState({
     width: 800,
     height: 600,
-    imgWidth: 400,
-    imgHeight: 300,
+    imgWidth: 640,
+    imgHeight: 360,
     ...presets[0],
   }, true)
 

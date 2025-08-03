@@ -7,24 +7,9 @@ export class DotGrid implements ILifecycleManager {
 
   private width: number
   private height: number
-  private resizeDebounceTime: number
-  private mouseMoveThrottleTime: number
-
   private rows: number = 0
   private cols: number = 0
   private rect: DOMRect | null = null
-
-  private dotSpacingX: number
-  private dotSpacingY: number
-  private dotRadius: number
-  private dotColor: string
-
-  private backgroundColor: string
-  private highlightGradientColors: [string, string]
-  private highlightRange: number
-
-  private transitionTime: number
-  private glowIntensity: number
 
   private mouseX: number = -1
   private mouseY: number = -1
@@ -32,7 +17,8 @@ export class DotGrid implements ILifecycleManager {
   private dotStates: Map<string, { highlighted: boolean, progress: number }> = new Map()
 
   private animationFrameId: number | null = null
-  private onResizeDebounce: (width: number, height: number) => void
+  private options: Required<DotGridOptions>
+  private declare onResizeDebounce: (width: number, height: number) => void
 
   // ======================
   // * Handlers
@@ -43,44 +29,51 @@ export class DotGrid implements ILifecycleManager {
   constructor(canvas: HTMLCanvasElement, options: DotGridOptions = {}) {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')!
-    this.width = options.width || getWinWidth()
-    this.height = options.height || getWinHeight()
 
-    this.resizeDebounceTime = options.resizeDebounceTime || 80
-    this.mouseMoveThrottleTime = options.mouseMoveThrottleTime || 16
+    /** 设置默认配置 */
+    const defaultOptions: Required<DotGridOptions> = {
+      width: getWinWidth(),
+      height: getWinHeight(),
+      resizeDebounceTime: 40,
+      mouseMoveThrottleTime: 8,
+      dotSpacingX: 20,
+      dotSpacingY: 20,
+      dotRadius: 1,
+      dotColor: '#333',
+      backgroundColor: '#000',
+      highlightGradientColors: ['#fff4', 'transparent'],
+      highlightRange: 2,
+      transitionTime: 50,
+      glowIntensity: 10,
+    }
 
-    this.dotSpacingX = options.dotSpacingX || 20
-    this.dotSpacingY = options.dotSpacingY || 20
-    this.dotRadius = options.dotRadius || 1
-    this.dotColor = options.dotColor || '#333'
+    this.options = {
+      ...defaultOptions,
+      ...options,
+    }
 
-    this.backgroundColor = options.backgroundColor || '#000'
-    this.highlightGradientColors = options.highlightGradientColors || ['#fff4', 'transparent']
-    this.highlightRange = options.highlightRange || 2
-    this.transitionTime = options.transitionTime || 50
-    this.glowIntensity = options.glowIntensity || 10
+    this.width = this.options.width
+    this.height = this.options.height
 
     // ======================
     // * 绑定事件处理器
     // ======================
-    this.onResizeDebounce = debounce(
-      (newWidth, newHeight) => {
-        this.width = newWidth
-        this.height = newHeight
-        this.initializeGrid()
-        this.updateHighlightedDots()
-      },
-      this.resizeDebounceTime,
-    )
+    this.setDebounceEvent()
 
     this.mouseMoveHandler = throttle((event: MouseEvent) => {
       if (!this.rect)
         return
+
       const rect = this.rect
-      this.mouseX = event.clientX - rect.left
-      this.mouseY = event.clientY - rect.top
+      /** 计算Canvas的缩放比例 */
+      const scaleX = this.canvas.width / rect.width
+      const scaleY = this.canvas.height / rect.height
+
+      /** 根据缩放比例调整鼠标坐标 */
+      this.mouseX = (event.clientX - rect.left) * scaleX
+      this.mouseY = (event.clientY - rect.top) * scaleY
       this.updateHighlightedDots()
-    }, this.mouseMoveThrottleTime)
+    }, this.options.mouseMoveThrottleTime)
 
     this.mouseLeaveHandler = () => {
       this.mouseX = -1
@@ -124,11 +117,31 @@ export class DotGrid implements ILifecycleManager {
     this.rmEvent()
   }
 
+  /** 更新配置 */
+  updateOptions(newOptions: Partial<DotGridOptions>) {
+    this.options = { ...this.options, ...newOptions }
+    this.initializeGrid()
+    this.setDebounceEvent()
+  }
+
+  private setDebounceEvent() {
+    this.onResizeDebounce = debounce(
+      (newWidth, newHeight) => {
+        this.width = newWidth
+        this.height = newHeight
+        this.initializeGrid()
+        this.updateHighlightedDots()
+      },
+      this.options.resizeDebounceTime,
+    )
+  }
+
   private initializeGrid() {
     this.rect = this.canvas.getBoundingClientRect()
-    this.rows = Math.floor(this.height / this.dotSpacingY) + 1
-    this.cols = Math.floor(this.width / this.dotSpacingX) + 1
+    this.rows = Math.floor(this.height / this.options.dotSpacingY) + 1
+    this.cols = Math.floor(this.width / this.options.dotSpacingX) + 1
 
+    /** 设置 Canvas 尺寸 */
     this.canvas.width = this.width
     this.canvas.height = this.height
 
@@ -144,23 +157,23 @@ export class DotGrid implements ILifecycleManager {
     if (this.mouseX < 0 || this.mouseY < 0)
       return
 
-    const dotRow = Math.floor(this.mouseY / this.dotSpacingY)
-    const dotCol = Math.floor(this.mouseX / this.dotSpacingX)
+    const dotRow = Math.floor(this.mouseY / this.options.dotSpacingY)
+    const dotCol = Math.floor(this.mouseX / this.options.dotSpacingX)
 
     this.highlightedDots.clear()
 
     for (
-      let r = Math.max(0, dotRow - this.highlightRange);
-      r <= Math.min(this.rows - 1, dotRow + this.highlightRange);
+      let r = Math.max(0, dotRow - this.options.highlightRange);
+      r <= Math.min(this.rows - 1, dotRow + this.options.highlightRange);
       r++
     ) {
       for (
-        let c = Math.max(0, dotCol - this.highlightRange);
-        c <= Math.min(this.cols - 1, dotCol + this.highlightRange);
+        let c = Math.max(0, dotCol - this.options.highlightRange);
+        c <= Math.min(this.cols - 1, dotCol + this.options.highlightRange);
         c++
       ) {
         const distance = Math.sqrt((dotRow - r) ** 2 + (dotCol - c) ** 2)
-        if (distance <= this.highlightRange) {
+        if (distance <= this.options.highlightRange) {
           this.highlightedDots.add(`${r},${c}`)
         }
       }
@@ -192,12 +205,12 @@ export class DotGrid implements ILifecycleManager {
     const deltaTime = 16
     for (const [key, state] of this.dotStates) {
       if (state.highlighted && state.progress < 1) {
-        state.progress += deltaTime / this.transitionTime
+        state.progress += deltaTime / this.options.transitionTime
         if (state.progress > 1)
           state.progress = 1
       }
       else if (!state.highlighted && state.progress > 0) {
-        state.progress -= deltaTime / this.transitionTime
+        state.progress -= deltaTime / this.options.transitionTime
         if (state.progress < 0)
           state.progress = 0
       }
@@ -215,21 +228,21 @@ export class DotGrid implements ILifecycleManager {
     const originalShadowColor = this.ctx.shadowColor
 
     this.ctx.globalCompositeOperation = 'lighter'
-    this.ctx.shadowBlur = this.glowIntensity
-    this.ctx.shadowColor = this.highlightGradientColors[0]
+    this.ctx.shadowBlur = this.options.glowIntensity
+    this.ctx.shadowColor = this.options.highlightGradientColors[0]
 
     for (const [key, state] of this.dotStates) {
       if (state.progress > 0) {
         const [row, col] = key.split(',').map(Number)
-        const x = col * this.dotSpacingX
-        const y = row * this.dotSpacingY
+        const x = col * this.options.dotSpacingX
+        const y = row * this.options.dotSpacingY
 
-        const maxRadius = this.dotRadius * 3
-        const currentRadius = this.dotRadius + (maxRadius - this.dotRadius) * state.progress
+        const maxRadius = this.options.dotRadius * 3
+        const currentRadius = this.options.dotRadius + (maxRadius - this.options.dotRadius) * state.progress
 
         const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, currentRadius)
-        gradient.addColorStop(0, this.highlightGradientColors[0])
-        gradient.addColorStop(1, this.highlightGradientColors[1])
+        gradient.addColorStop(0, this.options.highlightGradientColors[0])
+        gradient.addColorStop(1, this.options.highlightGradientColors[1])
 
         this.ctx.globalAlpha = state.progress
         this.ctx.fillStyle = gradient
@@ -247,16 +260,16 @@ export class DotGrid implements ILifecycleManager {
   }
 
   private drawDots() {
-    this.ctx.fillStyle = this.backgroundColor
+    this.ctx.fillStyle = this.options.backgroundColor
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
 
-    this.ctx.fillStyle = this.dotColor
+    this.ctx.fillStyle = this.options.dotColor
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.cols; col++) {
-        const x = col * this.dotSpacingX
-        const y = row * this.dotSpacingY
+        const x = col * this.options.dotSpacingX
+        const y = row * this.options.dotSpacingY
         this.ctx.beginPath()
-        this.ctx.arc(x, y, this.dotRadius, 0, Math.PI * 2)
+        this.ctx.arc(x, y, this.options.dotRadius, 0, Math.PI * 2)
         this.ctx.fill()
       }
     }

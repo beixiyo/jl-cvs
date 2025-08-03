@@ -1,3 +1,4 @@
+import { getDPR } from '@/canvasTool'
 import { Ball } from '@/canvasTool/Ball'
 import { getColor } from '@/canvasTool/color'
 import { BombBall } from './BombBall'
@@ -18,6 +19,7 @@ export class Firework {
     private getBoomColor = getColor,
     public r = 6,
     public speed = 2.5,
+    private dpr = getDPR(),
   ) {
     this.startTime = Date.now()
   }
@@ -37,10 +39,10 @@ export class Firework {
      * 每次绘制的小球半径减小，透明度减小
      */
     for (let i = 0; i < 80; i++) {
-      const r = this.r - i / 20
+      const r = (this.r - i / 20) * this.dpr
       const ball = new Ball({
         x: this.x,
-        y: this.y - i,
+        y: this.y - i * this.dpr,
         r: r < 0.1
           ? 0.1
           : r,
@@ -62,8 +64,8 @@ export class Firework {
       const radian = Math.PI * 2 / this.bombCount
 
       for (let i = 0; i < this.bombCount; i++) {
-        const dirX = Math.cos(radian * i) * Math.random() * 3
-        const dirY = Math.sin(radian * i) * Math.random() * 3
+        const dirX = Math.cos(radian * i) * Math.random() * 3 * this.dpr
+        const dirY = Math.sin(radian * i) * Math.random() * 3 * this.dpr
 
         const bombBall = new BombBall(
           this.ctx,
@@ -72,6 +74,8 @@ export class Firework {
           dirX,
           dirY,
           this.getBoomColor(),
+          3,
+          this.dpr,
         )
         bombBall.draw()
         this.bombArr.push(bombBall)

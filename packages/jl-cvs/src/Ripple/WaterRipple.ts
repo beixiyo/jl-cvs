@@ -32,6 +32,7 @@ export class WaterRipple {
       lineWidth: 2,
       circleCount: 13,
       intensity: 1,
+      strokeStyle: '#3336',
       onResize: () => { },
       ...opts,
     }
@@ -155,6 +156,10 @@ export type RippleOpts = {
    */
   circleCount?: number
   lineWidth?: number | ((radius: number) => number)
+  /**
+   * 波纹颜色
+   * @default '#3336'
+   */
   strokeStyle?: string | ((radius: number) => string)
   onResize?: () => void
 }

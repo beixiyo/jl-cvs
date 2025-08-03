@@ -1,4 +1,4 @@
-import { Ball } from '@/canvasTool'
+import { Ball, getDPR } from '@/canvasTool'
 import { getRandomNum } from '@/utils'
 
 /**
@@ -22,16 +22,18 @@ export class Debris {
   /** 位置 */
   x: number
   y: number
+  dpr: number
 
   ctx: CanvasRenderingContext2D
 
   constructor(opts: DebrisOpts) {
+    this.dpr = opts.dpr ?? getDPR()
     this.color = opts.color ?? '#fff'
-    this.radius = opts.radius ?? 1
+    this.radius = (opts.radius ?? 1) * this.dpr
     this.opacity = opts.opacity ?? getRandomNum(0.1, 0.5, true)
     this.duration = opts.duration ?? getRandomNum(0.5, 1, true)
 
-    this.g = opts.g ?? 0.98
+    this.g = (opts.g ?? 0.98) * this.dpr
     this.x = opts.x
     this.y = opts.y
     this.ctx = opts.ctx
@@ -72,4 +74,5 @@ export type DebrisOpts = {
   duration?: number
   opacity?: number
   ctx: CanvasRenderingContext2D
+  dpr?: number
 }

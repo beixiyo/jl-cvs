@@ -1,4 +1,4 @@
-import { clearAllCvs, getWinHeight, getWinWidth } from '@/canvasTool'
+import { clearAllCvs, getDPR, getWinHeight, getWinWidth } from '@/canvasTool'
 import { getColor } from '@/canvasTool/color'
 import { Firework } from './Firework'
 
@@ -9,23 +9,25 @@ export function createFirework(
   cvs: HTMLCanvasElement,
   opts?: FireworkOpts,
 ) {
-  const
-    /** 烟花对象数组 */
-    fireworkArr: Firework[] = []
-    /** 即将爆炸的烟花数组 */
+  /** 烟花对象数组 */
+  const fireworkArr: Firework[] = []
+  /** 即将爆炸的烟花数组 */
   const bombArr: Firework[] = []
   const ctx = cvs.getContext('2d')!
   const _opts = normalizeOpts(opts)
+  const dpr = getDPR()
 
   let time = Date.now()
   let id: number
 
-  cvs.width = _opts.width
-  cvs.height = _opts.height
+  cvs.width = _opts.width * dpr
+  cvs.height = _opts.height * dpr
+  cvs.style.width = `${_opts.width}px`
+  cvs.style.height = `${_opts.height}px`
 
   /* 坐标系改为从下往上 */
-  ctx.translate(0, cvs.height)
-  ctx.scale(1, -1)
+  ctx.scale(dpr, -dpr)
+  ctx.translate(0, -cvs.height)
 
   update(ctx, _opts)
 
@@ -65,6 +67,7 @@ export function createFirework(
         getBoomColor,
         r,
         speed,
+        dpr,
       )
       fireworkArr.push(fw)
     }

@@ -1,3 +1,4 @@
+import { getDPR } from '@/canvasTool'
 import { delFromItem } from '@/utils'
 import { Firework2, type Firework2Opts } from './Firework2'
 
@@ -11,6 +12,7 @@ export function createFirework2(
   let id: number
   const fireworkArr: Firework2[] = []
   const ctx = cvs.getContext('2d')!
+  const dpr = getDPR()
   const {
     width = cvs.width,
     height = cvs.height,
@@ -35,7 +37,7 @@ export function createFirework2(
   }
 
   function addFirework() {
-    const firework = new Firework2(opts)
+    const firework = new Firework2({ ...opts, dpr })
     firework.launch()
     fireworkArr.push(firework)
   }
@@ -64,17 +66,20 @@ export function createFirework2(
   }
 
   function setOpts() {
-    cvs.width = width
-    cvs.height = height
+    cvs.width = width * dpr
+    cvs.height = height * dpr
+    cvs.style.width = `${width}px`
+    cvs.style.height = `${height}px`
 
     /** 修改坐标系 */
-    ctx.translate(0, height)
-    ctx.scale(1, -1)
+    ctx.scale(dpr, -dpr)
+    ctx.translate(0, -height)
   }
 }
 
 export type Options = {
   width?: number
   height?: number
+  dpr?: number
 }
 & Firework2Opts

@@ -11,7 +11,7 @@
     "lint": "eslint ./src --fix"
   },
   "dependencies": {
-    "@jl-org/tool": "^2.0.6",
+    "@jl-org/tool": "3.0.2",
     "@jl-org/vite-auto-route": "^1.0.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

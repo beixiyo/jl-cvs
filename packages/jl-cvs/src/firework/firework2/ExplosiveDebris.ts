@@ -1,5 +1,5 @@
 import type { Firework2 } from './Firework2'
-import { Ball, getColor } from '@/canvasTool'
+import { Ball, getColor, getDPR } from '@/canvasTool'
 import { getRandomNum } from '@/utils'
 
 /**
@@ -26,22 +26,24 @@ export class ExplosiveDebris {
   debrisNum: number
   /** 是否要二次爆炸 */
   needSecondBurst: boolean
+  dpr: number
 
   constructor(opts: ExplosiveDebrisOpts) {
     this.firework = opts.firework
     this.x = opts.x
     this.y = opts.y
+    this.dpr = opts.dpr ?? getDPR()
 
     this.color = Math.random() > 0.2
       ? opts.color || getColor()
       : '#fff'
-    this.radius = opts.radius ?? 2
+    this.radius = (opts.radius ?? 2) * this.dpr
     this.angle = getRandomNum(0, 2 * Math.PI, true)
 
-    this.speed = opts.speed ?? getRandomNum(0.1, 4, true)
+    this.speed = (opts.speed ?? getRandomNum(0.1, 4, true)) * this.dpr
     this.vx = Math.cos(this.angle) * this.speed
     this.vy = Math.sin(this.angle) * this.speed
-    this.g = opts.g ?? 0.98
+    this.g = (opts.g ?? 0.98) * this.dpr
 
     this.debrisNum = opts.debrisNum ?? 3
     this.needSecondBurst = opts.needSecondBurst ?? false
@@ -77,11 +79,11 @@ export class ExplosiveDebris {
     if (this.debrisNum > 0 && Math.random() > 0.8) {
       this.debrisNum--
       this.firework.addDebris({
-        x: this.x + getRandomNum(-2, 2, true),
-        y: this.y + getRandomNum(-2, 2, true),
+        x: this.x + getRandomNum(-2, 2, true) * this.dpr,
+        y: this.y + getRandomNum(-2, 2, true) * this.dpr,
         color: this.color,
-        radius: 0.5,
-        g: 0.1,
+        radius: 0.5 * this.dpr,
+        g: 0.1 * this.dpr,
         ctx: this.firework.ctx,
       })
     }
@@ -107,4 +109,5 @@ export type ExplosiveDebrisOpts = {
 
   debrisNum?: number
   needSecondBurst?: boolean
+  dpr?: number
 }
