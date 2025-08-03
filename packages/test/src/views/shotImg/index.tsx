@@ -1,4 +1,5 @@
 import { ShotImg } from '@jl-org/cvs'
+import { Upload } from 'lucide-react'
 import { memo, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { type FileItem, Uploader } from '@/components/Uploader'
@@ -64,35 +65,30 @@ const ShotImgDemo = memo(() => {
     }
   }
 
-  /** 重置 */
-  const handleReset = () => {
-    setImageUrl('')
-    setResultImage('')
-  }
-
   return (
     <div className="flex flex-col gap-6 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-xl text-gray-800 font-semibold dark:text-gray-200">上传图片</h2>
-        <div className="flex items-center gap-4">
-
-          <Uploader
-            onChange={ handleFileChange }
-            accept="image/*"
-            className="w-72"
-          />
-
-          { imageUrl && (
-            <Button onClick={ handleReset } className="shrink-0">
-              重置
-            </Button>
-          ) }
-        </div>
-      </div>
-
       <div className={ cn('flex flex-col md:flex-row gap-6', !imageUrl && 'opacity-50 pointer-events-none') }>
         <div className="flex flex-1 flex-col gap-4">
-          <h2 className="text-xl text-gray-800 font-semibold dark:text-gray-200">原图 (拖动选择区域)</h2>
+          <div className="flex gap-4">
+            <h2 className="text-xl text-gray-800 font-semibold dark:text-gray-200">
+              原图 (拖动选择区域)
+            </h2>
+            <Uploader
+              onChange={ handleFileChange }
+              accept="image/*"
+              className="w-72"
+            >
+              <Button
+                designStyle="neumorphic"
+                size="sm"
+                rounded="full"
+                leftIcon={ <Upload className="h-4 w-4" /> }
+              >
+                上传
+              </Button>
+            </Uploader>
+          </div>
+
           <div className="relative overflow-hidden border border-gray-300 rounded dark:border-gray-600">
             <canvas
               ref={ canvasRef }

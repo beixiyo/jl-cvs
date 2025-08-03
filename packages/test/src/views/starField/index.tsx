@@ -2,11 +2,12 @@ import { StarField } from '@jl-org/cvs'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input, NumberInput } from '@/components/Input'
+import { NumberInput } from '@/components/Input'
+import { useGetState } from '@/hooks'
 
 export default function StarFieldTest() {
   const [starField, setStarField] = useState<StarField | null>(null)
-  const [config, setConfig] = useState({
+  const [config, setConfig] = useGetState({
     starCount: 300,
     sizeRange: [0.5, 2] as [number, number],
     speedRange: 0.1,
@@ -14,7 +15,8 @@ export default function StarFieldTest() {
     flickerSpeed: 0.01,
     width: 800,
     height: 600,
-  })
+    name: '默认星空',
+  }, true)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -22,51 +24,43 @@ export default function StarFieldTest() {
   const presets = [
     {
       name: '默认星空',
-      config: {
-        starCount: 300,
-        sizeRange: [0.5, 2] as [number, number],
-        speedRange: 0.1,
-        backgroundColor: '#001122',
-        flickerSpeed: 0.01,
-        width: 800,
-        height: 600,
-      },
+      starCount: 300,
+      sizeRange: [0.5, 2] as [number, number],
+      speedRange: 0.1,
+      backgroundColor: '#001122',
+      flickerSpeed: 0.01,
+      width: 800,
+      height: 600,
     },
     {
       name: '密集星空',
-      config: {
-        starCount: 500,
-        sizeRange: [0.3, 1.5] as [number, number],
-        speedRange: 0.05,
-        backgroundColor: '#000011',
-        flickerSpeed: 0.02,
-        width: 800,
-        height: 600,
-      },
+      starCount: 500,
+      sizeRange: [0.3, 1.5] as [number, number],
+      speedRange: 0.05,
+      backgroundColor: '#000011',
+      flickerSpeed: 0.02,
+      width: 800,
+      height: 600,
     },
     {
       name: '大星星',
-      config: {
-        starCount: 150,
-        sizeRange: [1, 4] as [number, number],
-        speedRange: 0.2,
-        backgroundColor: '#001133',
-        flickerSpeed: 0.005,
-        width: 800,
-        height: 600,
-      },
+      starCount: 150,
+      sizeRange: [1, 4] as [number, number],
+      speedRange: 0.2,
+      backgroundColor: '#001133',
+      flickerSpeed: 0.005,
+      width: 800,
+      height: 600,
     },
     {
       name: '快速移动',
-      config: {
-        starCount: 200,
-        sizeRange: [0.5, 2] as [number, number],
-        speedRange: 0.5,
-        backgroundColor: '#000022',
-        flickerSpeed: 0.03,
-        width: 800,
-        height: 600,
-      },
+      starCount: 200,
+      sizeRange: [0.5, 2] as [number, number],
+      speedRange: 0.5,
+      backgroundColor: '#000022',
+      flickerSpeed: 0.03,
+      width: 800,
+      height: 600,
     },
   ]
 
@@ -94,16 +88,16 @@ export default function StarFieldTest() {
     },
   ]
 
-  const [selectedColorTheme, setSelectedColorTheme] = useState(0)
+  const [selectedColorTheme, setSelectedColorTheme] = useGetState(0, true)
 
   /** 初始化星空 */
   const initStarField = () => {
     if (!canvasRef.current)
       return
 
-    const currentColorTheme = colorThemes[selectedColorTheme]
+    const currentColorTheme = colorThemes[setSelectedColorTheme.getLatest()]
     const starFieldInstance = new StarField(canvasRef.current, {
-      ...config,
+      ...setConfig.getLatest(),
       colors: currentColorTheme.colors,
     })
 
@@ -113,9 +107,7 @@ export default function StarFieldTest() {
   /** 应用预设 */
   const applyPreset = (presetConfig: any) => {
     setConfig(presetConfig)
-    setTimeout(() => {
-      initStarField()
-    }, 100)
+    initStarField()
   }
 
   /** 更新配置 */
@@ -125,7 +117,7 @@ export default function StarFieldTest() {
 
     setTimeout(() => {
       initStarField()
-    }, 100)
+    }, 20)
   }
 
   /** 更新尺寸范围 */
@@ -140,7 +132,7 @@ export default function StarFieldTest() {
     setSelectedColorTheme(index)
     setTimeout(() => {
       initStarField()
-    }, 100)
+    }, 20)
   }
 
   /** 初始化 */
@@ -209,7 +201,10 @@ export default function StarFieldTest() {
                   { presets.map((preset, index) => (
                     <Button
                       key={ `preset-${preset.name}-${index}` }
-                      onClick={ () => applyPreset(preset.config) }
+                      onClick={ () => applyPreset(preset) }
+                      variant={ config.name === preset.name
+                        ? 'primary'
+                        : 'default' }
                       size="sm"
                     >
                       { preset.name }

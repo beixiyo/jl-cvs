@@ -1,10 +1,11 @@
 import type { AddCanvasOpts, CanvasAttrs, CanvasItem, DisposeOpts, DrawImgOptions, ExportOptions, ImgInfo, Mode, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
 import type { ShapeType } from '@/Shapes'
+import type { ILifecycleManager } from '@/types'
 import { clearAllCvs, createCvs, cutImg, getCvsImg, getDPR, getImg } from '@/canvasTool'
 import { getCircleCursor } from '@/utils'
 import { mergeOpts, setCanvas } from './tools'
 
-export abstract class NoteBoardBase {
+export abstract class NoteBoardBase implements ILifecycleManager {
   static dpr = getDPR()
 
   /** 容器 */
@@ -382,30 +383,34 @@ export abstract class NoteBoardBase {
 
   /**
    * 拖拽、缩放画布
+   * @param callback 在设置完成 canvas 后执行的回调
    */
-  async setTransform() {
-    const { canvas, imgCanvas } = this
-
+  async setTransform(callback?: (styles: {
+    transform: string
+    transformOrigin: string
+  }) => void) {
     const transformOrigin = `${this.mousePoint.x}px ${this.mousePoint.y}px`
     const transform = `scale(${this.scale}, ${this.scale}) translate(${this.translateX}px, ${this.translateY}px)`
 
-    canvas.style.transformOrigin = transformOrigin
-    canvas.style.transform = transform
+    this.canvasList.forEach((item) => {
+      item.canvas.style.transformOrigin = transformOrigin
+      item.canvas.style.transform = transform
+    })
 
-    imgCanvas.style.transformOrigin = transformOrigin
-    imgCanvas.style.transform = transform
+    callback?.({
+      transform,
+      transformOrigin,
+    })
   }
 
   /**
    * 重置大小
    */
   async resetSize() {
-    const { canvas, imgCanvas } = this
-    canvas.style.transformOrigin = 'none'
-    canvas.style.transform = 'none'
-
-    imgCanvas.style.transformOrigin = 'none'
-    imgCanvas.style.transform = 'none'
+    this.canvasList.forEach((item) => {
+      item.canvas.style.transformOrigin = 'none'
+      item.canvas.style.transform = 'none'
+    })
   }
 
   /**

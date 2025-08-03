@@ -1,13 +1,27 @@
+import type { ILifecycleManager } from '../types'
 import type { MouseState, Point } from './types'
 import { Noise } from './Noise'
 
-export class WavyLines {
+/**
+ * 波浪线动画类
+ *
+ * 使用 noise 算法生成波浪效果，并根据鼠标交互产生形变。
+ * 通过 `WavyLinesConfig` 可自定义线条间距、颜色、背景色、鼠标影响范围等参数。
+ */
+export class WavyLines implements ILifecycleManager {
   private ctx: CanvasRenderingContext2D
   private mouse: MouseState
   private lines: Point[][] = []
   private noise: Noise
   private bounding: DOMRect
   private config: Required<WavyLinesConfig>
+
+  // ======================
+  // * Hanlders
+  // ======================
+  private resizeHandler: () => void
+  private mouseMoveHandler: (e: MouseEvent) => void
+  private touchMoveHandler: (e: TouchEvent) => void
 
   constructor(config: WavyLinesConfig) {
     const ctx = config.canvas.getContext('2d')
@@ -23,6 +37,7 @@ export class WavyLines {
       extraHeight: config.extraHeight ?? 30,
       mouseEffectRange: config.mouseEffectRange ?? 175,
       strokeStyle: config.strokeStyle ?? 'black',
+      fillStyle: config.fillStyle ?? 'transparent',
     }
 
     this.mouse = {
@@ -41,20 +56,40 @@ export class WavyLines {
     this.noise = new Noise(Math.random())
     this.bounding = config.canvas.getBoundingClientRect()
 
+    /** 绑定事件处理器 */
+    this.resizeHandler = this.onResize.bind(this)
+    this.mouseMoveHandler = this.onMouseMove.bind(this)
+    this.touchMoveHandler = this.onTouchMove.bind(this)
+
     this.init()
   }
 
   private init(): void {
     this.setSize()
     this.setLines()
-    this.bindEvents()
+    this.bindEvent()
     requestAnimationFrame(this.tick.bind(this))
   }
 
-  private bindEvents(): void {
-    window.addEventListener('resize', this.onResize.bind(this))
-    window.addEventListener('mousemove', this.onMouseMove.bind(this))
-    this.config.canvas.addEventListener('touchmove', this.onTouchMove.bind(this))
+  /** 绑定事件 */
+  bindEvent(): void {
+    window.addEventListener('resize', this.resizeHandler)
+    window.addEventListener('mousemove', this.mouseMoveHandler)
+    this.config.canvas.addEventListener('touchmove', this.touchMoveHandler)
+  }
+
+  /** 解绑所有事件 */
+  rmEvent(): void {
+    window.removeEventListener('resize', this.resizeHandler)
+    window.removeEventListener('mousemove', this.mouseMoveHandler)
+    this.config.canvas.removeEventListener('touchmove', this.touchMoveHandler)
+  }
+
+  /**
+   * 销毁实例，移除事件监听
+   */
+  dispose(): void {
+    this.rmEvent()
   }
 
   private onResize(): void {
@@ -183,6 +218,8 @@ export class WavyLines {
     const { width, height } = this.bounding
 
     this.ctx.clearRect(0, 0, width, height)
+    this.ctx.fillStyle = this.config.fillStyle
+    this.ctx.fillRect(0, 0, width, height)
     this.ctx.beginPath()
     this.ctx.strokeStyle = this.config.strokeStyle
 
@@ -225,15 +262,6 @@ export class WavyLines {
     this.drawLines()
 
     requestAnimationFrame(this.tick.bind(this))
-  }
-
-  /**
-   * 销毁实例，移除事件监听
-   */
-  destroy(): void {
-    window.removeEventListener('resize', this.onResize.bind(this))
-    window.removeEventListener('mousemove', this.onMouseMove.bind(this))
-    this.config.canvas.removeEventListener('touchmove', this.onTouchMove.bind(this))
   }
 }
 
@@ -278,7 +306,13 @@ export interface WavyLinesConfig {
 
   /**
    * 线条颜色
-   * @default "black"
+   * @default 'black'
    */
   strokeStyle?: string
+
+  /**
+   * 背景色
+   * @default 'transparent'
+   */
+  fillStyle?: string
 }

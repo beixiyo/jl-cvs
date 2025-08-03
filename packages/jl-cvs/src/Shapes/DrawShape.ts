@@ -1,5 +1,6 @@
 import type { BaseShape } from './BaseShape'
 import type { ShapeStyle } from './type'
+import type { ILifecycleManager } from '@/types'
 import { clearAllCvs } from '@/canvasTool'
 import { DRAW_MAP } from '@/NoteBoard'
 import { UnRedoLinkedList } from '@/utils'
@@ -19,7 +20,7 @@ const ShapeMap = {
  * - 圆形
  * - 箭头
  */
-export class DrawShape {
+export class DrawShape implements ILifecycleManager {
   disable = false
 
   /**
@@ -123,6 +124,10 @@ export class DrawShape {
     this.canvas.removeEventListener('mousemove', this.onMouseMove)
     this.canvas.removeEventListener('mouseup', this.onMouseUp)
     this.canvas.removeEventListener('mouseleave', this.onMouseLeave)
+  }
+
+  dispose() {
+    this.rmEvent()
   }
 
   /***************************************************

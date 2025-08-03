@@ -1,12 +1,90 @@
 import { DotGrid, Grid } from '@jl-org/cvs'
+import { debounce } from '@jl-org/tool'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input, NumberInput } from '@/components/Input'
+import { NumberInput } from '@/components/Input'
 import { Slider } from '@/components/Slider'
 import { useGetState } from '@/hooks'
 
 type GridType = 'grid' | 'dotGrid'
+
+/** Grid 预设配置 */
+const gridPresets = [
+  {
+    name: '默认网格',
+    cellWidth: 35,
+    cellHeight: 35,
+    backgroundColor: '#1a1a1a',
+    borderColor: '#666666',
+    borderWidth: 0.3,
+    dashedLines: false,
+  },
+  {
+    name: '大网格',
+    cellWidth: 50,
+    cellHeight: 50,
+    backgroundColor: '#0a0a0a',
+    borderColor: '#888888',
+    borderWidth: 0.5,
+    dashedLines: false,
+  },
+  {
+    name: '虚线网格',
+    cellWidth: 30,
+    cellHeight: 30,
+    backgroundColor: '#2a2a2a',
+    borderColor: '#999999',
+    borderWidth: 0.4,
+    dashedLines: true,
+    dashPattern: [5, 5],
+  },
+  {
+    name: '密集网格',
+    cellWidth: 20,
+    cellHeight: 20,
+    backgroundColor: '#1a1a1a',
+    borderColor: '#555555',
+    borderWidth: 0.2,
+    dashedLines: false,
+  },
+]
+
+/** DotGrid 预设配置 */
+const dotGridPresets = [
+  {
+    name: '默认点阵',
+    dotSpacingX: 20,
+    dotSpacingY: 20,
+    dotRadius: 1,
+    dotColor: '#333333',
+    backgroundColor: '#000000',
+  },
+  {
+    name: '密集点阵',
+    dotSpacingX: 15,
+    dotSpacingY: 15,
+    dotRadius: 0.8,
+    dotColor: '#444444',
+    backgroundColor: '#000000',
+  },
+  {
+    name: '稀疏点阵',
+    dotSpacingX: 30,
+    dotSpacingY: 30,
+    dotRadius: 1.5,
+    dotColor: '#555555',
+    backgroundColor: '#111111',
+  },
+  {
+    name: '彩色点阵',
+    dotSpacingX: 25,
+    dotSpacingY: 25,
+    dotRadius: 1.2,
+    dotColor: '#0066cc',
+    backgroundColor: '#001122',
+  },
+]
 
 export default function GridTest() {
   const [gridType, setGridType] = useState<GridType>('grid')
@@ -15,13 +93,7 @@ export default function GridTest() {
   const [gridConfig, setGridConfig] = useGetState({
     width: 800,
     height: 600,
-    cellWidth: 35,
-    cellHeight: 35,
-    dashedLines: false,
-    dashPattern: [2, 2],
-    backgroundColor: '#1a1a1a',
-    borderColor: '#666666',
-    borderWidth: 0.3,
+    ...gridPresets[0],
     highlightGradientColors: ['#fefefe55', 'transparent'] as [string, string],
     highlightRange: 1,
     transitionTime: 200,
@@ -33,11 +105,7 @@ export default function GridTest() {
   const [dotGridConfig, setDotGridConfig] = useGetState({
     width: 800,
     height: 600,
-    dotSpacingX: 20,
-    dotSpacingY: 20,
-    dotRadius: 1,
-    dotColor: '#333333',
-    backgroundColor: '#000000',
+    ...dotGridPresets[0],
     highlightGradientColors: ['#ffffff44', 'transparent'] as [string, string],
     highlightRange: 2,
     transitionTime: 50,
@@ -47,110 +115,16 @@ export default function GridTest() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const gridInstanceRef = useRef<Grid | DotGrid | null>(null)
 
-  /** 预设配置 */
-  const gridPresets = [
-    {
-      name: '默认网格',
-      config: {
-        cellWidth: 35,
-        cellHeight: 35,
-        backgroundColor: '#1a1a1a',
-        borderColor: '#666666',
-        borderWidth: 0.3,
-        dashedLines: false,
-      },
-    },
-    {
-      name: '大网格',
-      config: {
-        cellWidth: 50,
-        cellHeight: 50,
-        backgroundColor: '#0a0a0a',
-        borderColor: '#888888',
-        borderWidth: 0.5,
-        dashedLines: false,
-      },
-    },
-    {
-      name: '虚线网格',
-      config: {
-        cellWidth: 30,
-        cellHeight: 30,
-        backgroundColor: '#2a2a2a',
-        borderColor: '#999999',
-        borderWidth: 0.4,
-        dashedLines: true,
-        dashPattern: [5, 5],
-      },
-    },
-    {
-      name: '密集网格',
-      config: {
-        cellWidth: 20,
-        cellHeight: 20,
-        backgroundColor: '#1a1a1a',
-        borderColor: '#555555',
-        borderWidth: 0.2,
-        dashedLines: false,
-      },
-    },
-  ]
-
-  const dotGridPresets = [
-    {
-      name: '默认点阵',
-      config: {
-        dotSpacingX: 20,
-        dotSpacingY: 20,
-        dotRadius: 1,
-        dotColor: '#333333',
-        backgroundColor: '#000000',
-      },
-    },
-    {
-      name: '密集点阵',
-      config: {
-        dotSpacingX: 15,
-        dotSpacingY: 15,
-        dotRadius: 0.8,
-        dotColor: '#444444',
-        backgroundColor: '#000000',
-      },
-    },
-    {
-      name: '稀疏点阵',
-      config: {
-        dotSpacingX: 30,
-        dotSpacingY: 30,
-        dotRadius: 1.5,
-        dotColor: '#555555',
-        backgroundColor: '#111111',
-      },
-    },
-    {
-      name: '彩色点阵',
-      config: {
-        dotSpacingX: 25,
-        dotSpacingY: 25,
-        dotRadius: 1.2,
-        dotColor: '#0066cc',
-        backgroundColor: '#001122',
-      },
-    },
-  ]
-
   /** 创建网格实例 */
-  const createGridInstance = () => {
-    if (!canvasRef.current)
+  const createGridInstance = debounce(() => {
+    if (!canvasRef.current) {
+      console.warn('画布未准备好')
       return
+    }
 
     /** 销毁旧实例 */
     if (gridInstanceRef.current) {
-      // Grid 和 DotGrid 都没有 destroy 方法，但我们可以清空画布
-      const ctx = canvasRef.current.getContext('2d')
-      if (ctx) {
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-      }
+      gridInstanceRef.current.dispose()
       gridInstanceRef.current = null
     }
 
@@ -158,6 +132,13 @@ export default function GridTest() {
       /** 使用 getLatest() 获取最新配置 */
       const latestGridConfig = setGridConfig.getLatest()
       const latestDotGridConfig = setDotGridConfig.getLatest()
+
+      /** 设置画布尺寸 */
+      const config = gridType === 'grid'
+        ? latestGridConfig
+        : latestDotGridConfig
+      canvasRef.current.width = config.width
+      canvasRef.current.height = config.height
 
       if (gridType === 'grid') {
         gridInstanceRef.current = new Grid(canvasRef.current, latestGridConfig)
@@ -169,7 +150,7 @@ export default function GridTest() {
     catch (error) {
       console.error('创建网格实例失败:', error)
     }
-  }
+  }, 80)
 
   /** 应用预设配置 */
   const applyGridPreset = (presetConfig: any) => {
@@ -182,11 +163,11 @@ export default function GridTest() {
 
   /** 更新配置 */
   const updateGridConfig = (key: string, value: any) => {
-    setGridConfig(prev => ({ ...prev, [key]: value }))
+    setGridConfig({ [key]: value })
   }
 
   const updateDotGridConfig = (key: string, value: any) => {
-    setDotGridConfig(prev => ({ ...prev, [key]: value }))
+    setDotGridConfig({ [key]: value })
   }
 
   /** 切换网格类型 */
@@ -194,45 +175,24 @@ export default function GridTest() {
     setGridType(type)
   }
 
-  /** 自动启动效果 */
-  useEffect(() => {
-    /** 延迟启动，确保组件完全加载 */
-    setTimeout(() => {
-      if (canvasRef.current) {
-        createGridInstance()
-      }
-    }, 500)
-  }, [])
-
   /** 监听网格类型变化，自动重新创建 */
   useEffect(() => {
-    if (canvasRef.current) {
-      const timer = setTimeout(() => {
-        createGridInstance()
-      }, 100)
-      return () => clearTimeout(timer)
-    }
+    createGridInstance()
   }, [gridType])
 
   /** 监听Grid配置变化，自动重新创建 */
   useEffect(() => {
-    if (canvasRef.current && gridInstanceRef.current && gridType === 'grid') {
-      const timer = setTimeout(() => {
-        createGridInstance()
-      }, 100)
-      return () => clearTimeout(timer)
+    if (gridType === 'grid') {
+      createGridInstance()
     }
-  }, [gridConfig.width, gridConfig.height, gridConfig.cellWidth, gridConfig.cellHeight, gridConfig.backgroundColor, gridConfig.borderColor, gridConfig.borderWidth, gridConfig.dashedLines])
+  }, [gridConfig])
 
   /** 监听DotGrid配置变化，自动重新创建 */
   useEffect(() => {
-    if (canvasRef.current && gridInstanceRef.current && gridType === 'dotGrid') {
-      const timer = setTimeout(() => {
-        createGridInstance()
-      }, 100)
-      return () => clearTimeout(timer)
+    if (gridType === 'dotGrid') {
+      createGridInstance()
     }
-  }, [dotGridConfig.width, dotGridConfig.height, dotGridConfig.dotSpacingX, dotGridConfig.dotSpacingY, dotGridConfig.dotRadius, dotGridConfig.dotColor, dotGridConfig.backgroundColor])
+  }, [dotGridConfig])
 
   /** 处理窗口大小变化 */
   useEffect(() => {
@@ -254,12 +214,7 @@ export default function GridTest() {
   /** 组件卸载时清理 */
   useEffect(() => {
     return () => {
-      if (gridInstanceRef.current && canvasRef.current) {
-        const ctx = canvasRef.current.getContext('2d')
-        if (ctx) {
-          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-        }
-      }
+      gridInstanceRef.current?.dispose()
     }
   }, [])
 
@@ -278,32 +233,18 @@ export default function GridTest() {
       {/* 响应式布局容器 */ }
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
         {/* 左侧：效果展示区域 */ }
-        <div className="flex-1">
-          <Card className="min-h-[600px] p-6">
-            <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
-              网格效果展示
-            </h2>
-            <div className="min-h-[500px] flex flex-col items-center justify-center space-y-4">
-              <div className="relative">
-                <canvas
-                  ref={ canvasRef }
-                  className="border border-gray-300 rounded-lg shadow-xl dark:border-gray-600"
-                  width={ gridType === 'grid'
-                    ? gridConfig.width
-                    : dotGridConfig.width }
-                  height={ gridType === 'grid'
-                    ? gridConfig.height
-                    : dotGridConfig.height }
-                  style={ { maxWidth: '100%', height: 'auto' } }
-                />
-              </div>
-
-              <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                <p>移动鼠标到画布上查看交互效果</p>
-                <p>鼠标移动会产生高亮和发光效果</p>
-              </div>
-            </div>
-          </Card>
+        <div className="flex-1 flex justify-center items-center relative">
+          <canvas
+            ref={ canvasRef }
+            className="border border-gray-300 rounded-lg shadow-xl dark:border-gray-600"
+            width={ gridType === 'grid'
+              ? gridConfig.width
+              : dotGridConfig.width }
+            height={ gridType === 'grid'
+              ? gridConfig.height
+              : dotGridConfig.height }
+            style={ { maxWidth: '100%', height: 'auto' } }
+          />
         </div>
 
         {/* 右侧：控制面板 */ }
@@ -351,7 +292,10 @@ export default function GridTest() {
                     ? gridPresets.map((preset, index) => (
                         <Button
                           key={ `grid-preset-${preset.name}-${index}` }
-                          onClick={ () => applyGridPreset(preset.config) }
+                          onClick={ () => applyGridPreset(preset) }
+                          variant={ gridConfig.name === preset.name
+                            ? 'primary'
+                            : 'default' }
                           size="sm"
                           className="text-xs"
                         >
@@ -361,7 +305,10 @@ export default function GridTest() {
                     : dotGridPresets.map((preset, index) => (
                         <Button
                           key={ `dot-preset-${preset.name}-${index}` }
-                          onClick={ () => applyDotGridPreset(preset.config) }
+                          onClick={ () => applyDotGridPreset(preset) }
+                          variant={ dotGridConfig.name === preset.name
+                            ? 'primary'
+                            : 'default' }
                           size="sm"
                           className="text-xs"
                         >
@@ -633,10 +580,10 @@ export default function GridTest() {
                         className="h-8 w-12 border-0 p-0"
                       />
                       <input
-                        type="color"
+                        type="text"
                         value={ dotGridConfig.dotColor }
                         onChange={ e => updateDotGridConfig('dotColor', e.target.value) }
-                        className="flex-1"
+                        className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                       />
                     </div>
                   </div>

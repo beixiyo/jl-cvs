@@ -1,3 +1,5 @@
+'use client'
+
 import type { ChangeEvent } from 'react'
 import { numFixed } from '@jl-org/tool'
 import { ChevronDown, ChevronUp } from 'lucide-react'
@@ -37,10 +39,6 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
     ...rest
   } = props
 
-  const actualPrecision = precision ?? step < 1
-    ? 1
-    : 0
-
   /** 使用 useFormField hook 处理表单集成 */
   const {
     actualValue,
@@ -76,7 +74,7 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
       }
 
       const allowNegative = min === undefined || min < 0
-      const allowDecimal = actualPrecision > 0
+      const allowDecimal = precision !== undefined && precision > 0
 
       let pattern = '\\d*'
       if (allowDecimal) {
@@ -105,11 +103,11 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
         }
       }
     },
-    [handleChangeVal, actualPrecision, min],
+    [handleChangeVal, precision, min],
   )
 
-  /** 处理步进增加 */
-  const handleIncrement = useCallback(() => {
+  /** 处理步进 */
+  const handleIncrementOrDecrement = useCallback((type: 'increment' | 'decrement') => {
     if (disabled || readOnly)
       return
 
@@ -121,46 +119,24 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
     if (Number.isNaN(currentValue))
       currentValue = 0
 
-    const newValue = currentValue + (step || 1)
+    const newValue = type === 'increment'
+      ? currentValue + step
+      : currentValue - step
+
     let clampedValue = newValue
     if (max !== undefined && clampedValue > max)
       clampedValue = max
 
-    const formattedValue = numFixed(clampedValue, actualPrecision)
+    const formattedValue = precision !== undefined
+      ? numFixed(clampedValue, precision)
+      : clampedValue
 
     const mockEvent = {
       target: { value: String(formattedValue) },
     } as ChangeEvent<HTMLInputElement>
 
     handleChangeVal(formattedValue, mockEvent)
-  }, [actualValue, step, disabled, readOnly, max, actualPrecision, handleChangeVal])
-
-  /** 处理步进减少 */
-  const handleDecrement = useCallback(() => {
-    if (disabled || readOnly)
-      return
-
-    const valStr = (actualValue ?? '').toString()
-    if (min !== undefined && Number.parseFloat(valStr) <= min)
-      return
-
-    let currentValue = Number.parseFloat(valStr)
-    if (Number.isNaN(currentValue))
-      currentValue = 0
-
-    const newValue = currentValue - (step || 1)
-    let clampedValue = newValue
-    if (min !== undefined && clampedValue < min)
-      clampedValue = min
-
-    const formattedValue = numFixed(clampedValue, actualPrecision)
-
-    const mockEvent = {
-      target: { value: String(formattedValue) },
-    } as ChangeEvent<HTMLInputElement>
-
-    handleChangeVal(formattedValue, mockEvent)
-  }, [actualValue, step, disabled, readOnly, min, actualPrecision, handleChangeVal])
+  }, [actualValue, step, disabled, readOnly, max, precision, handleChangeVal])
 
   /** 处理聚焦 */
   const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
@@ -191,7 +167,9 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
             numValue = max
 
           /** 格式化精度 */
-          valueToSet = numFixed(numValue, actualPrecision)
+          valueToSet = precision !== undefined
+            ? numFixed(numValue, precision)
+            : numValue
         }
         else {
           valueToSet = undefined
@@ -212,7 +190,7 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
     handleChangeVal(valueToSet ?? 0, mockEvent)
 
     onBlur?.(e)
-  }, [onBlur, actualValue, min, max, actualPrecision, handleChangeVal, handleFieldBlur])
+  }, [onBlur, actualValue, min, max, precision, handleChangeVal, handleFieldBlur])
 
   /** 处理键盘事件 */
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -220,16 +198,16 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
 
     if (e.key === 'ArrowUp') {
       e.preventDefault()
-      handleIncrement()
+      handleIncrementOrDecrement('increment')
     }
     else if (e.key === 'ArrowDown') {
       e.preventDefault()
-      handleDecrement()
+      handleIncrementOrDecrement('decrement')
     }
     else if (e.key === 'Enter' && onPressEnter) {
       onPressEnter(e)
     }
-  }, [onKeyDown, onPressEnter, handleIncrement, handleDecrement])
+  }, [handleIncrementOrDecrement, onKeyDown, onPressEnter])
 
   const sizeClasses = {
     sm: 'h-8 text-sm',
@@ -301,7 +279,7 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
         <button
           type="button"
           className={ stepperButtonClasses }
-          onClick={ handleIncrement }
+          onClick={ () => handleIncrementOrDecrement('increment') }
           disabled={ disabled || readOnly || (max !== undefined && Number.parseFloat(actualValue?.toString() || '0') >= max) }
           tabIndex={ -1 }
         >
@@ -310,7 +288,7 @@ export const NumberInput = memo<NumberInputProps>(forwardRef<HTMLInputElement, N
         <button
           type="button"
           className={ stepperButtonClasses }
-          onClick={ handleDecrement }
+          onClick={ () => handleIncrementOrDecrement('decrement') }
           disabled={ disabled || readOnly || (min !== undefined && Number.parseFloat(actualValue?.toString() || '0') <= min) }
           tabIndex={ -1 }
         >

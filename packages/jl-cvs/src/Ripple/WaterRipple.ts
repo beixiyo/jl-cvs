@@ -48,6 +48,11 @@ export class WaterRipple {
     })
   }
 
+  /**
+   * 设置大小
+   * @param width - 宽度
+   * @param height - 高度
+   */
   setSize(width: number, height: number) {
     this.opts.width = width
     this.opts.height = height
@@ -57,7 +62,7 @@ export class WaterRipple {
   /**
    * 开始动画
    */
-  private startAnimation() {
+  startAnimation() {
     this.stopAnimation?.()
     this.stopAnimation = applyAnimation(() => {
       this.drawCircles()

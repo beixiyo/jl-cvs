@@ -1,13 +1,13 @@
-import { HalftoneWave } from '@jl-org/cvs'
-import { debounce } from '@jl-org/tool'
+import { HalftoneWave, type HalftoneWaveOptions } from '@jl-org/cvs'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input, NumberInput } from '@/components/Input'
+import { NumberInput } from '@/components/Input'
+import { useGetState } from '@/hooks'
 
 export default function HalftoneWaveTest() {
   const [halftoneWave, setHalftoneWave] = useState<HalftoneWave | null>(null)
-  const [config, setConfig] = useState({
+  const [config, setConfig] = useGetState<HalftoneWaveOptions, true>({
     width: 800,
     height: 600,
     gridSize: 20,
@@ -15,7 +15,7 @@ export default function HalftoneWaveTest() {
     waveColor: 'rgba(255, 255, 255, 0.5)',
     waveSpeed: 0.05,
     waveAmplitude: 0.8,
-  })
+  }, true)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -56,16 +56,18 @@ export default function HalftoneWaveTest() {
 
     setHalftoneWave((prev) => {
       if (prev)
-        prev.destroy()
+        prev.dispose()
 
-      return new HalftoneWave(canvasRef.current!, config)
+      return new HalftoneWave(
+        canvasRef.current!,
+        setConfig.getLatest(),
+      )
     })
-  }, [config])
-
-  const debouncedInit = useCallback(debounce(initHalftoneWave, 40), [initHalftoneWave])
+  }, [setConfig])
 
   /** 更新配置 */
   const updateConfig = (key: string, value: any) => {
+    console.log(value)
     const newConfig = { ...config, [key]: value }
 
     if (key === 'backgroundColor' || key === 'waveColor') {
@@ -94,32 +96,18 @@ export default function HalftoneWaveTest() {
 
   /** 初始化和响应配置变化 */
   useEffect(() => {
-    debouncedInit()
+    initHalftoneWave()
 
     return () => {
       if (halftoneWave) {
-        halftoneWave.destroy()
+        halftoneWave.dispose()
       }
     }
-  }, [debouncedInit])
-
-  /** 处理窗口大小变化 */
-  useEffect(() => {
-    const handleResize = () => {
-      if (halftoneWave) {
-        halftoneWave.onResize(config.width, config.height)
-      }
-    }
-
-    window.addEventListener('resize', handleResize)
-    return () => {
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [halftoneWave, config.width, config.height])
+  }, [config])
 
   return (
     <div className="min-h-screen from-gray-50 to-indigo-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
-      {/* 页面标题 - 全宽显示 */}
+      {/* 页面标题 - 全宽显示 */ }
       <div className="p-6 text-center">
         <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           🌀 半调波浪效果
@@ -129,9 +117,9 @@ export default function HalftoneWaveTest() {
         </p>
       </div>
 
-      {/* 响应式布局容器 */}
+      {/* 响应式布局容器 */ }
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
-        {/* 左侧：效果展示区域 */}
+        {/* 左侧：效果展示区域 */ }
         <div className="flex-1">
           <Card className="min-h-[600px] p-6">
             <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
@@ -147,7 +135,7 @@ export default function HalftoneWaveTest() {
           </Card>
         </div>
 
-        {/* 右侧：控制面板 */}
+        {/* 右侧：控制面板 */ }
         <div className="w-full lg:w-96">
           <Card>
             <div className="max-h-[80vh] overflow-y-auto p-6">
@@ -155,13 +143,13 @@ export default function HalftoneWaveTest() {
                 控制面板
               </h2>
 
-              {/* 颜色主题 */}
+              {/* 颜色主题 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   颜色主题
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {colorThemes.map((theme, index) => (
+                  { colorThemes.map((theme, index) => (
                     <Button
                       key={ index }
                       onClick={ () => changeColorTheme(index) }
@@ -170,13 +158,13 @@ export default function HalftoneWaveTest() {
                         : 'default' }
                       size="sm"
                     >
-                      {theme.name}
+                      { theme.name }
                     </Button>
-                  ))}
+                  )) }
                 </div>
               </div>
 
-              {/* 参数配置 */}
+              {/* 参数配置 */ }
               <div className="space-y-4">
                 <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                   参数配置
@@ -224,11 +212,11 @@ export default function HalftoneWaveTest() {
                   </label>
                   <NumberInput
                     value={ config.waveSpeed }
-                    onChange={ v =>
-                      updateConfig('waveSpeed', Number(v)) }
+                    onChange={ v => updateConfig('waveSpeed', v) }
                     min={ 0.01 }
-                    max={ 0.5 }
+                    max={ 0.1 }
                     step={ 0.01 }
+                    precision={ 3 }
                   />
                 </div>
 
@@ -238,37 +226,13 @@ export default function HalftoneWaveTest() {
                   </label>
                   <NumberInput
                     value={ config.waveAmplitude }
-                    onChange={ v =>
-                      updateConfig('waveAmplitude', Number(v)) }
+                    onChange={ v => updateConfig('waveAmplitude', Number(v)) }
                     min={ 0.1 }
                     max={ 2 }
                     step={ 0.1 }
                   />
                 </div>
 
-                <div>
-                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
-                    背景颜色
-                  </label>
-                  <input
-                    type="color"
-                    value={ config.backgroundColor }
-                    onChange={ e => updateConfig('backgroundColor', e.target.value) }
-                    placeholder="rgba(0, 0, 0, 0.1)"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm text-gray-700 font-medium dark:text-gray-200">
-                    波浪颜色
-                  </label>
-                  <input
-                    type="color"
-                    value={ config.waveColor }
-                    onChange={ e => updateConfig('waveColor', e.target.value) }
-                    placeholder="rgba(255, 255, 255, 0.5)"
-                  />
-                </div>
               </div>
             </div>
           </Card>

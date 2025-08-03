@@ -7,21 +7,99 @@ import { Input } from '@/components/Input'
 import { Select } from '@/components/Select'
 import { Slider } from '@/components/Slider'
 import { type FileItem, Uploader } from '@/components/Uploader'
-import { onMounted, useGetState, useTheme, useUpdateEffect } from '@/hooks'
+import { useGetState, useTheme } from '@/hooks'
 
 type ContentType = 'text' | 'image' | 'video'
+
+/** 字体选项 */
+const fontOptions = [
+  { value: 'Microsoft YaHei', label: '微软雅黑' },
+  { value: 'SimSun', label: '宋体' },
+  { value: 'SimHei', label: '黑体' },
+  { value: 'KaiTi', label: '楷体' },
+  { value: 'FangSong', label: '仿宋' },
+  { value: 'Arial', label: 'Arial' },
+  { value: 'Times New Roman', label: 'Times New Roman' },
+  { value: 'Courier New', label: 'Courier New' },
+]
+
+/** 预设文本 */
+const presetTexts = [
+  '哎呀你干嘛',
+  'Hello World',
+  '6666666',
+  'ABCDEFG',
+  '你好世界',
+  '★☆★☆★',
+  '123456789',
+  '❤️💖💕💗',
+]
+
+/** 获取预设配置 - 根据主题动态调整颜色 */
+function getPresets(theme: string) {
+  return [
+    {
+      name: '默认文字',
+      replaceText: '6',
+      gap: 10,
+      txtStyle: {
+        family: 'Microsoft YaHei',
+        size: 200,
+        color: theme === 'dark'
+          ? '#ffffff'
+          : '#000000',
+      },
+      txt: '哎呀你干嘛',
+    },
+    {
+      name: '密集效果',
+      replaceText: '█',
+      gap: 5,
+      txtStyle: { family: 'Microsoft YaHei', size: 100, color: '#ff0000' },
+      txt: 'DENSE',
+    },
+    {
+      name: '稀疏效果',
+      replaceText: '●',
+      gap: 20,
+      txtStyle: { family: 'Arial', size: 300, color: '#0066cc' },
+      txt: 'SPARSE',
+    },
+    {
+      name: '彩色字符',
+      replaceText: '♦',
+      gap: 8,
+      txtStyle: { family: 'SimHei', size: 150, color: '#ff6600' },
+      txt: '彩色',
+    },
+    {
+      name: '主题适配',
+      replaceText: '★',
+      gap: 12,
+      txtStyle: {
+        family: 'Microsoft YaHei',
+        size: 180,
+        color: theme === 'dark'
+          ? '#64b5f6'
+          : '#1976d2',
+      },
+      txt: '主题色',
+    },
+  ]
+}
 
 export default function ImgToTxtTest() {
   const [theme] = useTheme()
 
   const [config, setConfig] = useGetState({
+    name: '默认文字',
     replaceText: '6',
     gap: 9,
     isDynamic: false,
     isGray: false,
     txtStyle: {
       family: 'Microsoft YaHei',
-      size: 200,
+      size: 500,
       color: theme === 'dark'
         ? '#ffffff'
         : '#000000',
@@ -34,97 +112,12 @@ export default function ImgToTxtTest() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const effectRef = useRef<{ start: () => void, stop: () => void } | null>(null)
 
-  /** 字体选项 */
-  const fontOptions = [
-    { value: 'Microsoft YaHei', label: '微软雅黑' },
-    { value: 'SimSun', label: '宋体' },
-    { value: 'SimHei', label: '黑体' },
-    { value: 'KaiTi', label: '楷体' },
-    { value: 'FangSong', label: '仿宋' },
-    { value: 'Arial', label: 'Arial' },
-    { value: 'Times New Roman', label: 'Times New Roman' },
-    { value: 'Courier New', label: 'Courier New' },
-  ]
-
-  /** 预设文本 */
-  const presetTexts = [
-    '哎呀你干嘛',
-    'Hello World',
-    '6666666',
-    'ABCDEFG',
-    '你好世界',
-    '★☆★☆★',
-    '123456789',
-    '❤️💖💕💗',
-  ]
-
-  /** 预设配置 - 根据主题动态调整颜色 */
-  const presets = [
-    {
-      name: '默认文字',
-      config: {
-        replaceText: '6',
-        gap: 10,
-        txtStyle: {
-          family: 'Microsoft YaHei',
-          size: 200,
-          color: theme === 'dark'
-            ? '#ffffff'
-            : '#000000',
-        },
-        txt: '哎呀你干嘛',
-      },
-    },
-    {
-      name: '密集效果',
-      config: {
-        replaceText: '█',
-        gap: 5,
-        txtStyle: { family: 'Microsoft YaHei', size: 100, color: '#ff0000' },
-        txt: 'DENSE',
-      },
-    },
-    {
-      name: '稀疏效果',
-      config: {
-        replaceText: '●',
-        gap: 20,
-        txtStyle: { family: 'Arial', size: 300, color: '#0066cc' },
-        txt: 'SPARSE',
-      },
-    },
-    {
-      name: '彩色字符',
-      config: {
-        replaceText: '♦',
-        gap: 8,
-        txtStyle: { family: 'SimHei', size: 150, color: '#ff6600' },
-        txt: '彩色',
-      },
-    },
-    {
-      name: '主题适配',
-      config: {
-        replaceText: '★',
-        gap: 12,
-        txtStyle: {
-          family: 'Microsoft YaHei',
-          size: 180,
-          color: theme === 'dark'
-            ? '#64b5f6'
-            : '#1976d2',
-        },
-        txt: '主题色',
-      },
-    },
-  ]
-
   const [contentType, setContentType] = useState<ContentType>('image')
   const [currentImage, setCurrentImage] = useState<string>(() => new URL('@/assets/img/umr.webp', import.meta.url).href)
   const [currentVideo, setCurrentVideo] = useState<string>(() => new URL('@/assets/video/video.mp4', import.meta.url).href)
 
   /** 开始效果 */
-  const startEffect = useCallback(async () => {
+  const startEffect = useCallback(debounce(async () => {
     if (!canvasRef.current) {
       console.warn('画布未准备好')
       return
@@ -134,6 +127,10 @@ export default function ImgToTxtTest() {
       effectRef.current?.stop()
       /** 使用 getLatest() 获取最新配置 */
       const latestConfig = setConfig.getLatest()
+
+      /** 设置画布尺寸 */
+      canvasRef.current.width = latestConfig.width
+      canvasRef.current.height = latestConfig.height
 
       let opts: any = {}
 
@@ -180,11 +177,7 @@ export default function ImgToTxtTest() {
     catch (error) {
       console.error('效果启动失败:', error)
     }
-  }, [contentType, currentImage, currentVideo])
-
-  const debouncedStartEffect = useCallback(debounce(startEffect, 50), [
-    startEffect,
-  ])
+  }, 80), [setConfig, contentType, currentImage, currentVideo])
 
   /** 上传图片 */
   const handleImageUpload = (files: FileItem[]) => {
@@ -210,7 +203,7 @@ export default function ImgToTxtTest() {
 
   /** 更新配置 */
   const updateConfig = useCallback((key: string, value: any) => {
-    setConfig(prev => ({ ...prev, [key]: value }))
+    setConfig({ [key]: value })
   }, [setConfig])
 
   /** 更新文字样式 */
@@ -221,21 +214,13 @@ export default function ImgToTxtTest() {
     }))
   }, [setConfig])
 
-  onMounted(() => {
-    if (canvasRef.current) {
-      startEffect()
-    }
-  })
-
   /** 监听配置变化，自动重新启动效果 */
-  useUpdateEffect(() => {
-    if (canvasRef.current) {
-      debouncedStartEffect()
-    }
-  }, [config, contentType])
+  useEffect(() => {
+    startEffect()
+  }, [config, contentType, startEffect])
 
   /** 主题变化时自动更新文字颜色 */
-  useUpdateEffect(() => {
+  useEffect(() => {
     const newColor = theme === 'dark'
       ? '#ffffff'
       : '#000000'
@@ -250,6 +235,8 @@ export default function ImgToTxtTest() {
       }
     }
   }, [])
+
+  const presets = getPresets(theme)
 
   return (
     <div className="min-h-screen from-orange-50 to-red-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
@@ -266,44 +253,14 @@ export default function ImgToTxtTest() {
       {/* 响应式布局容器 */ }
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
         {/* 左侧：效果展示区域 */ }
-        <div className="flex-1">
-          <Card className="min-h-[600px] p-6">
-            <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
-              文字效果展示
-            </h2>
-            <div className="min-h-[500px] flex flex-col items-center justify-center space-y-4">
-              <canvas
-                ref={ canvasRef }
-                className="border border-gray-300 rounded-lg bg-white shadow-xl dark:border-gray-600 dark:bg-gray-800"
-                width={ config.width }
-                height={ config.height }
-                style={ { maxWidth: '100%', height: 'auto' } }
-              />
-
-              <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                <p>效果会在页面加载后自动开始</p>
-                <p>切换内容类型或调整参数会自动重新启动效果</p>
-              </div>
-
-              <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                <p>
-                  当前模式：
-                  { contentType === 'text'
-                    ? '文字'
-                    : contentType === 'image'
-                      ? '图片'
-                      : '视频' }
-                </p>
-                <p>
-                  { contentType === 'text'
-                    ? `显示文字：${config.txt}`
-                    : contentType === 'image'
-                      ? '图片转文字效果'
-                      : '视频转文字动画' }
-                </p>
-              </div>
-            </div>
-          </Card>
+        <div className="flex-1 flex justify-center items-center relative">
+          <canvas
+            ref={ canvasRef }
+            className="border border-gray-300 rounded-lg bg-white shadow-xl dark:border-gray-600 dark:bg-gray-800"
+            width={ config.width }
+            height={ config.height }
+            style={ { maxWidth: '100%', height: 'auto' } }
+          />
         </div>
 
         {/* 右侧：控制面板 */ }
@@ -323,7 +280,10 @@ export default function ImgToTxtTest() {
                   { presets.map((preset, index) => (
                     <Button
                       key={ `preset-${preset.name}-${index}` }
-                      onClick={ () => applyPreset(preset.config) }
+                      onClick={ () => applyPreset(preset) }
+                      variant={ config.name === preset.name
+                        ? 'primary'
+                        : 'default' }
                       size="sm"
                       className="text-xs"
                     >

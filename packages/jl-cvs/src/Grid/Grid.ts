@@ -1,6 +1,7 @@
+import type { ILifecycleManager } from '../types'
 import { debounce, getWinHeight, getWinWidth, throttle } from '@jl-org/tool'
 
-export class Grid {
+export class Grid implements ILifecycleManager {
   private canvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
 
@@ -35,9 +36,14 @@ export class Grid {
   private highlightedCells: Set<string> = new Set()
   private cellStates: Map<string, { highlighted: boolean, progress: number }> = new Map()
 
-  unBindEvents: () => void = () => { }
-
+  private animationFrameId: number | null = null
   private onResizeDebounce: (width: number, height: number) => void
+
+  // ======================
+  // * Handlers
+  // ======================
+  private mouseMoveHandler: (event: MouseEvent) => void
+  private mouseLeaveHandler: () => void
 
   /**
    * @example
@@ -59,7 +65,6 @@ export class Grid {
 
     this.resizeDebounceTime = options.resizeDebounceTime || 80
     this.mouseMoveThrottleTime = options.mouseMoveThrottleTime || 16
-    this.onResizeDebounce = debounce(this._onResize.bind(this), this.resizeDebounceTime)
 
     this.cellWidth = options.cellWidth || 35
     this.cellHeight = options.cellHeight || 35
@@ -75,29 +80,51 @@ export class Grid {
     this.glowIntensity = options.glowIntensity || 10
     this.highlightBorderWidth = options.highlightBorderWidth || 0.5
 
+    // ======================
+    // * 绑定事件处理器
+    // ======================
+    this.onResizeDebounce = debounce(
+      (newWidth, newHeight) => {
+        this.width = newWidth
+        this.height = newHeight
+
+        /** 重新初始化网格 */
+        this.initializeGrid()
+
+        /** 重新计算高亮单元格（如果鼠标仍在 Canvas 上） */
+        this.updateHighlightedCells()
+      },
+      this.resizeDebounceTime,
+    )
+
+    this.mouseMoveHandler = throttle((event: MouseEvent) => {
+      if (!this.rect)
+        return
+      const rect = this.rect
+      this.mouseX = event.clientX - rect.left
+      this.mouseY = event.clientY - rect.top
+      this.updateHighlightedCells()
+    }, this.mouseMoveThrottleTime)
+
+    this.mouseLeaveHandler = () => {
+      this.mouseX = -1
+      this.mouseY = -1
+      this.highlightedCells.clear()
+      this.updateCellStates()
+    }
+
     this.initializeGrid()
-    this.setupMouseEvents()
+    this.bindEvent()
     this.animate()
   }
 
+  /**
+   * 调整大小
+   * @param width - 宽度
+   * @param height - 高度
+   */
   onResize(width: number, height: number): void {
     this.onResizeDebounce(width, height)
-  }
-
-  /**
-   * 调整 Canvas 尺寸并重新计算网格。
-   * @param newWidth 新的宽度（像素）
-   * @param newHeight 新的高度（像素）
-   */
-  private _onResize(newWidth: number, newHeight: number) {
-    this.width = newWidth
-    this.height = newHeight
-
-    /** 重新初始化网格 */
-    this.initializeGrid()
-
-    /** 重新计算高亮单元格（如果鼠标仍在 Canvas 上） */
-    this.updateHighlightedCells()
   }
 
   /**
@@ -122,30 +149,25 @@ export class Grid {
     }
   }
 
-  private setupMouseEvents() {
-    const mouseMove = throttle((event: MouseEvent) => {
-      if (!this.rect)
-        return
-      const rect = this.rect
-      this.mouseX = event.clientX - rect.left
-      this.mouseY = event.clientY - rect.top
-      this.updateHighlightedCells()
-    }, this.mouseMoveThrottleTime)
+  /** 绑定事件 */
+  bindEvent(): void {
+    this.canvas.addEventListener('mousemove', this.mouseMoveHandler)
+    this.canvas.addEventListener('mouseleave', this.mouseLeaveHandler)
+  }
 
-    const mouseLeave = () => {
-      this.mouseX = -1
-      this.mouseY = -1
-      this.highlightedCells.clear()
-      this.updateCellStates()
+  /** 解绑所有事件 */
+  rmEvent(): void {
+    this.canvas.removeEventListener('mousemove', this.mouseMoveHandler)
+    this.canvas.removeEventListener('mouseleave', this.mouseLeaveHandler)
+  }
+
+  /** 销毁实例 */
+  dispose(): void {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId)
+      this.animationFrameId = null
     }
-
-    this.canvas.addEventListener('mousemove', mouseMove)
-    this.canvas.addEventListener('mouseleave', mouseLeave)
-
-    this.unBindEvents = () => {
-      this.canvas.removeEventListener('mousemove', mouseMove)
-      this.canvas.removeEventListener('mouseleave', mouseLeave)
-    }
+    this.rmEvent()
   }
 
   private updateHighlightedCells() {
@@ -209,7 +231,7 @@ export class Grid {
     }
 
     this.drawWithAnimation()
-    requestAnimationFrame(() => this.animate())
+    this.animationFrameId = requestAnimationFrame(() => this.animate())
   }
 
   private drawWithAnimation() {

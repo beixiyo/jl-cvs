@@ -97,6 +97,7 @@ export default antfu({
       'react/no-clone-element': 'off', // 允许 cloneElement
       'react/no-children-to-array': 'off', // 允许 Children.toArray
       'react/no-create-ref': 'off', // 允许 createRef
+      'react-hooks-extra/no-direct-set-state-in-use-effect': 'off',
     },
   },
 

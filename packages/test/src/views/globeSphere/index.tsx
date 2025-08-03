@@ -2,83 +2,66 @@ import { GlobeSphere } from '@jl-org/cvs'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input, NumberInput } from '@/components/Input'
+import { NumberInput } from '@/components/Input'
+import { useGetState } from '@/hooks'
 
 export default function GlobeSphereTest() {
   const [globeSphere, setGlobeSphere] = useState<GlobeSphere | null>(null)
-  const [config, setConfig] = useState({
-    width: 400,
-    height: 400,
-    pointCount: 1000,
-    radius: 120,
-    rotationSpeed: 0.001,
-    pointSize: 1,
-    pointColor: 'rgb(100, 150, 255)',
-    pointOpacity: 0.8,
-    perspectiveDistance: 400,
-  })
-
-  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   /** 预设配置 */
   const presets = [
     {
       name: '默认地球仪',
-      config: {
-        width: 400,
-        height: 400,
-        pointCount: 1000,
-        radius: 120,
-        rotationSpeed: 0.001,
-        pointSize: 1,
-        pointColor: 'rgb(100, 150, 255)',
-        pointOpacity: 0.8,
-        perspectiveDistance: 400,
-      },
+      width: 400,
+      height: 400,
+      pointCount: 1000,
+      radius: 120,
+      rotationSpeed: 0.001,
+      pointSize: 1,
+      pointColor: 'rgb(100, 150, 255)',
+      pointOpacity: 0.8,
+      perspectiveDistance: 400,
     },
     {
       name: '密集星球',
-      config: {
-        width: 400,
-        height: 400,
-        pointCount: 2000,
-        radius: 100,
-        rotationSpeed: 0.002,
-        pointSize: 0.8,
-        pointColor: 'rgb(255, 200, 100)',
-        pointOpacity: 0.9,
-        perspectiveDistance: 350,
-      },
+      width: 400,
+      height: 400,
+      pointCount: 2000,
+      radius: 100,
+      rotationSpeed: 0.002,
+      pointSize: 0.8,
+      pointColor: 'rgb(255, 200, 100)',
+      pointOpacity: 0.9,
+      perspectiveDistance: 350,
     },
     {
       name: '大型行星',
-      config: {
-        width: 500,
-        height: 500,
-        pointCount: 1500,
-        radius: 180,
-        rotationSpeed: 0.0005,
-        pointSize: 2,
-        pointColor: 'rgb(255, 100, 150)',
-        pointOpacity: 0.7,
-        perspectiveDistance: 500,
-      },
+      width: 500,
+      height: 500,
+      pointCount: 1500,
+      radius: 180,
+      rotationSpeed: 0.0005,
+      pointSize: 2,
+      pointColor: 'rgb(255, 100, 150)',
+      pointOpacity: 0.7,
+      perspectiveDistance: 500,
     },
     {
       name: '快速旋转',
-      config: {
-        width: 400,
-        height: 400,
-        pointCount: 800,
-        radius: 100,
-        rotationSpeed: 0.005,
-        pointSize: 1.5,
-        pointColor: 'rgb(150, 255, 100)',
-        pointOpacity: 0.8,
-        perspectiveDistance: 300,
-      },
+      width: 400,
+      height: 400,
+      pointCount: 800,
+      radius: 100,
+      rotationSpeed: 0.005,
+      pointSize: 1.5,
+      pointColor: 'rgb(150, 255, 100)',
+      pointOpacity: 0.8,
+      perspectiveDistance: 300,
     },
   ]
+  const [config, setConfig] = useGetState(presets[0], true)
+
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   /** 颜色主题 */
   const colorThemes = [
@@ -100,16 +83,14 @@ export default function GlobeSphereTest() {
       globeSphere.stopAnimation()
     }
 
-    const globeSphereInstance = new GlobeSphere(canvasRef.current, config)
+    const globeSphereInstance = new GlobeSphere(canvasRef.current, setConfig.getLatest())
     setGlobeSphere(globeSphereInstance)
   }
 
   /** 应用预设 */
   const applyPreset = (presetConfig: any) => {
     setConfig(presetConfig)
-    setTimeout(() => {
-      initGlobeSphere()
-    }, 100)
+    initGlobeSphere()
   }
 
   /** 更新配置 */
@@ -119,10 +100,7 @@ export default function GlobeSphereTest() {
 
     if (globeSphere) {
       if (key === 'width' || key === 'height') {
-        /** 尺寸变化需要重新初始化 */
-        setTimeout(() => {
-          initGlobeSphere()
-        }, 100)
+        initGlobeSphere()
       }
       else {
         /** 其他配置可以直接更新 */
@@ -149,7 +127,7 @@ export default function GlobeSphereTest() {
 
   return (
     <div className="min-h-screen from-blue-50 to-purple-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
-      {/* 页面标题 - 全宽显示 */}
+      {/* 页面标题 - 全宽显示 */ }
       <div className="p-6 text-center">
         <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           🌍 球体地球仪
@@ -159,9 +137,9 @@ export default function GlobeSphereTest() {
         </p>
       </div>
 
-      {/* 响应式布局容器 */}
+      {/* 响应式布局容器 */ }
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
-        {/* 左侧：效果展示区域 */}
+        {/* 左侧：效果展示区域 */ }
         <div className="flex-1">
           <Card className="min-h-[600px] p-6">
             <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
@@ -179,7 +157,7 @@ export default function GlobeSphereTest() {
           </Card>
         </div>
 
-        {/* 右侧：控制面板 */}
+        {/* 右侧：控制面板 */ }
         <div className="w-full lg:w-96">
           <Card>
             <div className="max-h-[80vh] overflow-y-auto p-6">
@@ -187,31 +165,34 @@ export default function GlobeSphereTest() {
                 控制面板
               </h2>
 
-              {/* 预设配置 */}
+              {/* 预设配置 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   预设效果
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {presets.map((preset, index) => (
+                  { presets.map((preset, index) => (
                     <Button
                       key={ index }
-                      onClick={ () => applyPreset(preset.config) }
+                      onClick={ () => applyPreset(preset) }
+                      variant={ config.name === preset.name
+                        ? 'primary'
+                        : 'default' }
                       size="sm"
                     >
-                      {preset.name}
+                      { preset.name }
                     </Button>
-                  ))}
+                  )) }
                 </div>
               </div>
 
-              {/* 颜色主题 */}
+              {/* 颜色主题 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   颜色主题
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {colorThemes.map((theme, index) => (
+                  { colorThemes.map((theme, index) => (
                     <Button
                       key={ index }
                       onClick={ () => changeColorTheme(theme.color) }
@@ -225,13 +206,13 @@ export default function GlobeSphereTest() {
                         className="h-3 w-3 border border-gray-300 rounded-full"
                         style={ { backgroundColor: theme.color } }
                       />
-                      {theme.name}
+                      { theme.name }
                     </Button>
-                  ))}
+                  )) }
                 </div>
               </div>
 
-              {/* 参数配置 */}
+              {/* 参数配置 */ }
               <div className="space-y-4">
                 <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                   参数配置
@@ -308,6 +289,7 @@ export default function GlobeSphereTest() {
                     min={ 0.5 }
                     max={ 5 }
                     step={ 0.1 }
+                    precision={ 3 }
                   />
                 </div>
 
@@ -321,6 +303,7 @@ export default function GlobeSphereTest() {
                     min={ 0.1 }
                     max={ 1 }
                     step={ 0.1 }
+                    precision={ 3 }
                   />
                 </div>
 
@@ -347,7 +330,7 @@ export default function GlobeSphereTest() {
                   />
                 </div>
 
-                {/* 技术说明 */}
+                {/* 技术说明 */ }
                 <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-600">
                   <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                     技术说明

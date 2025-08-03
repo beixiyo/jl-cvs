@@ -85,8 +85,8 @@ pnpm test
 
 ## 🎆 烟花效果 (Firework)
 
-**访问路径**: `/firework`
-**文件位置**: `packages/test/src/views/firework/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/firework`
+- **文件位置**: `packages/test/src/views/firework/index.tsx`
 
 ![烟花效果预览](./docAssets/firework.webp)
 
@@ -103,8 +103,8 @@ pnpm test
 
 ## 🌍 球体地球仪 (GlobeSphere)
 
-**访问路径**: `/globeSphere`
-**文件位置**: `packages/test/src/views/globeSphere/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/globeSphere`
+- **文件位置**: `packages/test/src/views/globeSphere/index.tsx`
 
 ![球体地球仪预览](./docAssets/globesphere.webp)
 
@@ -118,8 +118,8 @@ pnpm test
 
 ## ✂️ 抠图工具 (CutoutImg)
 
-**访问路径**: `/cutoutImg`
-**文件位置**: `packages/test/src/views/cutoutImg/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/cutoutImg`
+- **文件位置**: `packages/test/src/views/cutoutImg/index.tsx`
 
 ![抠图工具预览](./docAssets/cutoutImg.webp)
 
@@ -139,8 +139,8 @@ pnpm test
 
 ## 💡 智能选取 (SmartSelection)
 
-**访问路径**: `/smartSelection`
-**文件位置**: `packages/test/src/views/smartSelection/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/smartSelection`
+- **文件位置**: `packages/test/src/views/smartSelection/index.tsx`
 
 ![智能选取预览](./docAssets/smartSelectImg.webp)
 
@@ -159,8 +159,8 @@ pnpm test
 
 ## 📐 网格效果 (Grid)
 
-**访问路径**: `/grid`
-**文件位置**: `packages/test/src/views/grid/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/grid`
+- **文件位置**: `packages/test/src/views/grid/index.tsx`
 
 ![网格效果预览](./docAssets/grid.webp)
 
@@ -172,8 +172,8 @@ pnpm test
 
 ## 🌀 半调波浪 (HalftoneWave)
 
-**访问路径**: `/halftoneWave`
-**文件位置**: `packages/test/src/views/halftoneWave/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/halftoneWave`
+- **文件位置**: `packages/test/src/views/halftoneWave/index.tsx`
 
 ![半调波浪预览](./docAssets/halftoneWave.gif)
 
@@ -185,8 +185,8 @@ pnpm test
 
 ## 🖼️ 图像灰飞烟灭 (ImgToFade)
 
-**访问路径**: `/imgToFade`
-**文件位置**: `packages/test/src/views/imgToFade/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/imgToFade`
+- **文件位置**: `packages/test/src/views/imgToFade/index.tsx`
 
 ![图像灰飞烟灭预览](./docAssets/imgFade.gif)
 
@@ -198,8 +198,8 @@ pnpm test
 
 ## 📝 图像转文字 (ImgToTxt)
 
-**访问路径**: `/imgToTxt`
-**文件位置**: `packages/test/src/views/imgToTxt/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/imgToTxt`
+- **文件位置**: `packages/test/src/views/imgToTxt/index.tsx`
 
 ![图像转文字预览](./docAssets/imgToTxt.webp)
 
@@ -211,8 +211,9 @@ pnpm test
 
 ## 🎨 图像编辑画板 (NoteBoard)
 
-**访问路径**: `/noteBoard`
-**文件位置**: `packages/test/src/views/noteBoard/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/noteBoard`
+- **文件位置**: `packages/test/src/views/noteBoard/index.tsx`
+- **架构设计文档**: `packages/jl-cvs/src/NoteBoard/README.md`
 
 ![图像编辑画板预览](./docAssets/noteBoard.webp)
 ![图像编辑画板预览](./docAssets/noteBoardEditor.gif)
@@ -235,8 +236,8 @@ pnpm test
 
 ## 🎯 刮刮卡效果 (Scratch)
 
-**访问路径**: `/scratch`
-**文件位置**: `packages/test/src/views/scratch/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/scratch`
+- **文件位置**: `packages/test/src/views/scratch/index.tsx`
 
 ![刮刮卡效果预览](./docAssets/scratch.webp)
 
@@ -255,8 +256,8 @@ pnpm test
 
 ## 📸 截图工具 (ShotImg)
 
-**访问路径**: `/shotImg`
-**文件位置**: `packages/test/src/views/shotImg/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/shotImg`
+- **文件位置**: `packages/test/src/views/shotImg/index.tsx`
 
 ![截图工具预览](./docAssets/shotImg.gif)
 
@@ -274,8 +275,8 @@ pnpm test
 
 ## ⭐ 星空场景 (StarField)
 
-**访问路径**: `/starField`
-**文件位置**: `packages/test/src/views/starField/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/starField`
+- **文件位置**: `packages/test/src/views/starField/index.tsx`
 
 ![星空场景预览](./docAssets/starField.webp)
 
@@ -296,8 +297,8 @@ pnpm test
 
 ## 🔢 科技数字 (TechNum)
 
-**访问路径**: `/techNum`
-**文件位置**: `packages/test/src/views/techNum/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/techNum`
+- **文件位置**: `packages/test/src/views/techNum/index.tsx`
 
 ![科技数字预览](./docAssets/techNum.gif)
 
@@ -320,8 +321,8 @@ pnpm test
 
 ## 🌊 水波纹效果 (WaterRipple)
 
-**访问路径**: `/waterRipple`
-**文件位置**: `packages/test/src/views/waterRipple/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/waterRipple`
+- **文件位置**: `packages/test/src/views/waterRipple/index.tsx`
 
 ![水波纹效果预览](./docAssets/waterRipple.gif)
 
@@ -342,8 +343,8 @@ pnpm test
 
 ## 〰️ 波浪线条 (WavyLines)
 
-**访问路径**: `/wavyLines`
-**文件位置**: `packages/test/src/views/wavyLines/index.tsx`
+- **在线查看**: `https://jl-cvs.pages.dev/wavyLines`
+- **文件位置**: `packages/test/src/views/wavyLines/index.tsx`
 
 ![波浪线条预览](./docAssets/wavyLines.gif)
 

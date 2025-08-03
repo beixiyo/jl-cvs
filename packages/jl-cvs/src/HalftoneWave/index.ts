@@ -1,6 +1,7 @@
+import type { ILifecycleManager } from '../types'
 import { colorAddOpacity, debounce } from '@jl-org/tool'
 
-export class HalftoneWave {
+export class HalftoneWave implements ILifecycleManager {
   private canvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
 
@@ -26,9 +27,7 @@ export class HalftoneWave {
     this.ctx = canvas.getContext('2d')!
     this.width = options.width || window.innerWidth
     this.height = options.height || window.innerHeight
-
-    this.resizeDebounceTime = options.resizeDebounceTime || 80
-    this.onResizeDebounce = debounce(this._onResize.bind(this), this.resizeDebounceTime)
+    this.resizeDebounceTime = options.resizeDebounceTime || 40
 
     this.gridSize = options.gridSize || 20
     this.backgroundColor = options.backgroundColor || 'rgba(0, 0, 0, 0.1)'
@@ -36,18 +35,42 @@ export class HalftoneWave {
     this.waveSpeed = options.waveSpeed || 0.05
     this.waveAmplitude = options.waveAmplitude || 0.8
 
+    this.onResizeDebounce = debounce(
+      (newWidth, newHeight) => {
+        this.width = newWidth
+        this.height = newHeight
+        this.initializeGrid()
+      },
+      this.resizeDebounceTime,
+    )
+
     this.initializeGrid()
+    this.bindEvent()
     this.animate()
   }
 
-  onResize(width: number, height: number): void {
-    this.onResizeDebounce(width, height)
+  /** 绑定事件 */
+  bindEvent(): void { }
+
+  /** 解绑所有事件 */
+  rmEvent(): void { }
+
+  /** 销毁实例 */
+  dispose(): void {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId)
+      this.animationFrameId = null
+    }
+    this.rmEvent()
   }
 
-  private _onResize(newWidth: number, newHeight: number) {
-    this.width = newWidth
-    this.height = newHeight
-    this.initializeGrid()
+  /**
+   * 调整大小
+   * @param width - 宽度
+   * @param height - 高度
+   */
+  onResize(width: number, height: number): void {
+    this.onResizeDebounce(width, height)
   }
 
   private initializeGrid() {
@@ -88,12 +111,6 @@ export class HalftoneWave {
     this.drawHalftoneWave()
     this.time += this.waveSpeed
     this.animationFrameId = requestAnimationFrame(() => this.animate())
-  }
-
-  destroy() {
-    if (this.animationFrameId !== null) {
-      cancelAnimationFrame(this.animationFrameId)
-    }
   }
 }
 

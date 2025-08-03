@@ -3,21 +3,22 @@ import type { mouseMoveCb, ScratchOpts } from './types'
 /**
  * 刮刮乐，请确保有定位元素的包含块作为父级元素
  * @param canvas
- * @param onScratch 刮动回调函数
  * @param opts 配置
  * @returns 返回清理函数
  */
 export function createScratch(
   canvas: HTMLCanvasElement,
   opts: ScratchOpts = {},
-  onScratch?: mouseMoveCb,
 ) {
   const ctx = setStyle(canvas, opts)
-  return bindEvent(canvas, ctx, onScratch)
+  return bindEvent(canvas, ctx, opts.onScratch)
 }
 
 /**
  * 绘制刮奖区域样式
+ * @param canvas - 画布
+ * @param opts - 配置
+ * @returns 返回上下文
  */
 function setStyle(canvas: HTMLCanvasElement, opts: ScratchOpts) {
   const {
@@ -59,6 +60,12 @@ function setStyle(canvas: HTMLCanvasElement, opts: ScratchOpts) {
   return ctx
 }
 
+/**
+ * 绑定事件
+ * @param canvas - 画布
+ * @param ctx - 上下文
+ * @param onScratch - 刮动回调函数
+ */
 function bindEvent(
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,

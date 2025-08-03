@@ -1,144 +1,122 @@
 import { WavyLines } from '@jl-org/cvs'
+import { debounce } from '@jl-org/tool'
 import { useEffect, useRef } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input, NumberInput } from '@/components/Input'
+import { NumberInput } from '@/components/Input'
 import { Slider } from '@/components/Slider'
 import { useGetState } from '@/hooks'
 
-export default function WavyLinesTest() {
-  const [config, setConfig] = useGetState({
-    width: 800,
-    height: 600,
+/** 预设配置 */
+const presets = [
+  {
+    name: '默认效果',
     xGap: 10,
     yGap: 32,
     extraWidth: 200,
     extraHeight: 30,
     mouseEffectRange: 175,
     strokeStyle: '#333333',
+  },
+  {
+    name: '密集线条',
+    xGap: 6,
+    yGap: 20,
+    extraWidth: 150,
+    extraHeight: 20,
+    mouseEffectRange: 120,
+    strokeStyle: '#666666',
+  },
+  {
+    name: '稀疏线条',
+    xGap: 20,
+    yGap: 50,
+    extraWidth: 300,
+    extraHeight: 50,
+    mouseEffectRange: 250,
+    strokeStyle: '#999999',
+  },
+  {
+    name: '强交互效果',
+    xGap: 12,
+    yGap: 36,
+    extraWidth: 250,
+    extraHeight: 40,
+    mouseEffectRange: 300,
+    strokeStyle: '#444444',
+  },
+  {
+    name: '彩色线条',
+    xGap: 8,
+    yGap: 28,
+    extraWidth: 180,
+    extraHeight: 25,
+    mouseEffectRange: 150,
+    strokeStyle: '#0066cc',
+  },
+  {
+    name: '细腻效果',
+    xGap: 4,
+    yGap: 16,
+    extraWidth: 100,
+    extraHeight: 15,
+    mouseEffectRange: 80,
+    strokeStyle: '#888888',
+  },
+]
+
+/** 颜色预设 */
+const colorPresets = [
+  { name: '深灰', color: '#333333' },
+  { name: '中灰', color: '#666666' },
+  { name: '浅灰', color: '#999999' },
+  { name: '蓝色', color: '#0066cc' },
+  { name: '绿色', color: '#00cc66' },
+  { name: '红色', color: '#cc0066' },
+  { name: '紫色', color: '#6600cc' },
+  { name: '橙色', color: '#cc6600' },
+]
+
+export default function WavyLinesTest() {
+  const [config, setConfig] = useGetState({
+    width: 800,
+    height: 600,
+    ...presets[0],
   }, true)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wavyLinesRef = useRef<WavyLines | null>(null)
 
-  /** 预设配置 */
-  const presets = [
-    {
-      name: '默认效果',
-      config: {
-        xGap: 10,
-        yGap: 32,
-        extraWidth: 200,
-        extraHeight: 30,
-        mouseEffectRange: 175,
-        strokeStyle: '#333333',
-      },
-    },
-    {
-      name: '密集线条',
-      config: {
-        xGap: 6,
-        yGap: 20,
-        extraWidth: 150,
-        extraHeight: 20,
-        mouseEffectRange: 120,
-        strokeStyle: '#666666',
-      },
-    },
-    {
-      name: '稀疏线条',
-      config: {
-        xGap: 20,
-        yGap: 50,
-        extraWidth: 300,
-        extraHeight: 50,
-        mouseEffectRange: 250,
-        strokeStyle: '#999999',
-      },
-    },
-    {
-      name: '强交互效果',
-      config: {
-        xGap: 12,
-        yGap: 36,
-        extraWidth: 250,
-        extraHeight: 40,
-        mouseEffectRange: 300,
-        strokeStyle: '#444444',
-      },
-    },
-    {
-      name: '彩色线条',
-      config: {
-        xGap: 8,
-        yGap: 28,
-        extraWidth: 180,
-        extraHeight: 25,
-        mouseEffectRange: 150,
-        strokeStyle: '#0066cc',
-      },
-    },
-    {
-      name: '细腻效果',
-      config: {
-        xGap: 4,
-        yGap: 16,
-        extraWidth: 100,
-        extraHeight: 15,
-        mouseEffectRange: 80,
-        strokeStyle: '#888888',
-      },
-    },
-  ]
-
-  /** 颜色预设 */
-  const colorPresets = [
-    { name: '深灰', color: '#333333' },
-    { name: '中灰', color: '#666666' },
-    { name: '浅灰', color: '#999999' },
-    { name: '蓝色', color: '#0066cc' },
-    { name: '绿色', color: '#00cc66' },
-    { name: '红色', color: '#cc0066' },
-    { name: '紫色', color: '#6600cc' },
-    { name: '橙色', color: '#cc6600' },
-  ]
-
   /** 创建波浪线实例 */
-  const createWavyLines = () => {
+  const createWavyLines = useCallback(debounce(() => {
     if (!canvasRef.current) {
       console.warn('画布未准备好')
       return
     }
-
-    try {
-      /** 销毁旧实例 */
-      if (wavyLinesRef.current) {
-        wavyLinesRef.current.destroy()
-        wavyLinesRef.current = null
-      }
-
-      /** 使用 getLatest() 获取最新配置 */
-      const latestConfig = setConfig.getLatest()
-
-      /** 设置画布尺寸 */
-      canvasRef.current.width = latestConfig.width
-      canvasRef.current.height = latestConfig.height
-
-      /** 创建新实例 */
-      wavyLinesRef.current = new WavyLines({
-        canvas: canvasRef.current,
-        xGap: latestConfig.xGap,
-        yGap: latestConfig.yGap,
-        extraWidth: latestConfig.extraWidth,
-        extraHeight: latestConfig.extraHeight,
-        mouseEffectRange: latestConfig.mouseEffectRange,
-        strokeStyle: latestConfig.strokeStyle,
-      })
+    if (wavyLinesRef.current) {
+      wavyLinesRef.current.dispose()
+      wavyLinesRef.current = null
     }
-    catch (error) {
-      console.error('创建波浪线实例失败:', error)
-    }
-  }
+
+    /** 使用 getLatest() 获取最新配置 */
+    const latestConfig = setConfig.getLatest()
+
+    /** 设置画布尺寸 */
+    canvasRef.current.width = latestConfig.width
+    canvasRef.current.height = latestConfig.height
+
+    /** 创建新实例 */
+    wavyLinesRef.current = new WavyLines({
+      canvas: canvasRef.current,
+      xGap: latestConfig.xGap,
+      yGap: latestConfig.yGap,
+      extraWidth: latestConfig.extraWidth,
+      extraHeight: latestConfig.extraHeight,
+      mouseEffectRange: latestConfig.mouseEffectRange,
+      strokeStyle: latestConfig.strokeStyle,
+      fillStyle: '#0009',
+    })
+  }, 80), [setConfig])
 
   /** 应用预设配置 */
   const applyPreset = (presetConfig: any) => {
@@ -147,42 +125,23 @@ export default function WavyLinesTest() {
 
   /** 更新配置 */
   const updateConfig = (key: string, value: any) => {
-    setConfig(prev => ({ ...prev, [key]: value }))
+    setConfig({ [key]: value })
   }
-
-  /** 自动启动效果 */
-  useEffect(() => {
-    /** 延迟启动，确保组件完全加载 */
-    setTimeout(() => {
-      if (canvasRef.current) {
-        createWavyLines()
-      }
-    }, 500)
-  }, [])
 
   /** 监听配置变化，自动重新创建实例 */
   useEffect(() => {
-    if (canvasRef.current && wavyLinesRef.current) {
-      /** 延迟重新创建，避免频繁更新 */
-      const timer = setTimeout(() => {
-        createWavyLines()
-      }, 100)
-      return () => clearTimeout(timer)
-    }
-  }, [config.width, config.height, config.xGap, config.yGap, config.extraWidth, config.extraHeight, config.mouseEffectRange, config.strokeStyle])
+    createWavyLines()
 
-  /** 组件卸载时清理 */
-  useEffect(() => {
     return () => {
       if (wavyLinesRef.current) {
-        wavyLinesRef.current.destroy()
+        wavyLinesRef.current.dispose()
       }
     }
-  }, [])
+  }, [config, createWavyLines])
 
   return (
     <div className="min-h-screen from-cyan-50 to-blue-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
-      {/* 页面标题 - 全宽显示 */}
+      {/* 页面标题 - 全宽显示 */ }
       <div className="p-6 text-center">
         <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           〰️ 波浪线条效果
@@ -192,34 +151,20 @@ export default function WavyLinesTest() {
         </p>
       </div>
 
-      {/* 响应式布局容器 */}
+      {/* 响应式布局容器 */ }
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
-        {/* 左侧：效果展示区域 */}
-        <div className="flex-1">
-          <Card className="min-h-[600px] p-6">
-            <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
-              波浪线条效果展示
-            </h2>
-            <div className="min-h-[500px] flex flex-col items-center justify-center space-y-4">
-              <div className="relative">
-                <canvas
-                  ref={ canvasRef }
-                  className="border border-gray-300 rounded-lg bg-white shadow-xl dark:border-gray-600 dark:bg-gray-800"
-                  width={ config.width }
-                  height={ config.height }
-                  style={ { maxWidth: '100%', height: 'auto' } }
-                />
-              </div>
-
-              <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                <p>移动鼠标到画布上查看交互效果</p>
-                <p>鼠标移动会产生波浪扭曲和跟随效果</p>
-              </div>
-            </div>
-          </Card>
+        {/* 左侧：效果展示区域 */ }
+        <div className="flex-1 flex justify-center items-center relative">
+          <canvas
+            ref={ canvasRef }
+            className="border border-gray-300 rounded-lg bg-white shadow-xl dark:border-gray-600 dark:bg-gray-800"
+            width={ config.width }
+            height={ config.height }
+            style={ { maxWidth: '100%', height: 'auto' } }
+          />
         </div>
 
-        {/* 右侧：控制面板 */}
+        {/* 右侧：控制面板 */ }
         <div className="w-full lg:w-96">
           <Card>
             <div className="max-h-[80vh] overflow-y-auto p-6">
@@ -227,7 +172,7 @@ export default function WavyLinesTest() {
                 控制面板
               </h2>
 
-              {/* 预设配置 */}
+              {/* 预设配置 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   预设效果
@@ -236,7 +181,10 @@ export default function WavyLinesTest() {
                   { presets.map((preset, index) => (
                     <Button
                       key={ `preset-${preset.name}-${index}` }
-                      onClick={ () => applyPreset(preset.config) }
+                      onClick={ () => applyPreset(preset) }
+                      variant={ config.name === preset.name
+                        ? 'primary'
+                        : 'default' }
                       size="sm"
                       className="text-xs"
                     >
@@ -246,7 +194,7 @@ export default function WavyLinesTest() {
                 </div>
               </div>
 
-              {/* 基础参数配置 */}
+              {/* 基础参数配置 */ }
               <div className="mb-6 space-y-4">
                 <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                   基础参数
@@ -392,7 +340,7 @@ export default function WavyLinesTest() {
                 </div>
               </div>
 
-              {/* 颜色配置 */}
+              {/* 颜色配置 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   线条颜色
@@ -432,7 +380,7 @@ export default function WavyLinesTest() {
                 </div>
               </div>
 
-              {/* 使用说明 */}
+              {/* 使用说明 */ }
               <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-600">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   使用说明

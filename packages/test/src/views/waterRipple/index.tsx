@@ -60,19 +60,6 @@ export default function WaterRippleTest() {
         strokeStyle: 'rgba(255, 100, 100, 0.2)',
       },
     },
-    {
-      name: '彩色渐变',
-      config: {
-        width: 800,
-        height: 600,
-        yOffset: 150,
-        xOffset: 0,
-        lineWidth: 3,
-        circleCount: 15,
-        intensity: 2,
-        strokeStyle: '', // 将使用动态颜色函数
-      },
-    },
   ]
 
   /** 创建水波纹实例 */
@@ -183,7 +170,7 @@ export default function WaterRippleTest() {
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   预设效果
                 </h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1">
                   { presets.map((preset, index) => (
                     <Button
                       key={ `preset-${preset.name}-${index}` }

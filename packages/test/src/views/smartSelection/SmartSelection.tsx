@@ -216,7 +216,6 @@ export const SmartSelection = memo<SmartSelectionProps>((
       mouseLeave()
       return
     }
-    console.log(x, y)
 
     const i = maskSegs.findIndex((seg) => {
       const { matrix } = seg

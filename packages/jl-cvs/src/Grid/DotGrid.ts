@@ -1,6 +1,7 @@
+import type { ILifecycleManager } from '../types'
 import { debounce, getWinHeight, getWinWidth, throttle } from '@jl-org/tool'
 
-export class DotGrid {
+export class DotGrid implements ILifecycleManager {
   private canvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
 
@@ -30,9 +31,14 @@ export class DotGrid {
   private highlightedDots: Set<string> = new Set()
   private dotStates: Map<string, { highlighted: boolean, progress: number }> = new Map()
 
-  unBindEvents: () => void = () => { }
-
+  private animationFrameId: number | null = null
   private onResizeDebounce: (width: number, height: number) => void
+
+  // ======================
+  // * Handlers
+  // ======================
+  private mouseMoveHandler: (event: MouseEvent) => void
+  private mouseLeaveHandler: () => void
 
   constructor(canvas: HTMLCanvasElement, options: DotGridOptions = {}) {
     this.canvas = canvas
@@ -42,7 +48,6 @@ export class DotGrid {
 
     this.resizeDebounceTime = options.resizeDebounceTime || 80
     this.mouseMoveThrottleTime = options.mouseMoveThrottleTime || 16
-    this.onResizeDebounce = debounce(this._onResize.bind(this), this.resizeDebounceTime)
 
     this.dotSpacingX = options.dotSpacingX || 20
     this.dotSpacingY = options.dotSpacingY || 20
@@ -55,20 +60,68 @@ export class DotGrid {
     this.transitionTime = options.transitionTime || 50
     this.glowIntensity = options.glowIntensity || 10
 
+    // ======================
+    // * 绑定事件处理器
+    // ======================
+    this.onResizeDebounce = debounce(
+      (newWidth, newHeight) => {
+        this.width = newWidth
+        this.height = newHeight
+        this.initializeGrid()
+        this.updateHighlightedDots()
+      },
+      this.resizeDebounceTime,
+    )
+
+    this.mouseMoveHandler = throttle((event: MouseEvent) => {
+      if (!this.rect)
+        return
+      const rect = this.rect
+      this.mouseX = event.clientX - rect.left
+      this.mouseY = event.clientY - rect.top
+      this.updateHighlightedDots()
+    }, this.mouseMoveThrottleTime)
+
+    this.mouseLeaveHandler = () => {
+      this.mouseX = -1
+      this.mouseY = -1
+      this.highlightedDots.clear()
+      this.updateDotStates()
+    }
+
     this.initializeGrid()
-    this.setupMouseEvents()
+    this.bindEvent()
     this.animate()
   }
 
+  /**
+   * 调整大小
+   * @param width - 宽度
+   * @param height - 高度
+   */
   onResize(width: number, height: number): void {
     this.onResizeDebounce(width, height)
   }
 
-  private _onResize(newWidth: number, newHeight: number) {
-    this.width = newWidth
-    this.height = newHeight
-    this.initializeGrid()
-    this.updateHighlightedDots()
+  /** 绑定事件 */
+  bindEvent(): void {
+    this.canvas.addEventListener('mousemove', this.mouseMoveHandler)
+    this.canvas.addEventListener('mouseleave', this.mouseLeaveHandler)
+  }
+
+  /** 解绑所有事件 */
+  rmEvent(): void {
+    this.canvas.removeEventListener('mousemove', this.mouseMoveHandler)
+    this.canvas.removeEventListener('mouseleave', this.mouseLeaveHandler)
+  }
+
+  /** 销毁实例 */
+  dispose(): void {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId)
+      this.animationFrameId = null
+    }
+    this.rmEvent()
   }
 
   private initializeGrid() {
@@ -84,32 +137,6 @@ export class DotGrid {
       for (let c = 0; c < this.cols; c++) {
         this.dotStates.set(`${r},${c}`, { highlighted: false, progress: 0 })
       }
-    }
-  }
-
-  private setupMouseEvents() {
-    const mouseMove = throttle((event: MouseEvent) => {
-      if (!this.rect)
-        return
-      const rect = this.rect
-      this.mouseX = event.clientX - rect.left
-      this.mouseY = event.clientY - rect.top
-      this.updateHighlightedDots()
-    }, this.mouseMoveThrottleTime)
-
-    const mouseLeave = () => {
-      this.mouseX = -1
-      this.mouseY = -1
-      this.highlightedDots.clear()
-      this.updateDotStates()
-    }
-
-    this.canvas.addEventListener('mousemove', mouseMove)
-    this.canvas.addEventListener('mouseleave', mouseLeave)
-
-    this.unBindEvents = () => {
-      this.canvas.removeEventListener('mousemove', mouseMove)
-      this.canvas.removeEventListener('mouseleave', mouseLeave)
     }
   }
 
@@ -177,7 +204,7 @@ export class DotGrid {
     }
 
     this.drawWithAnimation()
-    requestAnimationFrame(() => this.animate())
+    this.animationFrameId = requestAnimationFrame(() => this.animate())
   }
 
   private drawWithAnimation() {

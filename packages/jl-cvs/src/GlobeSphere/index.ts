@@ -24,10 +24,10 @@ export class GlobeSphere {
   private rotation: number = 0
   private width: number
   private height: number
+  private options: Required<GlobeSphereOpts>
+
   private dpr = getDPR()
   private onResizeDebounce: (width: number, height: number) => void
-
-  private options: Required<GlobeSphereOpts>
 
   constructor(canvas: HTMLCanvasElement, opts?: GlobeSphereOpts) {
     this.canvas = canvas
@@ -44,7 +44,7 @@ export class GlobeSphere {
       pointColor: 'rgb(100, 150, 255)',
       pointOpacity: 0.8,
       perspectiveDistance: 400,
-      resizeDebounceTime: 80,
+      resizeDebounceTime: 40,
     }
 
     this.options = {
@@ -54,11 +54,44 @@ export class GlobeSphere {
 
     this.width = this.options.width
     this.height = this.options.height
-    this.onResizeDebounce = debounce(this._onResize.bind(this), this.options.resizeDebounceTime)
+    this.onResizeDebounce = debounce(
+      (newWidth, newHeight) => {
+        this.width = newWidth
+        this.height = newHeight
+
+        this.canvas.width = this.width * this.dpr
+        this.canvas.height = this.height * this.dpr
+        this.ctx.scale(this.dpr, this.dpr)
+      },
+      this.options.resizeDebounceTime,
+    )
 
     this.initCanvas()
     this.generatePoints()
     this.startAnimation()
+  }
+
+  /** 开始动画 */
+  startAnimation() {
+    this.animate()
+  }
+
+  /** 停止动画 */
+  stopAnimation() {
+    cancelAnimationFrame(this.animationFrame)
+  }
+
+  /** 调整大小 */
+  onResize(width: number, height: number): void {
+    this.onResizeDebounce(width, height)
+  }
+
+  /** 更新配置 */
+  updateOptions(opts: Partial<GlobeSphereOpts>) {
+    this.options = { ...this.options, ...opts }
+    if (opts.pointCount || opts.radius) {
+      this.generatePoints()
+    }
   }
 
   private initCanvas() {
@@ -116,38 +149,6 @@ export class GlobeSphere {
     })
 
     this.animationFrame = requestAnimationFrame(this.animate)
-  }
-
-  /** 开始动画 */
-  public startAnimation() {
-    this.animate()
-  }
-
-  /** 停止动画 */
-  public stopAnimation() {
-    cancelAnimationFrame(this.animationFrame)
-  }
-
-  /** 调整大小 */
-  public onResize(width: number, height: number): void {
-    this.onResizeDebounce(width, height)
-  }
-
-  private _onResize(newWidth: number, newHeight: number) {
-    this.width = newWidth
-    this.height = newHeight
-
-    this.canvas.width = this.width * this.dpr
-    this.canvas.height = this.height * this.dpr
-    this.ctx.scale(this.dpr, this.dpr)
-  }
-
-  /** 更新配置 */
-  public updateOptions(opts: Partial<GlobeSphereOpts>) {
-    this.options = { ...this.options, ...opts }
-    if (opts.pointCount || opts.radius) {
-      this.generatePoints()
-    }
   }
 }
 

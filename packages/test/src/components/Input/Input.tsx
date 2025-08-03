@@ -1,3 +1,5 @@
+'use client'
+
 import type { ChangeEvent } from 'react'
 import { forwardRef, memo, useCallback, useState } from 'react'
 import { useFormField } from '@/components/Form'

@@ -1,8 +1,9 @@
 import type { HandleImgReturn } from '@/canvasTool'
+import type { ILifecycleManager } from '@/types'
 import { getImg, isStr, type TransferType } from '@jl-org/tool'
 import { cutImg } from '@/canvasTool'
 
-export class ShotImg {
+export class ShotImg implements ILifecycleManager {
   cvs: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
 
@@ -51,17 +52,12 @@ export class ShotImg {
   async setImg(img: HTMLImageElement | string) {
     let _img: HTMLImageElement
 
-    if (isStr(img)) {
-      const newImg = await getImg(img)
-      if (newImg) {
-        _img = newImg
-      }
-      else {
-        throw new Error('[ShowImg]: 图片加载失败')
-      }
+    const newImg = await getImg(img)
+    if (newImg) {
+      _img = newImg
     }
     else {
-      _img = img
+      throw new Error('[ShowImg]: 图片加载失败')
     }
 
     const { naturalWidth, naturalHeight } = _img
@@ -105,7 +101,21 @@ export class ShotImg {
     )
   }
 
-  /** =========================== 私有方法 ================================= */
+  bindEvent() {
+    this.cvs.addEventListener('mousedown', this.onMouseDown)
+  }
+
+  rmEvent() {
+    this.cvs.removeEventListener('mousedown', this.onMouseDown)
+  }
+
+  dispose() {
+    this.rmEvent()
+  }
+
+  // ======================
+  // * 私有方法
+  // ======================
 
   private setSize(w: number, h: number) {
     this.cvs.width = w
@@ -127,10 +137,6 @@ export class ShotImg {
       return
     }
     this.ctx.drawImage(this.img, 0, 0, this.width, this.height)
-  }
-
-  private bindEvent() {
-    this.cvs.addEventListener('mousedown', this.onMouseDown)
   }
 
   /** 更新Canvas显示尺寸与图片原始尺寸的比例 */

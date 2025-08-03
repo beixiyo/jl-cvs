@@ -35,7 +35,7 @@ export class StarField {
       flickerSpeed: 0.01,
       width: window.innerWidth,
       height: window.innerHeight,
-      resizeDebounceTime: 80,
+      resizeDebounceTime: 40,
     }
 
     /** 合并用户配置和默认配置 */
@@ -45,22 +45,20 @@ export class StarField {
     this.canvas.width = this.config.width
     this.canvas.height = this.config.height
 
-    this.onResizeDebounce = debounce(this._onResize.bind(this), this.config.resizeDebounceTime)
+    this.onResizeDebounce = debounce(
+      (newWidth, newHeight) => {
+        this.canvas.width = newWidth
+        this.canvas.height = newHeight
+        this.initStars()
+      },
+      this.config.resizeDebounceTime,
+    )
 
     /** 初始化星星 */
     this.initStars()
 
     /** 开始动画 */
     this.animate()
-  }
-
-  /**
-   * 处理窗口大小变化
-   */
-  private _onResize(width: number, height: number): void {
-    this.canvas.width = width
-    this.canvas.height = height
-    this.initStars()
   }
 
   onResize(width: number, height: number): void {

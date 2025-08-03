@@ -2,14 +2,15 @@ import { createFirework, createFirework2 } from '@jl-org/cvs'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { Input, NumberInput } from '@/components/Input'
+import { NumberInput } from '@/components/Input'
+import { useGetState } from '@/hooks'
 import { cn } from '@/utils'
 
 type FireworkType = 'classic' | 'burst'
 
 export default function FireworkTest() {
   const [isPlaying, setIsPlaying] = useState(false)
-  const [fireworkType, setFireworkType] = useState<FireworkType>('burst')
+  const [fireworkType, setFireworkType] = useGetState<FireworkType, true>('classic', true)
   const [config, setConfig] = useState({
     width: 800,
     height: 600,
@@ -29,62 +30,6 @@ export default function FireworkTest() {
     resume: () => void
   } | null>(null)
   const firework2IntervalRef = useRef<NodeJS.Timeout | null>(null)
-
-  /** 预设配置 */
-  const presets = [
-    {
-      name: '默认烟花',
-      config: {
-        width: 800,
-        height: 600,
-        yRange: 50,
-        speed: 2.5,
-        r: 6,
-        ballCount: 150,
-        gapTime: 500,
-        maxCount: 2,
-      },
-    },
-    {
-      name: '密集烟花',
-      config: {
-        width: 800,
-        height: 600,
-        yRange: 80,
-        speed: 3,
-        r: 4,
-        ballCount: 200,
-        gapTime: 300,
-        maxCount: 4,
-      },
-    },
-    {
-      name: '大型烟花',
-      config: {
-        width: 800,
-        height: 600,
-        yRange: 100,
-        speed: 2,
-        r: 10,
-        ballCount: 300,
-        gapTime: 800,
-        maxCount: 1,
-      },
-    },
-    {
-      name: '快速小烟花',
-      config: {
-        width: 800,
-        height: 600,
-        yRange: 30,
-        speed: 4,
-        r: 3,
-        ballCount: 100,
-        gapTime: 200,
-        maxCount: 6,
-      },
-    },
-  ]
 
   /** 颜色预设 */
   const colorPresets = useMemo(() => [
@@ -154,7 +99,7 @@ export default function FireworkTest() {
 
     stopFirework()
 
-    if (fireworkType === 'classic') {
+    if (setFireworkType.getLatest() === 'classic') {
       /** 经典烟花 */
       const currentColorPreset = colorPresets[selectedColorPreset]
       const stopFn = createFirework(canvasRef.current, {
@@ -185,18 +130,7 @@ export default function FireworkTest() {
     }
 
     setIsPlaying(true)
-  }, [config, selectedColorPreset, colorPresets, stopFirework, fireworkType])
-
-  /** 应用预设 */
-  const applyPreset = (presetConfig: any) => {
-    setConfig(presetConfig)
-    if (isPlaying) {
-      stopFirework()
-      setTimeout(() => {
-        startFirework()
-      }, 100)
-    }
-  }
+  }, [colorPresets, config, selectedColorPreset, setFireworkType, stopFirework])
 
   /** 更新配置 */
   const updateConfig = (key: string, value: any) => {
@@ -229,7 +163,7 @@ export default function FireworkTest() {
       stopFirework()
       setTimeout(() => {
         startFirework()
-      }, 100)
+      }, 20)
     }
   }
 
@@ -248,7 +182,7 @@ export default function FireworkTest() {
 
   return (
     <div className="min-h-screen from-indigo-50 to-purple-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
-      {/* 页面标题 - 全宽显示 */}
+      {/* 页面标题 - 全宽显示 */ }
       <div className="p-6 text-center">
         <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           🎆 烟花效果
@@ -258,9 +192,9 @@ export default function FireworkTest() {
         </p>
       </div>
 
-      {/* 响应式布局容器 */}
+      {/* 响应式布局容器 */ }
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
-        {/* 左侧：效果展示区域 */}
+        {/* 左侧：效果展示区域 */ }
         <div className="flex-1">
           <Card className="min-h-[600px] p-6">
             <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
@@ -276,7 +210,7 @@ export default function FireworkTest() {
           </Card>
         </div>
 
-        {/* 右侧：控制面板 */}
+        {/* 右侧：控制面板 */ }
         <div className="w-full lg:w-96">
           <Card>
             <div className="max-h-[80vh] overflow-y-auto p-6">
@@ -284,7 +218,7 @@ export default function FireworkTest() {
                 控制面板
               </h2>
 
-              {/* 烟花类型选择器 */}
+              {/* 烟花类型选择器 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   烟花类型
@@ -311,7 +245,7 @@ export default function FireworkTest() {
                 </div>
               </div>
 
-              {/* 控制按钮 */}
+              {/* 控制按钮 */ }
               <div className="mb-6">
                 <Button
                   onClick={ isPlaying
@@ -330,25 +264,7 @@ export default function FireworkTest() {
                 </Button>
               </div>
 
-              {/* 预设配置 */}
-              <div className="mb-6">
-                <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
-                  预设效果
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  { presets.map(preset => (
-                    <Button
-                      key={ preset.name }
-                      onClick={ () => applyPreset(preset.config) }
-                      size="sm"
-                    >
-                      { preset.name }
-                    </Button>
-                  )) }
-                </div>
-              </div>
-
-              {/* 颜色主题 - 仅对经典烟花生效 */}
+              {/* 颜色主题 - 仅对经典烟花生效 */ }
               { fireworkType === 'classic' && (
                 <div className="mb-6">
                   <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
@@ -371,7 +287,7 @@ export default function FireworkTest() {
                 </div>
               ) }
 
-              {/* 参数配置 */}
+              {/* 参数配置 */ }
               <div className="space-y-4">
                 <h3 className="text-lg text-gray-700 font-medium dark:text-gray-200">
                   参数配置

@@ -154,6 +154,17 @@ export class NoteBoard extends NoteBoardBase {
     })
   }
 
+  bindEvent() {
+    const { canvas } = this
+
+    canvas.addEventListener('mousedown', this.onMousedown)
+    canvas.addEventListener('mousemove', this.onMousemove)
+    canvas.addEventListener('mouseup', this.onMouseup)
+    canvas.addEventListener('mouseleave', this.onMouseLeave)
+    canvas.addEventListener('wheel', this.onWheel)
+    canvas.addEventListener('contextmenu', this.onContextMenu)
+  }
+
   /**
    * 移除所有事件
    */
@@ -196,17 +207,6 @@ export class NoteBoard extends NoteBoardBase {
    */
   private isShapeMode(mode?: Mode) {
     return ['rect', 'circle', 'arrow'].includes(mode ?? this.mode)
-  }
-
-  bindEvent() {
-    const { canvas } = this
-
-    canvas.addEventListener('mousedown', this.onMousedown)
-    canvas.addEventListener('mousemove', this.onMousemove)
-    canvas.addEventListener('mouseup', this.onMouseup)
-    canvas.addEventListener('mouseleave', this.onMouseLeave)
-    canvas.addEventListener('wheel', this.onWheel)
-    canvas.addEventListener('contextmenu', this.onContextMenu)
   }
 
   onMousedown = (e: MouseEvent) => {
