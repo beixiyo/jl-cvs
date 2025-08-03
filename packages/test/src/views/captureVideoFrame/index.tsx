@@ -333,12 +333,12 @@ export default function CaptureVideoFramePage() {
             <h3 className="text-lg font-semibold mb-4">视频文件</h3>
             <div className="space-y-4">
               <Uploader
+                className="h-32"
                 ref={ uploaderRef }
                 accept="video/*"
                 maxCount={ 1 }
                 onChange={ handleVideoUpload }
                 placeholder="拖拽视频文件到这里"
-                className="min-h-24"
               />
               <Button
                 onClick={ resetToDefaultVideo }

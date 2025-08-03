@@ -1,5 +1,7 @@
 import type { FileItem, UploaderProps } from '.'
 import { blobToBase64, getImg } from '@jl-org/tool'
+import { useRef, useState } from 'react'
+import { isValidFileType } from '@/utils'
 
 export function useGenState(
   {
@@ -11,12 +13,13 @@ export function useGenState(
     onExceedCount,
     onExceedSize,
     onExceedPixels,
-    accept,
+    accept = '',
     autoClear = false,
     maxPixels,
   }: UploaderProps,
 ) {
   const [dragActive, setDragActive] = useState(false)
+  const [dragInvalid, setDragInvalid] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   /**
@@ -28,12 +31,8 @@ export function useGenState(
 
     for (const file of fileList) {
       /** 检查拖拽的文件类型 */
-      if (accept && accept.split('/')[1] !== '*') {
-        const acceptTypes = accept.split(',')
-        const fileType = `.${file.type.split('/').pop()}`
-        if (!acceptTypes.includes(fileType)) {
-          continue
-        }
+      if (!isValidFileType(file, accept)) {
+        continue
       }
 
       /** 检查是否超出数量限制 */
@@ -104,9 +103,33 @@ export function useGenState(
 
     if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true)
+
+      /** 检查拖拽的文件类型 */
+      if (accept && e.dataTransfer.items.length > 0) {
+        const files = Array.from(e.dataTransfer.items)
+        const hasInvalidFile = files.some((item) => {
+          if (item.kind === 'file') {
+            const file = item.getAsFile()
+            return file && !isValidFileType(file, accept)
+          }
+          return false
+        })
+        setDragInvalid(hasInvalidFile)
+      }
+      else {
+        setDragInvalid(false)
+      }
     }
     else if (e.type === 'dragleave') {
-      setDragActive(false)
+      /** 只有当鼠标真正离开容器时才重置状态 */
+      const rect = e.currentTarget.getBoundingClientRect()
+      const x = e.clientX
+      const y = e.clientY
+
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        setDragActive(false)
+        setDragInvalid(false)
+      }
     }
   }
 
@@ -116,6 +139,7 @@ export function useGenState(
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
+    setDragInvalid(false)
 
     if (e.dataTransfer.files?.[0]) {
       handleFiles(Array.from(e.dataTransfer.files), e)
@@ -154,6 +178,7 @@ export function useGenState(
 
   return {
     dragActive,
+    dragInvalid,
     inputRef,
     handleDrag,
     handleDrop,
