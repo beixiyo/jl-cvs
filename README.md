@@ -82,18 +82,20 @@ npm i @jl-org/cvs
 # 安装依赖
 pnpm install
 
+# 构建核心包
+pnpm build
 # 启动测试页面
 pnpm test
 ```
 
-访问 `http://localhost:5173` 即可查看所有测试页面
+访问 http://localhost:5173 即可查看所有测试页面
 
 ---
 
 ## 🎆 烟花效果 (Firework)
 
 - **在线查看**: https://jl-cvs.pages.dev/firework
-- **文件位置**: `packages/test/src/views/firework/index.tsx`
+- [文件位置](./packages/test/src/views/firework/index.tsx)
 
 ![烟花效果预览](./docAssets/firework.webp)
 
@@ -111,7 +113,7 @@ pnpm test
 ## 🌍 球体地球仪 (GlobeSphere)
 
 - **在线查看**: https://jl-cvs.pages.dev/globeSphere
-- **文件位置**: `packages/test/src/views/globeSphere/index.tsx`
+- [文件位置](./packages/test/src/views/globeSphere/index.tsx)
 
 ![球体地球仪预览](./docAssets/globesphere.webp)
 
@@ -165,7 +167,7 @@ pnpm test
 ## 📐 网格效果 (Grid)
 
 - **在线查看**: https://jl-cvs.pages.dev/grid
-- **文件位置**: `packages/test/src/views/grid/index.tsx`
+- [文件位置](./packages/test/src/views/grid/index.tsx)
 
 ![网格效果预览](./docAssets/grid.webp)
 
@@ -178,7 +180,7 @@ pnpm test
 ## 🌀 半调波浪 (HalftoneWave)
 
 - **在线查看**: https://jl-cvs.pages.dev/halftoneWave
-- **文件位置**: `packages/test/src/views/halftoneWave/index.tsx`
+- [文件位置](./packages/test/src/views/halftoneWave/index.tsx)
 
 ![半调波浪预览](./docAssets/halftoneWave.gif)
 
@@ -191,7 +193,7 @@ pnpm test
 ## 🖼️ 图像灰飞烟灭 (ImgToFade)
 
 - **在线查看**: https://jl-cvs.pages.dev/imgToFade
-- **文件位置**: `packages/test/src/views/imgToFade/index.tsx`
+- [文件位置](./packages/test/src/views/imgToFade/index.tsx)
 
 ![图像灰飞烟灭预览](./docAssets/imgFade.gif)
 
@@ -204,7 +206,7 @@ pnpm test
 ## 📝 图像转文字 (ImgToTxt)
 
 - **在线查看**: https://jl-cvs.pages.dev/imgToTxt
-- **文件位置**: `packages/test/src/views/imgToTxt/index.tsx`
+- [文件位置](./packages/test/src/views/imgToTxt/index.tsx)
 
 ![图像转文字预览](./docAssets/imgToTxt.webp)
 
@@ -217,8 +219,8 @@ pnpm test
 ## 🎨 图像编辑画板 (NoteBoard)
 
 - **在线查看**: https://jl-cvs.pages.dev/noteBoard
-- **文件位置**: `packages/test/src/views/noteBoard/index.tsx`
-- **架构设计文档**: `packages/jl-cvs/src/NoteBoard/README.md`
+- [文件位置](./packages/test/src/views/noteBoard/index.tsx)
+- [架构设计文档](packages/jl-cvs/src/NoteBoard/README.md)
 
 ![图像编辑画板预览](./docAssets/noteBoard.webp)
 
@@ -241,7 +243,7 @@ pnpm test
 ## 🎯 刮刮卡效果 (Scratch)
 
 - **在线查看**: https://jl-cvs.pages.dev/scratch
-- **文件位置**: `packages/test/src/views/scratch/index.tsx`
+- [文件位置](./packages/test/src/views/scratch/index.tsx)
 
 ![刮刮卡效果预览](./docAssets/scratch.webp)
 
@@ -261,7 +263,7 @@ pnpm test
 ## 📸 截图工具 (ShotImg)
 
 - **在线查看**: https://jl-cvs.pages.dev/shotImg
-- **文件位置**: `packages/test/src/views/shotImg/index.tsx`
+- [文件位置](./packages/test/src/views/shotImg/index.tsx)
 
 ![截图工具预览](./docAssets/shotImg.webp)
 
@@ -280,7 +282,7 @@ pnpm test
 ## ⭐ 星空场景 (StarField)
 
 - **在线查看**: https://jl-cvs.pages.dev/starField
-- **文件位置**: `packages/test/src/views/starField/index.tsx`
+- [文件位置](./packages/test/src/views/starField/index.tsx)
 
 ![星空场景预览](./docAssets/starField.webp)
 
@@ -302,7 +304,7 @@ pnpm test
 ## 🔢 科技数字 (TechNum)
 
 - **在线查看**: https://jl-cvs.pages.dev/techNum
-- **文件位置**: `packages/test/src/views/techNum/index.tsx`
+- [文件位置](./packages/test/src/views/techNum/index.tsx)
 
 ![科技数字预览](./docAssets/techNum.gif)
 
@@ -326,7 +328,7 @@ pnpm test
 ## 🌊 水波纹效果 (WaterRipple)
 
 - **在线查看**: https://jl-cvs.pages.dev/waterRipple
-- **文件位置**: `packages/test/src/views/waterRipple/index.tsx`
+- [文件位置](./packages/test/src/views/waterRipple/index.tsx)
 
 ![水波纹效果预览](./docAssets/waterRipple.webp)
 
@@ -348,7 +350,7 @@ pnpm test
 ## 〰️ 波浪线条 (WavyLines)
 
 - **在线查看**: https://jl-cvs.pages.dev/wavyLines
-- **文件位置**: `packages/test/src/views/wavyLines/index.tsx`
+- [文件位置](./packages/test/src/views/wavyLines/index.tsx)
 
 ![波浪线条预览](./docAssets/wavyLines.webp)
 
@@ -370,7 +372,7 @@ pnpm test
 ## 🖼️ 图像处理 (ImgProcessing)
 
 - **在线查看**: https://jl-cvs.pages.dev/imgProcessing
-- **文件位置**: `packages/test/src/views/imgProcessing/index.tsx`
+- [文件位置](./packages/test/src/views/imgProcessing/index.tsx)
 
 **功能特性**:
 - **噪点化处理**: 为图像添加噪点效果，可调节噪点强度
@@ -389,7 +391,7 @@ pnpm test
 ## 📊 图像数据处理 (ImgDataProcessing)
 
 - **在线查看**: https://jl-cvs.pages.dev/imgDataProcessing
-- **文件位置**: `packages/test/src/views/imgDataProcessing/index.tsx`
+- [文件位置](./packages/test/src/views/imgDataProcessing/index.tsx)
 
 **功能特性**:
 - **灰度化处理**: 使用加权灰度化算法将彩色图像转为灰度图
@@ -406,7 +408,7 @@ pnpm test
 ## 🔍 图像边缘检测 (ImgEdgeDetection)
 
 - **在线查看**: https://jl-cvs.pages.dev/imgEdgeDetection
-- **文件位置**: `packages/test/src/views/imgEdgeDetection/index.tsx`
+- [文件位置](./packages/test/src/views/imgEdgeDetection/index.tsx)
 
 ![图像边缘检测预览](./docAssets/imgEdge.webp)
 
@@ -422,7 +424,7 @@ pnpm test
 ## 🎬 截取视频帧 (CaptureVideoFrame)
 
 - **在线查看**: https://jl-cvs.pages.dev/captureVideoFrame
-- **文件位置**: `packages/test/src/views/captureVideoFrame/index.tsx`
+- [文件位置](./packages/test/src/views/captureVideoFrame/index.tsx)
 
 **功能特性**:
 - **视频上传**: 支持拖拽或点击上传视频文件
