@@ -1,4 +1,5 @@
 /* eslint-disable */
+
 import { getImgData } from '@jl-org/tool'
 import { getGrayscaleArray } from './handleImgData'
 
@@ -32,7 +33,10 @@ export async function getImgEdge(
 // * 工具函数
 // ======================
 
-/** Sobel 边缘检测 */
+/**
+ * Sobel 边缘检测
+ * @returns 边缘检测后的图片数据
+ */
 function sobelEdgeDetection(
   grayData: Uint8Array,
   width: number,
@@ -40,11 +44,17 @@ function sobelEdgeDetection(
   threshold: number,
 ): ImageData {
   const edgeData = new ImageData(width, height)
+  /**
+   * 左右两边对比，中间不动
+   */
   const sobelXKernel = [
     -1, 0, 1,
     -2, 0, 2,
     -1, 0, 1,
   ]
+  /**
+   * 上下两边对比，中间不动
+   */
   const sobelYKernel = [
     -1, -2, -1,
     0, 0, 0,
@@ -55,7 +65,12 @@ function sobelEdgeDetection(
     for (let x = 1; x < width - 1; x++) {
       let gx = 0; let gy = 0
 
-      // 3x3卷积
+      /**
+       * 获取周围 3 * 3 的卷积像素点，计算梯度
+       * (x-1, y-1)  (x, y-1)  (x+1, y-1)
+       * (x-1, y)    (x, y)    (x+1, y)
+       * (x-1, y+1)  (x, y+1)  (x+1, y+1)
+       */
       for (let ky = -1; ky <= 1; ky++) {
         for (let kx = -1; kx <= 1; kx++) {
           const pixelValue = grayData[(y + ky) * width + (x + kx)]

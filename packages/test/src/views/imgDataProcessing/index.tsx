@@ -1,14 +1,13 @@
 import { adaptiveBinarize, adaptiveGrayscale, changeImgColor, enhanceContrast } from '@jl-org/cvs'
-import { debounce, getImgData } from '@jl-org/tool'
+import { debounce, getColorInfo, getImgData, type Pixel } from '@jl-org/tool'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import { Input } from '@/components/Input'
+import { Message } from '@/components/Message'
 import { Slider } from '@/components/Slider'
 import { type FileItem, Uploader } from '@/components/Uploader'
 import { useGetState } from '@/hooks'
-
-type ProcessType = 'grayscale' | 'contrast' | 'binarize' | 'colorReplace'
 
 export default function ImgDataProcessingTest() {
   const [config, setConfig] = useGetState({
@@ -17,8 +16,8 @@ export default function ImgDataProcessingTest() {
     /** 二值化参数 */
     binarizeThreshold: 128,
     /** 颜色替换参数 */
-    fromColor: '#ffffff',
-    toColor: '#ff0000',
+    fromColor: '#7E696E',
+    toColor: '#5f8',
   }, true)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -159,8 +158,42 @@ export default function ImgDataProcessingTest() {
       /** 先获取原图尺寸 */
       const { imgData: originalImgData, width, height } = await getImgData(currentImage)
 
+      const fromColor = getColorInfo(latestConfig.fromColor)
+      console.log('源颜色信息:', fromColor, '配置:', latestConfig.fromColor)
+      console.log('目标颜色信息:', getColorInfo(latestConfig.toColor), '配置:', latestConfig.toColor)
+
+      let replacedCount = 0 // 记录替换的像素数量
+
+      const isNear = (pixel: Pixel) => {
+        const r = pixel[0]
+        const g = pixel[1]
+        const b = pixel[2]
+        const a = pixel[3]
+        const normalizedFromAlpha = Math.round(fromColor.a * 255) // 将 0-1 范围转换为 0-255 范围
+        const isMatch = Math.abs(r - fromColor.r) < 10
+          && Math.abs(g - fromColor.g) < 10
+          && Math.abs(b - fromColor.b) < 10
+          && Math.abs(a - normalizedFromAlpha) < 10
+
+        if (isMatch) {
+          replacedCount++
+        }
+        return isMatch
+      }
+
       /** 进行颜色替换 */
-      const result = await changeImgColor(currentImage, latestConfig.fromColor, latestConfig.toColor)
+      const result = await changeImgColor(
+        currentImage,
+        latestConfig.fromColor,
+        latestConfig.toColor,
+        {
+          isSameColor(pixel) {
+            return isNear(pixel)
+          },
+        },
+      )
+
+      Message.success(`颜色替换完成，共替换了 ${replacedCount} 个像素`)
 
       /** 显示处理结果 - 使用原图尺寸 */
       if (canvasRef.current) {
@@ -227,7 +260,7 @@ export default function ImgDataProcessingTest() {
 
   return (
     <div className="min-h-screen from-pink-50 to-rose-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
-      {/* 页面标题 */}
+      {/* 页面标题 */ }
       <div className="p-6 text-center">
         <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           🎯 图像数据处理
@@ -237,12 +270,12 @@ export default function ImgDataProcessingTest() {
         </p>
       </div>
 
-      {/* 响应式布局容器 */}
+      {/* 响应式布局容器 */ }
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
-        {/* 左侧：效果展示区域 */}
+        {/* 左侧：效果展示区域 */ }
         <div className="flex-1">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* 原图显示 */}
+            {/* 原图显示 */ }
             <Card>
               <h3 className="mb-4 text-center text-lg text-gray-800 font-semibold dark:text-white">
                 原图
@@ -256,11 +289,11 @@ export default function ImgDataProcessingTest() {
               </div>
             </Card>
 
-            {/* 处理结果显示 */}
+            {/* 处理结果显示 */ }
             <Card>
               <h3 className="mb-4 text-center text-lg text-gray-800 font-semibold dark:text-white">
                 处理结果
-                {isProcessing && <span className="ml-2 text-sm text-blue-500">处理中...</span>}
+                { isProcessing && <span className="ml-2 text-sm text-blue-500">处理中...</span> }
               </h3>
               <div className="flex items-center justify-center min-h-[300px]">
                 <canvas
@@ -273,7 +306,7 @@ export default function ImgDataProcessingTest() {
           </div>
         </div>
 
-        {/* 右侧：控制面板 */}
+        {/* 右侧：控制面板 */ }
         <div className="w-full lg:w-96">
           <Card>
             <div className="max-h-[80vh] overflow-y-auto p-6">
@@ -281,7 +314,7 @@ export default function ImgDataProcessingTest() {
                 控制面板
               </h2>
 
-              {/* 处理类型选择 */}
+              {/* 处理类型选择 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   处理类型
@@ -326,7 +359,7 @@ export default function ImgDataProcessingTest() {
                 </div>
               </div>
 
-              {/* 图片上传 */}
+              {/* 图片上传 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   图片上传
@@ -344,8 +377,8 @@ export default function ImgDataProcessingTest() {
                 </Uploader>
               </div>
 
-              {/* 对比度增强参数 */}
-              {processType === 'contrast' && (
+              {/* 对比度增强参数 */ }
+              { processType === 'contrast' && (
                 <div className="mb-6">
                   <h3 className="mb-4 text-lg text-gray-700 font-medium dark:text-gray-200">
                     对比度参数
@@ -354,7 +387,7 @@ export default function ImgDataProcessingTest() {
                     <div>
                       <label className="mb-2 block text-sm text-gray-700 font-medium dark:text-gray-200">
                         增强因子 (
-                        {config.contrastFactor.toFixed(1)}
+                        { config.contrastFactor.toFixed(1) }
                         )
                       </label>
                       <div className="px-2">
@@ -379,10 +412,10 @@ export default function ImgDataProcessingTest() {
                     </div>
                   </div>
                 </div>
-              )}
+              ) }
 
-              {/* 二值化参数 */}
-              {processType === 'binarize' && (
+              {/* 二值化参数 */ }
+              { processType === 'binarize' && (
                 <div className="mb-6">
                   <h3 className="mb-4 text-lg text-gray-700 font-medium dark:text-gray-200">
                     二值化参数
@@ -391,7 +424,7 @@ export default function ImgDataProcessingTest() {
                     <div>
                       <label className="mb-2 block text-sm text-gray-700 font-medium dark:text-gray-200">
                         二值化阈值 (
-                        {config.binarizeThreshold}
+                        { config.binarizeThreshold }
                         )
                       </label>
                       <div className="px-2">
@@ -415,10 +448,10 @@ export default function ImgDataProcessingTest() {
                     </div>
                   </div>
                 </div>
-              )}
+              ) }
 
-              {/* 颜色替换参数 */}
-              {processType === 'colorReplace' && (
+              {/* 颜色替换参数 */ }
+              { processType === 'colorReplace' && (
                 <div className="mb-6">
                   <h3 className="mb-4 text-lg text-gray-700 font-medium dark:text-gray-200">
                     颜色替换参数
@@ -467,31 +500,31 @@ export default function ImgDataProcessingTest() {
                     </div>
                   </div>
                 </div>
-              )}
+              ) }
 
-              {/* 快速设置 */}
+              {/* 快速设置 */ }
               <div className="mb-6">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   快速设置
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
-                  {processType === 'contrast' && (
+                  { processType === 'contrast' && (
                     <>
                       <Button onClick={ () => updateConfig('contrastFactor', 0.8) } variant="default" size="sm">低对比度</Button>
                       <Button onClick={ () => updateConfig('contrastFactor', 1.2) } variant="default" size="sm">中对比度</Button>
                       <Button onClick={ () => updateConfig('contrastFactor', 1.8) } variant="default" size="sm">高对比度</Button>
                       <Button onClick={ () => updateConfig('contrastFactor', 2.5) } variant="default" size="sm">超高对比度</Button>
                     </>
-                  )}
-                  {processType === 'binarize' && (
+                  ) }
+                  { processType === 'binarize' && (
                     <>
                       <Button onClick={ () => updateConfig('binarizeThreshold', 64) } variant="default" size="sm">低阈值</Button>
                       <Button onClick={ () => updateConfig('binarizeThreshold', 128) } variant="default" size="sm">中阈值</Button>
                       <Button onClick={ () => updateConfig('binarizeThreshold', 192) } variant="default" size="sm">高阈值</Button>
                       <Button onClick={ () => updateConfig('binarizeThreshold', 240) } variant="default" size="sm">超高阈值</Button>
                     </>
-                  )}
-                  {processType === 'colorReplace' && (
+                  ) }
+                  { processType === 'colorReplace' && (
                     <>
                       <Button
                         onClick={ () => {
@@ -530,17 +563,17 @@ export default function ImgDataProcessingTest() {
                         蓝→黄
                       </Button>
                     </>
-                  )}
+                  ) }
                 </div>
               </div>
 
-              {/* 使用说明 */}
+              {/* 使用说明 */ }
               <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-600">
                 <h3 className="mb-3 text-lg text-gray-700 font-medium dark:text-gray-200">
                   使用说明
                 </h3>
                 <div className="text-sm text-gray-600 space-y-3 dark:text-gray-300">
-                  {processType === 'grayscale' && (
+                  { processType === 'grayscale' && (
                     <>
                       <div>
                         <strong>灰度化：</strong>
@@ -551,8 +584,8 @@ export default function ImgDataProcessingTest() {
                         图像预处理、降低计算复杂度
                       </div>
                     </>
-                  )}
-                  {processType === 'contrast' && (
+                  ) }
+                  { processType === 'contrast' && (
                     <>
                       <div>
                         <strong>对比度增强：</strong>
@@ -563,8 +596,8 @@ export default function ImgDataProcessingTest() {
                         0.5-3.0，数值越大对比度越强
                       </div>
                     </>
-                  )}
-                  {processType === 'binarize' && (
+                  ) }
+                  { processType === 'binarize' && (
                     <>
                       <div>
                         <strong>二值化：</strong>
@@ -579,23 +612,23 @@ export default function ImgDataProcessingTest() {
                         0-255，推荐先进行灰度化和对比度增强
                       </div>
                     </>
-                  )}
-                  {processType === 'colorReplace' && (
+                  ) }
+                  { processType === 'colorReplace' && (
                     <>
                       <div>
                         <strong>颜色替换：</strong>
                         将图像中指定颜色替换为另一种颜色
                       </div>
                       <div>
-                        <strong>精确匹配：</strong>
-                        当前为精确匹配模式，需要颜色完全一致
+                        <strong>容错匹配：</strong>
+                        当前为容错匹配模式，RGB 值相差在 10 以内的像素都会被替换
                       </div>
                       <div>
                         <strong>透明度：</strong>
-                        支持 RGBA 颜色空间处理
+                        支持 RGBA 颜色空间处理，alpha 值也会进行容错匹配
                       </div>
                     </>
-                  )}
+                  ) }
                 </div>
               </div>
             </div>
@@ -605,3 +638,5 @@ export default function ImgDataProcessingTest() {
     </div>
   )
 }
+
+type ProcessType = 'grayscale' | 'contrast' | 'binarize' | 'colorReplace'

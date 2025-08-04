@@ -9,6 +9,7 @@ const SEP = { path: '/', name: '' }
 
 const pathArr = [
   { path: '/waterRipple', name: '🌊 水波纹效果' },
+
   { path: '/noteBoard', name: '🎨 图像编辑画板' },
   { path: '/shotImg', name: '📸 图片截图' },
   { path: '/cutoutImg', name: '✂️ 图像抠图' },
@@ -17,14 +18,15 @@ const pathArr = [
   { path: '/imgEdgeDetection', name: '🔍 图像边缘检测' },
   { path: '/imgProcessing', name: '🎨 图像处理工具' },
   { path: '/imgDataProcessing', name: '🎯 图像数据处理' },
+  { path: '/imgToTxt', name: '📝 图像转文字' },
+  { path: '/imgToFade', name: '🖼️ 图像灰飞烟灭' },
+
   { path: '/firework', name: '🎆 烟花效果' },
   { path: '/starField', name: '⭐ 星空场景' },
   { path: '/halftoneWave', name: '🌀 半调波浪' },
   { path: '/globeSphere', name: '🌍 球体地球仪' },
   { path: '/wavyLines', name: '〰️ 波浪线条' },
   { path: '/grid', name: '📐 网格效果' },
-  { path: '/imgToFade', name: '🖼️ 图像淡化' },
-  { path: '/imgToTxt', name: '📝 图像转文字' },
   { path: '/scratch', name: '🎯 刮刮卡' },
   { path: '/techNum', name: '🔢 科技数字' },
 ]

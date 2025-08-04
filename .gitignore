@@ -19,6 +19,7 @@ vite.config.ts.timestamp*
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+.hidden
 .idea
 .DS_Store
 *.suo

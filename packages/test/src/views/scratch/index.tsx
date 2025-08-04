@@ -166,7 +166,7 @@ export default function ScratchTest() {
       </div>
 
       {/* 控制面板 */ }
-      <Card className="p-6">
+      <Card className="">
         <h2 className="mb-4 text-xl text-gray-800 font-semibold dark:text-white">
           控制面板
         </h2>
@@ -288,59 +288,65 @@ export default function ScratchTest() {
       </Card>
 
       {/* 刮刮卡展示区域 */ }
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Card className="">
-          <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
+          <h3 className="mb-4 text-lg text-gray-800 font-semibold dark:text-white">
             刮刮卡体验
           </h3>
 
-          {/* 进度显示 */ }
-          <div className="mb-4 text-center">
-            <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
-              刮开进度:
-              { ' ' }
-              { scratchProgress }
-              %
-            </div>
-            <div className="h-2 w-full rounded-full bg-gray-200">
+          {/* 刮刮卡容器 */ }
+          <div className="flex flex-col items-center">
+            {/* 进度显示 */ }
+            <div className="mb-4 text-center">
+              <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
+                刮开进度:
+                { ' ' }
+                { scratchProgress }
+                %
+              </div>
               <div
-                className="h-2 rounded-full bg-yellow-500 transition-all duration-300"
-                style={ { width: `${scratchProgress}%` } }
+                className="h-2 rounded-full bg-gray-200"
+                style={ { width: config.width } }
+              >
+                <div
+                  className="h-2 rounded-full bg-yellow-500 transition-all duration-300"
+                  style={ { width: `${scratchProgress}%` } }
+                />
+              </div>
+            </div>
+
+            <div
+              className="relative overflow-hidden border-4 border-yellow-400 rounded-lg shadow-lg flex justify-center items-center"
+              style={ { width: config.width, height: config.height } }
+            >
+              {/* 奖品内容 */ }
+              <div className="absolute inset-0 flex flex-col items-center justify-center from-yellow-100 to-orange-100 bg-gradient-to-br p-4">
+                <div className={ cn('text-4xl font-bold mb-2', currentPrize.color) }>
+                  { currentPrize.text }
+                </div>
+                <div className="text-center text-lg text-gray-600">
+                  { currentPrize.subtitle }
+                </div>
+                { isRevealed && (
+                  <div className="mt-4 animate-pulse text-sm text-gray-500">
+                    🎊 恭喜您中奖了！
+                  </div>
+                ) }
+              </div>
+
+              {/* 刮奖层 */ }
+              <canvas
+                ref={ canvasRef }
+                className="absolute inset-0 cursor-crosshair"
+                width={ config.width }
+                height={ config.height }
               />
             </div>
-          </div>
-
-          <div
-            className="relative overflow-hidden border-4 border-yellow-400 rounded-lg shadow-lg flex justify-center items-center"
-            style={ { width: config.width, height: config.height } }
-          >
-            {/* 奖品内容 */ }
-            <div className="absolute inset-0 flex flex-col items-center justify-center from-yellow-100 to-orange-100 bg-gradient-to-br p-4">
-              <div className={ cn('text-4xl font-bold mb-2', currentPrize.color) }>
-                { currentPrize.text }
-              </div>
-              <div className="text-center text-lg text-gray-600">
-                { currentPrize.subtitle }
-              </div>
-              { isRevealed && (
-                <div className="mt-4 animate-pulse text-sm text-gray-500">
-                  🎊 恭喜您中奖了！
-                </div>
-              ) }
-            </div>
-
-            {/* 刮奖层 */ }
-            <canvas
-              ref={ canvasRef }
-              className="absolute inset-0 cursor-crosshair"
-              width={ config.width }
-              height={ config.height }
-            />
           </div>
         </Card>
 
         <Card className="">
-          <h3 className="mb-3 text-lg text-gray-800 font-semibold dark:text-white">
+          <h3 className="mb-4 text-lg text-gray-800 font-semibold dark:text-white">
             使用说明
           </h3>
           <div className="text-gray-600 space-y-4 dark:text-gray-300">
