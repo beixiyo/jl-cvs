@@ -137,7 +137,7 @@ export default function TechNumTest() {
       {/* 响应式布局容器 */}
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
         {/* 左侧：效果展示区域 */}
-        <div className="flex-1 flex justify-center items-center relative">
+        <div className="relative flex flex-1 items-center justify-center">
           <div className="rounded-lg bg-black p-8">
             <canvas
               ref={ canvasRef }
@@ -277,7 +277,7 @@ export default function TechNumTest() {
                     type="text"
                     value={ config.maskColor }
                     onChange={ e => updateConfig('maskColor', e.target.value) }
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                     placeholder="rgba(12, 12, 12, .1)"
                   />
                 </div>

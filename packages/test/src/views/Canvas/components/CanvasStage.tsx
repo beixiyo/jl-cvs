@@ -31,8 +31,8 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
   }, [onReady])
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="text-xs text-slate-500 px-4 py-2 bg-white border-b border-gray-200">内置：平移/缩放；后续绘制由库内部工具接管</div>
+    <div className="h-full flex flex-col">
+      <div className="border-b border-gray-200 bg-white px-4 py-2 text-xs text-slate-500">内置：平移/缩放；后续绘制由库内部工具接管</div>
       <div ref={ containerRef } className="flex-1 bg-white" />
     </div>
   )

@@ -176,7 +176,7 @@ export default function ImgProcessingTest() {
                   ? '水印参数'
                   : '原图' }
               </h3>
-              <div className="flex items-center justify-center min-h-[300px]">
+              <div className="min-h-[300px] flex items-center justify-center">
                 <canvas
                   ref={ originalCanvasRef }
                   className="border border-gray-300 rounded-lg bg-white shadow-md dark:border-gray-600 dark:bg-gray-800"
@@ -191,7 +191,7 @@ export default function ImgProcessingTest() {
                 处理结果
                 { isProcessing && <span className="ml-2 text-sm text-blue-500">处理中...</span> }
               </h3>
-              <div className="flex items-center justify-center min-h-[300px]">
+              <div className="min-h-[300px] flex items-center justify-center">
                 <div className="relative">
                   <canvas
                     ref={ canvasRef }
@@ -200,7 +200,7 @@ export default function ImgProcessingTest() {
                   />
                   { processType === 'watermark' && watermarkResult && (
                     <div
-                      className="absolute inset-0 rounded-lg pointer-events-none"
+                      className="pointer-events-none absolute inset-0 rounded-lg"
                       style={ {
                         backgroundImage: `url(${watermarkResult.base64})`,
                         backgroundSize: `${watermarkResult.size}px ${watermarkResult.size}px`,

@@ -1,11 +1,12 @@
-import type { BaseShape } from '../BaseShape'
+import type { ShapeMeta } from '../BaseShape'
 import type { ShapeStyle } from '../type'
+import { BaseShape } from '../BaseShape'
 
 /**
  * 绘制圆形
  */
-export class Circle implements BaseShape {
-  ctx: CanvasRenderingContext2D
+export class Circle extends BaseShape {
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
 
   startX: number
   startY: number
@@ -15,6 +16,7 @@ export class Circle implements BaseShape {
   shapeStyle: ShapeStyle = {}
 
   constructor(opts: CircleOpts) {
+    super(opts)
     this.ctx = opts.ctx
     this.ctx.lineCap = 'round'
 
@@ -27,9 +29,11 @@ export class Circle implements BaseShape {
     this.setShapeStyle(opts.shapeStyle)
   }
 
-  draw() {
-    const { ctx } = this
-
+  /**
+   * 绘制圆形
+   * @param ctx - 可选的 Canvas 渲染上下文
+   */
+  draw(ctx = this.ctx) {
     ctx.beginPath()
     ctx.arc(
       this.startX,
@@ -82,4 +86,6 @@ export type CircleOpts = {
   startY: number
   ctx: CanvasRenderingContext2D
   shapeStyle?: ShapeStyle
+  /** Canvas系统元数据（可选） */
+  meta?: ShapeMeta
 }

@@ -1,4 +1,4 @@
-import type { Rect } from './types'
+import type { Rect } from '@/Shapes/type'
 
 /**
  * 规范化矩形

@@ -1,11 +1,12 @@
-import type { BaseShape } from '../BaseShape'
+import type { ShapeMeta } from '../BaseShape'
 import type { ShapeStyle } from '../type'
+import { BaseShape } from '../BaseShape'
 
 /**
  * 绘制矩形
  */
-export class Rect implements BaseShape {
-  ctx: CanvasRenderingContext2D
+export class Rect extends BaseShape {
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
 
   startX: number
   startY: number
@@ -15,6 +16,7 @@ export class Rect implements BaseShape {
   shapeStyle: ShapeStyle = {}
 
   constructor(opts: RectOpts) {
+    super(opts)
     this.ctx = opts.ctx
     this.ctx.lineCap = 'square'
 
@@ -27,9 +29,11 @@ export class Rect implements BaseShape {
     this.setShapeStyle(opts.shapeStyle)
   }
 
-  draw() {
-    const { ctx } = this
-
+  /**
+   * 绘制矩形
+   * @param ctx - 可选的 Canvas 渲染上下文
+   */
+  draw(ctx = this.ctx) {
     ctx.beginPath()
 
     ctx.moveTo(this.minX, this.minY)
@@ -96,4 +100,6 @@ export type RectOpts = {
   startY: number
   ctx: CanvasRenderingContext2D
   shapeStyle?: ShapeStyle
+  /** Canvas系统元数据（可选） */
+  meta?: ShapeMeta
 }

@@ -1,4 +1,5 @@
-import type { Point, Rect, Size, ViewportState } from '../utils/types'
+import type { Point, Size, ViewportState } from '../utils/types'
+import type { Rect } from '@/Shapes/type'
 import { EventEmitter } from '../utils/EventEmitter'
 
 export interface ViewportOptions {

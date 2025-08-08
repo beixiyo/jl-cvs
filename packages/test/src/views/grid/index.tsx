@@ -233,7 +233,7 @@ export default function GridTest() {
       {/* 响应式布局容器 */ }
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
         {/* 左侧：效果展示区域 */ }
-        <div className="flex-1 flex justify-center items-center relative">
+        <div className="relative flex flex-1 items-center justify-center">
           <canvas
             ref={ canvasRef }
             className="border border-gray-300 rounded-lg shadow-xl dark:border-gray-600"
@@ -583,7 +583,7 @@ export default function GridTest() {
                         type="text"
                         value={ dotGridConfig.dotColor }
                         onChange={ e => updateDotGridConfig('dotColor', e.target.value) }
-                        className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                        className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                       />
                     </div>
                   </div>

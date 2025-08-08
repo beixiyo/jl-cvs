@@ -1,4 +1,3 @@
-import type { CanvasApp } from '../core/CanvasApp'
 import type { Viewport } from '../core/Viewport'
 import { InputController, type PointerEvt, type WheelEvt } from './InputController'
 

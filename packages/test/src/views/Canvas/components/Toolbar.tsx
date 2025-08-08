@@ -1,5 +1,5 @@
 import type { CanvasApp } from '@jl-org/cvs'
-import { Image as ImageIcon, Move, Pencil, Plus, RectangleHorizontal, RotateCcw, RotateCw, Trash2, Minus } from 'lucide-react'
+import { Image as ImageIcon, Minus, Move, Pencil, Plus, RectangleHorizontal, RotateCcw, RotateCw, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 /**
@@ -69,66 +69,80 @@ export function Toolbar({ app, mode, onModeChange, onUndo, onRedo, onClear, onAd
   return (
     <div className="w-full border-b border-slate-200 bg-white">
       <input ref={ fileRef } type="file" accept="image/*" className="hidden" onChange={ handleFileChange } />
-      <div className="mx-auto max-w-[1400px] px-6 py-3 flex items-center justify-between">
+      <div className="mx-auto max-w-[1400px] flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+          <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1">
             <button
-              className={ `${iconBtn} ${mode === 'pan' ? activeIconBtn : ''}` }
-              onClick={ () => onModeChange('pan') }>
+              className={ `${iconBtn} ${mode === 'pan'
+                ? activeIconBtn
+                : ''}` }
+              onClick={ () => onModeChange('pan') }
+            >
               <Move size={ 18 } />
             </button>
             <button
-              className={ `${iconBtn} ${mode === 'rect' ? activeIconBtn : ''}` }
-              onClick={ () => onModeChange('rect') }>
+              className={ `${iconBtn} ${mode === 'rect'
+                ? activeIconBtn
+                : ''}` }
+              onClick={ () => onModeChange('rect') }
+            >
               <RectangleHorizontal size={ 18 } />
             </button>
             <button
-              className={ `${iconBtn} ${mode === 'pen' ? activeIconBtn : ''}` }
-              onClick={ () => onModeChange('pen') }>
+              className={ `${iconBtn} ${mode === 'pen'
+                ? activeIconBtn
+                : ''}` }
+              onClick={ () => onModeChange('pen') }
+            >
               <Pencil size={ 18 } />
             </button>
           </div>
-          
-          <div className="flex items-center gap-2 ml-2 pl-4 border-l border-slate-200">
+
+          <div className="ml-2 flex items-center gap-2 border-l border-slate-200 pl-4">
             <label className="text-sm text-slate-600 font-medium">颜色</label>
-            <input 
-              type="color" 
-              value={ penColor } 
-              onChange={ e => onPenColorChange(e.target.value) } 
-              className="h-8 w-8 p-0 border border-slate-200 rounded-lg cursor-pointer" 
+            <input
+              type="color"
+              value={ penColor }
+              onChange={ e => onPenColorChange(e.target.value) }
+              className="h-8 w-8 cursor-pointer border border-slate-200 rounded-lg p-0"
             />
-            <div className="flex items-center gap-2 ml-2">
+            <div className="ml-2 flex items-center gap-2">
               <label className="text-sm text-slate-600 font-medium">粗细</label>
-              <input 
-                type="range" 
-                min={ 1 } 
-                max={ 20 } 
-                step={ 1 } 
-                value={ penWidth } 
-                onChange={ e => onPenWidthChange(Number(e.target.value)) } 
+              <input
+                type="range"
+                min={ 1 }
+                max={ 20 }
+                step={ 1 }
+                value={ penWidth }
+                onChange={ e => onPenWidthChange(Number(e.target.value)) }
                 className="w-24 accent-blue-600"
               />
-              <span className="text-sm text-slate-600 w-6 text-center">{penWidth}</span>
+              <span className="w-6 text-center text-sm text-slate-600">{penWidth}</span>
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl">
-            <button 
-              className={ `${iconBtn}` } 
-              onClick={ () => app?.setZoom(zoom * 1.2) }>
+          <div className="flex items-center rounded-xl bg-slate-100 p-1">
+            <button
+              className={ `${iconBtn}` }
+              onClick={ () => app?.setZoom(zoom * 1.2) }
+            >
               <Plus size={ 18 } />
             </button>
-            <span className="px-2 text-sm text-slate-600 min-w-[50px] text-center">{(zoom * 100).toFixed(0)}%</span>
-            <button 
-              className={ `${iconBtn}` } 
-              onClick={ () => app?.setZoom(zoom / 1.2) }>
+            <span className="min-w-[50px] px-2 text-center text-sm text-slate-600">
+              {(zoom * 100).toFixed(0)}
+              %
+            </span>
+            <button
+              className={ `${iconBtn}` }
+              onClick={ () => app?.setZoom(zoom / 1.2) }
+            >
               <Minus size={ 18 } />
             </button>
           </div>
-          
-          <div className="flex items-center gap-1 ml-2 pl-4 border-l border-slate-200">
+
+          <div className="ml-2 flex items-center gap-1 border-l border-slate-200 pl-4">
             <button className={ iconBtn } onClick={ onUndo }>
               <RotateCcw size={ 18 } />
             </button>

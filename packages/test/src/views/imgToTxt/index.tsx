@@ -253,7 +253,7 @@ export default function ImgToTxtTest() {
       {/* 响应式布局容器 */ }
       <div className="flex flex-col gap-6 px-6 lg:flex-row">
         {/* 左侧：效果展示区域 */ }
-        <div className="flex-1 flex justify-center items-center relative">
+        <div className="relative flex flex-1 items-center justify-center">
           <canvas
             ref={ canvasRef }
             className="border border-gray-300 rounded-lg bg-white shadow-xl dark:border-gray-600 dark:bg-gray-800"

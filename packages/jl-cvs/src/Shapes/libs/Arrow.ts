@@ -1,11 +1,12 @@
-import type { BaseShape } from '../BaseShape'
+import type { ShapeMeta } from '../BaseShape'
 import type { ShapeStyle } from '../type'
+import { BaseShape } from '../BaseShape'
 
 /**
  * 箭头图形类，实现BaseShape接口
  */
-export class Arrow implements BaseShape {
-  ctx: CanvasRenderingContext2D
+export class Arrow extends BaseShape {
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
 
   startX: number
   startY: number
@@ -31,6 +32,7 @@ export class Arrow implements BaseShape {
    * @param opts 箭头配置选项
    */
   constructor(opts: ArrowOpts) {
+    super(opts)
     this.ctx = opts.ctx
     /** 默认线条端点为圆形，可根据需要改为'butt'或'square' */
     this.ctx.lineCap = 'round'
@@ -46,9 +48,10 @@ export class Arrow implements BaseShape {
 
   /**
    * 绘制箭头图形
+   * @param ctx - 可选的 Canvas 渲染上下文
    */
-  draw(): void {
-    const { ctx, startX, startY, endX, endY } = this
+  draw(ctx = this.ctx): void {
+    const { startX, startY, endX, endY } = this
 
     /** 直接使用逻辑坐标 - ctx已经被DPR缩放 */
     const angle = Math.atan2(endY - startY, endX - startX)
@@ -174,4 +177,6 @@ export type ArrowOpts = {
   ctx: CanvasRenderingContext2D
   /** 图形样式（可选） */
   shapeStyle?: ShapeStyle
+  /** Canvas系统元数据（可选） */
+  meta?: ShapeMeta
 }

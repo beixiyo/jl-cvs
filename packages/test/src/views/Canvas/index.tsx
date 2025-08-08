@@ -1,12 +1,9 @@
-import type { CanvasApp, ShapeId } from '@jl-org/cvs'
+import type { CanvasApp } from '@jl-org/cvs'
 import { createUnReDoList } from '@jl-org/cvs'
-import { nanoid } from 'nanoid/non-secure'
+import { uniqueId } from '@jl-org/tool'
 import { useCallback, useRef, useState } from 'react'
 import { CanvasStage } from './components/CanvasStage'
 import { Toolbar, type ToolMode } from './components/Toolbar'
-import { DemoImage } from './shapes/DemoImage'
-import { DemoPath } from './shapes/DemoPath'
-import { DemoRect } from './shapes/DemoRect'
 
 /**
  * Canvas 测试页：演示无限画布、画笔、矩形、图片上传、撤销
@@ -23,13 +20,13 @@ export default function Canvas() {
   const handleReady = useCallback((app: CanvasApp) => {
     appRef.current = app
     for (let i = 0; i < 10; i++) {
-      const id = nanoid() as ShapeId
+      const id = uniqueId()
       const x = Math.random() * 800 - 400
       const y = Math.random() * 800 - 400
       const w = 40 + Math.random() * 80
       const h = 20 + Math.random() * 60
-      const rect = new DemoRect({ id, x, y, width: w, height: h })
-      app.add(rect)
+      // const rect = new DemoRect({ id, x, y, width: w, height: h })
+      // app.add(rect)
     }
   }, [])
 
@@ -37,10 +34,10 @@ export default function Canvas() {
     const app = appRef.current
     if (!app)
       return
-    const id = nanoid() as ShapeId
+    const id = uniqueId()
     const center = app.screenToWorld({ x: 200, y: 200 })
-    const rect = new DemoRect({ id, x: center.x, y: center.y, width: 120, height: 80 })
-    app.add(rect)
+    // const rect = new DemoRect({ id, x: center.x, y: center.y, width: 120, height: 80 })
+    // app.add(rect)
     history.current.add({ type: 'add', shape: 'rect', id })
     setTick(x => x + 1)
   }, [])
@@ -49,11 +46,11 @@ export default function Canvas() {
     const app = appRef.current
     if (!app)
       return
-    const id = nanoid() as ShapeId
+    const id = uniqueId()
     const p = app.screenToWorld({ x: 300, y: 200 })
     const url = URL.createObjectURL(file)
-    const img = new DemoImage({ id, x: p.x, y: p.y, width: 240, height: 160, src: url })
-    app.add(img)
+    // const img = new DemoImage({ id, x: p.x, y: p.y, width: 240, height: 160, src: url })
+    // app.add(img)
     history.current.add({ type: 'add', shape: 'image', id })
     setTick(x => x + 1)
   }, [])
@@ -108,7 +105,7 @@ export default function Canvas() {
         onPenWidthChange={ setPenWidth }
         onAddImage={ handleAddImage }
       />
-      <div className="flex-1 overflow-hidden border border-gray-200 rounded-lg mt-4">
+      <div className="mt-4 flex-1 overflow-hidden border border-gray-200 rounded-lg">
         <CanvasStage onReady={ handleReady } mode={ mode } />
       </div>
     </div>

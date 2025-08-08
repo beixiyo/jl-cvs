@@ -1,7 +1,7 @@
-import type { Rect } from '../utils/types'
 import type { CanvasManager } from './CanvasManager'
 import type { Scene } from './Scene'
 import type { Viewport } from './Viewport'
+import type { Rect } from '@/Shapes/type'
 import { Scheduler } from './Scheduler'
 
 /** 渲染器初始化选项 */
@@ -151,9 +151,10 @@ export class RenderEngine {
       const candidates = this.scene.queryByRect(visibleWorldRect)
       for (let i = 0; i < candidates.length; i++) {
         const shape = candidates[i]
-        if (!shape.visible)
+        if (!shape.meta.visible)
           continue
-        shape.draw({ ctx: this.bufferCtx as any, viewport: this.viewport, dpiScale: dpr })
+
+        shape.draw(this.bufferCtx)
       }
 
       /** 将缓冲绘制到显示画布 */
@@ -185,9 +186,10 @@ export class RenderEngine {
     const candidates = this.scene.queryByRect(visibleWorldRect)
     for (let i = 0; i < candidates.length; i++) {
       const shape = candidates[i]
-      if (!shape.visible)
+      if (!shape.meta.visible)
         continue
-      shape.draw({ ctx: vctx as any, viewport: this.viewport, dpiScale: dpr })
+
+      shape.draw(vctx)
     }
 
     /** 复原 dpr 基础状态 */

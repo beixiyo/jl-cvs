@@ -1,4 +1,6 @@
-import type { CanvasAppOptions, IShape, Point, Rect, ShapeId } from '../utils/types'
+import type { CanvasAppOptions, Point } from '../utils/types'
+import type { BaseShape } from '@/Shapes/BaseShape'
+import type { Rect } from '@/Shapes/type'
 import { InteractionManager } from '../interaction/InteractionManager'
 import { EventEmitter } from '../utils/EventEmitter'
 import { CanvasManager } from './CanvasManager'
@@ -13,9 +15,9 @@ export interface CanvasAppEventMap {
   /** 画布尺寸或 dpr 变化 */
   resize: { width: number, height: number, dpr: number }
   /** 形状新增 */
-  shapeadded: IShape
+  shapeadded: BaseShape
   /** 形状移除 */
-  shaperemoved: ShapeId
+  shaperemoved: string
 }
 
 /**
@@ -95,14 +97,14 @@ export class CanvasApp extends EventEmitter<CanvasAppEventMap> {
   }
 
   /** 添加形状 */
-  add(shape: IShape): void {
+  add(shape: BaseShape): void {
     this.scene.add(shape)
     this.emit('shapeadded', shape)
     this.engine.requestRender()
   }
 
   /** 根据 id 移除形状 */
-  remove(id: ShapeId): void {
+  remove(id: string): void {
     this.scene.remove(id)
     this.emit('shaperemoved', id)
     this.engine.requestRender()

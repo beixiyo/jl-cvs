@@ -55,13 +55,13 @@ export function Menu(
       ) }
       style={ style }
     >
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <ThemeToggle className="my-0" size={ 70 } />
         <a
           href="https://github.com/beixiyo/jl-cvs"
           target="_blank"
           rel="noopener noreferrer"
-          className="p-2 rounded-md bg-gray-800 hover:bg-gray-700 transition-colors flex items-center justify-center"
+          className="flex items-center justify-center rounded-md bg-gray-800 p-2 transition-colors hover:bg-gray-700"
         >
           <Github size={ 20 } />
         </a>

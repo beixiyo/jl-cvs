@@ -32,7 +32,6 @@ export type Float = number;
 export interface Point { x: Float; y: Float }
 export interface Size { width: Float; height: Float }
 export interface Rect { x: Float; y: Float; width: Float; height: Float }
-export type ShapeId = string & { __brand: 'ShapeId' };
 
 export interface ShapeStyle {
   fill?: string | CanvasGradient | CanvasPattern;
@@ -49,7 +48,7 @@ export interface RenderContext {
 }
 
 export interface IShape {
-  readonly id: ShapeId;
+  readonly id: string;
   zIndex: number;
   visible: boolean;
   style: ShapeStyle;
@@ -78,7 +77,7 @@ export interface ICanvasApp {
   getViewport(): Viewport;
   getScene(): Scene;
   add(shape: IShape): void;
-  remove(id: ShapeId): void;
+  remove(id: string): void;
   clear(): void;
   worldToScreen(pt: Point): Point;
   screenToWorld(pt: Point): Point;
@@ -208,7 +207,7 @@ app.setZoom(1.2, { x: 400, y: 300 }); // 围绕屏幕点缩放
 app.panBy(50, 0);
 
 // 命中与选择事件
-app.on('selectionchange', (ids: ShapeId[]) => console.log(ids));
+app.on('selectionchange', (ids: string[]) => console.log(ids));
 
 // 导出图片
 const dataUrl = await app.exportAsImage('image/png');

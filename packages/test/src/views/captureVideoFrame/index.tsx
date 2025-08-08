@@ -222,20 +222,20 @@ export default function CaptureVideoFramePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="max-w-full mx-auto">
+    <div className="min-h-screen bg-gray-50 p-4 dark:bg-gray-900">
+      <div className="mx-auto max-w-full">
         {/* 主要内容区域：视频和轨道 */ }
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 mb-6 gap-6 xl:grid-cols-2">
           {/* 视频预览区域 */ }
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">视频预览</h3>
+          <Card className="border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+            <h3 className="mb-4 text-lg text-gray-900 font-semibold dark:text-gray-100">视频预览</h3>
             { currentVideo && videoDuration > 0
               ? (
                   <div className="space-y-4">
                     <video
                       src={ currentVideo }
                       controls
-                      className="w-full rounded border bg-black"
+                      className="w-full border rounded bg-black"
                       style={ { maxHeight: '300px' } }
                     >
                       您的浏览器不支持视频播放
@@ -257,7 +257,7 @@ export default function CaptureVideoFramePage() {
                   </div>
                 )
               : (
-                  <div className="flex items-center justify-center h-48 bg-gray-100 rounded">
+                  <div className="h-48 flex items-center justify-center rounded bg-gray-100">
                     <p className="text-gray-500">加载视频中...</p>
                   </div>
                 ) }
@@ -265,14 +265,14 @@ export default function CaptureVideoFramePage() {
 
           {/* 当前帧预览 */ }
           <Card className="">
-            <h3 className="text-lg font-semibold mb-4">当前帧</h3>
+            <h3 className="mb-4 text-lg font-semibold">当前帧</h3>
             { currentFrame
               ? (
                   <div className="space-y-4">
                     <LazyImg
                       src={ currentFrame.src }
                       alt={ `Frame at ${currentFrame.timestamp}s` }
-                      className="w-full rounded border"
+                      className="w-full border rounded"
                       style={ { maxHeight: '300px', objectFit: 'contain' } }
                     />
                     <div className="grid grid-cols-1 gap-2 text-sm">
@@ -292,7 +292,7 @@ export default function CaptureVideoFramePage() {
                   </div>
                 )
               : (
-                  <div className="flex items-center justify-center h-48 bg-gray-100 rounded">
+                  <div className="h-48 flex items-center justify-center rounded bg-gray-100">
                     <p className="text-gray-500">暂无选中帧</p>
                   </div>
                 ) }
@@ -302,7 +302,7 @@ export default function CaptureVideoFramePage() {
         {/* 视频轨道区域 */ }
         { frames.length > 0 && (
           <Card className="">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold">视频轨道</h3>
               <div className="text-sm text-gray-600">
                 已加载
@@ -327,10 +327,10 @@ export default function CaptureVideoFramePage() {
         ) }
 
         {/* 控制面板 */ }
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* 视频上传区域 */ }
           <Card className="">
-            <h3 className="text-lg font-semibold mb-4">视频文件</h3>
+            <h3 className="mb-4 text-lg font-semibold">视频文件</h3>
             <div className="space-y-4">
               <Uploader
                 className="h-32"
@@ -351,9 +351,9 @@ export default function CaptureVideoFramePage() {
 
           {/* 操作控制 */ }
           <Card className="">
-            <h3 className="text-lg font-semibold mb-4">操作控制</h3>
+            <h3 className="mb-4 text-lg font-semibold">操作控制</h3>
             <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Button
                   onClick={ loadInitialFrames }
                   disabled={ loading || !currentVideo }
@@ -373,7 +373,7 @@ export default function CaptureVideoFramePage() {
 
               { captureProgress && (
                 <div>
-                  <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <div className="mb-2 flex justify-between text-sm text-gray-600">
                     <span>截取进度</span>
                     <span>
                       { captureProgress.current }
@@ -383,9 +383,9 @@ export default function CaptureVideoFramePage() {
                       { captureProgress.total }
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="h-2 w-full rounded-full bg-gray-200">
                     <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      className="h-2 rounded-full bg-blue-600 transition-all duration-300"
                       style={ {
                         width: `${(captureProgress.current / captureProgress.total) * 100}%`,
                       } }

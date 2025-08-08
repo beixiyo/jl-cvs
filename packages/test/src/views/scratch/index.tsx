@@ -248,7 +248,7 @@ export default function ScratchTest() {
                 type="text"
                 value={ config.bg }
                 onChange={ e => updateConfig('bg', e.target.value) }
-                className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
               />
             </div>
           </div>
@@ -316,7 +316,7 @@ export default function ScratchTest() {
             </div>
 
             <div
-              className="relative overflow-hidden border-4 border-yellow-400 rounded-lg shadow-lg flex justify-center items-center"
+              className="relative flex items-center justify-center overflow-hidden border-4 border-yellow-400 rounded-lg shadow-lg"
               style={ { width: config.width, height: config.height } }
             >
               {/* 奖品内容 */ }

@@ -280,7 +280,7 @@ export default function ImgDataProcessingTest() {
               <h3 className="mb-4 text-center text-lg text-gray-800 font-semibold dark:text-white">
                 原图
               </h3>
-              <div className="flex items-center justify-center min-h-[300px]">
+              <div className="min-h-[300px] flex items-center justify-center">
                 <canvas
                   ref={ originalCanvasRef }
                   className="border border-gray-300 rounded-lg bg-white shadow-md dark:border-gray-600 dark:bg-gray-800"
@@ -295,7 +295,7 @@ export default function ImgDataProcessingTest() {
                 处理结果
                 { isProcessing && <span className="ml-2 text-sm text-blue-500">处理中...</span> }
               </h3>
-              <div className="flex items-center justify-center min-h-[300px]">
+              <div className="min-h-[300px] flex items-center justify-center">
                 <canvas
                   ref={ canvasRef }
                   className="border border-gray-300 rounded-lg bg-white shadow-md dark:border-gray-600 dark:bg-gray-800"
