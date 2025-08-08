@@ -31,9 +31,9 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
   }, [onReady])
 
   return (
-    <div className="grid grid-rows-[auto_1fr] h-full min-h-[400px]">
-      <div className="text-xs text-slate-500 px-4 py-2 bg-white">内置：平移/缩放；后续绘制由库内部工具接管</div>
-      <div ref={ containerRef } className="w-full h-full bg-white" />
+    <div className="flex flex-col h-full">
+      <div className="text-xs text-slate-500 px-4 py-2 bg-white border-b border-gray-200">内置：平移/缩放；后续绘制由库内部工具接管</div>
+      <div ref={ containerRef } className="flex-1 bg-white" />
     </div>
   )
 }

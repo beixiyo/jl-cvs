@@ -93,7 +93,7 @@ export default function Canvas() {
   }, [])
 
   return (
-    <div className="h-full grid grid-rows-[auto_1fr] bg-white">
+    <div className="h-full flex flex-col bg-white p-4">
       <Toolbar
         app={ appRef.current }
         mode={ mode }
@@ -108,7 +108,9 @@ export default function Canvas() {
         onPenWidthChange={ setPenWidth }
         onAddImage={ handleAddImage }
       />
-      <CanvasStage onReady={ handleReady } mode={ mode } />
+      <div className="flex-1 overflow-hidden border border-gray-200 rounded-lg mt-4">
+        <CanvasStage onReady={ handleReady } mode={ mode } />
+      </div>
     </div>
   )
 }

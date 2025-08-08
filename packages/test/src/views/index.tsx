@@ -10,7 +10,9 @@ export default function Index() {
       <div style={ {
         width: `calc(100% - ${menuWidth}px)`,
       } }>
-        <Outlet></Outlet>
+        <div className="h-screen overflow-hidden">
+          <Outlet />
+        </div>
       </div>
 
     </div>
