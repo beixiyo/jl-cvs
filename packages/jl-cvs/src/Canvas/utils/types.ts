@@ -35,8 +35,7 @@ export interface RenderContext {
 
 /** 视口状态 */
 export interface ViewportState {
-  panX: number
-  panY: number
+  pan: Point
   zoom: number
 }
 
@@ -63,9 +62,11 @@ export interface CanvasAppOptions {
   background?: string
   /** 是否使用 OffscreenCanvas（预留） */
   enableOffscreen?: boolean
-  /** 最小/最大/初始缩放 */
+  /** 最小缩放 */
   minZoom?: number
+  /** 最大缩放 */
   maxZoom?: number
+  /** 初始缩放 */
   zoom?: number
   /** 初始平移（世界坐标） */
   pan?: Point
@@ -75,4 +76,12 @@ export interface CanvasAppOptions {
   wheelZoomSpeed?: number
   /** 拖拽惯性（预留） */
   dragInertia?: boolean
+}
+
+export type ViewportOptions = Pick<
+  CanvasAppOptions,
+  'minZoom' | 'maxZoom' | 'zoom' | 'pan'
+> & {
+  /** 视口变化回调 */
+  onViewportChange?: (state: ViewportState) => void
 }

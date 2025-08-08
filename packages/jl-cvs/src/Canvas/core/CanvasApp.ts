@@ -34,10 +34,17 @@ export class CanvasApp extends EventEmitter<CanvasAppEventMap> {
   /** 创建应用实例 */
   constructor(options: CanvasAppOptions) {
     super()
+    const opts: CanvasAppOptions = {
+      pan: { x: 0, y: 0 },
+      zoom: 1,
+      minZoom: 0.05,
+      maxZoom: 16,
+      ...options,
+    }
 
     this.manager = new CanvasManager({
-      container: options.container,
-      background: options.background,
+      container: opts.container,
+      background: opts.background,
       onResize: (size, dpr) => {
         this.engine.requestRender()
         this.emit('resize', { width: size.width, height: size.height, dpr })
@@ -45,27 +52,25 @@ export class CanvasApp extends EventEmitter<CanvasAppEventMap> {
     })
 
     this.viewport = new Viewport({
-      minZoom: options.minZoom,
-      maxZoom: options.maxZoom,
-      zoom: options.zoom,
-      pan: options.pan,
+      minZoom: opts.minZoom,
+      maxZoom: opts.maxZoom,
+      zoom: opts.zoom,
+      pan: opts.pan,
+      onViewportChange: (state) => {
+        this.emit('viewportchange', state)
+        this.engine.requestRender()
+      },
     })
 
     this.scene = new Scene()
 
     this.engine = new RenderEngine(this.manager, this.viewport, this.scene, {
-      background: options.background,
+      background: opts.background,
       useBuffer: false,
     })
 
     /** 默认启用基础交互（平移 + 滚轮缩放） */
     this.enableBasicInteraction(true)
-
-    /** 视口变化时触发重绘 */
-    this.viewport.on('viewportchange', (state) => {
-      this.emit('viewportchange', state)
-      this.engine.requestRender()
-    })
 
     this.engine.start()
     this.engine.requestRender()
@@ -150,10 +155,17 @@ export class CanvasApp extends EventEmitter<CanvasAppEventMap> {
     const scaleX = (size.width - padding * 2) / bounds.width
     const scaleY = (size.height - padding * 2) / bounds.height
     const zoom = Math.max(0.01, Math.min(scaleX, scaleY))
-    this.viewport.setZoom(zoom, { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 })
+
+    this.viewport.setZoom(zoom, {
+      x: bounds.x + bounds.width / 2,
+      y: bounds.y + bounds.height / 2,
+    })
+
     this.viewport.setState({
-      panX: bounds.x + bounds.width / 2 - size.width / (2 * zoom),
-      panY: bounds.y + bounds.height / 2 - size.height / (2 * zoom),
+      pan: {
+        x: bounds.x + bounds.width / 2 - size.width / (2 * zoom),
+        y: bounds.y + bounds.height / 2 - size.height / (2 * zoom),
+      },
     })
   }
 
@@ -171,11 +183,7 @@ export class CanvasApp extends EventEmitter<CanvasAppEventMap> {
   /** 释放资源 */
   dispose(): void {
     this.engine.stop()
-    this.removeAllListeners()
+    this.clearAll()
     this.manager.dispose()
-  }
-
-  private removeAllListeners(): void {
-    ;(this as any).listeners = {}
   }
 }

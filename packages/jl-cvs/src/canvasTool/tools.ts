@@ -42,7 +42,12 @@ export function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEle
 /**
  * 获取设备像素比，最大值默认为 2
  */
-export const getDPR = (max = 2) => Math.min(window.devicePixelRatio, max)
+export function getDPR(max = 2) {
+  if (typeof window === 'undefined')
+    return 1
+
+  return Math.min(window.devicePixelRatio, max)
+}
 
 export type CtxFontOpt = {
   /** 字体大小，默认 16 */

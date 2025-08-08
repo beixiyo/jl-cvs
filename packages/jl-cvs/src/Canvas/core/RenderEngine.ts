@@ -143,8 +143,8 @@ export class RenderEngine {
         0,
         0,
         dpr * state.zoom,
-        -state.panX * dpr * state.zoom,
-        -state.panY * dpr * state.zoom,
+        -state.pan.x * dpr * state.zoom,
+        -state.pan.y * dpr * state.zoom,
       )
 
       const visibleWorldRect = this.getVisibleWorldRect()
@@ -178,8 +178,8 @@ export class RenderEngine {
       0,
       0,
       dpr * state.zoom,
-      -state.panX * dpr * state.zoom,
-      -state.panY * dpr * state.zoom,
+      -state.pan.x * dpr * state.zoom,
+      -state.pan.y * dpr * state.zoom,
     )
 
     const visibleWorldRect = this.getVisibleWorldRect()

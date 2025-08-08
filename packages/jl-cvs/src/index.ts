@@ -1,17 +1,18 @@
 export * from '@/Canvas'
 export * from '@/canvasTool'
-
 export * from '@/firework'
+
 export * from '@/GlobeSphere'
 export * from '@/Grid'
 export * from '@/HalftoneWave'
-
 export * from '@/imgToFade'
-export * from '@/imgToTxt'
 
+export * from '@/imgToTxt'
 export * from '@/NoteBoard'
+
 export * from '@/Ripple'
 export * from '@/scratch'
+export * from '@/Shapes'
 export * from '@/ShotImg'
 export * from '@/StarField'
 

@@ -8,60 +8,62 @@ const srcDir = fileURLToPath(new URL('./src', import.meta.url))
 const distDir = fileURLToPath(new URL('./dist', import.meta.url))
 const distWorkerDir = fileURLToPath(new URL('./dist/worker', import.meta.url))
 
-export default defineConfig({
-  plugins: [
-    dts({
-      root: srcDir,
-    }),
-    cleanupPlugin(distWorkerDir, ['.cjs', '.d.ts']),
-  ],
-  resolve: {
-    alias: {
-      '@': srcDir,
-    },
-  },
+export default defineConfig(({ mode }) => {
+  console.log(`build mode: ${mode}`)
 
-  build: {
-    minify: true,
-    outDir: distDir,
-
-    // lib 模式通常用于构建单一入口的库。对于多个自定义命名的入口（如这里的 index 和 workers）
-    // lib: {
-    //   entry: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
-    //   fileName: 'index',
-    //   formats: ['es', 'cjs'],
-    // },
-
-    rollupOptions: {
-      /**
-       * 对于所有在 input 中定义的入口点，严格保留它们原始的、完整的导出签名
-       * 不要进行任何基于使用情况的 tree-shaking 来移除这些入口点自身的导出
-       */
-      preserveEntrySignatures: 'strict',
-      input: {
-        index: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
-        ...getDirEntries('./src/worker'),
+  return {
+    plugins: [
+      dts({
+        root: srcDir,
+      }),
+      cleanupPlugin(distWorkerDir, ['.cjs', '.d.ts']),
+    ],
+    resolve: {
+      alias: {
+        '@': srcDir,
       },
-      output: [
-        // ESM 格式输出（主入口 + Worker）
-        {
-          format: 'es',
-          entryFileNames: '[name].js',
-        },
-        // CJS 格式输出（仅主入口）
-        {
-          format: 'cjs',
-          entryFileNames: '[name].cjs',
-        },
-      ],
-
-      external: ['@jl-org/tool'],
     },
-  },
 
-  // index.html 入口文件
-  root: fileURLToPath(new URL('./test', import.meta.url)),
-  publicDir: fileURLToPath(new URL('./public', import.meta.url)),
+    build: {
+      minify: true,
+      sourcemap: mode === 'development',
+      outDir: distDir,
+      emptyOutDir: true, // 在构建前清空输出目录
+
+      // lib 模式通常用于构建单一入口的库。对于多个自定义命名的入口（如这里的 index 和 workers）
+      // lib: {
+      //   entry: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
+      //   fileName: 'index',
+      //   formats: ['es', 'cjs'],
+      // },
+
+      rollupOptions: {
+        /**
+         * 对于所有在 input 中定义的入口点，严格保留它们原始的、完整的导出签名
+         * 不要进行任何基于使用情况的 tree-shaking 来移除这些入口点自身的导出
+         */
+        preserveEntrySignatures: 'strict',
+        input: {
+          index: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
+          ...getDirEntries('./src/worker'),
+        },
+        output: [
+          // ESM 格式输出（主入口 + Worker）
+          {
+            format: 'es',
+            entryFileNames: '[name].js',
+          },
+          // CJS 格式输出（仅主入口）
+          {
+            format: 'cjs',
+            entryFileNames: '[name].cjs',
+          },
+        ],
+
+        external: ['@jl-org/tool'],
+      },
+    },
+  }
 })
 
 /**

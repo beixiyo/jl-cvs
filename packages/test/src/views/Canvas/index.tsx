@@ -19,15 +19,7 @@ export default function Canvas() {
 
   const handleReady = useCallback((app: CanvasApp) => {
     appRef.current = app
-    for (let i = 0; i < 10; i++) {
-      const id = uniqueId()
-      const x = Math.random() * 800 - 400
-      const y = Math.random() * 800 - 400
-      const w = 40 + Math.random() * 80
-      const h = 20 + Math.random() * 60
-      // const rect = new DemoRect({ id, x, y, width: w, height: h })
-      // app.add(rect)
-    }
+    // Initial shapes are now added in CanvasStage component
   }, [])
 
   const handleAddRect = useCallback(() => {

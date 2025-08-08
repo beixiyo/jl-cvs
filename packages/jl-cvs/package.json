@@ -22,6 +22,7 @@
   },
   "scripts": {
     "build": "npm run copy-readme && vite build",
+    "build:dev": "vite build --mode=development",
     "copy-readme": "node scripts/copy-readme.js",
     "clean": "node scripts/clean.js",
     "prepublishOnly": "npm run build",

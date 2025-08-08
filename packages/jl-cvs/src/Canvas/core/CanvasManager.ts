@@ -1,5 +1,5 @@
 import type { Size } from '../utils/types'
-import { getDevicePixelRatio } from '../utils/dpi'
+import { getDPR } from '@/canvasTool'
 
 /**
  * Canvas 管理器初始化选项
@@ -70,7 +70,7 @@ export class CanvasManager {
 
   /** 更新 DPR */
   private updateDpr() {
-    this.dpr = getDevicePixelRatio()
+    this.dpr = getDPR()
   }
 
   /**

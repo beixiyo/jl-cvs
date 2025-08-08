@@ -23,6 +23,9 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
       zoom: 1,
     })
     appRef.current = app
+
+    // Add initial demo shapes
+
     onReady?.(app)
 
     return () => {

@@ -68,28 +68,12 @@ export class Scene {
       const shape = arr[i]
       if (!shape.meta.visible)
         continue
-      const b = this.getBoundsFromShape(shape)
+
+      const b = shape.getBounds()
+
       if (rectsIntersect(rect, b))
         result.push(shape)
     }
     return result
-  }
-
-  /**
-   * 从BaseShape获取包围盒
-   * 根据startX, startY, endX, endY计算
-   */
-  private getBoundsFromShape(shape: BaseShape): Rect {
-    const minX = Math.min(shape.startX, shape.endX)
-    const minY = Math.min(shape.startY, shape.endY)
-    const maxX = Math.max(shape.startX, shape.endX)
-    const maxY = Math.max(shape.startY, shape.endY)
-
-    return {
-      x: minX,
-      y: minY,
-      width: maxX - minX,
-      height: maxY - minY,
-    }
   }
 }

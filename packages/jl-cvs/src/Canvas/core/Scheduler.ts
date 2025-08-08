@@ -20,6 +20,7 @@ export class Scheduler {
   start() {
     if (this.running)
       return
+
     this.running = true
     const tick = (ts: number) => {
       if (!this.running)
@@ -27,6 +28,7 @@ export class Scheduler {
       this.loop(ts)
       this.rafId = requestAnimationFrame(tick)
     }
+
     this.rafId = requestAnimationFrame(tick)
   }
 

@@ -47,11 +47,12 @@ export abstract class BaseShape {
 
   abstract isInPath(x: number, y: number): boolean
 
-  getBoundsFromShape(shape: BaseShape): Rect {
-    const minX = Math.min(shape.startX, shape.endX)
-    const minY = Math.min(shape.startY, shape.endY)
-    const maxX = Math.max(shape.startX, shape.endX)
-    const maxY = Math.max(shape.startY, shape.endY)
+  /** 获取包围盒 */
+  getBounds(): Rect {
+    const minX = Math.min(this.startX, this.endX)
+    const minY = Math.min(this.startY, this.endY)
+    const maxX = Math.max(this.startX, this.endX)
+    const maxY = Math.max(this.startY, this.endY)
 
     return {
       x: minX,
