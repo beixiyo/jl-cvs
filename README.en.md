@@ -450,365 +450,159 @@ Visit http://localhost:5173 to view all test pages
 
 ## 📚 API Function Documentation
 
-### All Functions
-
-- [Image Processing](#image-processing-api)
-- [Cutout](#cutout-api)
-- [Extract Image Edges](#extract-image-edges-api)
-- [Capture Video Frame](#capture-video-frame-api)
-- [ImageData Processing, Grayscale, Contrast, Binarization, etc.](#imagedata-processing-api)
-<br />
-
-- [Helper Functions](#canvas-helper-functions-api)
-- [Color Processing](#color-processing-api)
-- [SVG](#svg-api)
-
----
-
-### Image Processing API
-
-```ts
-/**
- * Add noise to image
- * @param img Image element
- * @param level Noise level, default 100
- */
-export declare function imgToNoise(img: HTMLImageElement, level?: number): HTMLCanvasElement
-
-/**
- * Add watermark
- * Returns base64 and image size, you can set it with CSS
- * @example
- * background-image: url(${base64});
- * background-size: ${size}px ${size}px;
- */
-export declare function waterMark({ fontSize, gap, text, color, rotate }: WaterMarkOpts): {
-  base64: string
-  size: number
-}
-
-/**
- * Compose images layer by layer using Canvas, supports base64 | blob
- */
-export declare function composeImg(srcs: Array<{
-  src: string | Blob
-  left?: number
-  top?: number
-  setImg?: (img: HTMLImageElement) => void
-}>, width: number, height: number): Promise<string>
-
-/**
- * Crop specified area of image, can set scaling, returns base64 | blob
- * @param img Image element
- * @param opts Configuration options
- * @param resType Return file format, default `base64`
- */
-export declare function cutImg<T extends TransferType = 'base64'>(img: HTMLImageElement, opts?: CutImgOpts, resType?: T): Promise<HandleImgReturn<T>>
-
-/**
- * Compress image
- * @param img Image element
- * @param resType Return file format, default `base64`
- * @param quality Compression quality, default 0.5
- * @param mimeType Image type, default `image/webp`. Only `image/jpeg | image/webp` can be compressed
- * @returns base64 | blob
- */
-export declare function compressImg<T extends TransferType = 'base64'>(img: HTMLImageElement, resType?: T, quality?: number, mimeType?: 'image/jpeg' | 'image/webp'): Promise<HandleImgReturn<T>>
-
-/**
- * Convert canvas image to base64 | blob
- * @param cvs Canvas element
- * @param resType Return file format, default `base64`
- * @param mimeType Image MIME format
- * @param quality Compression quality
- */
-export declare function getCvsImg<T extends TransferType = 'base64'>(cvs: HTMLCanvasElement, resType?: T, mimeType?: string, quality?: number): Promise<HandleImgReturn<T>>
-
-/**
- * Convert Blob to Base64
- */
-export declare function blobToBase64(blob: Blob): Promise<string>
-
-/**
- * Convert Base64 to Blob
- * @param base64Str Base64 string
- * @param mimeType File type, default application/octet-stream
- */
-export declare function base64ToBlob(base64Str: string, mimeType?: string): Blob
-
-/**
- * Convert HTTP URL to blob
- */
-export declare function urlToBlob(url: string): Promise<Blob>
-
-/**
- * Check if image src is available, returns image if available
- * @param src Image source
- * @param setImg Callback function executed before image loads
- */
-export declare const getImg: (src: string, setImg?: ((img: HTMLImageElement) => void) | undefined) => Promise<false | HTMLImageElement>
-```
+### Categories
+- **🖼️ Image Processing**: noise, watermark, composition, crop, compress, canvas export, download & conversions
+- **✂️ Cutout**: mask generation, composite cutout, smooth edge
+- **🔍 Image Edges**: Sobel edge detection
+- **🎬 Capture Video Frame**: Worker-first with Canvas fallback
+- **🧪 ImageData Processing**: grayscale, contrast, binarize, color replace, grayscale array
+- **🧰 Canvas Helpers**: font, clear, DPR, coordinate, pixel helpers, size utils
+- **🎨 Color Utilities**: RGBA parse, RGB/HEX convert, opacity utilities
+- **⚙️ Utilities**: debounce/throttle, deep clone, random number, string utils, undo/redo linked list
+- **🧩 SVG**: board, grid, text
+- **✨ Effects & Components**: Grid, DotGrid, HalftoneWave, WavyLines, WaterRipple, GlobeSphere, StarField, ShotImg, NoteBoard, Firework, TechNum
 
 ---
 
-### Cutout API
-```ts
-/**
- * Convert cutout to mask (replace non-transparent areas of image with specified color)
- * @param imgUrl Image URL
- * @param replaceColor Replacement color
- */
-export declare function cutoutImgToMask(imgUrl: string, replaceColor: string, { smoothEdge, smoothRadius, alphaThreshold, ignoreAlpha }?: CutImgToMaskOpts): Promise<{
-  base64: string
-  imgData: ImageData
-}>
+### 🖼️ Image Processing
+- **imgToNoise(img, level?)**: add noise to image
+  - Usage:
+  ```ts
+  const cvs = imgToNoise(img)
+  document.body.appendChild(cvs)
+  ```
 
-/**
- * Pass in an original image and a mask image, extract the opaque areas of the mask image.
- * Implemented using **globalCompositeOperation**
- *
- * @param originalImageSource Original image
- * @param maskImageSource Mask image
- */
-export declare function cutoutImg(originalImageSource: string | HTMLImageElement, maskImageSource: string | HTMLImageElement): Promise<string>
+- **waterMark({ text, fontSize, gap, color, rotate })**: generate tiled watermark
+  - Returns: `{ base64, size }`
+  - Usage:
+  ```css
+  background-image: url(${base64})
+  background-size: ${size}px ${size}px
+  ```
 
-/**
- * Pass in an original image and a mask image, extract the opaque areas of the mask image, and smooth the extracted areas.
- * Implemented by processing each pixel
- *
- * @param originalImg Original image
- * @param maskImg Mask image
- */
-export declare function cutoutImgSmoothed(originalImg: string, maskImg: string, { blurRadius, featherAmount, }?: CutoutImgOpts): Promise<ImageData>
-```
+- **composeImg([{ src, left, top }], width, height)**: compose multiple images and export base64
+  - Usage:
+  ```ts
+  const base64 = await composeImg([
+    { src: '/bg.png' },
+    { src: fileBlob, left: 40, top: 60 },
+  ], 800, 600)
+  ```
 
----
+- **cutImg(img, opts, resType?)**: crop area from image, export base64/blob
+  - Keys: `x y width height mimeType quality`
 
-### Extract Image Edges API
-```ts
-/**
- * Extract image edges
- * @param source Image URL or ImageData object
- * @param options Configuration options
- */
-export declare function getImgEdge(source: string | ImageData, options?: {
-  threshold?: number
-}): Promise<ImageData>
-```
+- **compressImg(img, resType?, quality?, mimeType?)**: compress image (`image/jpeg | image/webp`)
+
+- **getCvsImg(cvs, resType?, mimeType?, quality?)**: export canvas to base64/blob
+
+- **Download & conversions**:
+  - `downloadByData(data, filename)`, `downloadByUrl(url, filename)`
+  - `blobToBase64(blob)`, `base64ToBlob(base64, mimeType?)`
+  - `urlToBlob(url)`, `getImg(src)`
 
 ---
 
-### Capture Video Frame API
+### ✂️ Cutout
+- **cutoutImgToMask(imgUrl, replaceColor, opts?)**: turn cutout into mask (replace non-transparent areas)
+  - Options: `smoothEdge`, `smoothRadius`, `alphaThreshold`, `ignoreAlpha`, `handleAlpha`
 
-```ts
-/**
- * Example: Use Web Worker to capture frames at 1, 2, 100 seconds
- */
-const srcs = await captureVideoFrame(file, [1, 2, 100], 'base64', {
-  quality: 0.5,
-})
+- **cutoutImg(original, mask)**: extract opaque areas of mask from original image (transparent PNG output)
 
-/**
- * Capture a frame from video at specified time, uses last second if exceeds total duration.
- * Uses Worker for frame capture if browser supports ImageCapture, otherwise falls back to Canvas capture.
- * @param fileOrUrl File or URL
- * @param time Time, can be array
- * @param resType Return type
- */
-export declare function captureVideoFrame<N extends number | number[], T extends TransferType = 'base64'>(fileOrUrl: File | string, time: N, resType?: T, options?: Options): Promise<N extends number ? HandleImgReturn<T> : HandleImgReturn<T>[]>
-```
+- **cutoutImgSmoothed(original, mask, { blurRadius, featherAmount })**: per-pixel smooth cutout, returns `ImageData`
 
 ---
 
-### ImageData Processing API
-```ts
-/**
- * Grayscale algorithm: weighted grayscale
- * @returns
- */
-export declare const adaptiveGrayscale: (imageData: ImageData) => ImageData
-
-/**
- * Contrast enhancement
- * @param factor Factor, default 1.2
- * @returns
- */
-export declare const enhanceContrast: (imageData: ImageData, factor?: number) => ImageData
-
-/**
- * Binarization processing, please call first:
- * - adaptiveGrayscale
- * - enhanceContrast
- *
- * Then call this function for best image effect
- *
- * @param threshold Threshold boundary, default 128
- * @returns
- */
-export declare const adaptiveBinarize: (imageData: ImageData, threshold?: number) => ImageData
-
-/**
- * Pass in a reference image, returns another image where non-transparent areas of reference image will be cropped out
- * @param rawImg Original image
- * @param referenceImg Reference image
- */
-export declare function pickImgArea(rawImg: string, referenceImg: string): Promise<ImageData>
-
-/**
- * Pass in a reference image, returns another image where transparent areas of reference image will be cropped out
- * @param rawImg Original image
- * @param referenceImg Reference image
- */
-export declare function invertImgArea(rawImg: string, referenceImg: string): Promise<ImageData>
-```
+### 🔍 Image Edges
+- **getImgEdge(source, { threshold }?)**: Sobel edge detection
+  - `source` can be URL or `ImageData`, returns `ImageData`
 
 ---
 
-### Canvas Helper Functions API
-```ts
-/**
- * Set font, centered by default
- */
-export declare function setFont(ctx: CanvasRenderingContext2D, options: CtxFontOpt): void
-
-/** Clear entire canvas content */
-export declare function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void
-
-/**
- * Get DOM coordinates based on radius and angle
- * @param r Radius
- * @param deg Angle
- */
-export declare function calcCoord(r: number, deg: number): readonly [number, number]
-
-/**
- * Create a canvas with specified width and height
- * @param width Canvas width
- * @param height Canvas height
- * @param options Context configuration
- * @returns Object containing canvas and context
- */
-export declare function createCvs(width?: number, height?: number, options?: CanvasRenderingContext2DSettings): {
-  cvs: HTMLCanvasElement
-  ctx: CanvasRenderingContext2D
-}
-
-/**
- * Extract RGBA array at specific coordinates from canvas color described by one-dimensional array
- * ## Note: coordinates start from 0
- * @param x Column in width
- * @param y Row in height
- * @param imgData ImageData obtained by ctx.getImageData method
- * @returns RGBA array
- */
-export declare function getPixel(x: number, y: number, imgData: ImageData): Pixel
-
-/**
- * Beautify ctx.getImageData.data property
- * Each row is a large array, each pixel is a small array
- * @param imgData ImageData obtained by ctx.getImageData method
- */
-export declare function parseImgData(imgData: ImageData): Pixel[][]
-
-/** Function to fill a pixel in canvas with color */
-export declare function fillPixel(ctx: CanvasRenderingContext2D, x: number, y: number, color: string): void
-```
+### 🎬 Capture Video Frame
+- **captureVideoFrame(fileOrUrl, time, resType?, options?)**: capture frames at given time(s)
+  - Uses Worker with `ImageCapture` when available, fallback to Canvas
+  - `time` can be number or array, `resType` is `'base64' | 'blob'`
+  - Example:
+  ```ts
+  const frames = await captureVideoFrame(file, [1, 2, 8], 'base64', {
+    quality: 0.6
+  })
+  ```
 
 ---
 
-### Color Processing API
-```ts
-/**
- * Extract RGBA from color
- * @example
- * ```ts
- * getColorInfo('rgba(0, 0, 0, 1)')
- * getColorInfo('rgb(0, 0, 0)')
- *
- * getColorInfo('#fff')
- * getColorInfo('#fff1')
- * ```
- */
-export declare function getColorInfo(color: string): {
-  r: number
-  g: number
-  b: number
-  a: number
-}
+### 🧪 ImageData Processing
+- **adaptiveGrayscale(imageData)**: weighted grayscale
+- **enhanceContrast(imageData, factor=1.2)**: contrast enhancement
+- **adaptiveBinarize(imageData, threshold=128)**: binarization (call after grayscale & contrast)
+- **changeImgColor(imgOrUrl, fromColor, toColor, opts?)**: replace color with optional matcher
+  - Example:
+  ```ts
+  const { base64 } = await changeImgColor('/a.png', '#ff0000', 'rgba(0, 0, 255, .5)')
+  ```
+- **getGrayscaleArray(imageData)**: returns `Uint8Array`
 
-/** Get random hexadecimal color */
-export declare function getColor(): string
-
-/** Random hexadecimal color array */
-export declare function getColorArr(size: number): string[]
-
-/**
-## Convert hexadecimal color to original length color
-  - #000 => #000000
-  - #000f => #000000ff
- */
-export declare function hexColorToRaw(color: string): string
-
-/** Hexadecimal to RGB */
-export declare function hexToRGB(color: string): string
-
-/** RGB to hexadecimal */
-export declare function rgbToHex(color: string): string | undefined
-
-/**
- * Lighten color transparency, supports RGB and hexadecimal
- * @param color rgba(0, 239, 255, 1)
- * @param strength Lightening strength
- * @returns Returns RGBA format color like `rgba(0, 0, 0, 0.1)`
- */
-export declare function lightenColor(color: string, strength?: number): string
-
-/**
- * Add transparency to color, supports RGB and hexadecimal
- * @param color Color
- * @param opacity Opacity
- * @returns Returns hexadecimal format color like `#ffffff11`
- */
-export declare function colorAddOpacity(color: string, opacity?: number): string
-```
+> Note: Removed `pickImgArea` and `invertImgArea` from docs (not in codebase).
 
 ---
 
-### SVG API
-> The functions below, actually *genSvgBoard* | *genBoard*, are sufficient. Other exposed functions are just their internal implementations
-```ts
-/**
- * Generate SVG chessboard
- * @param width Width
- * @param height Height
- * @param gap Spacing
- * @param opts Text configuration options
- */
-export declare function genSvgBoard(width?: number, height?: number, gap?: number, opts?: Opts): {
-  svg: SVGSVGElement
-  g: SVGGElement
-}
+### 🧰 Canvas Helpers
+- Basics:
+  - **setFont(ctx, { size, family, weight, textAlign, textBaseline, color })**
+  - **clearAllCvs(ctx, canvas)**
+  - **getDPR(max=2)**
+  - **timeFunc(str) / genTimeFunc(str)**: time function generator (easing/tempo)
+- Size/coordinate:
+  - **getWinWidth() / getWinHeight()**, **calcCoord(r, deg)**
+  - **createCvs(width?, height?, options?) => { cvs, ctx }**
+- Pixel/data:
+  - **getImgData(imgOrUrl)**, **getImgDataIndex(x, y, width)**
+  - **getPixel(x, y, imgData)**, **parseImgData(imgData)**, **fillPixel(ctx, x, y, color)**
+  - **eachPixel(imgData, cb)**, **scaleImgData(imgData, scaleX, scaleY)**
 
-/** Generate chessboard path and text elements */
-export declare function genBoard(width?: number, height?: number, gap?: number, opts?: Opts): SVGGElement
+---
 
-/** Generate SVG */
-export declare function genSvg(viewBox?: string, width?: number, height?: number): SVGSVGElement
+### 🎨 Color Utilities
+- **getColorInfo(color)**, **getColor() / getColorArr(size)**
+- **hexColorToRaw(color)**, **hexToRGB(color)**, **rgbToHex(color)**
+- **lightenColor(color, strength?)**, **colorAddOpacity(color, opacity?)**
 
-/** Generate SVG path grid */
-export declare function genGrid(width?: number, height?: number, gap?: number, opts?: GridOpts): SVGPathElement
+### ⚙️ Utilities
+- **debounce(fn, wait)** / **throttle(fn, wait)**
+- **deepClone(obj)**, **excludeKeys(obj, keys)**
+- **getRandomNum(min, max)**, **randomStr(len)**, **numFixed(num, digits)**
+- **UnRedoLinkedList** / **createUnReDoList**
 
-/**
- * Generate grid path
- * @param width Width
- * @param height Height
- * @param gap Spacing
- * @param needHorizontal Need horizontal lines, default true
- * @param needVertical Need vertical lines, default true
- * @returns SVG path element's path d
- */
-export declare function genGridPath(width?: number, height?: number, gap?: number, needHorizontal?: boolean, needVertical?: boolean): string
+---
 
-/** Generate SVG text array */
-export declare function genTextArr(width?: number, height?: number, gap?: number, opts?: FontOpts): SVGTextElement[]
-``` 
+### 🧩 SVG
+- **genSvgBoard(width?, height?, gap?, opts?)** → `{ svg, g }`
+- **genBoard(width?, height?, gap?, opts?)** → `g`
+- **genSvg(viewBox?, width?, height?)** → `svg`
+- **genGrid(width?, height?, gap?, opts?)** → `path`
+- **genGridPath(width?, height?, gap?, needHorizontal?, needVertical?)** → `d`
+- **genTextArr(width?, height?, gap?, opts?)** → text elements
+
+---
+
+### ✨ Effects & Components
+- **Grid(canvas, options?)**, **DotGrid(canvas, options?)**
+- **HalftoneWave(canvas, options?)**, **WavyLines({ canvas, ... })**
+- **WaterRipple(options?)**
+  ```ts
+  const ripple = new WaterRipple({ circleCount: 10 })
+  document.body.appendChild(ripple.canvas)
+  ```
+- **GlobeSphere(canvas, options?)**, **StarField(canvas, options?)**
+- **imgToFade(bgCanvas, opts)**: image fade-away particles
+- **imgToTxt(options)**: image/video to text rendering
+- **ShotImg(canvas, img?, opacity?)**
+  ```ts
+  const s = new ShotImg(cvs, img)
+  const shot = await s.getShotImg('base64')
+  ```
+- **NoteBoard(options)** / **NoteBoardWithBase64(options)**
+- **createScratch(canvas, opts?)**: scratch card interaction
+- **createFirework(canvas, opts?)** / **createFirework2(canvas, opts)**
+- **createTechNum(options)**

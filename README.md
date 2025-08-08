@@ -450,365 +450,175 @@ pnpm test
 
 ## 📚 API 函数文档
 
-### 全部函数
-
-- [图像处理](#图像处理)
-- [抠图](#抠图)
-- [提取图像边缘](#提取图像边缘)
-- [截取视频某一帧](#截取视频某一帧)
-- [ImageData 处理，灰度、对比度、二值化等](#imagedata-处理)
-<br />
-
-- [辅助函数](#canvas-辅助函数)
-- [颜色处理](#颜色处理)
-- [svg](#svg)
-
----
-
-### 图像处理
-
-```ts
-/**
- * 图片噪点化
- * @param img 图片
- * @param level 噪点等级，默认 100
- */
-export declare function imgToNoise(img: HTMLImageElement, level?: number): HTMLCanvasElement
-
-/**
- * 添加水印
- * 返回 base64 和图片大小，你可以用 CSS 设置上
- * @example
- * background-image: url(${base64});
- * background-size: ${size}px ${size}px;
- */
-export declare function waterMark({ fontSize, gap, text, color, rotate }: WaterMarkOpts): {
-  base64: string
-  size: number
-}
-
-/**
- * 用 Canvas 层层叠加图片，支持 base64 | blob
- */
-export declare function composeImg(srcs: Array<{
-  src: string | Blob
-  left?: number
-  top?: number
-  setImg?: (img: HTMLImageElement) => void
-}>, width: number, height: number): Promise<string>
-
-/**
- * 裁剪图片指定区域，可设置缩放，返回 base64 | blob
- * @param img 图片
- * @param opts 配置
- * @param resType 需要返回的文件格式，默认 `base64`
- */
-export declare function cutImg<T extends TransferType = 'base64'>(img: HTMLImageElement, opts?: CutImgOpts, resType?: T): Promise<HandleImgReturn<T>>
-
-/**
- * 压缩图片
- * @param img 图片
- * @param resType 需要返回的文件格式，默认 `base64`
- * @param quality 压缩质量，默认 0.5
- * @param mimeType 图片类型，默认 `image/webp`。`image/jpeg | image/webp` 才能压缩
- * @returns base64 | blob
- */
-export declare function compressImg<T extends TransferType = 'base64'>(img: HTMLImageElement, resType?: T, quality?: number, mimeType?: 'image/jpeg' | 'image/webp'): Promise<HandleImgReturn<T>>
-
-/**
- * 把 canvas 上的图像转成 base64 | blob
- * @param cvs canvas
- * @param resType 需要返回的文件格式，默认 `base64`
- * @param mimeType 图片的 MIME 格式
- * @param quality 压缩质量
- */
-export declare function getCvsImg<T extends TransferType = 'base64'>(cvs: HTMLCanvasElement, resType?: T, mimeType?: string, quality?: number): Promise<HandleImgReturn<T>>
-
-/**
- * Blob 转 Base64
- */
-export declare function blobToBase64(blob: Blob): Promise<string>
-
-/**
- * Base64 转 Blob
- * @param base64Str base64
- * @param mimeType 文件类型，默认 application/octet-stream
- */
-export declare function base64ToBlob(base64Str: string, mimeType?: string): Blob
-
-/**
- * 把 http url 转 blob
- */
-export declare function urlToBlob(url: string): Promise<Blob>
-
-/**
- * 判断图片的 src 是否可用，可用则返回图片
- * @param src 图片
- * @param setImg 图片加载前执行的回调函数
- */
-export declare const getImg: (src: string, setImg?: ((img: HTMLImageElement) => void) | undefined) => Promise<false | HTMLImageElement>
-```
+### 全部分类
+- **🖼️ 图像处理**: 噪点、水印、叠图、裁剪、压缩、Canvas 导出、下载与格式转换
+- **✂️ 抠图**: 遮罩生成、基于遮罩的裁切、平滑边缘
+- **🔍 图像边缘**: Sobel 边缘检测
+- **🎬 截取视频帧**: 支持 Worker 与 Canvas 降级
+- **🧪 ImageData 处理**: 灰度、对比度、二值化、颜色替换、灰度数组
+- **🧰 Canvas 辅助**: 字体、清空、DPR、坐标、像素访问、尺寸工具
+- **🎨 颜色处理**: RGBA 解析、RGB/HEX 转换、透明度处理
+- **⚙️ 通用工具**: 防抖/节流、深拷贝、随机数、字符串、撤销重做链表
+- **🧩 SVG**: 棋盘、网格、文本
+- **✨ 动画与组件类**: 网格、点阵网格、半调波浪、波浪线、水波纹、球体、星空、截图、画板、烟花、数字雨
 
 ---
 
-### 抠图
-```ts
-/**
- * 抠图转遮罩（把图片的非透明区域，换成指定颜色）
- * @param imgUrl 图片
- * @param replaceColor 替换的颜色
- */
-export declare function cutoutImgToMask(imgUrl: string, replaceColor: string, { smoothEdge, smoothRadius, alphaThreshold, ignoreAlpha }?: CutImgToMaskOpts): Promise<{
-  base64: string
-  imgData: ImageData
-}>
+### 🖼️ 图像处理
+- **imgToNoise(img, level?)**: 为图片添加噪点
+  - 用途: 快速生成胶片颗粒或老照片质感
+  - 用法:
+  ```ts
+  const cvs = imgToNoise(img)
+  document.body.appendChild(cvs)
+  ```
 
-/**
- * 传入一张原始图片和一张遮罩图片，将遮罩图不透明的区域提取出来。
- * 使用 **globalCompositeOperation** 实现
- *
- * @param originalImageSource 原图
- * @param maskImageSource 遮罩图
- */
-export declare function cutoutImg(originalImageSource: string | HTMLImageElement, maskImageSource: string | HTMLImageElement): Promise<string>
+- **waterMark({ text, fontSize, gap, color, rotate })**: 生成平铺水印
+  - 返回: `{ base64, size }`
+  - 用法:
+  ```css
+  /* CSS 示例 */
+  background-image: url(${base64})
+  background-size: ${size}px ${size}px
+  ```
 
-/**
- * 传入一张原始图片和一张遮罩图片，将遮罩图不透明的区域提取出来，并对提取出的区域进行平滑处理。
- * 遍历处理每个像素实现
- *
- * @param originalImg 原图
- * @param maskImg 遮罩图
- */
-export declare function cutoutImgSmoothed(originalImg: string, maskImg: string, { blurRadius, featherAmount, }?: CutoutImgOpts): Promise<ImageData>
-```
+- **composeImg([{ src, left, top }], width, height)**: 用 Canvas 叠加多图并导出 base64
+  - 用法:
+  ```ts
+  const base64 = await composeImg([
+    { src: '/bg.png' },
+    { src: fileBlob, left: 40, top: 60 },
+  ], 800, 600)
+  ```
 
----
+- **cutImg(img, opts, resType?)**: 裁剪图片区域，支持导出 base64/blob
+  - 关键项: `x y width height mimeType quality`
 
-### 提取图像边缘
-```ts
-/**
- * 提取图片边缘
- * @param source 图片URL或ImageData对象
- * @param options 配置项
- */
-export declare function getImgEdge(source: string | ImageData, options?: {
-  threshold?: number
-}): Promise<ImageData>
-```
+- **compressImg(img, resType?, quality?, mimeType?)**: 压缩图片
+  - 仅 `image/jpeg | image/webp` 支持有损压缩
+
+- **getCvsImg(cvs, resType?, mimeType?, quality?)**: 将 Canvas 导出为 base64/blob
+
+- **下载与格式转换**:
+  - `downloadByData(data, filename)`、`downloadByUrl(url, filename)`
+  - `blobToBase64(blob)`、`base64ToBlob(base64, mimeType?)`
+  - `urlToBlob(url)`、`getImg(src)`
 
 ---
 
-### 截取视频某一帧
+### ✂️ 抠图
+- **cutoutImgToMask(imgUrl, replaceColor, opts?)**: 抠图转遮罩（非透明区替换为指定颜色）
+  - 选项: `smoothEdge` 边缘平滑、`smoothRadius` 半径、`alphaThreshold` 阈值、`ignoreAlpha` 是否忽略原 alpha、`handleAlpha` 自定义透明度
+  - 适合生成下载/叠加用的纯色遮罩图
 
-```ts
-/**
- * 示例，使用 Web Worker 截取视频 1、2、100 秒的图片
- */
-const srcs = await captureVideoFrame(file, [1, 2, 100], 'base64', {
-  quality: 0.5,
-})
+- **cutoutImg(original, mask)**: 基于遮罩图的不透明区域裁取原图
+  - 使用 `globalCompositeOperation` 实现，输出透明 PNG base64
 
-/**
- * 截取视频某一帧图片，大于总时长则用最后一秒。
- * 如果浏览器支持 ImageCapture，则使用 Worker 截取帧，否则降级为截取 Canvas。
- * @param fileOrUrl 文件或者链接
- * @param time 时间，可以是数组
- * @param resType 返回类型
- */
-export declare function captureVideoFrame<N extends number | number[], T extends TransferType = 'base64'>(fileOrUrl: File | string, time: N, resType?: T, options?: Options): Promise<N extends number ? HandleImgReturn<T> : HandleImgReturn<T>[]>
-```
+- **cutoutImgSmoothed(original, mask, { blurRadius, featherAmount })**: 像素级平滑边缘裁切
+  - 输出 `ImageData`
 
 ---
 
-### ImageData 处理
-```ts
-/**
- * 灰度化算法：加权灰度化
- * @returns
- */
-export declare const adaptiveGrayscale: (imageData: ImageData) => ImageData
-
-/**
- * 对比度增强
- * @param factor 因数，默认 1.2
- * @returns
- */
-export declare const enhanceContrast: (imageData: ImageData, factor?: number) => ImageData
-
-/**
- * 二值化处理，请先调用
- * - adaptiveGrayscale
- * - enhanceContrast
- *
- * 最后再调用此函数，以获得最好的图像效果
- *
- * @param threshold 阈值边界，默认 128
- * @returns
- */
-export declare const adaptiveBinarize: (imageData: ImageData, threshold?: number) => ImageData
-
-/**
- * 传入一张参考图，返回另一张图片，其中参考图的非透明区域将被裁剪掉
- * @param rawImg 原图
- * @param referenceImg 参考图
- */
-export declare function pickImgArea(rawImg: string, referenceImg: string): Promise<ImageData>
-
-/**
- * 传入一张参考图，返回另一张图片，其中参考图的透明区域将被裁剪掉
- * @param rawImg 原图
- * @param referenceImg 参考图
- */
-export declare function invertImgArea(rawImg: string, referenceImg: string): Promise<ImageData>
-```
+### 🔍 图像边缘
+- **getImgEdge(source, { threshold }?)**: 使用 Sobel 算子提取边缘
+  - `source` 可为图片 URL 或 `ImageData`
+  - 返回 `ImageData`
 
 ---
 
-### Canvas 辅助函数
-```ts
-/**
- * 设置字体，默认居中
- */
-export declare function setFont(ctx: CanvasRenderingContext2D, options: CtxFontOpt): void
-
-/** 清除 canvas 整个画布的内容 */
-export declare function clearAllCvs(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void
-
-/**
- * 根据半径和角度获取 DOM 坐标
- * @param r 半径
- * @param deg 角度
- */
-export declare function calcCoord(r: number, deg: number): readonly [number, number]
-
-/**
- * 创建一个指定宽高的画布
- * @param width 画布的宽度
- * @param height 画布的高度
- * @param options 上下文配置
- * @returns 包含画布和上下文的对象
- */
-export declare function createCvs(width?: number, height?: number, options?: CanvasRenderingContext2DSettings): {
-  cvs: HTMLCanvasElement
-  ctx: CanvasRenderingContext2D
-}
-
-/**
- * 取出 `canvas` 用一维数组描述的颜色中，某个坐标的`RGBA`数组
- * ## 注意坐标从 0 开始
- * @param x 宽度中的第几列
- * @param y 高度中的第几行
- * @param imgData ctx.getImageData 方法获取的 ImageData
- * @returns `RGBA`数组
- */
-export declare function getPixel(x: number, y: number, imgData: ImageData): Pixel
-
-/**
- * 美化 ctx.getImageData.data 属性
- * 每一行为一个大数组，每个像素点为一个小数组
- * @param imgData ctx.getImageData 方法获取的 ImageData
- */
-export declare function parseImgData(imgData: ImageData): Pixel[][]
-
-/** 给 canvas 某个像素点填充颜色的函数 */
-export declare function fillPixel(ctx: CanvasRenderingContext2D, x: number, y: number, color: string): void
-```
+### 🎬 截取视频帧
+- **captureVideoFrame(fileOrUrl, time, resType?, options?)**: 截取指定时间点的帧
+  - 自动选择: 支持 `ImageCapture` 用 Worker，缺失时降级 Canvas
+  - `time` 支持数字或数组，`resType` 支持 `'base64' | 'blob'`
+  - 示例：批量截帧并导出 base64
+  ```ts
+  const frames = await captureVideoFrame(file, [1, 2, 8], 'base64', {
+    quality: 0.6
+  })
+  ```
 
 ---
 
-### 颜色处理
-```ts
-/**
- * 把颜色提取出 RGBA
- * @example
- * ```ts
- * getColorInfo('rgba(0, 0, 0, 1)')
- * getColorInfo('rgb(0, 0, 0)')
- *
- * getColorInfo('#fff')
- * getColorInfo('#fff1')
- * ```
- */
-export declare function getColorInfo(color: string): {
-  r: number
-  g: number
-  b: number
-  a: number
-}
+### 🧪 ImageData 处理
+- **adaptiveGrayscale(imageData)**: 加权灰度化
+- **enhanceContrast(imageData, factor=1.2)**: 对比度增强
+- **adaptiveBinarize(imageData, threshold=128)**: 二值化（建议在灰度与对比度增强之后调用）
+- **changeImgColor(imgOrUrl, fromColor, toColor, opts?)**: 指定颜色替换
+  - 可自定义 `isSameColor(pixel, x, y, index)`
+  - 示例：将纯红替换为半透明蓝
+  ```ts
+  const { base64 } = await changeImgColor('/a.png', '#ff0000', 'rgba(0, 0, 255, .5)')
+  ```
+- **getGrayscaleArray(imageData)**: 获取灰度数组 `Uint8Array`
 
-/** 获取十六进制随机颜色 */
-export declare function getColor(): string
-
-/** 随机十六进制颜色数组 */
-export declare function getColorArr(size: number): string[]
-
-/**
-## 把十六进制颜色转成 原始长度的颜色
-  - #000 => #000000
-  - #000f => #000000ff
- */
-export declare function hexColorToRaw(color: string): string
-
-/** 十六进制 转 RGB */
-export declare function hexToRGB(color: string): string
-
-/** RGB 转十六进制 */
-export declare function rgbToHex(color: string): string | undefined
-
-/**
- * 淡化颜色透明度，支持 `RGB` 和 `十六进制`
- * @param color rgba(0, 239, 255, 1)
- * @param strength 淡化的强度
- * @returns 返回 RGBA 类似如下格式的颜色 `rgba(0, 0, 0, 0.1)`
- */
-export declare function lightenColor(color: string, strength?: number): string
-
-/**
- * 颜色添加透明度，支持 `RGB` 和 `十六进制`
- * @param color 颜色
- * @param opacity 透明度
- * @returns 返回十六进制 类似如下格式的颜色 `#ffffff11`
- */
-export declare function colorAddOpacity(color: string, opacity?: number): string
-```
+> 说明：旧文档中的 `pickImgArea`、`invertImgArea` 已移除（代码中不存在）。
 
 ---
 
-### svg
-> 下面的函数，其实 *genSvgBoard* | *genBoard*，就够用了，其他暴露的函数，仅仅是他们内部的实现
-```ts
-/**
- * 生成 svg 棋盘
- * @param width 宽度
- * @param height 高度
- * @param gap 间隔
- * @param opts 文字配置选项
- */
-export declare function genSvgBoard(width?: number, height?: number, gap?: number, opts?: Opts): {
-  svg: SVGSVGElement
-  g: SVGGElement
-}
+### 🧰 Canvas 辅助
+- 基础:
+  - **setFont(ctx, { size, family, weight, textAlign, textBaseline, color })**
+  - **clearAllCvs(ctx, canvas)**
+  - **getDPR(max=2)**
+  - **timeFunc(str) / genTimeFunc(str)**: 时间函数生成器（缓动/节拍）
+- 尺寸/坐标:
+  - **getWinWidth() / getWinHeight()**、**calcCoord(r, deg)**
+  - **createCvs(width?, height?, options?) => { cvs, ctx }**
+- 像素/数据:
+  - **getImgData(imgOrUrl)**、**getImgDataIndex(x, y, width)**
+  - **getPixel(x, y, imgData)**、**parseImgData(imgData)**、**fillPixel(ctx, x, y, color)**
+  - **eachPixel(imgData, cb)**、**scaleImgData(imgData, scaleX, scaleY)**
 
-/** 生成棋盘的 path 和 text 元素 */
-export declare function genBoard(width?: number, height?: number, gap?: number, opts?: Opts): SVGGElement
+---
 
-/** 生成 svg */
-export declare function genSvg(viewBox?: string, width?: number, height?: number): SVGSVGElement
+### 🎨 颜色处理
+- **getColorInfo(color)**: 解析 RGBA
+- **getColor() / getColorArr(size)**: 随机颜色/数组
+- **hexColorToRaw(color)**: 补全 HEX 长度（`#000 -> #000000`）
+- **hexToRGB(color)**、**rgbToHex(color)**
+- **lightenColor(color, strength?)**: 调整透明度
+- **colorAddOpacity(color, opacity?)**: 给颜色叠加透明度（返回 HEX 带 alpha）
 
-/** 生成 svg path 网格 */
-export declare function genGrid(width?: number, height?: number, gap?: number, opts?: GridOpts): SVGPathElement
+### ⚙️ 通用工具
+- **debounce(fn, wait)** / **throttle(fn, wait)**
+- **deepClone(obj)**、**excludeKeys(obj, keys)**
+- **getRandomNum(min, max)**、**randomStr(len)**、**numFixed(num, digits)**
+- **UnRedoLinkedList** / **createUnReDoList**: 撤销重做结构
 
-/**
- * 生成网格路径
- * @param width 宽度
- * @param height 高度
- * @param gap 间隔
- * @param needHorizontal 需要水平线 默认 true
- * @param needVertical 需要垂直线 默认 true
- * @returns svg path 元素的路径 d
- */
-export declare function genGridPath(width?: number, height?: number, gap?: number, needHorizontal?: boolean, needVertical?: boolean): string
+---
 
-/** 生成 svg 文字数组 */
-export declare function genTextArr(width?: number, height?: number, gap?: number, opts?: FontOpts): SVGTextElement[]
-```
+### 🧩 SVG
+- **genSvgBoard(width?, height?, gap?, opts?)**: 返回 `{ svg, g }`
+- **genBoard(width?, height?, gap?, opts?)**: 返回棋盘 `g`
+- **genSvg(viewBox?, width?, height?)**: 创建 `svg`
+- **genGrid(width?, height?, gap?, opts?)**: 创建网格 `path`
+- **genGridPath(width?, height?, gap?, needHorizontal?, needVertical?)**: 生成 `d`
+- **genTextArr(width?, height?, gap?, opts?)**: 批量坐标文字
+
+---
+
+### ✨ 动画与组件类
+- **Grid(canvas, options?)**: 动态网格背景，支持鼠标高亮、发光、虚线
+- **DotGrid(canvas, options?)**: 点阵网格背景，带渐变高亮
+- **HalftoneWave(canvas, options?)**: 半调波浪动画
+- **WavyLines({ canvas, ... })**: 噪声驱动的波浪线
+- **WaterRipple(options?)**: 水波纹扩散
+  ```ts
+  const ripple = new WaterRipple({ circleCount: 10 })
+  document.body.appendChild(ripple.canvas)
+  ```
+- **GlobeSphere(canvas, options?)**: 点阵球体
+- **StarField(canvas, options?)**: 星空背景
+- **imgToFade(bgCanvas, opts)**: 图像灰飞烟灭
+- **imgToTxt(options)**: 图像/视频转文本绘制
+- **ShotImg(canvas, img?, opacity?)**: 截图工具
+  ```ts
+  const s = new ShotImg(cvs, img)
+  const shot = await s.getShotImg('base64')
+  ```
+- **NoteBoard(options)** / **NoteBoardWithBase64(options)**: 画板（图形/撤销重做/缩放拖拽）
+- **createScratch(canvas, opts?)**: 刮刮卡交互
+- **createFirework(canvas, opts?)** / **createFirework2(canvas, opts)**: 烟花效果
+- **createTechNum(options)**: 科技数字雨
+
+> 复杂类的完整参数可参考对应示例页面或类型定义（`packages/jl-cvs/src/**`）。
