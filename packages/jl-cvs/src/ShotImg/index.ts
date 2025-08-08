@@ -1,6 +1,6 @@
 import type { HandleImgReturn } from '@/canvasTool'
 import type { ILifecycleManager } from '@/types'
-import { getImg, isStr, type TransferType } from '@jl-org/tool'
+import { getImg, type TransferType } from '@jl-org/tool'
 import { cutImg } from '@/canvasTool'
 
 export class ShotImg implements ILifecycleManager {
@@ -214,4 +214,4 @@ export class ShotImg implements ILifecycleManager {
   }
 }
 
-export type Point = [number, number]
+type Point = [number, number]

@@ -18,6 +18,7 @@ vite.config.ts.timestamp*
 
 # Editor directories and files
 .vscode/*
+.cursor
 !.vscode/extensions.json
 .hidden
 .idea

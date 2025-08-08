@@ -1,3 +1,4 @@
+export * from '@/Canvas'
 export * from '@/canvasTool'
 
 export * from '@/firework'
