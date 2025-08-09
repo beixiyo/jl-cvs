@@ -1,3 +1,5 @@
+import type { ILifecycleManager } from '@/types'
+
 export interface InputOptions {
   /** wheel 事件是否使用 passive */
   passiveWheel?: boolean
@@ -34,7 +36,7 @@ export type WheelHandler = (e: WheelEvt) => void
  * 输入控制器：
  * - 绑定 Canvas 的 pointer/wheel 事件并转发给上层
  */
-export class InputController {
+export class InputController implements ILifecycleManager {
   private el: HTMLElement
   private options: InputOptions
   private onPointer?: PointerHandler
@@ -45,7 +47,7 @@ export class InputController {
     this.options = options
   }
 
-  attach(onPointer: PointerHandler, onWheel?: WheelHandler) {
+  bindEvent(onPointer: PointerHandler, onWheel?: WheelHandler) {
     this.onPointer = onPointer
     this.onWheel = onWheel
     this.el.addEventListener('pointerdown', this.handlePointerDown)
@@ -56,7 +58,7 @@ export class InputController {
     this.el.addEventListener('wheel', this.handleWheel, { passive: this.options.passiveWheel ?? false })
   }
 
-  detach() {
+  rmEvent() {
     this.el.removeEventListener('pointerdown', this.handlePointerDown as any)
     this.el.removeEventListener('pointermove', this.handlePointerMove as any)
     this.el.removeEventListener('pointerup', this.handlePointerUp as any)
@@ -65,6 +67,10 @@ export class InputController {
     this.el.removeEventListener('wheel', this.handleWheel as any)
     this.onPointer = undefined
     this.onWheel = undefined
+  }
+
+  dispose() {
+    this.rmEvent()
   }
 
   private toLocalXY = (e: PointerEvent | WheelEvent) => {

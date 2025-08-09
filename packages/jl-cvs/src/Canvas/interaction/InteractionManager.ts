@@ -1,6 +1,7 @@
 import type { Scene } from '../core/Scene'
 import type { Viewport } from '../core/Viewport'
 import type { BaseShape } from '@/Shapes/BaseShape'
+import type { ILifecycleManager } from '@/types'
 import { InputController, type PointerEvt, type WheelEvt } from './InputController'
 
 export interface InteractionOptions {
@@ -22,7 +23,7 @@ export interface InteractionOptions {
  * - 管理平移与缩放交互
  * - 管理形状拖拽交互
  */
-export class InteractionManager {
+export class InteractionManager implements ILifecycleManager {
   private readonly viewport: Viewport
   private readonly scene: Scene
   private readonly input: InputController
@@ -59,12 +60,16 @@ export class InteractionManager {
     }
   }
 
-  attach() {
-    this.input.attach(this.handlePointer, this.handleWheel)
+  bindEvent() {
+    this.input.bindEvent(this.handlePointer, this.handleWheel)
   }
 
-  detach() {
-    this.input.detach()
+  rmEvent() {
+    this.input.rmEvent()
+  }
+
+  dispose() {
+    this.rmEvent()
   }
 
   /**
@@ -92,6 +97,7 @@ export class InteractionManager {
       /** 首先检查是否点击了形状 */
       if (this.options.enableShapeDrag) {
         const shape = this.getShapeAtPoint(e.x, e.y)
+
         if (shape) {
           /** 开始形状拖拽 */
           this.shapeDragging = true

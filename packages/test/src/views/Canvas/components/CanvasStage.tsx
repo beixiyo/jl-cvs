@@ -30,15 +30,15 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
 
     /** 添加拖拽事件监听器 */
     app.on('shapedragstart', (shape) => {
-      console.log('开始拖拽形状:', shape.meta.id, { startX: shape.startX, startY: shape.startY })
+
     })
 
     app.on('shapedrag', (shape) => {
-      console.log('拖拽形状中:', shape.meta.id, { startX: shape.startX, startY: shape.startY })
+
     })
 
     app.on('shapedragend', (shape) => {
-      console.log('结束拖拽形状:', shape.meta.id, { startX: shape.startX, startY: shape.startY })
+
     })
 
     onReady?.(app)

@@ -1,8 +1,8 @@
 export interface ILifecycleManager {
   /** 销毁实例 */
-  dispose: () => void
+  dispose: (...args: any[]) => void
   /** 绑定事件 */
-  bindEvent: () => void
+  bindEvent: (...args: any[]) => void
   /** 解绑所有事件 */
-  rmEvent: () => void
+  rmEvent: (...args: any[]) => void
 }

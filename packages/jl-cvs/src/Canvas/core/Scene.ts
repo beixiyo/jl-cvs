@@ -15,6 +15,7 @@ export class Scene {
   add(shape: BaseShape): void {
     if (this.idToShape.has(shape.meta.id))
       return
+
     this.shapes.push(shape)
     this.idToShape.set(shape.meta.id, shape)
     this.sortDirty = true
@@ -49,6 +50,18 @@ export class Scene {
       this.sortDirty = false
     }
     return this.shapes
+  }
+
+  /**
+   * 把即将加入或者刚刚点击的形状置顶
+   * @param shape
+   */
+  sortZIndex(shape: BaseShape) {
+    const idx = this.shapes.indexOf(shape)
+    if (idx >= 0) {
+      this.shapes.splice(idx, 1)
+      this.shapes.push(shape)
+    }
   }
 
   /** 标记需要重新排序 */

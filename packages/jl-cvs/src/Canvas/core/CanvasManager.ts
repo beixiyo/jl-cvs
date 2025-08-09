@@ -1,4 +1,4 @@
-import type { Size } from '../utils/types'
+import type { Size } from '../types'
 import { getDPR } from '@/canvasTool'
 
 /**

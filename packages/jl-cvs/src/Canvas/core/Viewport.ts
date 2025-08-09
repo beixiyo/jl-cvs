@@ -1,4 +1,4 @@
-import type { Point, Size, ViewportOptions, ViewportState } from '../utils/types'
+import type { Point, Size, ViewportOptions, ViewportState } from '../types'
 import type { Rect } from '@/Shapes/type'
 import { clamp } from '@jl-org/tool'
 

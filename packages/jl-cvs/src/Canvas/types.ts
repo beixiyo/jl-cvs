@@ -21,7 +21,7 @@ export interface ShapeStyle {
   opacity?: number
 }
 
-import type { Viewport } from '../core/Viewport'
+import type { Viewport } from './core/Viewport'
 
 /**
  * 绘制上下文

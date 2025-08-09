@@ -1,4 +1,4 @@
-import type { CanvasAppOptions, Point } from '../utils/types'
+import type { CanvasAppOptions, Point } from '../types'
 import type { BaseShape } from '@/Shapes/BaseShape'
 import type { Rect } from '@/Shapes/type'
 import { EventBus } from '@jl-org/tool'
@@ -31,10 +31,10 @@ export interface CanvasAppEventMap {
  * - 负责聚合管理器、视口、场景与渲染引擎，提供对外 API
  */
 export class CanvasApp extends EventBus<CanvasAppEventMap> {
+  private readonly engine: RenderEngine
   private readonly manager: CanvasManager
   private readonly viewport: Viewport
   private readonly scene: Scene
-  private readonly engine: RenderEngine
   private interaction?: InteractionManager
 
   /** 创建应用实例 */
@@ -85,6 +85,8 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
   /** 启用或关闭内置基础交互（平移 + 滚轮缩放） */
   enableBasicInteraction(enabled: boolean) {
     const el = this.manager.getCanvasElement()
+    const defaultCursor = el.style.cursor
+
     if (enabled) {
       if (!this.interaction) {
         this.interaction = new InteractionManager(el, this.viewport, this.scene, {
@@ -92,6 +94,8 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
           enableWheelZoom: true,
           enableShapeDrag: true,
           onShapeDragStart: (shape) => {
+            el.style.cursor = 'grabbing'
+            this.scene.sortZIndex(shape)
             this.emit('shapedragstart', shape)
           },
           onShapeDrag: (shape) => {
@@ -99,15 +103,16 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
             this.engine.requestRender()
           },
           onShapeDragEnd: (shape) => {
+            el.style.cursor = defaultCursor
             this.emit('shapedragend', shape)
             this.engine.requestRender()
           },
         })
-        this.interaction.attach()
+        this.interaction.bindEvent()
       }
     }
     else {
-      this.interaction?.detach()
+      this.interaction?.rmEvent()
       this.interaction = undefined
     }
   }
@@ -203,8 +208,9 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
 
   /** 释放资源 */
   dispose(): void {
-    this.engine.stop()
     this.off()
+    this.engine.stop()
     this.manager.dispose()
+    this.interaction?.dispose()
   }
 }
