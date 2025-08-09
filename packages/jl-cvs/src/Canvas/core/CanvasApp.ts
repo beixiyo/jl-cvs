@@ -11,19 +11,19 @@ import { Viewport } from './Viewport'
 /** 应用事件映射 */
 export interface CanvasAppEventMap {
   /** 视口变化 */
-  viewportchange: ReturnType<Viewport['getState']>
+  viewportChange: ReturnType<Viewport['getState']>
   /** 画布尺寸或 dpr 变化 */
   resize: { width: number, height: number, dpr: number }
   /** 形状新增 */
-  shapeadded: BaseShape
+  shapeAdded: BaseShape
   /** 形状移除 */
-  shaperemoved: string
+  shapeRemoved: string
   /** 形状拖拽开始 */
-  shapedragstart: BaseShape
+  shapeDragStart: BaseShape
   /** 形状拖拽中 */
-  shapedrag: BaseShape
+  shapeDrag: BaseShape
   /** 形状拖拽结束 */
-  shapedragend: BaseShape
+  shapeDragEnd: BaseShape
 }
 
 /**
@@ -63,7 +63,7 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
       zoom: opts.zoom,
       pan: opts.pan,
       onViewportChange: (state) => {
-        this.emit('viewportchange', state)
+        this.emit('viewportChange', state)
         this.engine.requestRender()
       },
     })
@@ -96,15 +96,15 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
           onShapeDragStart: (shape) => {
             el.style.cursor = 'grabbing'
             this.scene.sortZIndex(shape)
-            this.emit('shapedragstart', shape)
+            this.emit('shapeDragStart', shape)
           },
           onShapeDrag: (shape) => {
-            this.emit('shapedrag', shape)
+            this.emit('shapeDrag', shape)
             this.engine.requestRender()
           },
           onShapeDragEnd: (shape) => {
             el.style.cursor = defaultCursor
-            this.emit('shapedragend', shape)
+            this.emit('shapeDragEnd', shape)
             this.engine.requestRender()
           },
         })
@@ -130,14 +130,14 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
   /** 添加形状 */
   add(shape: BaseShape): void {
     this.scene.add(shape)
-    this.emit('shapeadded', shape)
+    this.emit('shapeAdded', shape)
     this.engine.requestRender()
   }
 
   /** 根据 id 移除形状 */
   remove(id: string): void {
     this.scene.remove(id)
-    this.emit('shaperemoved', id)
+    this.emit('shapeRemoved', id)
     this.engine.requestRender()
   }
 

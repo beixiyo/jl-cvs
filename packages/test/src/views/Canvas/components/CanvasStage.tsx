@@ -29,15 +29,15 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
     addDefaultShapes(app)
 
     /** 添加拖拽事件监听器 */
-    app.on('shapedragstart', (shape) => {
+    app.on('shapeDragStart', (shape) => {
 
     })
 
-    app.on('shapedrag', (shape) => {
+    app.on('shapeDrag', (shape) => {
 
     })
 
-    app.on('shapedragend', (shape) => {
+    app.on('shapeDragEnd', (shape) => {
 
     })
 
