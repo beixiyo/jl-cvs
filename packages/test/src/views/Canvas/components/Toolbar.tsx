@@ -1,4 +1,5 @@
-import type { CanvasApp } from '@jl-org/cvs'
+import type { RefObject } from 'react'
+import { type CanvasApp, Rect } from '@jl-org/cvs'
 import { Image as ImageIcon, Minus, Move, Pencil, Plus, RectangleHorizontal, RotateCcw, RotateCw, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -12,7 +13,7 @@ export type ToolMode = 'pan' | 'rect' | 'pen'
  */
 export interface ToolbarProps {
   /** 画布应用实例 */
-  app?: CanvasApp | null
+  app?: RefObject<CanvasApp> | null
   /** 当前工具模式 */
   mode: ToolMode
   /** 切换工具模式 */
@@ -23,8 +24,6 @@ export interface ToolbarProps {
   onRedo: () => void
   /** 清空场景 */
   onClear: () => void
-  /** 添加矩形 */
-  onAddRect: () => void
   /** 画笔颜色 */
   penColor: string
   /** 画笔粗细 */
@@ -40,19 +39,54 @@ export interface ToolbarProps {
 /**
  * 顶部工具栏
  */
-export function Toolbar({ app, mode, onModeChange, onUndo, onRedo, onClear, onAddRect, penColor, penWidth, onPenColorChange, onPenWidthChange, onAddImage }: ToolbarProps) {
+export function Toolbar({ app, mode, onModeChange, onUndo, onRedo, onClear, penColor, penWidth, onPenColorChange, onPenWidthChange, onAddImage }: ToolbarProps) {
   const [zoom, setZoom] = useState(1)
   const fileRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
-    if (!app)
+    if (!app?.current)
       return
-    const off = app.on('viewportchange', state => setZoom(state.zoom))
+    const off = app.current.on('viewportChange', state => setZoom(state.zoom))
     return () => off()
   }, [app])
 
+  /**
+   * 添加矩形到画布
+   */
+  const handleAddRect = async () => {
+    if (!app?.current)
+      return
+
+    /** 获取最后点击的位置 */
+    const position = app.current.getLastClickPosition()
+
+    /** 如果没有点击位置，使用画布中心 */
+    const worldPosition = position || {
+      x: 0,
+      y: 0,
+    }
+
+    const rect = new Rect({
+      startX: worldPosition.x,
+      startY: worldPosition.y,
+    })
+
+    /** 设置矩形样式 */
+    rect.setShapeStyle({
+      strokeStyle: penColor,
+      lineWidth: penWidth,
+      fillStyle: `${penColor}20`, // 添加半透明填充
+    })
+
+    /** 设置矩形大小 */
+    rect.endX = worldPosition.x + 100
+    rect.endY = worldPosition.y + 80
+
+    /** 添加到场景 */
+    app.current.add(rect)
+  }
+
   const btn = 'inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 active:bg-slate-100 text-slate-700 transition-colors'
-  const active = 'bg-blue-600 text-white hover:bg-blue-700 border-blue-600'
   const iconBtn = 'inline-flex items-center justify-center p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors'
   const activeIconBtn = 'bg-blue-600 text-white hover:bg-blue-700 border-blue-600'
 
@@ -126,7 +160,7 @@ export function Toolbar({ app, mode, onModeChange, onUndo, onRedo, onClear, onAd
           <div className="flex items-center rounded-xl bg-slate-100 p-1">
             <button
               className={ `${iconBtn}` }
-              onClick={ () => app?.setZoom(zoom * 1.2) }
+              onClick={ () => app?.current?.setZoom(zoom * 1.2) }
             >
               <Plus size={ 18 } />
             </button>
@@ -136,7 +170,7 @@ export function Toolbar({ app, mode, onModeChange, onUndo, onRedo, onClear, onAd
             </span>
             <button
               className={ `${iconBtn}` }
-              onClick={ () => app?.setZoom(zoom / 1.2) }
+              onClick={ () => app?.current?.setZoom(zoom / 1.2) }
             >
               <Minus size={ 18 } />
             </button>
@@ -149,7 +183,7 @@ export function Toolbar({ app, mode, onModeChange, onUndo, onRedo, onClear, onAd
             <button className={ iconBtn } onClick={ onRedo }>
               <RotateCw size={ 18 } />
             </button>
-            <button className={ btn } onClick={ onAddRect }>
+            <button className={ btn } onClick={ handleAddRect }>
               <RectangleHorizontal size={ 18 } />
               添加矩形
             </button>

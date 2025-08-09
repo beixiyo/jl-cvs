@@ -17,7 +17,7 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
     if (!containerRef.current)
       return
     const app = new CanvasApp({
-      container: containerRef.current,
+      el: containerRef.current,
       background: '#ffffff',
       minZoom: 0.1,
       maxZoom: 8,

@@ -116,7 +116,7 @@ export default function WaterRippleTest() {
   return (
     <div className="min-h-screen from-blue-50 to-purple-50 bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
       {/* 页面标题 - 全宽显示 */ }
-      <div className="p-6 text-center">
+      <div className="p-1 text-center">
         <h1 className="mb-2 text-3xl text-gray-800 font-bold dark:text-white">
           🌊 水波纹动画效果
         </h1>
@@ -126,27 +126,22 @@ export default function WaterRippleTest() {
       </div>
 
       {/* 响应式布局容器 */ }
-      <div className="flex flex-col gap-6 px-6 lg:flex-row">
+      <div className="flex flex-col gap-6 px-6 lg:flex-row mt-2">
         {/* 左侧：效果展示区域 */ }
         <div className="flex-1">
-          <Card className="min-h-[600px] p-6">
-            <h2 className="mb-6 text-center text-2xl text-gray-800 font-semibold dark:text-white">
-              水波纹效果展示
-            </h2>
-            <div className="min-h-[500px] flex items-center justify-center">
-              <canvas
-                ref={ canvasRef }
-                className="border border-gray-300 rounded-lg bg-black shadow-xl dark:border-gray-600"
-                style={ { maxWidth: '100%', height: 'auto' } }
-              />
-            </div>
+          <Card className="min-h-[600px] p-1">
+            <canvas
+              ref={ canvasRef }
+              className="border border-gray-300 rounded-lg bg-black shadow-xl dark:border-gray-600"
+              style={ { maxWidth: '100%', height: 'auto' } }
+            />
           </Card>
         </div>
 
         {/* 右侧：控制面板 */ }
         <div className="w-full lg:w-96">
           <Card>
-            <div className="max-h-[80vh] overflow-y-auto p-6">
+            <div className="max-h-[80vh] overflow-y-auto p-1">
               <h2 className="mb-4 text-xl text-gray-800 font-semibold dark:text-white">
                 控制面板
               </h2>

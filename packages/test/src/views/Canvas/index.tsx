@@ -47,11 +47,6 @@ export default function Canvas() {
     setTick(x => x + 1)
   }, [])
 
-  const onSnapshot = useCallback((payload: any) => {
-    history.current.add(payload)
-    setTick(x => x + 1)
-  }, [])
-
   const onUndo = useCallback(() => {
     const app = appRef.current
     if (!app)
@@ -84,13 +79,12 @@ export default function Canvas() {
   return (
     <div className="h-full flex flex-col bg-white p-4">
       <Toolbar
-        app={ appRef.current }
+        app={ appRef }
         mode={ mode }
         onModeChange={ setMode }
         onUndo={ onUndo }
         onRedo={ onRedo }
         onClear={ onClear }
-        onAddRect={ handleAddRect }
         penColor={ penColor }
         penWidth={ penWidth }
         onPenColorChange={ setPenColor }

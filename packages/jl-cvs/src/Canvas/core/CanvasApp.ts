@@ -24,6 +24,8 @@ export interface CanvasAppEventMap {
   shapeDrag: BaseShape
   /** 形状拖拽结束 */
   shapeDragEnd: BaseShape
+  /** 鼠标点击事件 */
+  click: Point
 }
 
 /**
@@ -35,7 +37,8 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
   private readonly manager: CanvasManager
   private readonly viewport: Viewport
   private readonly scene: Scene
-  private interaction?: InteractionManager
+  private interaction: InteractionManager
+  private lastClickPosition: Point = { x: 0, y: 0 }
 
   /** 创建应用实例 */
   constructor(options: CanvasAppOptions) {
@@ -49,7 +52,7 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
     }
 
     this.manager = new CanvasManager({
-      container: opts.container,
+      el: opts.el,
       background: opts.background,
       onResize: (size, dpr) => {
         this.engine.requestRender()
@@ -75,45 +78,44 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
       useBuffer: false,
     })
 
-    /** 默认启用基础交互（平移 + 滚轮缩放） */
-    this.enableBasicInteraction(true)
+    const canvas = this.manager.getCanvasElement()
+    const defaultCursor = canvas.style.cursor
+    this.interaction = new InteractionManager(canvas, this.viewport, this.scene, {
+      enablePan: true,
+      enableWheelZoom: true,
+      enableShapeDrag: true,
+      onShapeDragStart: (shape) => {
+        canvas.style.cursor = 'grabbing'
+        this.scene.sortZIndex(shape)
+        this.emit('shapeDragStart', shape)
+      },
+      onShapeDrag: (shape) => {
+        this.emit('shapeDrag', shape)
+        this.engine.requestRender()
+      },
+      onShapeDragEnd: (shape) => {
+        canvas.style.cursor = defaultCursor
+        this.emit('shapeDragEnd', shape)
+        this.engine.requestRender()
+      },
+      onClick: (canvasPoint, worldPoint) => {
+        this.lastClickPosition = worldPoint
+        this.emit('click', worldPoint)
+      },
+    })
 
+    this.enableBasicInteraction(true)
     this.engine.start()
     this.engine.requestRender()
   }
 
   /** 启用或关闭内置基础交互（平移 + 滚轮缩放） */
   enableBasicInteraction(enabled: boolean) {
-    const el = this.manager.getCanvasElement()
-    const defaultCursor = el.style.cursor
-
     if (enabled) {
-      if (!this.interaction) {
-        this.interaction = new InteractionManager(el, this.viewport, this.scene, {
-          enablePan: true,
-          enableWheelZoom: true,
-          enableShapeDrag: true,
-          onShapeDragStart: (shape) => {
-            el.style.cursor = 'grabbing'
-            this.scene.sortZIndex(shape)
-            this.emit('shapeDragStart', shape)
-          },
-          onShapeDrag: (shape) => {
-            this.emit('shapeDrag', shape)
-            this.engine.requestRender()
-          },
-          onShapeDragEnd: (shape) => {
-            el.style.cursor = defaultCursor
-            this.emit('shapeDragEnd', shape)
-            this.engine.requestRender()
-          },
-        })
-        this.interaction.bindEvent()
-      }
+      this.interaction.bindEvent()
     }
     else {
-      this.interaction?.rmEvent()
-      this.interaction = undefined
+      this.interaction.rmEvent()
     }
   }
 
@@ -204,6 +206,13 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
   async exportAsImage(type: 'image/png' | 'image/jpeg' = 'image/png', quality?: number): Promise<string> {
     const el = this.manager.getCanvasElement()
     return el.toDataURL(type, quality)
+  }
+
+  /**
+   * 获取最后点击的位置
+   */
+  getLastClickPosition(): Point | null {
+    return this.lastClickPosition
   }
 
   /** 释放资源 */

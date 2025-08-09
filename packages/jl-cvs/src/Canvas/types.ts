@@ -60,7 +60,7 @@ export type CanvasEventType
  */
 export interface CanvasAppOptions {
   /** 容器元素 */
-  container: HTMLElement
+  el: HTMLElement
   /** 背景色（CSS 颜色） */
   background?: string
   /** 是否使用 OffscreenCanvas（预留） */

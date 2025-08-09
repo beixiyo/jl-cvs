@@ -6,7 +6,7 @@ import { getDPR } from '@/canvasTool'
  */
 export interface CanvasManagerOptions {
   /** 作为画布父容器的元素 */
-  container: HTMLElement
+  el: HTMLElement
   /** 背景颜色（CSS 颜色值） */
   background?: string
   /** 尺寸/DPR 变化回调 */
@@ -20,18 +20,20 @@ export interface CanvasManagerOptions {
  * - 提供 2D 上下文与尺寸查询
  */
 export class CanvasManager {
-  private readonly container: HTMLElement
+  private readonly el: HTMLElement
   private readonly canvas: HTMLCanvasElement
   private readonly ctx: CanvasRenderingContext2D
   private resizeObserver?: ResizeObserver
   private dpr: number = 1
   private size: Size = { width: 0, height: 0 }
 
+  private onResize?: (size: Size, dpr: number) => void
+
   /**
    * 创建管理器并挂载 `<canvas>` 到容器
    */
   constructor(options: CanvasManagerOptions) {
-    this.container = options.container
+    this.el = options.el
     this.canvas = document.createElement('canvas')
     this.canvas.style.display = 'block'
     this.canvas.style.width = '100%'
@@ -40,7 +42,7 @@ export class CanvasManager {
     if (options.background) {
       this.canvas.style.background = options.background
     }
-    this.container.appendChild(this.canvas)
+    this.el.appendChild(this.canvas)
 
     const ctx = this.canvas.getContext('2d', { alpha: true, desynchronized: true })
     if (!ctx)
@@ -50,22 +52,14 @@ export class CanvasManager {
     this.updateDpr()
     this.resizeToContainer()
 
+    this.onResize = options.onResize
     this.resizeObserver = new ResizeObserver(() => {
       this.resizeToContainer()
       options.onResize?.(this.getSize(), this.dpr)
     })
-    this.resizeObserver.observe(this.container)
+    this.resizeObserver.observe(this.el)
 
-    /** 监听 DPR 变化（媒体查询方式，兼容性一般，尽力而为） */
-    const mq = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
-    /** 一些浏览器不支持 addEventListener */
-    if (mq.addEventListener) {
-      mq.addEventListener('change', () => {
-        this.updateDpr()
-        this.resizeToContainer()
-        options.onResize?.(this.getSize(), this.dpr)
-      })
-    }
+    window.addEventListener('resize', this.handleResize)
   }
 
   /** 更新 DPR */
@@ -73,12 +67,18 @@ export class CanvasManager {
     this.dpr = getDPR()
   }
 
+  private handleResize = () => {
+    this.updateDpr()
+    this.resizeToContainer()
+    this.onResize?.(this.getSize(), this.dpr)
+  }
+
   /**
    * 根据容器尺寸重置 `<canvas>` 的像素尺寸与基础缩放
    * - 设置 `setTransform(dpr, 0, 0, dpr, 0, 0)` 以做到 1 单位 == 1 CSS 像素
    */
   private resizeToContainer() {
-    const rect = this.container.getBoundingClientRect()
+    const rect = this.el.getBoundingClientRect()
     const cssWidth = Math.max(1, Math.floor(rect.width))
     const cssHeight = Math.max(1, Math.floor(rect.height))
     const pixelWidth = Math.floor(cssWidth * this.dpr)
@@ -123,9 +123,10 @@ export class CanvasManager {
 
   /** 释放资源并从容器移除 `<canvas>` */
   dispose() {
+    window.removeEventListener('resize', this.handleResize)
     this.resizeObserver?.disconnect()
-    if (this.canvas.parentElement === this.container) {
-      this.container.removeChild(this.canvas)
+    if (this.canvas.parentElement === this.el) {
+      this.el.removeChild(this.canvas)
     }
   }
 }

@@ -1,3 +1,4 @@
+import type { PartRequired } from '@jl-org/ts-tool'
 import type { Scene } from '../core/Scene'
 import type { Viewport } from '../core/Viewport'
 import type { BaseShape } from '@/Shapes/BaseShape'
@@ -16,6 +17,8 @@ export interface InteractionOptions {
   onShapeDrag?: (shape: BaseShape) => void
   /** 形状拖拽结束回调 */
   onShapeDragEnd?: (shape: BaseShape) => void
+  /** 点击事件回调 */
+  onClick?: (canvasPoint: { x: number, y: number }, worldPoint: { x: number, y: number }) => void
 }
 
 /**
@@ -27,7 +30,14 @@ export class InteractionManager implements ILifecycleManager {
   private readonly viewport: Viewport
   private readonly scene: Scene
   private readonly input: InputController
-  private readonly options: Required<Omit<InteractionOptions, 'onShapeDragStart' | 'onShapeDrag' | 'onShapeDragEnd'>> & Pick<InteractionOptions, 'onShapeDragStart' | 'onShapeDrag' | 'onShapeDragEnd'>
+  private readonly options: PartRequired<
+    InteractionOptions,
+    'enablePan'
+    | 'enableWheelZoom'
+    | 'enableShapeDrag'
+    | 'wheelZoomSpeed'
+    | 'panButton'
+  >
 
   /** 画布拖拽相关 */
   private dragging = false
@@ -44,6 +54,15 @@ export class InteractionManager implements ILifecycleManager {
   private shapeEndX = 0
   private shapeEndY = 0
 
+  /** 点击检测相关 */
+  private clickStartX = 0
+  private clickStartY = 0
+  private clickStartTime = 0
+  /** 像素阈值，超过此距离不算点击 */
+  private readonly clickThreshold = 5
+  /** 时间阈值，超过此时间不算点击 */
+  private readonly clickTimeThreshold = 300
+
   constructor(targetEl: HTMLElement, viewport: Viewport, scene: Scene, options: InteractionOptions = {}) {
     this.viewport = viewport
     this.scene = scene
@@ -54,9 +73,11 @@ export class InteractionManager implements ILifecycleManager {
       enableShapeDrag: options.enableShapeDrag ?? true,
       wheelZoomSpeed: options.wheelZoomSpeed ?? 1.1,
       panButton: options.panButton ?? 0,
+
       onShapeDragStart: options.onShapeDragStart,
       onShapeDrag: options.onShapeDrag,
       onShapeDragEnd: options.onShapeDragEnd,
+      onClick: options.onClick,
     }
   }
 
@@ -94,6 +115,11 @@ export class InteractionManager implements ILifecycleManager {
 
   private handlePointer = (e: PointerEvt) => {
     if (e.type === 'down' && e.button === this.options.panButton) {
+      /** 初始化点击检测 */
+      this.clickStartX = e.x
+      this.clickStartY = e.y
+      this.clickStartTime = Date.now()
+
       /** 首先检查是否点击了形状 */
       if (this.options.enableShapeDrag) {
         const shape = this.getShapeAtPoint(e.x, e.y)
@@ -165,6 +191,20 @@ export class InteractionManager implements ILifecycleManager {
       /** 如果正在拖拽形状，触发拖拽结束回调 */
       if (this.shapeDragging && this.draggedShape) {
         this.options.onShapeDragEnd?.(this.draggedShape)
+      }
+      else {
+        /** 检测是否为点击事件 */
+        const dx = e.x - this.clickStartX
+        const dy = e.y - this.clickStartY
+        const distance = Math.sqrt(dx * dx + dy * dy)
+        const duration = Date.now() - this.clickStartTime
+
+        if (distance <= this.clickThreshold && duration <= this.clickTimeThreshold) {
+          /** 触发点击事件 */
+          const canvasPoint = { x: e.x, y: e.y }
+          const worldPoint = this.viewport.screenToWorld(canvasPoint)
+          this.options.onClick?.(canvasPoint, worldPoint)
+        }
       }
 
       this.dragging = false
