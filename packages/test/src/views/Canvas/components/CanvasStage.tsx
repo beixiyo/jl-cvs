@@ -28,6 +28,19 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
     // Add initial demo shapes
     addDefaultShapes(app)
 
+    /** 添加拖拽事件监听器 */
+    app.on('shapedragstart', (shape) => {
+      console.log('开始拖拽形状:', shape.meta.id, { startX: shape.startX, startY: shape.startY })
+    })
+
+    app.on('shapedrag', (shape) => {
+      console.log('拖拽形状中:', shape.meta.id, { startX: shape.startX, startY: shape.startY })
+    })
+
+    app.on('shapedragend', (shape) => {
+      console.log('结束拖拽形状:', shape.meta.id, { startX: shape.startX, startY: shape.startY })
+    })
+
     onReady?.(app)
 
     return () => {
@@ -80,7 +93,9 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="border-b border-gray-200 bg-white px-4 py-2 text-xs text-slate-500">内置：平移/缩放；后续绘制由库内部工具接管</div>
+      <div className="border-b border-gray-200 bg-white px-4 py-2 text-xs text-slate-500">
+        内置：平移/缩放/形状拖拽；点击形状可拖拽，点击空白区域可平移画布
+      </div>
       <div ref={ containerRef } className="flex-1 bg-white" />
     </div>
   )

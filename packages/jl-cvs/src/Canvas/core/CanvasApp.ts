@@ -1,8 +1,8 @@
 import type { CanvasAppOptions, Point } from '../utils/types'
 import type { BaseShape } from '@/Shapes/BaseShape'
 import type { Rect } from '@/Shapes/type'
+import { EventBus } from '@jl-org/tool'
 import { InteractionManager } from '../interaction/InteractionManager'
-import { EventEmitter } from '../utils/EventEmitter'
 import { CanvasManager } from './CanvasManager'
 import { RenderEngine } from './RenderEngine'
 import { Scene } from './Scene'
@@ -18,13 +18,19 @@ export interface CanvasAppEventMap {
   shapeadded: BaseShape
   /** 形状移除 */
   shaperemoved: string
+  /** 形状拖拽开始 */
+  shapedragstart: BaseShape
+  /** 形状拖拽中 */
+  shapedrag: BaseShape
+  /** 形状拖拽结束 */
+  shapedragend: BaseShape
 }
 
 /**
  * 画布应用（门面）
  * - 负责聚合管理器、视口、场景与渲染引擎，提供对外 API
  */
-export class CanvasApp extends EventEmitter<CanvasAppEventMap> {
+export class CanvasApp extends EventBus<CanvasAppEventMap> {
   private readonly manager: CanvasManager
   private readonly viewport: Viewport
   private readonly scene: Scene
@@ -81,7 +87,22 @@ export class CanvasApp extends EventEmitter<CanvasAppEventMap> {
     const el = this.manager.getCanvasElement()
     if (enabled) {
       if (!this.interaction) {
-        this.interaction = new InteractionManager(el, this.viewport, { enablePan: true, enableWheelZoom: true })
+        this.interaction = new InteractionManager(el, this.viewport, this.scene, {
+          enablePan: true,
+          enableWheelZoom: true,
+          enableShapeDrag: true,
+          onShapeDragStart: (shape) => {
+            this.emit('shapedragstart', shape)
+          },
+          onShapeDrag: (shape) => {
+            this.emit('shapedrag', shape)
+            this.engine.requestRender()
+          },
+          onShapeDragEnd: (shape) => {
+            this.emit('shapedragend', shape)
+            this.engine.requestRender()
+          },
+        })
         this.interaction.attach()
       }
     }
@@ -183,7 +204,7 @@ export class CanvasApp extends EventEmitter<CanvasAppEventMap> {
   /** 释放资源 */
   dispose(): void {
     this.engine.stop()
-    this.clearAll()
+    this.off()
     this.manager.dispose()
   }
 }

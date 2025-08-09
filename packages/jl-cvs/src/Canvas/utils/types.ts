@@ -50,6 +50,9 @@ export type CanvasEventType
     | 'shapeadded'
     | 'shaperemoved'
     | 'shapetransform'
+    | 'shapedragstart'
+    | 'shapedrag'
+    | 'shapedragend'
     | 'resize'
 
 /**

@@ -1,4 +1,4 @@
-import type { BaseShapeOpts, ShapeMeta } from '../BaseShape'
+import type { BaseShapeOpts } from '../BaseShape'
 import type { ShapeStyle } from '../type'
 import { BaseShape } from '../BaseShape'
 
