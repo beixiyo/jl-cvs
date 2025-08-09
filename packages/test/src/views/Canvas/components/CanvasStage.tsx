@@ -1,6 +1,7 @@
 import type { CanvasApp as CanvasAppType } from '@jl-org/cvs'
 import type { ToolMode } from './Toolbar'
 import { CanvasApp } from '@jl-org/cvs'
+import { Circle, Rect } from '@jl-org/cvs'
 import { memo, useEffect, useRef } from 'react'
 
 export interface CanvasStageProps {
@@ -25,6 +26,7 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
     appRef.current = app
 
     // Add initial demo shapes
+    addDefaultShapes(app)
 
     onReady?.(app)
 
@@ -32,6 +34,49 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
       app.dispose()
     }
   }, [onReady])
+
+  /**
+   * Add default shapes to the canvas when it initializes
+   */
+  const addDefaultShapes = (app: CanvasAppType) => {
+    // Create a rectangle
+    const rect = new Rect({
+      startX: 100,
+      startY: 100,
+      shapeStyle: {
+        fillStyle: '#3b82f6', // blue
+        strokeStyle: '#1d4ed8', // darker blue
+        lineWidth: 2,
+      },
+      meta: {
+        id: 'default-rect',
+        zIndex: 1,
+        visible: true,
+      },
+    })
+    rect.endX = 250
+    rect.endY = 200
+    app.add(rect)
+
+    // Create a circle
+    const circle = new Circle({
+      startX: 350,
+      startY: 150,
+      shapeStyle: {
+        fillStyle: '#ef4444', // red
+        strokeStyle: '#b91c1c', // darker red
+        lineWidth: 2,
+      },
+      meta: {
+        id: 'default-circle',
+        zIndex: 1,
+        visible: true,
+      },
+    })
+    circle.endX = 400
+    circle.endY = 150
+    app.add(circle)
+  }
 
   return (
     <div className="h-full flex flex-col">

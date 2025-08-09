@@ -1,29 +1,15 @@
 import type { Rect, ShapeStyle } from './type'
 import { uniqueId } from '@jl-org/tool'
 
-/**
- * Canvas系统元数据
- * 用于存放形状在Canvas系统中需要的额外属性
- */
-export interface ShapeMeta {
-  /** 形状唯一标识 */
-  id: string
-  /** zIndex 越大越后绘制 */
-  zIndex: number
-  /** 是否可见 */
-  visible: boolean
-}
-
 export abstract class BaseShape {
-  abstract ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
+  ctx?: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
 
-  abstract startX: number
-  abstract startY: number
-  abstract endX: number
-  abstract endY: number
+  startX: number
+  startY: number
+  endX: number
+  endY: number
 
-  abstract shapeStyle: ShapeStyle
-  abstract setShapeStyle(shapeStyle: ShapeStyle): void
+  shapeStyle: ShapeStyle = {}
 
   /**
    * Canvas系统元数据
@@ -35,8 +21,24 @@ export abstract class BaseShape {
     visible: true,
   }
 
-  constructor(opts: { meta?: ShapeMeta }) {
+  constructor(opts: BaseShapeOpts) {
+    opts.ctx && (this.ctx = opts.ctx)
     opts.meta && (this.meta = opts.meta)
+
+    this.startX = opts.startX
+    this.startY = opts.startY
+    this.endX = opts.startX // 初始时终点与起点相同
+    this.endY = opts.startY
+
+    this.setShapeStyle(opts.shapeStyle)
+  }
+
+  /**
+   * 设置图形样式
+   * @param shapeStyle 样式对象
+   */
+  setShapeStyle(shapeStyle: ShapeStyle = {}) {
+    Object.assign(this.shapeStyle, shapeStyle)
   }
 
   /**
@@ -61,4 +63,30 @@ export abstract class BaseShape {
       height: maxY - minY,
     }
   }
+}
+
+/**
+ * Canvas系统元数据
+ * 用于存放形状在Canvas系统中需要的额外属性
+ */
+export interface ShapeMeta {
+  /** 形状唯一标识 */
+  id: string
+  /** zIndex 越大越后绘制 */
+  zIndex: number
+  /** 是否可见 */
+  visible: boolean
+}
+
+export type BaseShapeOpts = {
+  /** 起点x坐标 */
+  startX: number
+  /** 起点y坐标 */
+  startY: number
+  /** 画布上下文 */
+  ctx?: CanvasRenderingContext2D
+  /** 图形样式（可选） */
+  shapeStyle?: ShapeStyle
+  /** Canvas系统元数据（可选） */
+  meta?: ShapeMeta
 }
