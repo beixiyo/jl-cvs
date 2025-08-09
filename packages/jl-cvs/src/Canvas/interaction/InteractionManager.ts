@@ -1,8 +1,13 @@
 import type { PartRequired } from '@jl-org/ts-tool'
 import type { Scene } from '../core/Scene'
 import type { Viewport } from '../core/Viewport'
+import type { CursorMode, DrawModeOptions } from '../types'
 import type { BaseShape } from '@/Shapes/BaseShape'
 import type { ILifecycleManager } from '@/types'
+import { Arrow } from '@/Shapes/libs/Arrow'
+import { Brush } from '@/Shapes/libs/Brush'
+import { Circle } from '@/Shapes/libs/Circle'
+import { Rect } from '@/Shapes/libs/Rect'
 import { InputController, type PointerEvt, type WheelEvt } from './InputController'
 
 export interface InteractionOptions {
@@ -11,6 +16,10 @@ export interface InteractionOptions {
   enableShapeDrag?: boolean
   wheelZoomSpeed?: number
   panButton?: 0 | 1 | 2
+  /** 当前光标模式 */
+  cursorMode?: CursorMode
+  /** 绘制模式选项 */
+  drawOptions?: DrawModeOptions
   /** 形状拖拽开始回调 */
   onShapeDragStart?: (shape: BaseShape) => void
   /** 形状拖拽中回调 */
@@ -37,6 +46,7 @@ export class InteractionManager implements ILifecycleManager {
     | 'enableShapeDrag'
     | 'wheelZoomSpeed'
     | 'panButton'
+    | 'cursorMode'
   >
 
   /** 画布拖拽相关 */
@@ -63,6 +73,10 @@ export class InteractionManager implements ILifecycleManager {
   /** 时间阈值，超过此时间不算点击 */
   private readonly clickTimeThreshold = 300
 
+  /** 绘制模式相关 */
+  private isDrawing = false
+  private currentDrawingShape: BaseShape | null = null
+
   constructor(targetEl: HTMLElement, viewport: Viewport, scene: Scene, options: InteractionOptions = {}) {
     this.viewport = viewport
     this.scene = scene
@@ -73,11 +87,13 @@ export class InteractionManager implements ILifecycleManager {
       enableShapeDrag: options.enableShapeDrag ?? true,
       wheelZoomSpeed: options.wheelZoomSpeed ?? 1.1,
       panButton: options.panButton ?? 0,
+      cursorMode: options.cursorMode ?? 'pan',
 
       onShapeDragStart: options.onShapeDragStart,
       onShapeDrag: options.onShapeDrag,
       onShapeDragEnd: options.onShapeDragEnd,
       onClick: options.onClick,
+      drawOptions: options.drawOptions,
     }
   }
 
@@ -91,6 +107,67 @@ export class InteractionManager implements ILifecycleManager {
 
   dispose() {
     this.rmEvent()
+  }
+
+  /**
+   * 设置光标模式
+   */
+  setCursorMode(mode: CursorMode) {
+    this.options.cursorMode = mode
+  }
+
+  /**
+   * 设置绘制选项
+   */
+  setDrawOptions(options: DrawModeOptions) {
+    this.options.drawOptions = {
+      ...this.options.drawOptions,
+      ...options,
+    }
+  }
+
+  /**
+   * 获取当前光标模式
+   */
+  getCursorMode(): CursorMode {
+    return this.options.cursorMode
+  }
+
+  /**
+   * 根据当前模式创建形状
+   */
+  private createShapeByMode(startX: number, startY: number): BaseShape | null {
+    const mode = this.options.cursorMode
+    const shapeStyle = this.options.drawOptions?.shapeStyle || {}
+
+    switch (mode) {
+      case 'rect':
+        return new Rect({
+          startX,
+          startY,
+          shapeStyle,
+        })
+      case 'circle':
+        return new Circle({
+          startX,
+          startY,
+          shapeStyle,
+        })
+      case 'arrow':
+        return new Arrow({
+          startX,
+          startY,
+          shapeStyle,
+        })
+      case 'draw':
+        return new Brush({
+          startX,
+          startY,
+          shapeStyle,
+        })
+      default:
+        return null
+    }
   }
 
   /**
@@ -120,7 +197,7 @@ export class InteractionManager implements ILifecycleManager {
       this.clickStartY = e.y
       this.clickStartTime = Date.now()
 
-      /** 首先检查是否点击了形状 */
+      /** 首先检查是否点击了形状 - 形状拖拽在任何模式下都有最高优先级 */
       if (this.options.enableShapeDrag) {
         const shape = this.getShapeAtPoint(e.x, e.y)
 
@@ -141,8 +218,27 @@ export class InteractionManager implements ILifecycleManager {
         }
       }
 
+      /** 如果没有点击到形状，检查是否为绘制模式 */
+      if (this.options.cursorMode !== 'pan') {
+        const worldPoint = this.viewport.screenToWorld({ x: e.x, y: e.y })
+        const shape = this.createShapeByMode(worldPoint.x, worldPoint.y)
+
+        if (shape) {
+          /** 开始绘制 */
+          this.isDrawing = true
+          this.currentDrawingShape = shape
+
+          /** 添加到场景 */
+          this.scene.add(shape)
+
+          /** 触发绘制开始回调 */
+          this.options.drawOptions?.onDrawStart?.(shape)
+          return
+        }
+      }
+
       /** 如果没有点击形状且启用了画布拖拽，则开始画布拖拽 */
-      if (this.options.enablePan) {
+      if (this.options.enablePan && this.options.cursorMode === 'pan') {
         this.dragging = true
         this.lastClientX = e.clientX
         this.lastClientY = e.clientY
@@ -151,6 +247,26 @@ export class InteractionManager implements ILifecycleManager {
     }
 
     if (e.type === 'move') {
+      /** 处理绘制过程 */
+      if (this.isDrawing && this.currentDrawingShape) {
+        const worldPoint = this.viewport.screenToWorld({ x: e.x, y: e.y })
+
+        if (this.options.cursorMode === 'draw') {
+          /** 笔刷模式：添加路径点 */
+          const brush = this.currentDrawingShape as Brush
+          brush.addPoint(worldPoint.x, worldPoint.y)
+        }
+        else {
+          /** 其他形状模式：更新结束点 */
+          this.currentDrawingShape.endX = worldPoint.x
+          this.currentDrawingShape.endY = worldPoint.y
+        }
+
+        /** 触发绘制中回调 */
+        this.options.drawOptions?.onDrawing?.(this.currentDrawingShape)
+        return
+      }
+
       /** 处理形状拖拽 */
       if (this.shapeDragging && this.draggedShape) {
         const dx = e.x - this.dragStartX
@@ -188,6 +304,17 @@ export class InteractionManager implements ILifecycleManager {
     }
 
     if (e.type === 'up') {
+      /** 处理绘制结束 */
+      if (this.isDrawing && this.currentDrawingShape) {
+        /** 触发绘制结束回调 */
+        this.options.drawOptions?.onDrawEnd?.(this.currentDrawingShape)
+
+        /** 重置绘制状态 */
+        this.isDrawing = false
+        this.currentDrawingShape = null
+        return
+      }
+
       /** 如果正在拖拽形状，触发拖拽结束回调 */
       if (this.shapeDragging && this.draggedShape) {
         this.options.onShapeDragEnd?.(this.draggedShape)

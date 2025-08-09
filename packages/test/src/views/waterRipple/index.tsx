@@ -126,7 +126,7 @@ export default function WaterRippleTest() {
       </div>
 
       {/* 响应式布局容器 */ }
-      <div className="flex flex-col gap-6 px-6 lg:flex-row mt-2">
+      <div className="mt-2 flex flex-col gap-6 px-6 lg:flex-row">
         {/* 左侧：效果展示区域 */ }
         <div className="flex-1">
           <Card className="min-h-[600px] p-1">

@@ -2,6 +2,7 @@ import type { CanvasApp } from '@jl-org/cvs'
 import { createUnReDoList } from '@jl-org/cvs'
 import { uniqueId } from '@jl-org/tool'
 import { useCallback, useRef, useState } from 'react'
+import React from 'react'
 import { CanvasStage } from './components/CanvasStage'
 import { Toolbar, type ToolMode } from './components/Toolbar'
 
@@ -22,27 +23,32 @@ export default function Canvas() {
     // Initial shapes are now added in CanvasStage component
   }, [])
 
-  const handleAddRect = useCallback(() => {
+  /** 更新绘制样式 */
+  const updateDrawStyle = useCallback(() => {
     const app = appRef.current
     if (!app)
       return
-    const id = uniqueId()
-    const center = app.screenToWorld({ x: 200, y: 200 })
-    // const rect = new DemoRect({ id, x: center.x, y: center.y, width: 120, height: 80 })
-    // app.add(rect)
-    history.current.add({ type: 'add', shape: 'rect', id })
-    setTick(x => x + 1)
-  }, [])
+
+    app.setDrawOptions({
+      shapeStyle: {
+        strokeStyle: penColor,
+        lineWidth: penWidth,
+        fillStyle: `${penColor}20`, // 添加透明度
+      },
+    })
+  }, [penColor, penWidth])
+
+  /** 当颜色或粗细变化时更新绘制样式 */
+  React.useEffect(() => {
+    updateDrawStyle()
+  }, [updateDrawStyle])
 
   const handleAddImage = useCallback(async (file: File) => {
     const app = appRef.current
     if (!app)
       return
     const id = uniqueId()
-    const p = app.screenToWorld({ x: 300, y: 200 })
-    const url = URL.createObjectURL(file)
-    // const img = new DemoImage({ id, x: p.x, y: p.y, width: 240, height: 160, src: url })
-    // app.add(img)
+
     history.current.add({ type: 'add', shape: 'image', id })
     setTick(x => x + 1)
   }, [])

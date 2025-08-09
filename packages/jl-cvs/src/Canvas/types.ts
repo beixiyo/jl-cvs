@@ -22,6 +22,7 @@ export interface ShapeStyle {
 }
 
 import type { Viewport } from './core/Viewport'
+import type { BaseShape } from '@/Shapes/BaseShape'
 
 /**
  * 绘制上下文
@@ -79,6 +80,34 @@ export interface CanvasAppOptions {
   wheelZoomSpeed?: number
   /** 拖拽惯性（预留） */
   dragInertia?: boolean
+}
+
+/**
+ * 光标模式类型
+ */
+export type CursorMode
+  = | 'pan' // 平移模式（默认）
+    | 'draw' // 笔刷绘制
+    | 'rect' // 矩形绘制
+    | 'circle' // 圆形绘制
+    | 'arrow' // 箭头绘制
+
+/**
+ * 绘制模式选项
+ */
+export interface DrawModeOptions {
+  /** 绘制样式 */
+  shapeStyle?: {
+    strokeStyle?: string
+    lineWidth?: number
+    fillStyle?: string
+  }
+  /** 绘制开始回调 */
+  onDrawStart?: (shape: BaseShape) => void
+  /** 绘制中回调 */
+  onDrawing?: (shape: BaseShape) => void
+  /** 绘制完成回调 */
+  onDrawEnd?: (shape: BaseShape) => void
 }
 
 export type ViewportOptions = Pick<

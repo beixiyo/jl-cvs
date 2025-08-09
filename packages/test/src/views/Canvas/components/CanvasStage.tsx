@@ -9,7 +9,7 @@ export interface CanvasStageProps {
   onReady?: (app: CanvasAppType) => void
 }
 
-function CanvasStageInner({ onReady }: CanvasStageProps) {
+function CanvasStageInner({ mode, onReady }: CanvasStageProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const appRef = useRef<CanvasAppType | null>(null)
 
@@ -30,15 +30,28 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
 
     /** 添加拖拽事件监听器 */
     app.on('shapeDragStart', (shape) => {
-
+      console.log('Shape drag start:', shape.meta.id)
     })
 
     app.on('shapeDrag', (shape) => {
-
+      // console.log('Shape dragging:', shape.meta.id)
     })
 
     app.on('shapeDragEnd', (shape) => {
+      console.log('Shape drag end:', shape.meta.id)
+    })
 
+    /** 添加绘制事件监听器 */
+    app.on('drawStart', (shape) => {
+      console.log('Draw start:', shape.meta.id)
+    })
+
+    app.on('drawing', (shape) => {
+      // console.log('Drawing:', shape.meta.id)
+    })
+
+    app.on('drawEnd', (shape) => {
+      console.log('Draw end:', shape.meta.id)
     })
 
     onReady?.(app)
@@ -47,6 +60,22 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
       app.dispose()
     }
   }, [onReady])
+
+  /** 响应模式变化 */
+  useEffect(() => {
+    if (appRef.current) {
+      appRef.current.setCursorMode(mode)
+
+      /** 设置绘制样式 */
+      appRef.current.setDrawOptions({
+        shapeStyle: {
+          strokeStyle: '#3b82f6',
+          lineWidth: 2,
+          fillStyle: '#3b82f620',
+        },
+      })
+    }
+  }, [mode])
 
   /**
    * Add default shapes to the canvas when it initializes
@@ -94,7 +123,7 @@ function CanvasStageInner({ onReady }: CanvasStageProps) {
   return (
     <div className="h-full flex flex-col">
       <div className="border-b border-gray-200 bg-white px-4 py-2 text-xs text-slate-500">
-        内置：平移/缩放/形状拖拽；点击形状可拖拽，点击空白区域可平移画布
+        内置：平移/缩放/形状拖拽/绘制；选择工具后拖拽绘制图形，点击形状可拖拽，点击空白区域可平移画布
       </div>
       <div ref={ containerRef } className="flex-1 bg-white" />
     </div>

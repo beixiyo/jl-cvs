@@ -1,4 +1,4 @@
-import type { CanvasAppOptions, Point } from '../types'
+import type { CanvasAppOptions, CursorMode, DrawModeOptions, Point } from '../types'
 import type { BaseShape } from '@/Shapes/BaseShape'
 import type { Rect } from '@/Shapes/type'
 import { EventBus } from '@jl-org/tool'
@@ -26,6 +26,12 @@ export interface CanvasAppEventMap {
   shapeDragEnd: BaseShape
   /** 鼠标点击事件 */
   click: Point
+  /** 绘制开始 */
+  drawStart: BaseShape
+  /** 绘制中 */
+  drawing: BaseShape
+  /** 绘制结束 */
+  drawEnd: BaseShape
 }
 
 /**
@@ -84,6 +90,21 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
       enablePan: true,
       enableWheelZoom: true,
       enableShapeDrag: true,
+      cursorMode: 'pan',
+      drawOptions: {
+        onDrawStart: (shape) => {
+          this.emit('drawStart', shape)
+          this.engine.requestRender()
+        },
+        onDrawing: (shape) => {
+          this.emit('drawing', shape)
+          this.engine.requestRender()
+        },
+        onDrawEnd: (shape) => {
+          this.emit('drawEnd', shape)
+          this.engine.requestRender()
+        },
+      },
       onShapeDragStart: (shape) => {
         canvas.style.cursor = 'grabbing'
         this.scene.sortZIndex(shape)
@@ -200,6 +221,45 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
   /** 设置交互期连续重绘 */
   setContinuousRendering(enabled: boolean) {
     this.engine.setContinuousRendering(enabled)
+  }
+
+  /**
+   * 设置光标模式
+   */
+  setCursorMode(mode: CursorMode) {
+    this.interaction.setCursorMode(mode)
+
+    /** 根据模式设置画布光标样式 */
+    const canvas = this.manager.getCanvasElement()
+    switch (mode) {
+      case 'pan':
+        canvas.style.cursor = 'default'
+        break
+      case 'draw':
+        canvas.style.cursor = 'crosshair'
+        break
+      case 'rect':
+      case 'circle':
+      case 'arrow':
+        canvas.style.cursor = 'crosshair'
+        break
+      default:
+        canvas.style.cursor = 'default'
+    }
+  }
+
+  /**
+   * 获取当前光标模式
+   */
+  getCursorMode(): CursorMode {
+    return this.interaction.getCursorMode()
+  }
+
+  /**
+   * 设置绘制选项
+   */
+  setDrawOptions(options: DrawModeOptions) {
+    this.interaction.setDrawOptions(options)
   }
 
   /** 导出图片（dataURL） */

@@ -1,12 +1,13 @@
+import type { CursorMode } from '@jl-org/cvs'
 import type { RefObject } from 'react'
 import { type CanvasApp, Rect } from '@jl-org/cvs'
-import { Image as ImageIcon, Minus, Move, Pencil, Plus, RectangleHorizontal, RotateCcw, RotateCw, Trash2 } from 'lucide-react'
+import { ArrowUp, Circle as CircleIcon, Image as ImageIcon, Minus, Move, Pencil, Plus, RectangleHorizontal, RotateCcw, RotateCw, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 /**
  * 工具模式
  */
-export type ToolMode = 'pan' | 'rect' | 'pen'
+export type ToolMode = CursorMode
 
 /**
  * 工具栏属性
@@ -123,10 +124,26 @@ export function Toolbar({ app, mode, onModeChange, onUndo, onRedo, onClear, penC
               <RectangleHorizontal size={ 18 } />
             </button>
             <button
-              className={ `${iconBtn} ${mode === 'pen'
+              className={ `${iconBtn} ${mode === 'circle'
                 ? activeIconBtn
                 : ''}` }
-              onClick={ () => onModeChange('pen') }
+              onClick={ () => onModeChange('circle') }
+            >
+              <CircleIcon size={ 18 } />
+            </button>
+            <button
+              className={ `${iconBtn} ${mode === 'arrow'
+                ? activeIconBtn
+                : ''}` }
+              onClick={ () => onModeChange('arrow') }
+            >
+              <ArrowUp size={ 18 } />
+            </button>
+            <button
+              className={ `${iconBtn} ${mode === 'draw'
+                ? activeIconBtn
+                : ''}` }
+              onClick={ () => onModeChange('draw') }
             >
               <Pencil size={ 18 } />
             </button>
