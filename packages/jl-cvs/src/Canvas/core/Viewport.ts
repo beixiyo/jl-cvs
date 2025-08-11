@@ -1,5 +1,5 @@
 import type { Point, Size, ViewportOptions, ViewportState } from '../types'
-import type { Rect } from '@/Shapes/type'
+import type { BoundRect } from '@/Shapes/type'
 import { clamp } from '@jl-org/tool'
 
 /**
@@ -250,7 +250,7 @@ export class Viewport {
    * @param screenSize 屏幕尺寸（CSS像素）
    * @returns 世界坐标系中的可视区域矩形
    */
-  getWorldVisibleRect(screenSize: Size): Rect {
+  getWorldVisibleRect(screenSize: Size): BoundRect {
     const { options } = this
     const widthWorld = screenSize.width / options.zoom
     const heightWorld = screenSize.height / options.zoom

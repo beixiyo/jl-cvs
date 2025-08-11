@@ -1,5 +1,5 @@
 import type { BaseShape } from '@/Shapes/BaseShape'
-import type { Rect } from '@/Shapes/type'
+import type { BoundRect } from '@/Shapes/type'
 import { rectsIntersect } from '../utils/geometry'
 
 /**
@@ -73,7 +73,7 @@ export class Scene {
    * 按矩形查询候选形状（初版线性扫描）
    * - 后续将接入 QuadTree 以提升性能
    */
-  queryByRect(rect: Rect): BaseShape[] {
+  queryByRect(rect: BoundRect): BaseShape[] {
     /** 初版线性扫描，后续接入 QuadTree */
     const result: BaseShape[] = []
     const arr = this.getAll()

@@ -1,6 +1,6 @@
 import type { CanvasAppOptions, CursorMode, DrawModeOptions, Point } from '../types'
 import type { BaseShape } from '@/Shapes/BaseShape'
-import type { Rect } from '@/Shapes/type'
+import type { BoundRect } from '@/Shapes/type'
 import { EventBus } from '@jl-org/tool'
 import { InteractionManager } from '../interaction/InteractionManager'
 import { CanvasManager } from './CanvasManager'
@@ -197,7 +197,7 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
    * @param bounds 内容世界坐标包围盒
    * @param padding 内边距
    */
-  fitToScreen(bounds?: Rect, padding = 16): void {
+  fitToScreen(bounds?: BoundRect, padding = 16): void {
     const size = this.manager.getSize()
     if (!bounds)
       return

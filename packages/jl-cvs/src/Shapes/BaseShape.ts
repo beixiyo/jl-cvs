@@ -1,4 +1,4 @@
-import type { Rect, ShapeStyle } from './type'
+import type { BoundRect, ShapeStyle } from './type'
 import { uniqueId } from '@jl-org/tool'
 
 export abstract class BaseShape {
@@ -50,7 +50,7 @@ export abstract class BaseShape {
   abstract isInPath(x: number, y: number): boolean
 
   /** 获取包围盒 */
-  getBounds(): Rect {
+  getBounds(): BoundRect {
     const minX = Math.min(this.startX, this.endX)
     const minY = Math.min(this.startY, this.endY)
     const maxX = Math.max(this.startX, this.endX)

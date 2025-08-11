@@ -15,7 +15,7 @@ export type ShapeStyle = {
   fillStyle?: string
 }
 
-export interface Rect {
+export interface BoundRect {
   x: number
   y: number
   width: number

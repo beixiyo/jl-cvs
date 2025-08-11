@@ -1,7 +1,7 @@
 import type { CanvasManager } from './CanvasManager'
 import type { Scene } from './Scene'
 import type { Viewport } from './Viewport'
-import type { Rect } from '@/Shapes/type'
+import type { BoundRect } from '@/Shapes/type'
 import { Scheduler } from './Scheduler'
 
 /** 渲染器初始化选项 */
@@ -112,7 +112,7 @@ export class RenderEngine {
   }
 
   /** 获取可见世界矩形 */
-  private getVisibleWorldRect(): Rect {
+  private getVisibleWorldRect(): BoundRect {
     const size = this.manager.getSize()
     return this.viewport.getWorldVisibleRect(size)
   }
