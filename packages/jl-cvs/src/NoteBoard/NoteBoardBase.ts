@@ -63,6 +63,16 @@ export abstract class NoteBoardBase implements ILifecycleManager {
   abstract redo(): void
 
   /**
+   * 是否可以执行撤销
+   */
+  abstract canUndo(): boolean
+
+  /**
+   * 是否可以执行重做
+   */
+  abstract canRedo(): boolean
+
+  /**
    * 移除所有事件
    */
   abstract rmEvent(): void

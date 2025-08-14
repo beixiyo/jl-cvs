@@ -144,6 +144,20 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
   }
 
   /**
+   * 是否可以执行撤销
+   */
+  canUndo(): boolean {
+    return this.history.canUndo()
+  }
+
+  /**
+   * 是否可以执行重做
+   */
+  canRedo(): boolean {
+    return this.history.canRedo()
+  }
+
+  /**
    * 移除所有事件
    */
   rmEvent() {

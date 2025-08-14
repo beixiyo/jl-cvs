@@ -37,6 +37,9 @@ export const Toolbar = memo<ToolbarProps>(({
   onUndo,
   onRedo,
   onClear,
+
+  canUndo = true,
+  canRedo = true,
 }) => {
   return (
     <div className="mb-4 w-full flex flex-wrap items-center justify-between gap-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
@@ -153,6 +156,7 @@ export const Toolbar = memo<ToolbarProps>(({
             rounded="full"
             onClick={ onUndo }
             leftIcon={ <Undo className="h-4 w-4" /> }
+            disabled={ !canUndo }
           >
             撤回
           </Button>
@@ -165,6 +169,7 @@ export const Toolbar = memo<ToolbarProps>(({
             rounded="full"
             onClick={ onRedo }
             leftIcon={ <Redo className="h-4 w-4" /> }
+            disabled={ !canRedo }
           >
             重做
           </Button>
@@ -214,4 +219,7 @@ export type ToolbarProps = {
   onUndo?: () => void
   onRedo?: () => void
   onClear?: () => void
+
+  canUndo?: boolean
+  canRedo?: boolean
 }

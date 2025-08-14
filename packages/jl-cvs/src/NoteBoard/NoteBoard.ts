@@ -154,6 +154,20 @@ export class NoteBoard extends NoteBoardBase {
     })
   }
 
+  /**
+   * 是否可以执行撤销
+   */
+  canUndo(): boolean {
+    return this.history.canUndo
+  }
+
+  /**
+   * 是否可以执行重做
+   */
+  canRedo(): boolean {
+    return this.history.canRedo
+  }
+
   bindEvent() {
     const { canvas } = this
 
@@ -232,7 +246,6 @@ export class NoteBoard extends NoteBoardBase {
      * 添加记录
      */
     if (this.canAddRecord) {
-      this.history.cleanUnusedNodes()
       this.addHistory()
       this.drawShape.drawMap?.syncShapeRecord()
     }

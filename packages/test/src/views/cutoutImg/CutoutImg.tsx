@@ -288,12 +288,20 @@ export const CutoutImg = memo<CutoutImgProps>((
   }, [])
 
   const handleUndo = useCallback(async () => {
-    await brushNoteboard.current?.undo(drawUnRedoReizeMask)
+    const noteBoard = brushNoteboard.current
+    if (!noteBoard || !noteBoard.canUndo()) {
+      return
+    }
+    await noteBoard.undo(drawUnRedoReizeMask)
     drawPreviewImg()
   }, [drawPreviewImg, drawUnRedoReizeMask])
 
   const handleRedo = useCallback(async () => {
-    await brushNoteboard.current?.redo(drawUnRedoReizeMask)
+    const noteBoard = brushNoteboard.current
+    if (!noteBoard || !noteBoard.canRedo()) {
+      return
+    }
+    await noteBoard.redo(drawUnRedoReizeMask)
     drawPreviewImg()
   }, [drawPreviewImg, drawUnRedoReizeMask])
 
