@@ -26,15 +26,15 @@ export const SmartSelection = memo<SmartSelectionProps>((
    * NoteBoard
    */
   const containerRef = useRef<HTMLDivElement>(null)
-  const noteBoard = useRef<NoteBoardWithBase64>()
+  const noteBoardRef = useRef<NoteBoardWithBase64>()
   const rect = useRef<DOMRect>()
 
   const imgInfo = useMemo(
-    () => noteBoard.current?.imgInfo,
+    () => noteBoardRef.current?.imgInfo,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      noteBoard.current?.imgInfo?.x,
-      noteBoard.current?.imgInfo?.y,
+      noteBoardRef.current?.imgInfo?.x,
+      noteBoardRef.current?.imgInfo?.y,
     ],
   )
   const transferRect = getTransferRect()
@@ -50,7 +50,7 @@ export const SmartSelection = memo<SmartSelectionProps>((
       return
     }
 
-    noteBoard.current = new NoteBoardWithBase64({
+    const noteBoard = new NoteBoardWithBase64({
       el: containerRef.current!,
       width: rect.current.width,
       height: rect.current.height,
@@ -59,25 +59,25 @@ export const SmartSelection = memo<SmartSelectionProps>((
       drawGlobalCompositeOperation: 'xor',
       minScale: 0.9,
       maxScale: 3.5,
-
-      onWheel({ scale }) {
-        const canvas = noteBoard.current
-        if (!canvas || scale < 1)
-          return
-
-        canvas.setStyle({ lineWidth: DEFAULT_STROKE_WIDTH / scale })
-        if (canvas.mode !== 'draw')
-          return
-        canvas.setCursor()
-      },
     })
 
-    noteBoard.current.setMode('none')
-    noteBoard.current.isEnableZoom = false
+    noteBoard.on('wheel', ({ scale }) => {
+      if (!noteBoard || scale < 1)
+        return
+
+      noteBoard.setStyle({ lineWidth: DEFAULT_STROKE_WIDTH / scale })
+      if (noteBoard.mode !== 'draw')
+        return
+      noteBoard.setCursor()
+    })
+
+    noteBoard.setMode('none')
+    noteBoard.isEnableZoom = false
+    noteBoardRef.current = noteBoard
   }
 
   function drawImg() {
-    const canvas = noteBoard.current
+    const canvas = noteBoardRef.current
     if (!canvas) {
       return
     }
@@ -136,7 +136,7 @@ export const SmartSelection = memo<SmartSelectionProps>((
   }
 
   async function drawSmartMask(index: number) {
-    const canvas = noteBoard.current
+    const canvas = noteBoardRef.current
     if (!canvas)
       return
 
@@ -160,7 +160,7 @@ export const SmartSelection = memo<SmartSelectionProps>((
   }
 
   function removeMask(index: number) {
-    if (!noteBoard.current || !maskSegs.length || !imgInfo)
+    if (!noteBoardRef.current || !maskSegs.length || !imgInfo)
       return
 
     const maskMatrix = maskSegs[index].matrix
@@ -185,7 +185,7 @@ export const SmartSelection = memo<SmartSelectionProps>((
         if (item == 1) {
           const _x = Math.round(x * scaleX) + left
           const _y = Math.round(y * scaleY) + top
-          noteBoard.current.ctx.clearRect(_x, _y, mapPixelWidth, mapPixelHeight)
+          noteBoardRef.current.ctx.clearRect(_x, _y, mapPixelWidth, mapPixelHeight)
         }
       }
     }

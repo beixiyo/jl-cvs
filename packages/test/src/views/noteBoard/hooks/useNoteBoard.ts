@@ -1,6 +1,6 @@
 import type { Mode, NoteBoard } from '@jl-org/cvs'
 import { NoteBoard as NoteBoardClass } from '@jl-org/cvs'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { BRUSH_COLOR, DEFAULT_STROKE_WIDTH } from '@/config'
 import { onMounted, useGetState } from '@/hooks'
 import { CANVAS_CONFIG, DEFAULT_IMAGE_URL, NOTE_BOARD_INIT_CONFIG } from '../constants'
@@ -130,25 +130,34 @@ export function useNoteBoard(options: UseNoteBoardOptions = {}) {
       lineWidth: config.lineWidth,
       lineCap: config.lineCap,
       ...NOTE_BOARD_INIT_CONFIG,
+    })
 
-      onMouseDown: options.onMouseDown || (() => {}),
-      onMouseMove: options.onMouseMove || (() => {}),
-      onMouseUp: (e) => {
-        options.onMouseUp?.(e)
-        updateUndoRedoState()
-      },
-      onWheel: options.onWheel || (({ scale, e }) => {
-        syncBrushSize(scale)
-      }),
-      onDrag: options.onDrag || (() => {}),
-      onUndo: (params) => {
-        options.onUndo?.(params)
-        updateUndoRedoState()
-      },
-      onRedo: (params) => {
-        options.onRedo?.(params)
-        updateUndoRedoState()
-      },
+    board.on('mouseDown', (e) => {
+      options.onMouseDown?.(e)
+    })
+    board.on('mouseMove', (e) => {
+      options.onMouseMove?.(e)
+    })
+    board.on('mouseUp', (e) => {
+      options.onMouseUp?.(e)
+      updateUndoRedoState()
+    })
+    board.on('wheel', (e) => {
+      syncBrushSize(e.scale)
+      options.onWheel?.(e)
+    })
+
+    board.on('dragging', (e) => {
+      options.onDrag?.(e)
+    })
+
+    board.on('undo', (e) => {
+      options.onUndo?.(e)
+      updateUndoRedoState()
+    })
+    board.on('redo', (e) => {
+      options.onRedo?.(e)
+      updateUndoRedoState()
     })
 
     /** 首次渲染时加载默认图片 */

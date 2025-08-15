@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { PreviewImg } from '@/components/PreviewImg'
 import { Toolbar } from '@/components/Toolbar'
 import {
+  AddShapeSection,
   CanvasArea,
   ExportModal,
   FeatureSection,
@@ -96,6 +97,9 @@ export default function NoteBoardTest() {
         <CanvasArea
           canvasContainerRef={ canvasContainerRef }
         />
+
+        {/* addShape 方法测试区域 */ }
+        <AddShapeSection noteBoardRef={ noteBoardRef } />
 
         {/* 快捷键提示按钮 */ }
         <ShortcutButton onClick={ () => setShowShortcutModal(true) } />

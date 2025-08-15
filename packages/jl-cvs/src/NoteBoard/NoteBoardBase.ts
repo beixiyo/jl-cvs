@@ -1,11 +1,14 @@
 import type { AddCanvasOpts, CanvasAttrs, CanvasItem, DisposeOpts, DrawImgOptions, ExportOptions, ImgInfo, Mode, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
 import type { ShapeType } from '@/Shapes'
 import type { ILifecycleManager } from '@/types'
+import { EventBus } from '@jl-org/tool'
 import { clearAllCvs, createCvs, cutImg, getCvsImg, getDPR, getImg } from '@/canvasTool'
 import { getCircleCursor } from '@/utils'
 import { mergeOpts, setCanvas } from './tools'
 
-export abstract class NoteBoardBase implements ILifecycleManager {
+export abstract class NoteBoardBase<T extends Record<string, any>>
+  extends EventBus<T>
+  implements ILifecycleManager {
   static dpr = getDPR()
 
   /** 容器 */
@@ -28,7 +31,7 @@ export abstract class NoteBoardBase implements ILifecycleManager {
   /** 存储的所有 Canvas 信息 */
   canvasList: CanvasItem[] = []
 
-  protected opts: NoteBoardOptionsRequired
+  protected noteBoardOpts: NoteBoardOptionsRequired
 
   /** 开启鼠标滚轮缩放 */
   isEnableZoom = true
@@ -128,10 +131,11 @@ export abstract class NoteBoardBase implements ILifecycleManager {
   }
 
   constructor(opts: NoteBoardOptions) {
-    this.opts = mergeOpts(opts, NoteBoardBase.dpr)
+    super({ triggerBefore: true })
+    this.noteBoardOpts = mergeOpts(opts, NoteBoardBase.dpr)
 
     /** 设置画笔画板置顶 */
-    this.canvas.style.zIndex = this.opts.canvasZIndex
+    this.canvas.style.zIndex = this.noteBoardOpts.canvasZIndex
     this.el = opts.el
 
     this.el.style.overflow = 'hidden'
@@ -147,7 +151,7 @@ export abstract class NoteBoardBase implements ILifecycleManager {
       'brushCanvas',
       { canvas: this.canvas },
     )
-    this.setStyle(this.opts)
+    this.setStyle(this.noteBoardOpts)
 
     this.ctx.scale(NoteBoardBase.dpr, NoteBoardBase.dpr)
     this.imgCtx.scale(NoteBoardBase.dpr, NoteBoardBase.dpr)
@@ -213,8 +217,8 @@ export abstract class NoteBoardBase implements ILifecycleManager {
       height = img.height
     }
     else {
-      width = this.opts.width
-      height = this.opts.height
+      width = this.noteBoardOpts.width
+      height = this.noteBoardOpts.height
     }
 
     const { ctx, cvs } = createCvs(width, height, { dpr: NoteBoardBase.dpr })
@@ -340,7 +344,7 @@ export abstract class NoteBoardBase implements ILifecycleManager {
     const {
       width: canvasWidth,
       height: canvasHeight,
-    } = this.opts
+    } = this.noteBoardOpts
 
     const imgWidth = options.imgWidth ?? newImg.naturalWidth
     const imgHeight = options.imgHeight ?? newImg.naturalHeight
@@ -463,7 +467,7 @@ export abstract class NoteBoardBase implements ILifecycleManager {
         continue
       }
 
-      this.opts[k] = attr
+      this.noteBoardOpts[k] = attr
       if (k === 'width' || k === 'height') {
         for (const item of this.canvasList) {
           item.canvas[k] = attr * NoteBoardBase.dpr
@@ -491,8 +495,8 @@ export abstract class NoteBoardBase implements ILifecycleManager {
    */
   setCursor(lineWidth?: number, strokeStyle?: string) {
     this.canvas.style.cursor = getCircleCursor(
-      lineWidth || this.opts.lineWidth,
-      strokeStyle || this.opts.strokeStyle,
+      lineWidth || this.noteBoardOpts.lineWidth,
+      strokeStyle || this.noteBoardOpts.strokeStyle,
     )
   }
 
@@ -502,8 +506,8 @@ export abstract class NoteBoardBase implements ILifecycleManager {
 
   private getAddcanvasOpts(opts: AddCanvasOpts) {
     return {
-      width: this.opts.width,
-      height: this.opts.height,
+      width: this.noteBoardOpts.width,
+      height: this.noteBoardOpts.height,
       center: true,
       parentEl: this.el,
       ...opts,

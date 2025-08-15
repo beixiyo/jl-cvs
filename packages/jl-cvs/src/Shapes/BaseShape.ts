@@ -27,8 +27,8 @@ export abstract class BaseShape {
 
     this.startX = opts.startX
     this.startY = opts.startY
-    this.endX = opts.startX // 初始时终点与起点相同
-    this.endY = opts.startY
+    this.endX = opts.endX ?? opts.startX
+    this.endY = opts.endY ?? opts.startY
 
     this.setShapeStyle(opts.shapeStyle)
   }
@@ -83,10 +83,15 @@ export type BaseShapeOpts = {
   startX: number
   /** 起点y坐标 */
   startY: number
+  /** 终点x坐标 */
+  endX?: number
+  /** 终点y坐标 */
+  endY?: number
+
   /** 画布上下文 */
   ctx?: CanvasRenderingContext2D
-  /** 图形样式（可选） */
+  /** 图形样式 */
   shapeStyle?: ShapeStyle
-  /** Canvas系统元数据（可选） */
+  /** Canvas系统元数据 */
   meta?: ShapeMeta
 }

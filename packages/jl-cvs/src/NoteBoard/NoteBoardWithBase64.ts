@@ -1,4 +1,4 @@
-import type { DisposeOpts, Mode, NoteBoardOptions } from './type'
+import type { DisposeOpts, Mode, NoteBoardEvent, NoteBoardOptions } from './type'
 import type { ShapeType } from '@/Shapes'
 import { getImg } from '@/canvasTool'
 import { createUnReDoList } from '@/utils'
@@ -21,7 +21,7 @@ import { NoteBoardBase } from './NoteBoardBase'
  *
  * - 截图
  */
-export class NoteBoardWithBase64 extends NoteBoardBase {
+export class NoteBoardWithBase64 extends NoteBoardBase<NoteBoardEvent> {
   mode: NoteBoardWithBase64Mode = 'draw'
 
   /**
@@ -45,12 +45,12 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
    */
   setMode(mode: NoteBoardWithBase64Mode) {
     this.mode = mode
-    this.ctx.globalCompositeOperation = this.opts.globalCompositeOperation
+    this.ctx.globalCompositeOperation = this.noteBoardOpts.globalCompositeOperation
 
     switch (mode) {
       case 'draw':
         this.setCursor()
-        this.ctx.globalCompositeOperation = this.opts.drawGlobalCompositeOperation
+        this.ctx.globalCompositeOperation = this.noteBoardOpts.drawGlobalCompositeOperation
         break
 
       case 'erase':
@@ -97,7 +97,10 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
           }
 
           this.ctx.globalCompositeOperation = currentCompositeOperation
-          this.opts.onUndo?.(base64)
+          this.emit('undo', {
+            mode: this.mode,
+            shapes: [],
+          })
           resolve(true)
         })
       }
@@ -133,7 +136,10 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
           }
 
           this.ctx.globalCompositeOperation = currentCompositeOperation
-          this.opts.onRedo?.(base64)
+          this.emit('redo', {
+            mode: this.mode,
+            shapes: [],
+          })
           resolve(true)
         })
       }
@@ -204,10 +210,10 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
   }
 
   onMousedown = (e: MouseEvent) => {
-    this.opts.onMouseDown?.(e)
+    this.emit('mouseDown', e)
 
     /** 右键拖拽判断 */
-    if (e.button === 2 && this.opts.enableRightDrag !== false) {
+    if (e.button === 2 && this.noteBoardOpts.enableRightDrag !== false) {
       e.preventDefault()
       this.isDragging = true
       this.rightMouseDragging = true
@@ -233,7 +239,7 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
   }
 
   onMousemove = (e: MouseEvent) => {
-    this.opts.onMouseMove?.(e)
+    this.emit('mouseMove', e)
 
     /**
      * 拖拽
@@ -246,7 +252,7 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
       this.translateY = this.translateY + dy
 
       this.setTransform()
-      this.opts.onDrag?.({
+      this.emit('dragging', {
         translateX: this.translateX,
         translateY: this.translateY,
         transformOriginX: this.dragStart.x,
@@ -267,7 +273,7 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
     ctx.moveTo(start.x, start.y)
     ctx.lineTo(offsetX, offsetY)
 
-    ctx.lineWidth = this.opts.lineWidth
+    ctx.lineWidth = this.noteBoardOpts.lineWidth
     ctx.stroke()
 
     this.drawStart = {
@@ -277,7 +283,7 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
   }
 
   onMouseup = (e: MouseEvent) => {
-    this.opts.onMouseUp?.(e)
+    this.emit('mouseUp', e)
 
     /** 右键拖拽结束 */
     if (this.rightMouseDragging) {
@@ -302,7 +308,7 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
   }
 
   onMouseLeave = (e: MouseEvent) => {
-    this.opts.onMouseLeave?.(e)
+    this.emit('mouseLeave', e)
 
     if (this.rightMouseDragging) {
       this.isDragging = false
@@ -320,8 +326,8 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
   }
 
   onContextMenu = (e: MouseEvent) => {
-    this.opts.onContextMenu?.(e)
-    if (this.opts.enableRightDrag !== false)
+    this.emit('contextMenu', e)
+    if (this.noteBoardOpts.enableRightDrag !== false)
       e.preventDefault()
   }
 
@@ -339,10 +345,10 @@ export class NoteBoardWithBase64 extends NoteBoardBase {
       ? this.scale / 1.1
       : this.scale * 1.1
 
-    this.scale = Math.min(Math.max(this.scale, this.opts.minScale), this.opts.maxScale)
+    this.scale = Math.min(Math.max(this.scale, this.noteBoardOpts.minScale), this.noteBoardOpts.maxScale)
     this.setTransform()
 
-    this.opts.onWheel?.({
+    this.emit('wheel', {
       scale: this.scale,
       e,
     })

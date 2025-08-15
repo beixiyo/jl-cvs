@@ -187,15 +187,15 @@ export const CutoutImg = memo<CutoutImgProps>((
         // drawGlobalCompositeOperation: 'xor',
         minScale: 0.9,
         maxScale: 2.5,
+      })
 
-        onMouseUp: drawPreviewImg,
-        onWheel({ scale }) {
-          const lineWidth = setBrushSize.getLatest()
-          noteBoard.setStyle({
-            lineWidth: lineWidth / scale,
-          })
-          noteBoard.setCursor()
-        },
+      noteBoard.on('mouseUp', drawPreviewImg)
+      noteBoard.on('wheel', ({ scale }) => {
+        const lineWidth = setBrushSize.getLatest()
+        noteBoard.setStyle({
+          lineWidth: lineWidth / scale,
+        })
+        noteBoard.setCursor()
       })
 
       brushNoteboard.current = noteBoard

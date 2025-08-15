@@ -1,26 +1,6 @@
 import type { PartRequired } from '@jl-org/ts-tool'
-import type { ShapeType, UnRedoReturn } from '@/Shapes'
+import type { ShapeType } from '@/Shapes'
 import type { BaseShape } from '@/Shapes/BaseShape'
-import type { UnRedoLinkedList } from '@/utils'
-
-export type MouseEventFn = (e: MouseEvent) => void
-
-export type ZoomFn = (
-  params: {
-    scale: number
-    e: WheelEvent
-  }
-) => void
-
-export type DragFn = (
-  params: {
-    translateX: number
-    translateY: number
-    transformOriginX: number
-    transformOriginY: number
-    e: MouseEvent
-  }
-) => void
 
 export type Mode = 'draw' | 'erase' | 'drag' | 'none' | ShapeType
 
@@ -90,20 +70,34 @@ export type NoteBoardOptions = {
    * @default true
    */
   enableRightDrag?: boolean
-
-  onMouseDown?: MouseEventFn
-  onMouseMove?: MouseEventFn
-  onMouseUp?: MouseEventFn
-  onMouseLeave?: MouseEventFn
-  /** contextmenu 事件 */
-  onContextMenu?: MouseEventFn
-
-  onWheel?: ZoomFn
-  onDrag?: DragFn
-
-  onRedo?: (params: OnUnRedoParams) => void
-  onUndo?: (params: OnUnRedoParams) => void
 } & CanvasAttrs
+
+export type NoteBoardEvent = {
+  mouseDown: MouseEvent
+  mouseMove: MouseEvent
+  mouseUp: MouseEvent
+  mouseLeave: MouseEvent
+  contextMenu: MouseEvent
+
+  wheel: {
+    scale: number
+    e: WheelEvent
+  }
+  dragging: {
+    translateX: number
+    translateY: number
+    transformOriginX: number
+    transformOriginY: number
+    e: MouseEvent
+  }
+
+  redo: OnUnRedoParams
+  undo: OnUnRedoParams
+  shapeAdded: {
+    shape: BaseShape
+    mode: Mode
+  }
+}
 
 export type NoteBoardOptionsRequired = PartRequired<
   NoteBoardOptions,
@@ -243,10 +237,6 @@ export type AddCanvasOpts = {
 }
 
 export type RecordPath = {
-  path: {
-    moveTo: [number, number]
-    lineTo: [number, number]
-  }[]
   canvasAttrs: Omit<CanvasAttrs, 'width' | 'height'>
   mode: Mode
   shapes: BaseShape[]
@@ -280,24 +270,6 @@ export type CanvasItem = {
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
   name: string
-}
-
-export type DrawMapVal = {
-  unRedo: (options: {
-    type: 'undo' | 'redo'
-  }) => UnRedoReturn | undefined
-
-  draw: VoidFunction
-  getHistory: () => UnRedoLinkedList<RecordPath[]>
-
-  /**
-   * 同步图形绘制记录到 NoteBoard 类
-   */
-  syncShapeRecord: () => void
-  cleanShapeRecord: VoidFunction
-
-  setCursor: (cursor: string) => void
-  isShapeMode: () => boolean
 }
 
 export type DisposeOpts = {

@@ -82,19 +82,16 @@ export class Brush extends BaseShape {
     ctx.strokeStyle = this.shapeStyle.strokeStyle || '#000000'
     ctx.lineWidth = this.shapeStyle.lineWidth || 2
 
-    ctx.beginPath()
+    /** 为了支持擦除，每个线段都独立绘制 */
+    for (let i = 0; i < this.points.length - 1; i++) {
+      const currentPoint = this.points[i]
+      const nextPoint = this.points[i + 1]
 
-    /** 移动到第一个点 */
-    const firstPoint = this.points[0]
-    ctx.moveTo(firstPoint.x, firstPoint.y)
-
-    /** 绘制到所有后续点 */
-    for (let i = 1; i < this.points.length; i++) {
-      const point = this.points[i]
-      ctx.lineTo(point.x, point.y)
+      ctx.beginPath()
+      ctx.moveTo(currentPoint.x, currentPoint.y)
+      ctx.lineTo(nextPoint.x, nextPoint.y)
+      ctx.stroke()
     }
-
-    ctx.stroke()
   }
 
   /**

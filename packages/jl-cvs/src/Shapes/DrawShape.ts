@@ -1,9 +1,7 @@
 import type { BaseShape } from './BaseShape'
 import type { ShapeStyle } from './type'
-import type { ILifecycleManager } from '@/types'
+import { EventBus } from '@jl-org/tool'
 import { clearAllCvs } from '@/canvasTool'
-import { DRAW_MAP } from '@/NoteBoard'
-import { UnRedoLinkedList } from '@/utils'
 import { Arrow } from './libs/Arrow'
 import { Circle } from './libs/Circle'
 import { Rect } from './libs/Rect'
@@ -20,19 +18,22 @@ const ShapeMap = {
  * - 圆形
  * - 箭头
  */
-export class DrawShape implements ILifecycleManager {
-  disable = false
-
+export class DrawShape extends EventBus<DrawShapeEvent> {
   /**
    * 当前绘制的图形类型
    */
   shapeType: ShapeType = 'rect'
-  history = new UnRedoLinkedList<BaseShape[]>()
 
   /**
-   * 当前拖动的矩形
+   * 当前拖动的图形
    */
   curDragShape: BaseShape | null = null
+
+  /**
+   * 当前正在绘制的图形
+   */
+  private currentShape: BaseShape | null = null
+
   private shapeStyle: ShapeStyle = {}
 
   declare canvas: HTMLCanvasElement
@@ -49,25 +50,27 @@ export class DrawShape implements ILifecycleManager {
   init(drawShapeOpts: DrawShapeOpts) {
     this.canvas = drawShapeOpts.canvas
     this.ctx = drawShapeOpts.context
-    this.bindEvent()
   }
 
-  drawShapes(needClear = true, shapes?: BaseShape[]) {
-    needClear && clearAllCvs(this.ctx, this.canvas);
-    (shapes || this.shapes).forEach(shape => shape.draw())
+  /**
+   * 绘制指定的图形数组
+   */
+  drawShapes(shapes: BaseShape[], needClear = true) {
+    needClear && clearAllCvs(this.ctx, this.canvas)
+    shapes.forEach(shape => shape.draw(this.ctx))
   }
 
   /**
    * 根据坐标获取图形
    */
-  getShape(x: number, y: number) {
-    const shapes = this.shapes
+  getShape(x: number, y: number, shapes: BaseShape[]): BaseShape | null {
     for (let i = shapes.length - 1; i >= 0; i--) {
       const shape = shapes[i]
       if (shape.isInPath(x, y)) {
         return shape
       }
     }
+    return null
   }
 
   /**
@@ -77,124 +80,68 @@ export class DrawShape implements ILifecycleManager {
     Object.assign(this.shapeStyle, style)
   }
 
-  /**
-   * 撤销
-   */
-  undo(needClear = true): UnRedoReturn {
-    const shapes = this.history.undo()
-    if (shapes) {
-      this.drawShapes(needClear)
-    }
-    else {
-      this.drawShapes(true, [])
-    }
-
-    return { shape: this.lastShape, shapes: [...this.shapes] }
-  }
-
-  /**
-   * 重做
-   */
-  redo(needClear = true): UnRedoReturn {
-    const shapes = this.history.redo()
-    if (shapes) {
-      this.drawShapes(needClear)
-    }
-    return { shape: this.lastShape, shapes: [...this.shapes] }
-  }
-
-  get shapes() {
-    return this.history.curValue || []
-  }
-
-  get lastShape() {
-    const shapes = this.shapes
-    return shapes[shapes.length - 1]
-  }
-
-  bindEvent() {
-    this.canvas.addEventListener('mousedown', this.onMouseDown)
-    this.canvas.addEventListener('mousemove', this.onMouseMove)
-    this.canvas.addEventListener('mouseup', this.onMouseUp)
-    this.canvas.addEventListener('mouseleave', this.onMouseLeave)
-  }
-
-  rmEvent() {
-    this.canvas.removeEventListener('mousedown', this.onMouseDown)
-    this.canvas.removeEventListener('mousemove', this.onMouseMove)
-    this.canvas.removeEventListener('mouseup', this.onMouseUp)
-    this.canvas.removeEventListener('mouseleave', this.onMouseLeave)
-  }
-
-  dispose() {
-    this.rmEvent()
-  }
-
   /***************************************************
-   *                    private
+   *                    Public Event Handlers
    ***************************************************/
 
-  private onMouseDown = (e: MouseEvent) => {
-    if (this.disable)
-      return
+  /**
+   * 处理鼠标按下事件
+   */
+  handleMouseDown(e: MouseEvent) {
     this.isDrawing = true
 
-    /**
-     * 重画代表废弃撤销里的图形
-     */
-    this.history.cleanUnusedNodes((isCleanAll) => {
-      isCleanAll && this.drawMap?.cleanShapeRecord()
-    })
-
     const { offsetX, offsetY } = e
-    const shape = this.getShape(offsetX, offsetY)
 
-    /** 拖动 */
-    if (shape) {
+    // @TODO 检查是否点击在现有图形上（用于拖拽）
+    const currentShapes: BaseShape[] = []
+    const clickedShape = this.getShape(offsetX, offsetY, currentShapes)
+
+    /** 拖动现有图形 */
+    if (clickedShape) {
       this.dragX = offsetX
       this.dragY = offsetY
-      this.curDragShape = shape
+      this.curDragShape = clickedShape
 
-      /** 不记录矩形位移的历史记录 */
-      const history = this.drawMap?.getHistory()
-      if (!history)
-        return
-      history.undo()
-      history.cleanUnusedNodes()
-
+      /** 通知外部开始拖拽 */
+      this.emit('shapeDragStart', clickedShape)
       return
     }
 
+    /** 创建新图形 */
     const Cls = ShapeMap[this.shapeType]
-    const dyShape = new Cls({
+    const newShape = new Cls({
       startX: offsetX,
       startY: offsetY,
       ctx: this.ctx,
     })
 
-    dyShape.setShapeStyle(this.shapeStyle)
+    newShape.setShapeStyle(this.shapeStyle)
+    this.currentShape = newShape
 
-    const lastRecord = (this.history.curValue || []) as BaseShape[]
-    this.history.add([...lastRecord, dyShape])
+    /** 通知外部创建了新图形 */
+    this.emit('shapeCreated', newShape)
   }
 
-  private onMouseMove = (e: MouseEvent) => {
+  /**
+   * 处理鼠标移动事件
+   */
+  handleMouseMove(e: MouseEvent) {
     /**
-     * 鼠标是否在图形上检测
+     * 鼠标悬停检测 - 改变光标样式
      */
-    if (this.drawMap?.isShapeMode()) {
-      const dragShape = this.getShape(e.offsetX, e.offsetY)
-      dragShape
-        ? this.drawMap?.setCursor('grab')
-        : this.drawMap?.setCursor('crosshair')
-    }
-
-    if (!this.isDrawing)
+    if (!this.isDrawing) {
+      // @TODO 检查是否悬停在现有图形上（用于拖拽）
+      const currentShapes: BaseShape[] = []
+      const hoveredShape = this.getShape(e.offsetX, e.offsetY, currentShapes)
+      this.emit('cursorChange', hoveredShape
+        ? 'grab'
+        : 'crosshair')
       return
+    }
 
     const { curDragShape } = this
     /**
-     * 拖动
+     * 拖动现有图形
      */
     if (curDragShape) {
       const { startX, startY, endX, endY } = curDragShape
@@ -209,57 +156,63 @@ export class DrawShape implements ILifecycleManager {
       this.dragX = e.offsetX
       this.dragY = e.offsetY
 
-      const drawFn = this.drawMap
-      if (drawFn) {
-        drawFn.draw()
-      }
-      else {
-        this.drawShapes()
-      }
-
+      /** 通知外部图形已更新，需要重绘 */
+      this.emit('shapeUpdated', undefined)
       return
     }
 
-    const shape = this.lastShape
-    if (!shape)
+    /**
+     * 绘制新图形
+     */
+    if (!this.currentShape)
       return
 
-    shape.endX = e.offsetX
-    shape.endY = e.offsetY
-    // this.drawMap?.setCursor('crosshair')
+    /** 更新当前图形的结束坐标 */
+    this.currentShape.endX = e.offsetX
+    this.currentShape.endY = e.offsetY
 
-    const drawMap = this.drawMap
-    if (drawMap) {
-      drawMap.draw()
-    }
-    else {
-      this.drawShapes()
-    }
+    /** 通知外部图形已更新，需要重绘 */
+    this.emit('shapeUpdated', undefined)
   }
 
-  private onMouseUp = (e: MouseEvent) => {
+  /**
+   * 处理鼠标抬起事件
+   */
+  handleMouseUp(e: MouseEvent) {
     this.isDrawing = false
-    this.curDragShape = null
+    this.currentShape = null
+
+    if (this.curDragShape) {
+      this.emit('shapeDragEnd', undefined)
+      this.curDragShape = null
+    }
   }
 
-  private onMouseLeave = (e: MouseEvent) => {
+  /**
+   * 处理鼠标离开事件
+   */
+  handleMouseLeave(e: MouseEvent) {
     this.isDrawing = false
-    this.curDragShape = null
-  }
+    this.currentShape = null
 
-  get drawMap() {
-    return DRAW_MAP.get(this)
+    if (this.curDragShape) {
+      this.emit('shapeDragEnd', undefined)
+      this.curDragShape = null
+    }
   }
 }
 
 export type ShapeType = keyof typeof ShapeMap
 
-export type UnRedoReturn = {
-  shape: BaseShape | null
-  shapes: BaseShape[]
-}
-
 export type DrawShapeOpts = {
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D
+}
+
+type DrawShapeEvent = {
+  shapeCreated: BaseShape
+  shapeUpdated: undefined
+  shapeDragStart: BaseShape
+  shapeDragEnd: undefined
+  cursorChange: string
 }

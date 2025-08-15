@@ -1,3 +1,4 @@
+export * from './AddShapeSection'
 export * from './CanvasArea'
 export * from './ExportModal'
 export * from './FeatureSection'
