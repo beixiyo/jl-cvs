@@ -12,7 +12,7 @@ export * from '@/NoteBoard'
 
 export * from '@/Ripple'
 export * from '@/scratch'
-export * from '@/Shapes'
+export * from '@/Shapes/libs'
 export * from '@/ShotImg'
 export * from '@/StarField'
 

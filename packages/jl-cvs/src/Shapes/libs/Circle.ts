@@ -1,10 +1,13 @@
-import type { BaseShapeOpts } from '../BaseShape'
-import { BaseShape } from '../BaseShape'
+import type { BaseShapeOpts } from './BaseShape'
+import type { ShapeType } from './type'
+import { BaseShape } from './BaseShape'
 
 /**
  * 绘制圆形
  */
 export class Circle extends BaseShape {
+  name: ShapeType = 'circle'
+
   constructor(opts: BaseShapeOpts) {
     super(opts)
 

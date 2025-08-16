@@ -1,5 +1,5 @@
 import type { CanvasAppOptions, CursorMode, DrawModeOptions, Point } from '../types'
-import type { BaseShape } from '@/Shapes/BaseShape'
+import type { BaseShape } from '@/Shapes/libs/BaseShape'
 import type { BoundRect } from '@/Shapes/type'
 import { EventBus } from '@jl-org/tool'
 import { InteractionManager } from '../interaction/InteractionManager'

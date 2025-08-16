@@ -1,11 +1,13 @@
-import type { BaseShapeOpts } from '../BaseShape'
 import type { ShapeStyle } from '../type'
-import { BaseShape } from '../BaseShape'
+import type { BaseShapeOpts } from './BaseShape'
+import type { ShapeType } from './type'
+import { BaseShape } from './BaseShape'
 
 /**
  * 箭头图形类，实现BaseShape接口
  */
 export class Arrow extends BaseShape {
+  name: ShapeType = 'arrow'
   shapeStyle: ShapeStyle = {}
 
   /**

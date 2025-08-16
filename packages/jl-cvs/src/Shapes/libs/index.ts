@@ -1,4 +1,6 @@
 export { Arrow } from './Arrow'
+export { BaseShape } from './BaseShape'
 export { Brush } from './Brush'
 export { Circle } from './Circle'
 export { Rect } from './Rect'
+export * from './type'

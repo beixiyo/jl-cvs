@@ -1,5 +1,6 @@
-import type { BaseShapeOpts } from '../BaseShape'
-import { BaseShape } from '../BaseShape'
+import type { BaseShapeOpts } from './BaseShape'
+import type { ShapeType } from './type'
+import { BaseShape } from './BaseShape'
 
 /**
  * 笔刷路径点
@@ -13,6 +14,7 @@ export interface BrushPoint {
  * 笔刷形状类，用于自由绘制
  */
 export class Brush extends BaseShape {
+  name: ShapeType = 'brush'
   /** 笔刷路径点集合 */
   private points: BrushPoint[] = []
 

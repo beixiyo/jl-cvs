@@ -1,4 +1,5 @@
-import type { BoundRect, ShapeStyle } from './type'
+import type { BoundRect, ShapeStyle } from '../type'
+import type { ShapeType } from './type'
 import { uniqueId } from '@jl-org/tool'
 
 export abstract class BaseShape {
@@ -9,6 +10,7 @@ export abstract class BaseShape {
   endX: number
   endY: number
 
+  abstract name: ShapeType
   shapeStyle: ShapeStyle = {}
 
   /**

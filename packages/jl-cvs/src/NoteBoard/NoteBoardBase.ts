@@ -1,5 +1,5 @@
 import type { AddCanvasOpts, CanvasAttrs, CanvasItem, DisposeOpts, DrawImgOptions, ExportOptions, ImgInfo, Mode, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
-import type { ShapeType } from '@/Shapes'
+import type { ShapeType } from '@/Shapes/libs'
 import type { ILifecycleManager } from '@/types'
 import { EventBus } from '@jl-org/tool'
 import { clearAllCvs, createCvs, cutImg, getCvsImg, getDPR, getImg } from '@/canvasTool'
@@ -31,7 +31,7 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
   /** 存储的所有 Canvas 信息 */
   canvasList: CanvasItem[] = []
 
-  protected noteBoardOpts: NoteBoardOptionsRequired
+  noteBoardOpts: NoteBoardOptionsRequired
 
   /** 开启鼠标滚轮缩放 */
   isEnableZoom = true
@@ -39,12 +39,12 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
   /**
    * 记录缩放、位置等属性
    */
-  protected isDrawing = false
-  protected drawStart = { x: 0, y: 0 }
+  isDrawing = false
+  drawStart = { x: 0, y: 0 }
 
-  protected isDragging = false
-  protected dragStart = { x: 0, y: 0 }
-  protected mousePoint = { x: 0, y: 0 }
+  isDragging = false
+  dragStart = { x: 0, y: 0 }
+  mousePoint = { x: 0, y: 0 }
 
   scale = 1
   translateX = 0
@@ -80,14 +80,6 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
    */
   abstract rmEvent(): void
   abstract bindEvent(): void
-
-  abstract onMousedown: (e: MouseEvent) => void
-  abstract onMousemove: (e: MouseEvent) => void
-
-  abstract onMouseup: (e: MouseEvent) => void
-  abstract onMouseLeave: (e: MouseEvent) => void
-
-  abstract onWheel: (e: WheelEvent) => void
 
   /**
    * 设置模式

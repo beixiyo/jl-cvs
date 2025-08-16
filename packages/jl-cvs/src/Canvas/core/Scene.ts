@@ -1,4 +1,4 @@
-import type { BaseShape } from '@/Shapes/BaseShape'
+import type { BaseShape } from '@/Shapes/libs/BaseShape'
 import type { BoundRect } from '@/Shapes/type'
 import { rectsIntersect } from '../utils/geometry'
 

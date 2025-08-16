@@ -1,6 +1,6 @@
 import type { PartRequired } from '@jl-org/ts-tool'
-import type { ShapeType } from '@/Shapes'
-import type { BaseShape } from '@/Shapes/BaseShape'
+import type { ShapeType } from '@/Shapes/libs'
+import type { BaseShape } from '@/Shapes/libs/BaseShape'
 
 export type Mode = 'draw' | 'erase' | 'drag' | 'none' | ShapeType
 

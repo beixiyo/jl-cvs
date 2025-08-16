@@ -1,5 +1,5 @@
 import type { DisposeOpts, Mode, NoteBoardEvent, NoteBoardOptions } from './type'
-import type { ShapeType } from '@/Shapes'
+import type { ShapeType } from '@/Shapes/libs'
 import { getImg } from '@/canvasTool'
 import { createUnReDoList } from '@/utils'
 import { NoteBoardBase } from './NoteBoardBase'

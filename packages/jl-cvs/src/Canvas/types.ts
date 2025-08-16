@@ -22,7 +22,7 @@ export interface ShapeStyle {
 }
 
 import type { Viewport } from './core/Viewport'
-import type { BaseShape } from '@/Shapes/BaseShape'
+import type { BaseShape } from '@/Shapes/libs/BaseShape'
 
 /**
  * 绘制上下文

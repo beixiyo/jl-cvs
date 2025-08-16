@@ -1,10 +1,13 @@
-import type { BaseShapeOpts } from '../BaseShape'
-import { BaseShape } from '../BaseShape'
+import type { BaseShapeOpts } from './BaseShape'
+import type { ShapeType } from './type'
+import { BaseShape } from './BaseShape'
 
 /**
  * 绘制矩形
  */
 export class Rect extends BaseShape {
+  name: ShapeType = 'rect'
+
   constructor(opts: BaseShapeOpts) {
     super(opts)
   }

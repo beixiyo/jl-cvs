@@ -1,16 +1,9 @@
-import type { BaseShape } from './BaseShape'
+import type { BaseShape } from './libs/BaseShape'
+import type { ShapeType } from './libs/type'
 import type { ShapeStyle } from './type'
 import { EventBus } from '@jl-org/tool'
 import { clearAllCvs } from '@/canvasTool'
-import { Arrow } from './libs/Arrow'
-import { Circle } from './libs/Circle'
-import { Rect } from './libs/Rect'
-
-const ShapeMap = {
-  rect: Rect,
-  circle: Circle,
-  arrow: Arrow,
-}
+import { ShapeMap } from './libs/constants'
 
 /**
  * 绘制图形与拖拽，支持
@@ -178,7 +171,7 @@ export class DrawShape extends EventBus<DrawShapeEvent> {
   /**
    * 处理鼠标抬起事件
    */
-  handleMouseUp(e: MouseEvent) {
+  handleMouseUp() {
     this.isDrawing = false
     this.currentShape = null
 
@@ -191,7 +184,7 @@ export class DrawShape extends EventBus<DrawShapeEvent> {
   /**
    * 处理鼠标离开事件
    */
-  handleMouseLeave(e: MouseEvent) {
+  handleMouseLeave() {
     this.isDrawing = false
     this.currentShape = null
 
@@ -201,8 +194,6 @@ export class DrawShape extends EventBus<DrawShapeEvent> {
     }
   }
 }
-
-export type ShapeType = keyof typeof ShapeMap
 
 export type DrawShapeOpts = {
   canvas: HTMLCanvasElement
