@@ -1,4 +1,4 @@
-import type { Mode, NoteBoard } from '@jl-org/cvs'
+import type { NoteBoard, NoteBoardMode } from '@jl-org/cvs'
 import { NoteBoard as NoteBoardClass } from '@jl-org/cvs'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { BRUSH_COLOR, DEFAULT_STROKE_WIDTH } from '@/config'
@@ -23,7 +23,7 @@ export interface UseNoteBoardOptions {
 
 export function useNoteBoard(options: UseNoteBoardOptions = {}) {
   const noteBoardRef = useRef<NoteBoard>()
-  const [currentMode, setCurrentMode] = useState<Mode>('draw')
+  const [currentMode, setCurrentMode] = useState<NoteBoardMode>('brush')
   const [canUndo, setCanUndo] = useState(false)
   const [canRedo, setCanRedo] = useState(false)
 
@@ -72,7 +72,7 @@ export function useNoteBoard(options: UseNoteBoardOptions = {}) {
   }, [setConfig])
 
   /** 切换模式 */
-  const handleModeChange = (mode: Mode) => {
+  const handleModeChange = (mode: NoteBoardMode) => {
     const noteBoard = noteBoardRef.current
     if (!noteBoard)
       return

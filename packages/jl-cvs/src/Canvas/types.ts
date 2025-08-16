@@ -87,7 +87,7 @@ export interface CanvasAppOptions {
  */
 export type CursorMode
   = | 'pan' // 平移模式（默认）
-    | 'draw' // 笔刷绘制
+    | 'brush' // 笔刷绘制
     | 'rect' // 矩形绘制
     | 'circle' // 圆形绘制
     | 'arrow' // 箭头绘制

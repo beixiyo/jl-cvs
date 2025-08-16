@@ -2,11 +2,11 @@ import type { PartRequired } from '@jl-org/ts-tool'
 import type { ShapeType } from '@/Shapes/libs'
 import type { BaseShape } from '@/Shapes/libs/BaseShape'
 
-export type Mode = 'draw' | 'erase' | 'drag' | 'none' | ShapeType
+export type NoteBoardMode = 'erase' | 'drag' | 'none' | ShapeType
 
 type OnUnRedoParams = {
   recordPath?: RecordPath[]
-  mode: Mode
+  mode: NoteBoardMode
   shape?: BaseShape
   shapes?: BaseShape[]
 }
@@ -95,7 +95,7 @@ export type NoteBoardEvent = {
   undo: OnUnRedoParams
   shapeAdded: {
     shape: BaseShape
-    mode: Mode
+    mode: NoteBoardMode
   }
 }
 
@@ -238,7 +238,7 @@ export type AddCanvasOpts = {
 
 export type RecordPath = {
   canvasAttrs: Omit<CanvasAttrs, 'width' | 'height'>
-  mode: Mode
+  mode: NoteBoardMode
   shapes: BaseShape[]
 }
 

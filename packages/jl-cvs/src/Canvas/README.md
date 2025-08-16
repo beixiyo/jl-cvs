@@ -85,14 +85,14 @@ app.on('drawEnd', (shape) => {
 
 ### 笔刷绘制模式
 
-笔刷模式（`draw`）支持自由绘制，与其他形状模式不同：
+笔刷模式（`brush`）支持自由绘制，与其他形状模式不同：
 
 - **矩形/圆形/箭头**：拖拽绘制固定形状，从起点拖拽到终点
 - **笔刷**：自由绘制，鼠标移动轨迹即为绘制路径
 
 ```typescript
 // 切换到笔刷模式
-app.setCursorMode('draw')
+app.setCursorMode('brush')
 
 // 设置笔刷样式
 app.setDrawOptions({

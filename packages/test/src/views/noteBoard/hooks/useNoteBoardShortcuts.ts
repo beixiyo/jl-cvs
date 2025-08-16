@@ -1,11 +1,11 @@
-import type { Mode } from '@jl-org/cvs'
+import type { NoteBoardMode } from '@jl-org/cvs'
 import { useShortCutKey } from '@/hooks'
 import { MODE_MAP } from '../constants'
 
 export interface UseNoteBoardShortcutsOptions {
   onUndo: () => void
   onRedo: () => void
-  onModeChange: (mode: Mode) => void
+  onModeChange: (mode: NoteBoardMode) => void
   onExport: () => void
   onExportAll: () => void
   onResetSize: () => void

@@ -235,7 +235,7 @@ export class CanvasApp extends EventBus<CanvasAppEventMap> {
       case 'pan':
         canvas.style.cursor = 'default'
         break
-      case 'draw':
+      case 'brush':
         canvas.style.cursor = 'crosshair'
         break
       case 'rect':

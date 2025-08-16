@@ -1,4 +1,4 @@
-import type { Mode } from '@jl-org/cvs'
+import type { NoteBoardMode } from '@jl-org/cvs'
 import type { ToolbarMode } from '@/components/Toolbar'
 
 /** 画布尺寸配置 */
@@ -9,7 +9,7 @@ export const CANVAS_CONFIG = {
 
 /** 模式选项配置 */
 export const MODE_OPTIONS: ToolbarMode[] = [
-  { value: 'draw', label: '绘制', hasBrushSlider: true },
+  { value: 'brush', label: '绘制', hasBrushSlider: true },
   { value: 'erase', label: '擦除', hasBrushSlider: true },
   { value: 'drag', label: '拖拽' },
   { value: 'rect', label: '矩形' },
@@ -19,8 +19,8 @@ export const MODE_OPTIONS: ToolbarMode[] = [
 ]
 
 /** 模式映射 */
-export const MODE_MAP: Record<string, Mode> = {
-  1: 'draw',
+export const MODE_MAP: Record<string, NoteBoardMode> = {
+  1: 'brush',
   2: 'erase',
   3: 'drag',
   4: 'rect',

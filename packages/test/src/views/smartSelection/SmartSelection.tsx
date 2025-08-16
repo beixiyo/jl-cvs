@@ -66,7 +66,7 @@ export const SmartSelection = memo<SmartSelectionProps>((
         return
 
       noteBoard.setStyle({ lineWidth: DEFAULT_STROKE_WIDTH / scale })
-      if (noteBoard.mode !== 'draw')
+      if (noteBoard.mode !== 'brush')
         return
       noteBoard.setCursor()
     })

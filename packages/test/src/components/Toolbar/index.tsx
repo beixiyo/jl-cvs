@@ -1,4 +1,4 @@
-import type { Mode } from '@jl-org/cvs'
+import type { NoteBoardMode } from '@jl-org/cvs'
 import type { FileItem } from '@/components/Uploader'
 import {
   Download,
@@ -194,7 +194,7 @@ export const Toolbar = memo<ToolbarProps>(({
 Toolbar.displayName = 'Toolbar'
 
 export type ToolbarMode = {
-  value: Mode
+  value: NoteBoardMode
   label: string
   /**
    * 是否显示画笔大小调节器
@@ -204,8 +204,8 @@ export type ToolbarMode = {
 
 export type ToolbarProps = {
   modes?: ToolbarMode[]
-  activeMode?: Mode
-  onModeChange?: (mode: Mode) => void
+  activeMode?: NoteBoardMode
+  onModeChange?: (mode: NoteBoardMode) => void
 
   brushSize?: number
   onBrushSizeChange?: (size: number) => void

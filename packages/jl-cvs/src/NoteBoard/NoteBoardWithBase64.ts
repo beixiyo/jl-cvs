@@ -1,4 +1,4 @@
-import type { DisposeOpts, Mode, NoteBoardEvent, NoteBoardOptions } from './type'
+import type { DisposeOpts, NoteBoardEvent, NoteBoardMode, NoteBoardOptions } from './type'
 import type { ShapeType } from '@/Shapes/libs'
 import { getImg } from '@/canvasTool'
 import { createUnReDoList } from '@/utils'
@@ -22,7 +22,7 @@ import { NoteBoardBase } from './NoteBoardBase'
  * - 截图
  */
 export class NoteBoardWithBase64 extends NoteBoardBase<NoteBoardEvent> {
-  mode: NoteBoardWithBase64Mode = 'draw'
+  mode: NoteBoardWithBase64Mode = 'brush'
 
   /**
    * 右键拖拽状态
@@ -48,7 +48,7 @@ export class NoteBoardWithBase64 extends NoteBoardBase<NoteBoardEvent> {
     this.ctx.globalCompositeOperation = this.noteBoardOpts.globalCompositeOperation
 
     switch (mode) {
-      case 'draw':
+      case 'brush':
         this.setCursor()
         this.ctx.globalCompositeOperation = this.noteBoardOpts.drawGlobalCompositeOperation
         break
@@ -355,4 +355,4 @@ export class NoteBoardWithBase64 extends NoteBoardBase<NoteBoardEvent> {
   }
 }
 
-export type NoteBoardWithBase64Mode = Exclude<Mode, ShapeType>
+export type NoteBoardWithBase64Mode = Exclude<NoteBoardMode, ShapeType> | Extract<NoteBoardMode, 'brush'>

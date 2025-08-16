@@ -159,7 +159,7 @@ export class InteractionManager implements ILifecycleManager {
           startY,
           shapeStyle,
         })
-      case 'draw':
+      case 'brush':
         return new Brush({
           startX,
           startY,
@@ -251,7 +251,7 @@ export class InteractionManager implements ILifecycleManager {
       if (this.isDrawing && this.currentDrawingShape) {
         const worldPoint = this.viewport.screenToWorld({ x: e.x, y: e.y })
 
-        if (this.options.cursorMode === 'draw') {
+        if (this.options.cursorMode === 'brush') {
           /** 笔刷模式：添加路径点 */
           const brush = this.currentDrawingShape as Brush
           brush.addPoint(worldPoint.x, worldPoint.y)

@@ -1,4 +1,4 @@
-import type { Mode } from '@jl-org/cvs'
+import type { NoteBoardMode } from '@jl-org/cvs'
 import { memo } from 'react'
 import { Slider } from '@/components/Slider'
 
@@ -27,7 +27,7 @@ export const SliderContent = memo<SliderContentProps>((
       value={ brushSize }
       onChange={ onBrushSizeChange }
       onChangeComplete={ () => {
-        mode === 'draw' && onModeChange?.('draw')
+        mode === 'brush' && onModeChange?.('brush')
         mode === 'erase' && onModeChange?.('erase')
       } }
       tooltip={ false }
@@ -38,8 +38,8 @@ export const SliderContent = memo<SliderContentProps>((
 SliderContent.displayName = 'ToolbarSliderContent'
 
 export type SliderContentProps = {
-  mode: Mode
+  mode: NoteBoardMode
   brushSize: number
   onBrushSizeChange?: (size: number) => void
-  onModeChange?: (mode: Mode) => void
+  onModeChange?: (mode: NoteBoardMode) => void
 }

@@ -1,4 +1,4 @@
-import type { DisposeOpts, Mode, NoteBoardEvent, NoteBoardOptions, RecordPath } from './type'
+import type { DisposeOpts, NoteBoardEvent, NoteBoardMode, NoteBoardOptions, RecordPath } from './type'
 import type { BaseShape } from '@/Shapes/libs/BaseShape'
 import { type Brush, DrawShape } from '@/Shapes'
 import { UnRedoLinkedList } from '@/utils'
@@ -25,7 +25,7 @@ import { NoteBoardBase } from './NoteBoardBase'
  * - 截图
  */
 export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
-  mode: Mode = 'draw'
+  mode: NoteBoardMode = 'brush'
   drawShape: DrawShape
 
   /**
@@ -72,14 +72,14 @@ export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
   /**
    * 设置绘制模式
    */
-  setMode(mode: Mode) {
+  setMode(mode: NoteBoardMode) {
     const { drawShape } = this
     this.mode = mode
     this.ctx.globalCompositeOperation = this.noteBoardOpts.globalCompositeOperation
     this.renderer.setCursorForCurrentMode()
 
     switch (mode) {
-      case 'draw':
+      case 'brush':
         this.ctx.globalCompositeOperation = this.noteBoardOpts.drawGlobalCompositeOperation
         break
 

@@ -1,4 +1,4 @@
-import type { Mode, NoteBoard } from '../'
+import type { NoteBoard, NoteBoardMode } from '../'
 import type { BaseShape } from '@/Shapes/libs/BaseShape'
 import { excludeKeys } from '@/utils'
 
@@ -63,13 +63,13 @@ export class NoteBoardInteraction {
    * 是笔刷模式（draw/erase）
    */
   isBrushMode(mode?: string) {
-    return ['draw', 'erase'].includes(mode ?? this.noteBoard.mode)
+    return ['brush', 'erase'].includes(mode ?? this.noteBoard.mode)
   }
 
   /**
    * 添加多个图形到历史记录（用于拖拽结束后）
    */
-  addShapesToHistory(shapes: BaseShape[], mode?: Mode) {
+  addShapesToHistory(shapes: BaseShape[], mode?: NoteBoardMode) {
     const lastRecord = this.noteBoard.history.curValue
     this.noteBoard.history.add([
       ...(lastRecord || []),

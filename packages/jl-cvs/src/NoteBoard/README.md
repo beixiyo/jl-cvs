@@ -9,7 +9,7 @@
 ### 2. 功能特性
 
 - **多模式绘图**:
-  - **画笔模式** (`draw`): 进行自由涂鸦。
+  - **画笔模式** (`brush`): 进行自由涂鸦。
   - **橡皮擦模式** (`erase`): 擦除画笔内容。
   - **图形绘制**: 支持绘制 **矩形** (`rect`)、**圆形** (`circle`)、**箭头** (`arrow`) 等。
 - **画布操作**:
@@ -64,7 +64,7 @@ classDiagram
     }
 
     class NoteBoard {
-        +mode: Mode
+        +mode: NoteBoardMode
         +history: UnRedoLinkedList~RecordPath[]~
         +drawShape: DrawShape
         +setMode(mode)
@@ -149,9 +149,9 @@ classDiagram
 
 #### 4.2. 绘图流程 (`NoteBoard` 为例)
 
-1.  **设置模式**: 调用 `setMode('draw')`。
+1.  **设置模式**: 调用 `setMode('brush')`。
     - 内部 `switch` 语句会根据模式进行设置。
-    - `mode` 设为 `'draw'`。
+    - `mode` 设为 `'brush'`。
     - 设置画笔光标样式。
     - 设置 `ctx.globalCompositeOperation` 为绘图模式 (默认为 `source-over`)。
 2.  **鼠标按下 (`onMousedown`)**:

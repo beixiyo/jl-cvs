@@ -77,7 +77,7 @@ export class NoteBoardRenderer {
    */
   setCursorForCurrentMode() {
     switch (this.noteBoard.mode) {
-      case 'draw':
+      case 'brush':
       case 'erase':
         this.noteBoard.setCursor()
         break

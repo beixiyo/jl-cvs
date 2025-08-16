@@ -1,4 +1,4 @@
-import type { AddCanvasOpts, CanvasAttrs, CanvasItem, DisposeOpts, DrawImgOptions, ExportOptions, ImgInfo, Mode, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
+import type { AddCanvasOpts, CanvasAttrs, CanvasItem, DisposeOpts, DrawImgOptions, ExportOptions, ImgInfo, NoteBoardMode, NoteBoardOptions, NoteBoardOptionsRequired } from './type'
 import type { ShapeType } from '@/Shapes/libs'
 import type { ILifecycleManager } from '@/types'
 import { EventBus } from '@jl-org/tool'
@@ -150,7 +150,7 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
   }
 
   protected get canDraw() {
-    return ['draw', 'erase'].includes(this.mode)
+    return ['brush', 'erase'].includes(this.mode)
   }
 
   /**
@@ -509,4 +509,4 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
   }
 }
 
-export type NoteBoardWithBase64Mode = Exclude<Mode, ShapeType>
+export type NoteBoardWithBase64Mode = Exclude<NoteBoardMode, ShapeType>
