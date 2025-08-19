@@ -118,7 +118,7 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
   return (
     <Card className="p-6 space-y-6">
       <div className="space-y-2">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="text-lg text-gray-900 font-semibold dark:text-gray-100">
           🎯 addShape 方法测试
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -128,10 +128,10 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
 
       {/* 坐标设置 */ }
       <div className="space-y-3">
-        <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">坐标设置</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <h4 className="text-md text-gray-800 font-medium dark:text-gray-200">坐标设置</h4>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-xs text-gray-700 font-medium dark:text-gray-300">
               起点 X
             </label>
             <NumberInput
@@ -141,7 +141,7 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-xs text-gray-700 font-medium dark:text-gray-300">
               起点 Y
             </label>
             <NumberInput
@@ -151,7 +151,7 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-xs text-gray-700 font-medium dark:text-gray-300">
               终点 X
             </label>
             <NumberInput
@@ -161,7 +161,7 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-xs text-gray-700 font-medium dark:text-gray-300">
               终点 Y
             </label>
             <NumberInput
@@ -175,10 +175,10 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
 
       {/* 样式设置 */ }
       <div className="space-y-3">
-        <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">样式设置</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <h4 className="text-md text-gray-800 font-medium dark:text-gray-200">样式设置</h4>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-xs text-gray-700 font-medium dark:text-gray-300">
               边框颜色
             </label>
             <div className="flex gap-2">
@@ -186,7 +186,7 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
                 type="color"
                 value={ shapeStyle.strokeStyle }
                 onChange={ e => handleStyleChange('strokeStyle', e.target.value) }
-                className="w-12 h-8 rounded border border-gray-300 dark:border-gray-600"
+                className="h-8 w-12 border border-gray-300 rounded dark:border-gray-600"
               />
               <NumberInput
                 value={ shapeStyle.strokeStyle }
@@ -197,7 +197,7 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-xs text-gray-700 font-medium dark:text-gray-300">
               线条宽度
             </label>
             <NumberInput
@@ -209,7 +209,7 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-xs text-gray-700 font-medium dark:text-gray-300">
               填充颜色 (可选)
             </label>
             <div className="flex gap-2">
@@ -217,7 +217,7 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
                 type="color"
                 value={ shapeStyle.fillStyle || '#ffffff' }
                 onChange={ e => handleStyleChange('fillStyle', e.target.value) }
-                className="w-12 h-8 rounded border border-gray-300 dark:border-gray-600"
+                className="h-8 w-12 border border-gray-300 rounded dark:border-gray-600"
               />
               <NumberInput
                 value={ shapeStyle.fillStyle || '' }
@@ -232,14 +232,14 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
 
       {/* 操作按钮 */ }
       <div className="space-y-3">
-        <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">添加形状</h4>
+        <h4 className="text-md text-gray-800 font-medium dark:text-gray-200">添加形状</h4>
         <div className="flex flex-wrap gap-3">
           <Button
             onClick={ () => addShape('rect') }
             variant="default"
             className="flex items-center gap-2"
           >
-            <div className="w-4 h-4 border-2 border-current"></div>
+            <div className="h-4 w-4 border-2 border-current"></div>
             添加矩形
           </Button>
           <Button
@@ -247,7 +247,7 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
             variant="default"
             className="flex items-center gap-2"
           >
-            <div className="w-4 h-4 border-2 border-current rounded-full"></div>
+            <div className="h-4 w-4 border-2 border-current rounded-full"></div>
             添加圆形
           </Button>
           <Button
@@ -255,7 +255,7 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
             variant="default"
             className="flex items-center gap-2"
           >
-            <div className="w-4 h-4 flex items-center justify-center">→</div>
+            <div className="h-4 w-4 flex items-center justify-center">→</div>
             添加箭头
           </Button>
           <Button
@@ -269,11 +269,11 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
       </div>
 
       {/* 使用说明 */ }
-      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-        <h5 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+      <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+        <h5 className="mb-2 text-sm text-blue-900 font-medium dark:text-blue-100">
           💡 使用说明
         </h5>
-        <ul className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
+        <ul className="text-xs text-blue-800 space-y-1 dark:text-blue-200">
           <li>• 设置起点和终点坐标来定义形状的位置和大小</li>
           <li>• 自定义边框颜色、线条宽度和填充颜色</li>
           <li>• 点击对应按钮添加不同类型的形状</li>

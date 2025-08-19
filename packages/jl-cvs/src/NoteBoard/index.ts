@@ -1,3 +1,5 @@
 export * from './NoteBoard'
+export * from './NoteBoard2'
+export * from './NoteBoard2Viewport'
 export * from './NoteBoardWithBase64'
 export * from './type'
