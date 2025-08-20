@@ -25,7 +25,7 @@ export abstract class BaseShape {
 
   constructor(opts: BaseShapeOpts) {
     opts.ctx && (this.ctx = opts.ctx)
-    opts.meta && (this.meta = opts.meta)
+    opts.meta && Object.assign(this.meta, opts.meta)
 
     this.startX = opts.startX
     this.startY = opts.startY
@@ -78,6 +78,12 @@ export interface ShapeMeta {
   zIndex: number
   /** 是否可见 */
   visible: boolean
+  /** 图片源，用于 ImageShape */
+  imgSrc?: string | HTMLImageElement
+  /** 图片宽度，用于 ImageShape */
+  width?: number
+  /** 图片高度，用于 ImageShape */
+  height?: number
 }
 
 export type BaseShapeOpts = {
@@ -95,5 +101,5 @@ export type BaseShapeOpts = {
   /** 图形样式 */
   shapeStyle?: ShapeStyle
   /** Canvas系统元数据 */
-  meta?: ShapeMeta
+  meta?: Partial<ShapeMeta>
 }

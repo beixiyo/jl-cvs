@@ -1,10 +1,10 @@
 import type { NoteBoard } from '@jl-org/cvs'
-import { Arrow, Circle, Rect } from '@jl-org/cvs'
+import { Arrow, Circle, ImageShape, Rect } from '@jl-org/cvs'
 import { getColor, getRandomNum } from '@jl-org/tool'
 import { type MutableRefObject, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
-import { NumberInput } from '@/components/Input'
+import { Input, NumberInput } from '@/components/Input'
 import { useGetState } from '@/hooks'
 
 interface AddShapeSectionProps {
@@ -26,16 +26,22 @@ interface ShapeStyle {
 
 export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
   const [coordinates, setCoordinates] = useGetState<ShapeCoordinates, true>({
-    startX: 100,
-    startY: 100,
-    endX: 200,
-    endY: 200,
+    startX: 0,
+    startY: 0,
+    endX: 100,
+    endY: 100,
   }, true)
 
   const [shapeStyle, setShapeStyle] = useState<ShapeStyle>({
     strokeStyle: '#ff0000',
     lineWidth: 2,
     fillStyle: '',
+  })
+
+  const [imageSrc, setImageSrc] = useState<string>(() => new URL('@/assets/img/umr.webp', import.meta.url).href)
+  const [imageSize, setImageSize] = useState<{ width?: number, height?: number }>({
+    width: undefined,
+    height: undefined,
   })
 
   const handleCoordinateChange = (key: keyof ShapeCoordinates, value: number) => {
@@ -46,7 +52,11 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
     setShapeStyle(prev => ({ ...prev, [key]: value }))
   }
 
-  const addShape = (shapeType: 'rect' | 'circle' | 'arrow') => {
+  const handleImageSizeChange = (key: 'width' | 'height', value: number | undefined) => {
+    setImageSize(prev => ({ ...prev, [key]: value }))
+  }
+
+  const addShape = (shapeType: 'rect' | 'circle' | 'arrow' | 'imageShape') => {
     const noteBoard = noteBoardRef.current
     if (!noteBoard) {
       console.warn('NoteBoard instance not available')
@@ -75,6 +85,17 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
       case 'arrow':
         shape = new Arrow(shapeOpts)
         break
+      case 'imageShape':
+        shape = new ImageShape({
+          ...shapeOpts,
+          meta: {
+            imgSrc: imageSrc,
+            ...(imageSize.width && { width: imageSize.width }),
+            ...(imageSize.height && { height: imageSize.height }),
+          },
+        })
+        shape.load()
+        break
       default:
         console.warn('Unknown shape type:', shapeType)
         return
@@ -91,7 +112,7 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
   }
 
   const addRandomShape = () => {
-    const shapeTypes = ['rect', 'circle', 'arrow'] as const
+    const shapeTypes = ['rect', 'circle', 'arrow', 'imageShape'] as const
     const randomType = shapeTypes[getRandomNum(0, shapeTypes.length - 1)]
 
     /** 生成随机坐标 */
@@ -173,6 +194,82 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
         </div>
       </div>
 
+      {/* 图片设置 */ }
+      <div className="space-y-3">
+        <h4 className="text-md text-gray-800 font-medium dark:text-gray-200 mt-4">图片设置</h4>
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <Input
+              value={ imageSrc }
+              onChange={ setImageSrc }
+              placeholder="输入图片 URL 或 base64"
+              label="图片源"
+            />
+
+            <Button
+              onClick={ () => setImageSrc(`https://picsum.photos/300/200?r=${Math.random()}`) }
+              className="px-2 py-1 text-xs translate-y-6.5"
+            >
+              300x200
+            </Button>
+            <Button
+              onClick={ () => setImageSrc(`https://picsum.photos/400/300?r=${Math.random()}`) }
+              className="px-2 py-1 text-xs translate-y-6.5"
+            >
+              400x300
+            </Button>
+            <Button
+              onClick={ () => setImageSrc(`https://picsum.photos/150/150?r=${Math.random()}`) }
+              className="px-2 py-1 text-xs translate-y-6.5"
+            >
+              150x150
+            </Button>
+          </div>
+
+          <div className="flex gap-3 mt-3 items-center">
+            <NumberInput
+              value={ imageSize.width || '' }
+              onChange={ e => handleImageSizeChange('width', e || undefined) }
+              className="w-full"
+              placeholder="自动"
+              label="图片宽度"
+            />
+            <NumberInput
+              value={ imageSize.height || '' }
+              onChange={ e => handleImageSizeChange('height', e || undefined) }
+              className="w-full"
+              placeholder="自动"
+              label="图片高度"
+            />
+
+            <Button
+              onClick={ () => setImageSize({ width: 200, height: undefined }) }
+              className="px-2 py-1 text-xs translate-y-3.5"
+            >
+              宽度200
+            </Button>
+            <Button
+              onClick={ () => setImageSize({ width: undefined, height: 150 }) }
+              className="px-2 py-1 text-xs translate-y-3.5"
+            >
+              高度150
+            </Button>
+            <Button
+              onClick={ () => setImageSize({ width: 300, height: 200 }) }
+              className="px-2 py-1 text-xs translate-y-3.5"
+            >
+              300x200
+            </Button>
+            <Button
+              onClick={ () => setImageSize({ width: undefined, height: undefined }) }
+              className="px-2 py-1 text-xs translate-y-3.5"
+            >
+              重置
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* 样式设置 */ }
       <div className="space-y-3">
         <h4 className="text-md text-gray-800 font-medium dark:text-gray-200">样式设置</h4>
@@ -188,7 +285,7 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
                 onChange={ e => handleStyleChange('strokeStyle', e.target.value) }
                 className="h-8 w-12 border border-gray-300 rounded dark:border-gray-600"
               />
-              <NumberInput
+              <Input
                 value={ shapeStyle.strokeStyle }
                 onChange={ e => handleStyleChange('strokeStyle', e) }
                 className="flex-1"
@@ -259,6 +356,14 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
             添加箭头
           </Button>
           <Button
+            onClick={ () => addShape('imageShape') }
+            variant="default"
+            className="flex items-center gap-2"
+          >
+            <div className="h-4 w-4 flex items-center justify-center">🖼️</div>
+            添加图片
+          </Button>
+          <Button
             onClick={ addRandomShape }
             variant="primary"
             className="flex items-center gap-2"
@@ -276,8 +381,12 @@ export function AddShapeSection({ noteBoardRef }: AddShapeSectionProps) {
         <ul className="text-xs text-blue-800 space-y-1 dark:text-blue-200">
           <li>• 设置起点和终点坐标来定义形状的位置和大小</li>
           <li>• 自定义边框颜色、线条宽度和填充颜色</li>
-          <li>• 点击对应按钮添加不同类型的形状</li>
+          <li>• 对于图片形状，可以设置图片源（URL 或 base64）和自定义尺寸</li>
+          <li>• 图片尺寸留空时将使用原始图片尺寸，设置后将缩放到指定尺寸</li>
+          <li>• 只设置宽度或高度时，会自动按原图比例计算另一项，保持图片不变形</li>
+          <li>• 点击对应按钮添加不同类型的形状（矩形、圆形、箭头、图片）</li>
           <li>• 使用"随机添加"按钮快速测试多种形状</li>
+          <li>• 图片支持异步加载，加载完成后自动重绘</li>
           <li>• 添加的形状支持撤销/重做操作</li>
           <li>• 所有操作都会在控制台输出详细信息</li>
         </ul>

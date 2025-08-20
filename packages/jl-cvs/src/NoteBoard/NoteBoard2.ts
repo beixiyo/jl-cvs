@@ -1,6 +1,6 @@
 import type { NoteBoardOptions } from './type'
 import type { Point } from '@/Canvas/types'
-import { Brush } from '@/Shapes'
+import { Brush, ImageShape } from '@/Shapes'
 import { NoteBoard } from './NoteBoard'
 import { NoteBoard2Viewport } from './NoteBoard2Viewport'
 
@@ -306,6 +306,14 @@ export class NoteBoard2 extends NoteBoard {
 
       /** 绘制所有图形 */
       for (const shape of record.shapes) {
+        /** 如果是 ImageShape 且还没加载，设置加载完成后的重绘回调 */
+        if (shape.name === 'imageShape' && shape instanceof ImageShape) {
+          if (shape.loadState === 'loading' && !shape.onLoadCallback) {
+            shape.onLoadCallback = () => {
+              this.requestRender()
+            }
+          }
+        }
         shape.draw(this.ctx)
       }
     }
@@ -514,8 +522,8 @@ export class NoteBoard2 extends NoteBoard {
     /** 图形模式的鼠标抬起处理 */
     if (this.interaction.isShapeMode()) {
       /** 在无限画布模式下，需要转换坐标后再传递给 DrawShape */
-      const transformedEvent = this.transformMouseEventForDrawShape(e)
-      this.drawShape.handleMouseUp(transformedEvent)
+      // const transformedEvent = this.transformMouseEventForDrawShape(e)
+      this.drawShape.handleMouseUp()
       return
     }
   }

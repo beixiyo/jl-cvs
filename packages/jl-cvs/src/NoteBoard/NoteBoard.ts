@@ -1,6 +1,6 @@
 import type { DisposeOpts, NoteBoardEvent, NoteBoardMode, NoteBoardOptions, RecordPath } from './type'
 import type { BaseShape } from '@/Shapes/libs/BaseShape'
-import { type Brush, DrawShape } from '@/Shapes'
+import { type Brush, DrawShape, ImageShape } from '@/Shapes'
 import { UnRedoLinkedList } from '@/utils'
 import { NoteBoardEvents } from './core/NoteBoardEvents'
 import { NoteBoardInteraction } from './core/NoteBoardInteraction'
@@ -188,6 +188,17 @@ export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
     /** 设置画布上下文 */
     if (!shape.ctx) {
       shape.ctx = this.ctx
+    }
+
+    /** 如果是 ImageShape，需要特殊处理 */
+    if (shape.name === 'imageShape' && shape instanceof ImageShape) {
+      /** 如果图片还没有开始加载，启动加载并传入重绘回调 */
+      if (!shape.loadPromise) {
+        shape.load(undefined, () => {
+          /** 图片加载完成后重绘 */
+          this.renderer.redrawAll()
+        })
+      }
     }
 
     /** 添加到历史记录 */
