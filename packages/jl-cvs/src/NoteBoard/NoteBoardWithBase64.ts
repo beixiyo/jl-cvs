@@ -349,7 +349,7 @@ export class NoteBoardWithBase64 extends NoteBoardBase<NoteBoardEvent> {
     this.setTransform()
 
     this.emit('wheel', {
-      scale: this.scale,
+      zoom: this.scale,
       e,
     })
   }

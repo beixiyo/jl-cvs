@@ -6,11 +6,7 @@ import { excludeKeys } from '@/utils'
  * NoteBoard 交互逻辑模块
  */
 export class NoteBoardInteraction {
-  private noteBoard: NoteBoard
-
-  constructor(noteBoard: NoteBoard) {
-    this.noteBoard = noteBoard
-  }
+  constructor(private readonly noteBoard: NoteBoard) { }
 
   /**
    * 设置 DrawShape 的事件函数

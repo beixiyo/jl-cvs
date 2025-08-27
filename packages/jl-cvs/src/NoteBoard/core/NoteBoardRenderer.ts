@@ -1,22 +1,29 @@
-import type { NoteBoard } from '../'
+import { ImageShape } from '@/Shapes'
+import { NoteBoard } from '../NoteBoard'
 
 /**
  * NoteBoard 渲染模块
  */
 export class NoteBoardRenderer {
-  private noteBoard: NoteBoard
-
-  constructor(noteBoard: NoteBoard) {
-    this.noteBoard = noteBoard
-  }
+  constructor(private readonly noteBoard: NoteBoard) { }
 
   /**
    * 重绘所有内容
    */
   redrawAll() {
-    this.noteBoard.clear(false)
+    const { noteBoard } = this
+    /** 先重置变换矩阵，然后清屏 */
+    noteBoard.canvasList.forEach((item) => {
+      noteBoard.viewport.resetTransform(item.ctx, NoteBoard.dpr)
+    })
+    noteBoard.clear(false)
 
-    const lastRecord = this.noteBoard.history.curValue
+    /** 应用世界坐标变换 */
+    noteBoard.canvasList.forEach((item) => {
+      noteBoard.viewport.applyTransform(item.ctx, NoteBoard.dpr)
+    })
+
+    const lastRecord = noteBoard.history.curValue
     if (!lastRecord) {
       return
     }
@@ -24,78 +31,90 @@ export class NoteBoardRenderer {
     /** 按记录顺序绘制所有内容 */
     for (const record of lastRecord) {
       /** 设置绘制样式 */
-      this.noteBoard.setStyle(record.canvasAttrs, this.noteBoard.ctx)
+      noteBoard.setStyle(record.canvasAttrs, noteBoard.ctx)
 
       /** 设置混合模式 */
       if (record.mode === 'erase') {
-        this.noteBoard.ctx.globalCompositeOperation = 'destination-out'
+        noteBoard.ctx.globalCompositeOperation = 'destination-out'
       }
-      else if (this.noteBoard.interaction.isShapeMode(record.mode)) {
-        this.noteBoard.ctx.globalCompositeOperation = this.noteBoard.noteBoardOpts.shapeGlobalCompositeOperation
+      else if (noteBoard.interaction.isShapeMode(record.mode)) {
+        noteBoard.ctx.globalCompositeOperation = noteBoard.noteBoardOpts.shapeGlobalCompositeOperation
       }
       else {
-        this.noteBoard.ctx.globalCompositeOperation = this.noteBoard.noteBoardOpts.drawGlobalCompositeOperation
+        noteBoard.ctx.globalCompositeOperation = noteBoard.noteBoardOpts.drawGlobalCompositeOperation
       }
 
       /** 绘制所有图形 */
       for (const shape of record.shapes) {
-        shape.draw(this.noteBoard.ctx)
+        /** 如果是 ImageShape 且还没加载，设置加载完成后的重绘回调 */
+        if (shape.name === 'imageShape' && shape instanceof ImageShape) {
+          if (shape.loadState === 'loading' && !shape.onLoadCallback) {
+            shape.onLoadCallback = () => {
+              this.redrawAll()
+            }
+          }
+        }
+        shape.draw(noteBoard.ctx)
       }
     }
 
     /** 恢复当前模式的样式 */
-    this.noteBoard.setMode(this.noteBoard.mode)
+    noteBoard.setMode(noteBoard.mode)
   }
 
   /**
    * 绘制当前线段（实时绘制优化）
    */
   drawCurrentSegment(fromX: number, fromY: number, toX: number, toY: number) {
+    const { noteBoard } = this
+
     /** 设置当前笔刷的样式 */
-    this.noteBoard.ctx.strokeStyle = this.noteBoard.noteBoardOpts.strokeStyle
-    this.noteBoard.ctx.lineWidth = this.noteBoard.noteBoardOpts.lineWidth
-    this.noteBoard.ctx.lineCap = 'round'
-    this.noteBoard.ctx.lineJoin = 'round'
+    noteBoard.ctx.strokeStyle = noteBoard.noteBoardOpts.strokeStyle
+    noteBoard.ctx.lineWidth = noteBoard.noteBoardOpts.lineWidth
+    noteBoard.ctx.lineCap = 'round'
+    noteBoard.ctx.lineJoin = 'round'
 
     /** 设置当前模式的混合模式 */
-    if (this.noteBoard.mode === 'erase') {
-      this.noteBoard.ctx.globalCompositeOperation = 'destination-out'
+    if (noteBoard.mode === 'erase') {
+      noteBoard.ctx.globalCompositeOperation = 'destination-out'
     }
     else {
-      this.noteBoard.ctx.globalCompositeOperation = this.noteBoard.noteBoardOpts.drawGlobalCompositeOperation
+      noteBoard.ctx.globalCompositeOperation = noteBoard.noteBoardOpts.drawGlobalCompositeOperation
     }
 
     /** 绘制线段 */
-    this.noteBoard.ctx.beginPath()
-    this.noteBoard.ctx.moveTo(fromX, fromY)
-    this.noteBoard.ctx.lineTo(toX, toY)
-    this.noteBoard.ctx.stroke()
+    noteBoard.ctx.beginPath()
+    noteBoard.ctx.moveTo(fromX, fromY)
+    noteBoard.ctx.lineTo(toX, toY)
+    noteBoard.ctx.stroke()
   }
 
   /**
    * 恢复当前模式的光标样式
    */
   setCursorForCurrentMode() {
-    switch (this.noteBoard.mode) {
+    const { noteBoard } = this
+
+    switch (noteBoard.mode) {
       case 'brush':
       case 'erase':
-        this.noteBoard.setCursor()
+        noteBoard.setCursor()
         break
 
       case 'none':
-        this.noteBoard.canvas.style.cursor = 'unset'
+        noteBoard.canvas.style.cursor = 'unset'
         break
       case 'drag':
-        this.noteBoard.canvas.style.cursor = 'grab'
+        noteBoard.canvas.style.cursor = 'grab'
         break
 
       case 'rect':
       case 'circle':
       case 'arrow':
-        this.noteBoard.canvas.style.cursor = 'crosshair'
+        noteBoard.canvas.style.cursor = 'crosshair'
         break
       default:
-        this.noteBoard.canvas.style.cursor = 'default'
+        noteBoard.canvas.style.cursor = 'default'
         break
     }
   }

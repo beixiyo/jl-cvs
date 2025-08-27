@@ -1,10 +1,12 @@
 import type { DisposeOpts, NoteBoardEvent, NoteBoardMode, NoteBoardOptions, RecordPath } from './type'
+import type { Point } from '@/Canvas/types'
 import type { BaseShape } from '@/Shapes/libs/BaseShape'
 import { type Brush, DrawShape, ImageShape } from '@/Shapes'
 import { UnRedoLinkedList } from '@/utils'
 import { NoteBoardEvents } from './core/NoteBoardEvents'
 import { NoteBoardInteraction } from './core/NoteBoardInteraction'
 import { NoteBoardRenderer } from './core/NoteBoardRenderer'
+import { Viewport } from './core/Viewport'
 import { NoteBoardBase } from './NoteBoardBase'
 
 /**
@@ -43,10 +45,10 @@ export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
    */
   currentBrush: Brush | null = null
 
-  /** 模块化组件 */
-  events: NoteBoardEvents
-  renderer: NoteBoardRenderer
-  interaction: NoteBoardInteraction
+  readonly events: NoteBoardEvents = new NoteBoardEvents(this)
+  readonly renderer: NoteBoardRenderer = new NoteBoardRenderer(this)
+  readonly interaction: NoteBoardInteraction = new NoteBoardInteraction(this)
+  readonly viewport: Viewport
 
   constructor(opts: NoteBoardOptions) {
     super(opts)
@@ -57,16 +59,22 @@ export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
       context: this.ctx,
     })
 
-    // ======================
-    // * 初始化模块
-    // ======================
-    this.events = new NoteBoardEvents(this)
-    this.renderer = new NoteBoardRenderer(this)
-    this.interaction = new NoteBoardInteraction(this)
-
     this.interaction.setupDrawShapeEvents()
     this.events.bindEvent()
     this.setMode(this.mode)
+
+    this.viewport = new Viewport({
+      pan: { x: 0, y: 0 },
+      zoom: 1,
+      minZoom: opts.minScale || 0.1,
+      maxZoom: opts.maxScale || 10,
+      onViewportChange: () => {
+        this.renderer.redrawAll()
+        if (this.interaction.isBrushMode()) {
+          this.setCursor()
+        }
+      },
+    })
   }
 
   /**
@@ -104,6 +112,10 @@ export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
 
       default:
         break
+    }
+
+    if (this.interaction.isBrushMode()) {
+      this.setCursor()
     }
   }
 
@@ -181,6 +193,16 @@ export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
   }
 
   /**
+   * 重置画布变换状态
+   */
+  override async resetSize(): Promise<void> {
+    /** 重置所有画布的变换矩阵 */
+    this.canvasList.forEach((item) => {
+      this.viewport.resetTransform(item.ctx, NoteBoard.dpr)
+    })
+  }
+
+  /**
    * 添加一个形状到画板
    * @param shape - 要添加的形状实例
    */
@@ -212,5 +234,112 @@ export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
       shape,
       mode: shape.name ?? this.mode,
     })
+  }
+
+  /**
+   * 屏幕坐标转世界坐标
+   * @param screenPoint 屏幕坐标点
+   * @returns 世界坐标点
+   */
+  screenToWorld(screenPoint: Point): Point {
+    return this.viewport.screenToWorld(screenPoint)
+  }
+
+  /**
+   * 世界坐标转屏幕坐标
+   * @param worldPoint 世界坐标点
+   * @returns 屏幕坐标点
+   */
+  worldToScreen(worldPoint: Point): Point {
+    return this.viewport.worldToScreen(worldPoint)
+  }
+
+  /**
+   * 获取视口状态
+   */
+  getViewportState() {
+    return this.viewport.getState()
+  }
+
+  /**
+   * 设置视口状态
+   * @param state 新的视口状态
+   */
+  setViewportState(state: Partial<{ pan: Point, zoom: number }>) {
+    this.viewport.setState(state)
+  }
+
+  /**
+   * 设置缩放级别（支持锚点缩放）
+   * @param zoom 新的缩放级别
+   * @param anchorScreenPoint 可选的屏幕坐标锚点
+   */
+  setZoom(zoom: number, anchorScreenPoint?: Point) {
+    let anchorWorldPoint: Point | undefined
+    if (anchorScreenPoint) {
+      /** 将屏幕坐标锚点转换为世界坐标 */
+      anchorWorldPoint = this.viewport.screenToWorld(anchorScreenPoint)
+    }
+
+    this.viewport.setZoom(zoom, anchorWorldPoint)
+  }
+
+  /**
+   * 设置平移偏移
+   * @param pan 新的平移偏移
+   */
+  setPan(pan: Point) {
+    this.viewport.setPan(pan)
+  }
+
+  /**
+   * 增量平移
+   * @param delta 平移增量
+   */
+  addPan(delta: Point) {
+    this.viewport.addPan(delta)
+  }
+
+  /**
+   * 获取可见的世界坐标区域
+   */
+  getVisibleWorldRect() {
+    return this.viewport.getVisibleWorldRect({
+      width: this.canvas.width / NoteBoard.dpr,
+      height: this.canvas.height / NoteBoard.dpr,
+    })
+  }
+
+  /**
+   * 获取缩放范围
+   */
+  getZoomRange() {
+    return this.viewport.getZoomRange()
+  }
+
+  /**
+   * 重写 setCursor 方法以支持缩放同步
+   * 在无限画布模式下，笔刷光标大小会根据当前缩放级别自动调整
+   */
+  setCursor(lineWidth?: number, strokeStyle?: string) {
+    if (!this.viewport) {
+      return
+    }
+
+    /** 在无限画布模式下，根据缩放级别调整光标大小 */
+    const currentZoom = this.viewport.getState().zoom
+    const actualLineWidth = lineWidth || this.noteBoardOpts.lineWidth
+    const actualStrokeStyle = strokeStyle || this.noteBoardOpts.strokeStyle
+
+    /** 将世界坐标的线宽转换为屏幕坐标的光标大小 */
+    let scaledCursorSize = actualLineWidth * currentZoom
+
+    /** 设置最小和最大光标大小，确保光标始终可见且不会过大 */
+    const minCursorSize = 4 // 最小 4px
+    const maxCursorSize = 100 // 最大 100px
+    scaledCursorSize = Math.max(minCursorSize, Math.min(maxCursorSize, scaledCursorSize))
+
+    /** 调用父类方法，但使用缩放后的大小 */
+    return super.setCursor(scaledCursorSize, actualStrokeStyle)
   }
 }

@@ -492,10 +492,6 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
     )
   }
 
-  /***************************************************
-   *                    Private
-   ***************************************************/
-
   private getAddcanvasOpts(opts: AddCanvasOpts) {
     return {
       width: this.noteBoardOpts.width,

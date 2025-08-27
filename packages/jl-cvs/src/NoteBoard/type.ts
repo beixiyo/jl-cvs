@@ -80,7 +80,7 @@ export type NoteBoardEvent = {
   contextMenu: MouseEvent
 
   wheel: {
-    scale: number
+    zoom: number
     e: WheelEvent
   }
   dragging: {

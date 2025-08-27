@@ -1,4 +1,5 @@
 import type { Point, Size } from '@/Canvas/types'
+import { clamp } from '@jl-org/tool'
 
 /**
  * 视口状态接口
@@ -46,7 +47,7 @@ export interface ViewportOptions {
  *    屏幕坐标 = (世界坐标 - 视口偏移) * 缩放比例
  *    世界坐标 = 屏幕坐标 / 缩放比例 + 视口偏移
  */
-export class NoteBoard2Viewport {
+export class Viewport {
   private options: Required<ViewportOptions>
 
   constructor(options: ViewportOptions = {}) {
@@ -81,19 +82,12 @@ export class NoteBoard2Viewport {
     }
 
     if (partial.zoom !== undefined) {
-      this.options.zoom = this.clampZoom(partial.zoom)
+      this.options.zoom = clamp(partial.zoom, options.minZoom, options.maxZoom)
     }
 
     if (!silent) {
       options.onViewportChange(this.getState())
     }
-  }
-
-  /**
-   * 限制缩放值在有效范围内
-   */
-  private clampZoom(value: number): number {
-    return Math.min(Math.max(value, this.options.minZoom), this.options.maxZoom)
   }
 
   /**
@@ -114,7 +108,7 @@ export class NoteBoard2Viewport {
    * @param anchorWorldPoint 可选的世界坐标锚点
    */
   setZoom(nextZoom: number, anchorWorldPoint?: Point): void {
-    const clamped = this.clampZoom(nextZoom)
+    const clamped = clamp(nextZoom, this.options.minZoom, this.options.maxZoom)
 
     if (anchorWorldPoint) {
       const { pan, zoom } = this.options
