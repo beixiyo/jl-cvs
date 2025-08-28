@@ -281,3 +281,9 @@ export type CanvasItem = {
 export type DisposeOpts = {
   handleCleanCanvasList?: (canvasList: CanvasItem[]) => void
 }
+
+/** 平面点坐标 */
+export interface Point { x: number, y: number }
+
+/** 尺寸（宽高） */
+export interface Size { width: number, height: number }

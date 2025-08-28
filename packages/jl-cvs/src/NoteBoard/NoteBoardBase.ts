@@ -399,7 +399,6 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
         continue
       }
 
-      this.noteBoardOpts[k] = attr
       if (k === 'width' || k === 'height') {
         for (const item of this.canvasList) {
           item.canvas[k] = attr * this.dpr
@@ -418,6 +417,18 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
         }
       }
     }
+  }
+
+  /**
+   * 更新画板的全局配置选项
+   * @param opts - 需要更新的选项
+   */
+  updateOptions(opts: Partial<CanvasAttrs>) {
+    /** 1. 更新主配置对象 */
+    Object.assign(this.noteBoardOpts, opts)
+
+    /** 2. 将新样式应用到当前上下文中，以便立即生效 */
+    this.setStyle(opts)
   }
 
   /**

@@ -1,4 +1,4 @@
-import type { Point, Size } from '@/Canvas/types'
+import type { Point, Size } from '../type'
 import { clamp } from '@jl-org/tool'
 
 /**

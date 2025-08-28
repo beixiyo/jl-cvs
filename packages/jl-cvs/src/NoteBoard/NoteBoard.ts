@@ -1,5 +1,11 @@
-import type { DisposeOpts, NoteBoardEvent, NoteBoardMode, NoteBoardOptions, RecordPath } from './type'
-import type { Point } from '@/Canvas/types'
+import type {
+  DisposeOpts,
+  NoteBoardEvent,
+  NoteBoardMode,
+  NoteBoardOptions,
+  Point,
+  RecordPath,
+} from './type'
 import type { BaseShape } from '@/Shapes/libs/BaseShape'
 import { type Brush, DrawShape, ImageShape } from '@/Shapes'
 import { UnRedoLinkedList } from '@/utils'
