@@ -1,4 +1,5 @@
 import type { NoteBoard, RecordPath } from '../'
+import type { BoundRect } from '@/Shapes/type'
 import { type BaseShape, ImageShape } from '@/Shapes'
 
 /**
@@ -33,6 +34,8 @@ export class NoteBoardRenderer {
   private _performRedraw() {
     const { noteBoard } = this
     const { noteBoardOpts, canvasList, viewport, history, imgInfo, ctx } = noteBoard
+
+    const visibleRect = noteBoard.getVisibleWorldRect()
 
     /** 重置和清空画布 */
     canvasList.forEach((item) => {
@@ -86,6 +89,11 @@ export class NoteBoardRenderer {
         const sortedShapes = [...finalShapes.values()].sort((a, b) => a.shape.meta.zIndex - b.shape.meta.zIndex)
 
         for (const { shape, record } of sortedShapes) {
+          /** 可视区域渲染优化：只绘制视口内的形状 */
+          if (!isRectIntersect(shape.getBounds(), visibleRect)) {
+            continue
+          }
+
           /** 设置绘制样式 */
           noteBoard.setStyle(shape.shapeStyle, ctx)
 
@@ -122,14 +130,17 @@ export class NoteBoardRenderer {
 
     /** 绘制临时的预览形状 */
     if (this.tempShape) {
-      /** 临时形状的绘制也需要包裹，以防它污染最终的 setMode */
-      ctx.save()
-      try {
-        ctx.globalCompositeOperation = noteBoardOpts.shapeGlobalCompositeOperation
-        this.tempShape.draw(ctx)
-      }
-      finally {
-        ctx.restore()
+      /** 可视区域渲染优化：只绘制视口内的形状 */
+      if (isRectIntersect(this.tempShape.getBounds(), visibleRect)) {
+        /** 临时形状的绘制也需要包裹，以防它污染最终的 setMode */
+        ctx.save()
+        try {
+          ctx.globalCompositeOperation = noteBoardOpts.shapeGlobalCompositeOperation
+          this.tempShape.draw(ctx)
+        }
+        finally {
+          ctx.restore()
+        }
       }
     }
 
@@ -198,4 +209,16 @@ export class NoteBoardRenderer {
         break
     }
   }
+}
+
+/**
+ * 判断两个矩形是否相交
+ */
+function isRectIntersect(rect1: BoundRect, rect2: BoundRect): boolean {
+  return (
+    rect1.x < rect2.x + rect2.width
+    && rect1.x + rect1.width > rect2.x
+    && rect1.y < rect2.y + rect2.height
+    && rect1.y + rect1.height > rect2.y
+  )
 }
