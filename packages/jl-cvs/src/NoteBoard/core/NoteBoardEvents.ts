@@ -38,7 +38,7 @@ export class NoteBoardEvents {
     /** 优先处理左键拖拽形状 */
     if (e.button === 0 && !interaction.isBrushMode()) {
       const shape = interaction.getShapeAtPoint(worldPoint)
-      if (shape) {
+      if (shape && shape.name !== 'brush') {
         interaction.draggedShape = shape.clone()
         interaction.isDragging = true
         interaction.dragStartPoint = worldPoint

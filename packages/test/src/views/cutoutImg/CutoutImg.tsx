@@ -192,7 +192,7 @@ export const CutoutImg = memo<CutoutImgProps>((
       noteBoard.on('mouseUp', drawPreviewImg)
       noteBoard.on('wheel', ({ zoom }) => {
         const lineWidth = setBrushSize.getLatest()
-        noteBoard.setStyle({
+        noteBoard.updateOptions({
           lineWidth: lineWidth / zoom,
         })
         noteBoard.setCursor()
@@ -262,7 +262,7 @@ export const CutoutImg = memo<CutoutImgProps>((
       if (!noteBoard)
         return
 
-      noteBoard.setStyle({ lineWidth: brushSize })
+      noteBoard.updateOptions({ lineWidth: brushSize })
       noteBoard.setCursor()
     },
     [brushSize],

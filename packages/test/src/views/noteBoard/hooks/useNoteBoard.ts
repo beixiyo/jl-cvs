@@ -50,13 +50,13 @@ export function useNoteBoard() {
 
     if (zoom !== undefined && zoom > 1) {
       const lineWidth = setConfig.getLatest().lineWidth / zoom
-      noteBoard.setStyle({ lineWidth })
+      noteBoard.updateOptions({ lineWidth })
       noteBoard.setCursor()
       return
     }
 
     if (size !== undefined && size > 0) {
-      noteBoard.setStyle({ lineWidth: size })
+      noteBoard.updateOptions({ lineWidth: size })
       noteBoard.setCursor()
       return
     }
