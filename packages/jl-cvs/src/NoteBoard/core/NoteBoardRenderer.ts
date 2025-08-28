@@ -1,5 +1,5 @@
-import type { NoteBoard } from '../NoteBoard'
-import { ImageShape } from '@/Shapes'
+import type { NoteBoard, RecordPath } from '../'
+import { type BaseShape, ImageShape } from '@/Shapes'
 
 /**
  * NoteBoard 渲染模块
@@ -7,6 +7,8 @@ import { ImageShape } from '@/Shapes'
 export class NoteBoardRenderer {
   /** 标志位，用于防止重复的重绘请求 */
   private isRedrawScheduled = false
+  /** 用于实时预览的临时形状（如拖拽中的形状） */
+  public tempShape: BaseShape | null = null
 
   constructor(private readonly noteBoard: NoteBoard) { }
 
@@ -60,40 +62,69 @@ export class NoteBoardRenderer {
 
     const lastRecord = history.curValue
     if (!lastRecord) {
+      /** 即使没有历史记录，也可能需要绘制临时形状 */
+      if (this.tempShape) {
+        ctx.globalCompositeOperation = noteBoardOpts.shapeGlobalCompositeOperation
+        this.tempShape.draw(ctx)
+      }
+      noteBoard.setMode(noteBoard.mode)
       return
     }
 
-    /** 按记录顺序绘制所有内容 */
+    /**
+     * 核心渲染逻辑：按 ID 去重，只绘制最新的形状
+     * 遍历所有历史记录，后面的形状会覆盖前面相同 ID 的形状
+     */
+    const finalShapes = new Map<string, { shape: BaseShape, record: RecordPath }>()
     for (const record of lastRecord) {
-      /** 设置绘制样式 */
-      noteBoard.setStyle(record.canvasAttrs, ctx)
+      for (const shape of record.shapes) {
+        finalShapes.set(shape.meta.id, { shape, record })
+      }
+    }
 
-      /** 设置混合模式 */
+    /** 如果正在预览临时形状（如拖拽），则从最终列表中移除其原始版本 */
+    if (this.tempShape) {
+      finalShapes.delete(this.tempShape.meta.id)
+    }
+
+    /** 按 zIndex 排序，zIndex 大的后绘制 */
+    const sortedShapes = [...finalShapes.values()].sort((a, b) => a.shape.meta.zIndex - b.shape.meta.zIndex)
+
+    for (const { shape, record } of sortedShapes) {
+      /** 设置绘制样式 */
+      noteBoard.setStyle(shape.shapeStyle, ctx)
+
+      /** 根据历史记录的模式设置混合模式 */
       if (record.mode === 'erase') {
         ctx.globalCompositeOperation = 'destination-out'
       }
-      else if (noteBoard.interaction.isShapeMode(record.mode)) {
-        ctx.globalCompositeOperation = noteBoardOpts.shapeGlobalCompositeOperation
-      }
-      else {
+      else if (record.mode === 'brush') {
         ctx.globalCompositeOperation = noteBoardOpts.drawGlobalCompositeOperation
       }
+      else {
+        ctx.globalCompositeOperation = noteBoardOpts.shapeGlobalCompositeOperation
+      }
 
-      /** 绘制所有图形 */
-      for (const shape of record.shapes) {
-        /** 如果是 ImageShape 且还没加载，设置加载完成和失败后的重绘回调 */
-        if (shape.name === 'imageShape' && shape instanceof ImageShape) {
-          if (shape.loadState === 'loading') {
-            if (!shape.onLoadCallback) {
-              shape.onLoadCallback = () => this.redrawAll()
-            }
-            if (!shape.onErrorCallback) {
-              shape.onErrorCallback = () => this.redrawAll()
-            }
+      /** 如果是 ImageShape 且还没加载，设置加载完成和失败后的重绘回调 */
+      if (shape.name === 'imageShape' && shape instanceof ImageShape) {
+        if (shape.loadState === 'loading') {
+          if (!shape.onLoadCallback) {
+            shape.onLoadCallback = () => this.redrawAll()
+          }
+          if (!shape.onErrorCallback) {
+            shape.onErrorCallback = () => this.redrawAll()
           }
         }
-        shape.draw(ctx)
       }
+
+      shape.draw(ctx)
+    }
+
+    /** 绘制临时的预览形状 */
+    if (this.tempShape) {
+      /** 临时形状使用默认的绘制模式 */
+      ctx.globalCompositeOperation = noteBoardOpts.shapeGlobalCompositeOperation
+      this.tempShape.draw(ctx)
     }
 
     /** 恢复当前模式的样式 */

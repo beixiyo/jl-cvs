@@ -51,6 +51,43 @@ export abstract class BaseShape {
 
   abstract isInPath(x: number, y: number): boolean
 
+  /**
+   * 平移形状
+   * @param dx - x轴方向的位移
+   * @param dy - y轴方向的位移
+   */
+  translate(dx: number, dy: number) {
+    this.startX += dx
+    this.startY += dy
+    this.endX += dx
+    this.endY += dy
+  }
+
+  /**
+   * 获取用于克隆的构造函数参数
+   */
+  protected getCloneOpts(): BaseShapeOpts {
+    return {
+      startX: this.startX,
+      startY: this.startY,
+      endX: this.endX,
+      endY: this.endY,
+      ctx: this.ctx,
+      shapeStyle: { ...this.shapeStyle },
+      meta: { ...this.meta },
+    }
+  }
+
+  /**
+   * 克隆形状
+   * @returns 一个新的形状实例
+   */
+  clone(): BaseShape {
+    const opts = this.getCloneOpts()
+    // @ts-expect-error
+    return new this.constructor(opts)
+  }
+
   /** 获取包围盒 */
   getBounds(): BoundRect {
     const minX = Math.min(this.startX, this.endX)
@@ -97,7 +134,7 @@ export type BaseShapeOpts = {
   endY?: number
 
   /** 画布上下文 */
-  ctx?: CanvasRenderingContext2D
+  ctx?: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
   /** 图形样式 */
   shapeStyle?: ShapeStyle
   /** Canvas系统元数据 */

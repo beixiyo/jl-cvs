@@ -11,11 +11,6 @@ export class Circle extends BaseShape {
   constructor(opts: BaseShapeOpts) {
     super(opts)
 
-    this.startX = opts.startX
-    this.startY = opts.startY
-    this.endX = opts.startX
-    this.endY = opts.startY
-
     this.shapeStyle = opts.shapeStyle || {}
     this.setShapeStyle(opts.shapeStyle)
   }

@@ -1,4 +1,5 @@
 import type { NoteBoard, NoteBoardMode } from '../'
+import type { Point } from '@/Canvas/types'
 import type { BaseShape } from '@/Shapes/libs/BaseShape'
 import { excludeKeys } from '@/utils'
 
@@ -6,6 +7,13 @@ import { excludeKeys } from '@/utils'
  * NoteBoard 交互逻辑模块
  */
 export class NoteBoardInteraction {
+  /** 正在拖拽的形状副本 */
+  draggedShape: BaseShape | null = null
+  /** 是否正在拖拽形状 */
+  isDragging = false
+  /** 拖拽起始的世界坐标 */
+  dragStartPoint: Point = { x: 0, y: 0 }
+
   constructor(private readonly noteBoard: NoteBoard) { }
 
   /**
@@ -94,6 +102,31 @@ export class NoteBoardInteraction {
     if (!lastRecord || lastRecord.length === 0) {
       return []
     }
-    return lastRecord[lastRecord.length - 1].shapes
+
+    const finalShapes = new Map<string, BaseShape>()
+    for (const record of lastRecord) {
+      for (const shape of record.shapes) {
+        finalShapes.set(shape.meta.id, shape)
+      }
+    }
+    return [...finalShapes.values()]
+  }
+
+  /**
+   * 获取指定世界坐标点下的最顶层形状
+   * @param worldPoint - 世界坐标点
+   */
+  getShapeAtPoint(worldPoint: Point): BaseShape | null {
+    const shapes = this.getAllShapes()
+
+    /** 从最顶层（数组末尾）开始查找 */
+    for (let i = shapes.length - 1; i >= 0; i--) {
+      const shape = shapes[i]
+      if (shape.isInPath(worldPoint.x, worldPoint.y)) {
+        return shape
+      }
+    }
+
+    return null
   }
 }

@@ -29,8 +29,23 @@ export class NoteBoardEvents {
 
   onMousedown = (e: MouseEvent) => {
     const { noteBoard } = this
+    const { interaction, renderer } = noteBoard
     noteBoard.emit('mouseDown', e)
-    noteBoard.renderer.setCursorForCurrentMode()
+    renderer.setCursorForCurrentMode()
+
+    const worldPoint = noteBoard.screenToWorld({ x: e.offsetX, y: e.offsetY })
+
+    /** 优先处理左键拖拽形状 */
+    if (e.button === 0 && !interaction.isBrushMode()) {
+      const shape = interaction.getShapeAtPoint(worldPoint)
+      if (shape) {
+        interaction.draggedShape = shape.clone()
+        interaction.isDragging = true
+        interaction.dragStartPoint = worldPoint
+        noteBoard.canvas.style.cursor = 'grabbing'
+        return
+      }
+    }
 
     /** 拖拽模式 */
     if (noteBoard.mode === 'drag') {
@@ -81,7 +96,23 @@ export class NoteBoardEvents {
 
   onMousemove = (e: MouseEvent) => {
     const { noteBoard } = this
+    const { interaction, renderer } = noteBoard
     noteBoard.emit('mouseMove', e)
+
+    /** 正在拖拽形状 */
+    if (interaction.isDragging && interaction.draggedShape) {
+      const worldPoint = noteBoard.screenToWorld({ x: e.offsetX, y: e.offsetY })
+      const dx = worldPoint.x - interaction.dragStartPoint.x
+      const dy = worldPoint.y - interaction.dragStartPoint.y
+
+      interaction.draggedShape.translate(dx, dy)
+      interaction.dragStartPoint = worldPoint
+
+      // 实时预览，将拖拽中的形状副本交给渲染器绘制
+      renderer.tempShape = interaction.draggedShape
+      renderer.redrawAll()
+      return
+    }
 
     if (noteBoard.isDragging) {
       const dx = e.offsetX - noteBoard.dragStart.x
@@ -131,7 +162,19 @@ export class NoteBoardEvents {
 
   onMouseup = (e: MouseEvent) => {
     const { noteBoard } = this
+    const { interaction, renderer } = noteBoard
     noteBoard.emit('mouseUp', e)
+
+    /** 结束形状拖拽 */
+    if (interaction.isDragging && interaction.draggedShape) {
+      // 将拖拽后的形状副本加入历史记录
+      interaction.addShapesToHistory([interaction.draggedShape])
+      interaction.isDragging = false
+      interaction.draggedShape = null
+      renderer.tempShape = null // 清除临时形状
+      renderer.setCursorForCurrentMode()
+      return
+    }
 
     /** 结束拖拽 */
     if (noteBoard.isDragging) {
@@ -161,7 +204,18 @@ export class NoteBoardEvents {
 
   onMouseLeave = (e: MouseEvent) => {
     const { noteBoard } = this
+    const { interaction, renderer } = noteBoard
     noteBoard.emit('mouseLeave', e)
+
+    /** 结束形状拖拽 */
+    if (interaction.isDragging && interaction.draggedShape) {
+      interaction.addShapesToHistory([interaction.draggedShape])
+      interaction.isDragging = false
+      interaction.draggedShape = null
+      renderer.tempShape = null // 清除临时形状
+      renderer.setCursorForCurrentMode()
+      return
+    }
 
     /** 结束拖拽 */
     if (noteBoard.isDragging) {

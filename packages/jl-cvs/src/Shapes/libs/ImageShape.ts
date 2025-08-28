@@ -90,13 +90,11 @@ export class ImageShape extends BaseShape {
       return
     }
 
-    /** 保存当前的混合模式 */
-    const originalCompositeOperation = ctx.globalCompositeOperation
-
-    /** 计算绘制区域 */
-    const { x, y, width, height } = this.getBounds()
-
+    ctx.save()
     try {
+      /** 计算绘制区域 */
+      const { x, y, width, height } = this.getBounds()
+
       /** 设置图片绘制的混合模式为正常模式，避免受到当前模式（如 xor）的影响 */
       ctx.globalCompositeOperation = 'source-over'
 
@@ -108,8 +106,8 @@ export class ImageShape extends BaseShape {
       this.drawErrorPlaceholder(ctx)
     }
     finally {
-      /** 恢复原始的混合模式 */
-      ctx.globalCompositeOperation = originalCompositeOperation
+      /** 恢复原始的上下文状态 */
+      ctx.restore()
     }
   }
 
@@ -117,9 +115,7 @@ export class ImageShape extends BaseShape {
    * 绘制加载中占位符
    */
   private drawPlaceholder(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
-    /** 保存当前的混合模式 */
-    const originalCompositeOperation = ctx.globalCompositeOperation
-
+    ctx.save()
     try {
       /** 设置正常绘制模式 */
       ctx.globalCompositeOperation = 'source-over'
@@ -134,8 +130,8 @@ export class ImageShape extends BaseShape {
       ctx.fillText('Loading...', x + width / 2, y + height / 2)
     }
     finally {
-      /** 恢复原始的混合模式 */
-      ctx.globalCompositeOperation = originalCompositeOperation
+      /** 恢复原始的上下文状态 */
+      ctx.restore()
     }
   }
 
@@ -143,9 +139,7 @@ export class ImageShape extends BaseShape {
    * 绘制错误占位符
    */
   private drawErrorPlaceholder(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
-    /** 保存当前的混合模式 */
-    const originalCompositeOperation = ctx.globalCompositeOperation
-
+    ctx.save()
     try {
       /** 设置正常绘制模式 */
       ctx.globalCompositeOperation = 'source-over'
@@ -160,8 +154,8 @@ export class ImageShape extends BaseShape {
       ctx.fillText('❌ Load Failed', x + width / 2, y + height / 2)
     }
     finally {
-      /** 恢复原始的混合模式 */
-      ctx.globalCompositeOperation = originalCompositeOperation
+      /** 恢复原始的上下文状态 */
+      ctx.restore()
     }
   }
 
@@ -258,5 +252,19 @@ export class ImageShape extends BaseShape {
       && y >= bounds.y
       && y <= bounds.y + bounds.height
     )
+  }
+
+  /**
+   * 重写克隆方法，以保留加载状态和图片数据
+   */
+  override clone(): BaseShape {
+    const newShape = super.clone() as ImageShape
+
+    /** 复制图片相关的特定属性 */
+    newShape.loadState = this.loadState
+    newShape.image = this.image
+    newShape.loadPromise = this.loadPromise
+
+    return newShape
   }
 }
