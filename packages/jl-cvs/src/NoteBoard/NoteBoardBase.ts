@@ -9,7 +9,7 @@ import { mergeOpts, setCanvas } from './tools'
 export abstract class NoteBoardBase<T extends Record<string, any>>
   extends EventBus<T>
   implements ILifecycleManager {
-  static dpr = getDPR()
+  dpr = getDPR()
 
   /** 容器 */
   el: HTMLElement
@@ -36,59 +36,43 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
   /** 开启鼠标滚轮缩放 */
   isEnableZoom = true
 
-  /**
-   * 记录缩放、位置等属性
-   */
+  /** 是否正在绘制 */
   isDrawing = false
   drawStart = { x: 0, y: 0 }
 
+  /** 是否正在拖拽 */
   isDragging = false
   dragStart = { x: 0, y: 0 }
   mousePoint = { x: 0, y: 0 }
 
-  scale = 1
-  translateX = 0
-  translateY = 0
-
+  /** 当前模式 */
   abstract mode: any
 
-  /**
-   * 历史记录
-   */
+  /** 历史记录 */
   abstract history: any
-  /**
-   * 撤销
-   */
+
+  /** 撤销 */
   abstract undo(): void
-  /**
-   * 重做
-   */
+
+  /** 重做 */
   abstract redo(): void
 
-  /**
-   * 是否可以执行撤销
-   */
+  /** 是否可以执行撤销 */
   abstract canUndo(): boolean
 
-  /**
-   * 是否可以执行重做
-   */
+  /** 是否可以执行重做 */
   abstract canRedo(): boolean
 
-  /**
-   * 移除所有事件
-   */
+  /** 移除所有事件 */
   abstract rmEvent(): void
+
+  /** 绑定事件 */
   abstract bindEvent(): void
 
-  /**
-   * 设置模式
-   */
+  /** 设置模式 */
   abstract setMode(mode: any): void
 
-  /**
-   * 清理并释放所有资源
-   */
+  /** 清理并释放所有资源 */
   dispose(opts: DisposeOpts = {}) {
     if (opts.handleCleanCanvasList) {
       opts.handleCleanCanvasList(this.canvasList)
@@ -109,22 +93,11 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
 
     /** 清空画布内容 */
     this.clear(true, true)
-
-    /** 重置变换 */
-    this.resetSize()
-
-    /** 清理引用 */
-    this.imgInfo = undefined
-    this.el = null as any
-    this.canvas = null as any
-    this.ctx = null as any
-    this.imgCanvas = null as any
-    this.imgCtx = null as any
   }
 
   constructor(opts: NoteBoardOptions) {
     super({ triggerBefore: true })
-    this.noteBoardOpts = mergeOpts(opts, NoteBoardBase.dpr)
+    this.noteBoardOpts = mergeOpts(opts, this.dpr)
 
     /** 设置画笔画板置顶 */
     this.canvas.style.zIndex = this.noteBoardOpts.canvasZIndex
@@ -145,8 +118,8 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
     )
     this.setStyle(this.noteBoardOpts)
 
-    this.ctx.scale(NoteBoardBase.dpr, NoteBoardBase.dpr)
-    this.imgCtx.scale(NoteBoardBase.dpr, NoteBoardBase.dpr)
+    this.ctx.scale(this.dpr, this.dpr)
+    this.imgCtx.scale(this.dpr, this.dpr)
   }
 
   protected get canDraw() {
@@ -213,7 +186,7 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
       height = this.noteBoardOpts.height
     }
 
-    const { ctx, cvs } = createCvs(width, height, { dpr: NoteBoardBase.dpr })
+    const { ctx, cvs } = createCvs(width, height, { dpr: this.dpr })
     for (const img of imgs) {
       ctx.drawImage(img, 0, 0)
     }
@@ -278,7 +251,7 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
     /**
      * 缩放回原始大小的计算过程
      */
-    const dpr = NoteBoardBase.dpr
+    const dpr = this.dpr
 
     // 1. 计算源图像（物理像素图像）上的裁剪区域（物理像素）
     const physicalX = imgInfo.x * dpr
@@ -388,38 +361,6 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
   }
 
   /**
-   * 拖拽、缩放画布
-   * @param callback 在设置完成 canvas 后执行的回调
-   */
-  async setTransform(callback?: (styles: {
-    transform: string
-    transformOrigin: string
-  }) => void) {
-    const transformOrigin = `${this.mousePoint.x}px ${this.mousePoint.y}px`
-    const transform = `scale(${this.scale}, ${this.scale}) translate(${this.translateX}px, ${this.translateY}px)`
-
-    this.canvasList.forEach((item) => {
-      item.canvas.style.transformOrigin = transformOrigin
-      item.canvas.style.transform = transform
-    })
-
-    callback?.({
-      transform,
-      transformOrigin,
-    })
-  }
-
-  /**
-   * 重置大小
-   */
-  async resetSize() {
-    this.canvasList.forEach((item) => {
-      item.canvas.style.transformOrigin = 'none'
-      item.canvas.style.transform = 'none'
-    })
-  }
-
-  /**
    * 清空画板
    */
   clear(
@@ -431,8 +372,7 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
   }
 
   /**
-   * 添加新的画布到 canvasList 中
-   * ## 记得手动设置 ctx.scale(dpr, dpr)
+   * 添加新的画布到 canvasList 中，记得手动设置 ctx.scale(dpr, dpr)
    */
   addCanvas(name: string, opts: AddCanvasOpts) {
     const options = this.getAddcanvasOpts(opts)
@@ -443,7 +383,7 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
     })
 
     options.parentEl.appendChild(options.canvas)
-    setCanvas(options, NoteBoardBase.dpr)
+    setCanvas(options, this.dpr)
   }
 
   /**
@@ -462,7 +402,7 @@ export abstract class NoteBoardBase<T extends Record<string, any>>
       this.noteBoardOpts[k] = attr
       if (k === 'width' || k === 'height') {
         for (const item of this.canvasList) {
-          item.canvas[k] = attr * NoteBoardBase.dpr
+          item.canvas[k] = attr * this.dpr
         }
         continue
       }

@@ -65,12 +65,6 @@ export default function NoteBoard2Test() {
     }
   }
 
-  /** 重置视口 */
-  const handleResetViewport = () => {
-    actions.setPan({ x: 0, y: 0 })
-    actions.setZoom(1)
-  }
-
   /** 缩放到指定级别 */
   const handleZoomTo = (zoom: number) => {
     /** 以画布中心为锚点缩放 */
@@ -95,62 +89,7 @@ export default function NoteBoard2Test() {
         <div className="absolute h-80 w-80 rounded-full from-pink-400/20 to-orange-600/20 bg-gradient-to-tr blur-3xl -bottom-40 -left-40" />
       </div>
 
-      <div className="relative z-10 p-6 space-y-8">
-        <h1 className="mb-4 text-3xl text-center text-gray-900 font-bold dark:text-white">
-          🚀 NoteBoard2 无限画布测试
-        </h1>
-
-        {/* 无限画布控制面板 */ }
-        <div className="border border-gray-200/50 rounded-xl bg-white/80 p-6 shadow-lg backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/80">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 md:grid-cols-2">
-            {/* 视口状态显示 */ }
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              <div>
-                缩放:
-                { viewportState.zoom.toFixed(2) }
-                x
-              </div>
-              <div>
-                平移: (
-                { viewportState.pan.x.toFixed(0) }
-                ,
-                { viewportState.pan.y.toFixed(0) }
-                )
-              </div>
-            </div>
-
-            {/* 缩放控制 */ }
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-700 dark:text-gray-300">缩放:</span>
-              <button
-                onClick={ () => handleZoomTo(0.5) }
-                className="rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600"
-              >
-                50%
-              </button>
-              <button
-                onClick={ () => handleZoomTo(1) }
-                className="rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600"
-              >
-                100%
-              </button>
-              <button
-                onClick={ () => handleZoomTo(2) }
-                className="rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600"
-              >
-                200%
-              </button>
-            </div>
-
-            {/* 重置视口 */ }
-            <button
-              onClick={ handleResetViewport }
-              className="rounded-md bg-purple-500 px-4 py-2 text-sm text-white font-medium transition-colors hover:bg-purple-600"
-            >
-              重置视口
-            </button>
-          </div>
-        </div>
+      <div>
 
         {/* 工具栏容器 */ }
         <Toolbar

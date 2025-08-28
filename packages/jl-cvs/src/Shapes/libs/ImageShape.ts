@@ -16,14 +16,17 @@ export class ImageShape extends BaseShape {
   private image: HTMLImageElement | null = null
   loadState: ImageLoadState = 'loading'
   loadPromise: Promise<HTMLImageElement> | null = null
-  onLoadCallback?: () => void
+  onLoadCallback?: (img: HTMLImageElement) => void
+  onErrorCallback?: (err: Error) => void
 
-  load(src?: string, onLoad?: () => void) {
+  load(
+    src?: string,
+    onLoad?: (img: HTMLImageElement) => void,
+    onError?: (err: Error) => void,
+  ) {
     if (!this.meta.imgSrc && !src) {
       throw new Error('ImageShape meta.src or src param is required')
     }
-
-    this.onLoadCallback = onLoad
 
     this.loadPromise = new Promise((resolve, reject) => {
       if (isStr(this.meta.imgSrc)) {
@@ -37,23 +40,26 @@ export class ImageShape extends BaseShape {
       this.image.onload = () => {
         this.loadState = 'loaded'
         /** 图片加载完成后触发回调 */
-        if (this.onLoadCallback) {
-          this.onLoadCallback()
-        }
+        this.onLoadCallback?.(this.image as HTMLImageElement)
+        onLoad?.(this.image as HTMLImageElement)
         resolve(this.image as HTMLImageElement)
       }
       this.image.onerror = () => {
         this.loadState = 'error'
-        reject(new Error('ImageShape load failed'))
+        const err = new Error('ImageShape load failed')
+        /** 图片加载失败后触发回调 */
+        this.onErrorCallback?.(err)
+        onError?.(err)
+        reject(err)
       }
     })
   }
 
   /**
    * 绘制图片
-   * @param ctx - 可选的 Canvas 渲染上下文
+   * @param ctx - Canvas 渲染上下文
    */
-  async draw(ctx = this.ctx) {
+  draw(ctx = this.ctx) {
     if (!ctx) {
       throw new Error('Canvas context is required')
     }
@@ -63,18 +69,16 @@ export class ImageShape extends BaseShape {
       throw new Error('ImageShape meta.src is required')
     }
 
-    if (this.loadState === 'loading') {
-      this.drawPlaceholder(ctx)
-    }
-
-    try {
-      /** 等待图片加载完成 */
-      await this.loadPromise
-      this.drawImage(ctx)
-    }
-    catch (error) {
-      /** 加载失败，绘制错误占位符 */
-      this.drawErrorPlaceholder(ctx)
+    switch (this.loadState) {
+      case 'loading':
+        this.drawPlaceholder(ctx)
+        break
+      case 'loaded':
+        this.drawImage(ctx)
+        break
+      case 'error':
+        this.drawErrorPlaceholder(ctx)
+        break
     }
   }
 

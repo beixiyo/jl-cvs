@@ -10,11 +10,9 @@ import { Viewport } from './core/Viewport'
 import { NoteBoardBase } from './NoteBoardBase'
 
 /**
- * 画板，提供如下功能
- * - 签名涂抹
- * - 绘制矩形
- * - 绘制圆形
- *
+ * 无限画布，提供如下功能
+ * - 笔刷涂抹（支持橡皮擦）
+ * - 绘制矩形、圆形、箭头
  * - 分层自适应绘图
  *
  * - 擦除（仅针对 brushCanvas 画板）
@@ -23,31 +21,29 @@ import { NoteBoardBase } from './NoteBoardBase'
  *
  * - 缩放
  * - 拖拽
- *
  * - 截图
  */
 export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
   mode: NoteBoardMode = 'brush'
+  /** 绘制形状管理器 */
   drawShape: DrawShape
 
-  /**
-   * 右键拖拽状态
-   */
+  /** 右键拖拽状态 */
   rightMouseDragging = false
 
-  /**
-   * 统一的历史记录 - 包含笔刷和图形
-   */
+  /** 统一的历史记录 - 包含笔刷和图形 */
   history = new UnRedoLinkedList<RecordPath[]>()
 
-  /**
-   * 当前正在绘制的笔刷（用于 draw/erase 模式）
-   */
+  /** 当前正在绘制的笔刷（用于 draw/erase 模式） */
   currentBrush: Brush | null = null
 
+  /** 事件管理器 */
   readonly events: NoteBoardEvents = new NoteBoardEvents(this)
+  /** 渲染器 */
   readonly renderer: NoteBoardRenderer = new NoteBoardRenderer(this)
+  /** 交互管理器 */
   readonly interaction: NoteBoardInteraction = new NoteBoardInteraction(this)
+  /** 无限画布视口管理器 */
   readonly viewport: Viewport
 
   constructor(opts: NoteBoardOptions) {
@@ -185,21 +181,24 @@ export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
   /**
    * 清理并释放所有资源
    */
-  dispose(opts: DisposeOpts = {}) {
+  override dispose(opts: DisposeOpts = {}) {
     super.dispose(opts)
     /** 清理历史记录 */
     this.history.cleanAll()
+    this.events.rmEvent()
     this.currentBrush = null
   }
 
   /**
    * 重置画布变换状态
    */
-  override async resetSize(): Promise<void> {
+  async resetSize(): Promise<void> {
     /** 重置所有画布的变换矩阵 */
     this.canvasList.forEach((item) => {
-      this.viewport.resetTransform(item.ctx, NoteBoard.dpr)
+      this.viewport.resetTransform(item.ctx, this.dpr)
     })
+    this.setPan({ x: 0, y: 0 })
+    this.setZoom(1)
   }
 
   /**
@@ -214,12 +213,9 @@ export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
 
     /** 如果是 ImageShape，需要特殊处理 */
     if (shape.name === 'imageShape' && shape instanceof ImageShape) {
-      /** 如果图片还没有开始加载，启动加载并传入重绘回调 */
+      /** 如果图片还没有开始加载，启动加载 */
       if (!shape.loadPromise) {
-        shape.load(undefined, () => {
-          /** 图片加载完成后重绘 */
-          this.renderer.redrawAll()
-        })
+        shape.load()
       }
     }
 
@@ -305,8 +301,8 @@ export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
    */
   getVisibleWorldRect() {
     return this.viewport.getVisibleWorldRect({
-      width: this.canvas.width / NoteBoard.dpr,
-      height: this.canvas.height / NoteBoard.dpr,
+      width: this.canvas.width / this.dpr,
+      height: this.canvas.height / this.dpr,
     })
   }
 
@@ -321,7 +317,7 @@ export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
    * 重写 setCursor 方法以支持缩放同步
    * 在无限画布模式下，笔刷光标大小会根据当前缩放级别自动调整
    */
-  setCursor(lineWidth?: number, strokeStyle?: string) {
+  override setCursor(lineWidth?: number, strokeStyle?: string) {
     if (!this.viewport) {
       return
     }
@@ -332,12 +328,7 @@ export class NoteBoard extends NoteBoardBase<NoteBoardEvent> {
     const actualStrokeStyle = strokeStyle || this.noteBoardOpts.strokeStyle
 
     /** 将世界坐标的线宽转换为屏幕坐标的光标大小 */
-    let scaledCursorSize = actualLineWidth * currentZoom
-
-    /** 设置最小和最大光标大小，确保光标始终可见且不会过大 */
-    const minCursorSize = 4 // 最小 4px
-    const maxCursorSize = 100 // 最大 100px
-    scaledCursorSize = Math.max(minCursorSize, Math.min(maxCursorSize, scaledCursorSize))
+    const scaledCursorSize = actualLineWidth * currentZoom
 
     /** 调用父类方法，但使用缩放后的大小 */
     return super.setCursor(scaledCursorSize, actualStrokeStyle)

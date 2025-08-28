@@ -2,33 +2,7 @@ import type { Point, Size } from '@/Canvas/types'
 import { clamp } from '@jl-org/tool'
 
 /**
- * 视口状态接口
- */
-export interface ViewportState {
-  /** 视口在世界坐标系中的偏移 */
-  pan: Point
-  /** 缩放级别 */
-  zoom: number
-}
-
-/**
- * 视口配置选项
- */
-export interface ViewportOptions {
-  /** 初始平移偏移 */
-  pan?: Point
-  /** 初始缩放级别 */
-  zoom?: number
-  /** 最小缩放级别 */
-  minZoom?: number
-  /** 最大缩放级别 */
-  maxZoom?: number
-  /** 视口变化回调 */
-  onViewportChange?: (state: ViewportState) => void
-}
-
-/**
- * NoteBoard2 视口管理器
+ * 无限画布视口管理器
  *
  * 负责管理世界坐标系与屏幕坐标系的转换，实现无限画布的核心功能
  *
@@ -242,4 +216,30 @@ export class Viewport {
       max: this.options.maxZoom,
     }
   }
+}
+
+/**
+ * 视口状态接口
+ */
+export interface ViewportState {
+  /** 视口在世界坐标系中的偏移 */
+  pan: Point
+  /** 缩放级别 */
+  zoom: number
+}
+
+/**
+ * 视口配置选项
+ */
+export interface ViewportOptions {
+  /** 初始平移偏移 */
+  pan?: Point
+  /** 初始缩放级别 */
+  zoom?: number
+  /** 最小缩放级别 */
+  minZoom?: number
+  /** 最大缩放级别 */
+  maxZoom?: number
+  /** 视口变化回调 */
+  onViewportChange?: (state: ViewportState) => void
 }

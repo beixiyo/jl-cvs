@@ -1,29 +1,64 @@
+import type { NoteBoard } from '../NoteBoard'
 import { ImageShape } from '@/Shapes'
-import { NoteBoard } from '../NoteBoard'
 
 /**
  * NoteBoard 渲染模块
  */
 export class NoteBoardRenderer {
+  /** 标志位，用于防止重复的重绘请求 */
+  private isRedrawScheduled = false
+
   constructor(private readonly noteBoard: NoteBoard) { }
 
   /**
-   * 重绘所有内容
+   * 请求重绘所有内容 (异步队列)
+   * 使用 requestAnimationFrame 来合并多次连续的重绘请求，在下一帧统一处理，从而优化性能
    */
   redrawAll() {
+    if (this.isRedrawScheduled) {
+      return // 如果已经安排了重绘，则直接返回，等待下一帧的绘制
+    }
+    this.isRedrawScheduled = true
+    requestAnimationFrame(() => {
+      this._performRedraw()
+      this.isRedrawScheduled = false
+    })
+  }
+
+  /**
+   * 真正执行重绘所有内容的核心逻辑
+   */
+  private _performRedraw() {
     const { noteBoard } = this
-    /** 先重置变换矩阵，然后清屏 */
-    noteBoard.canvasList.forEach((item) => {
-      noteBoard.viewport.resetTransform(item.ctx, NoteBoard.dpr)
-    })
-    noteBoard.clear(false)
+    const { noteBoardOpts, canvasList, viewport, history, imgInfo, ctx } = noteBoard
 
-    /** 应用世界坐标变换 */
-    noteBoard.canvasList.forEach((item) => {
-      noteBoard.viewport.applyTransform(item.ctx, NoteBoard.dpr)
+    /** 重置和清空画布 */
+    canvasList.forEach((item) => {
+      /** 如果背景不跟随，则完全跳过对它的任何操作 */
+      if (item.name === 'imgCanvas' && !noteBoardOpts.isImgCanvasFollow) {
+        return
+      }
+      viewport.resetTransform(item.ctx, noteBoard.dpr)
     })
 
-    const lastRecord = noteBoard.history.curValue
+    /** 如果背景不跟随，则不清空它 */
+    noteBoard.clear(noteBoardOpts.isImgCanvasFollow, true)
+
+    /** 应用变换 */
+    canvasList.forEach((item) => {
+      if (item.name === 'imgCanvas' && !noteBoardOpts.isImgCanvasFollow) {
+        return
+      }
+      viewport.applyTransform(item.ctx, noteBoard.dpr)
+    })
+
+    /** 重绘背景图片 */
+    if (noteBoardOpts.isImgCanvasFollow && imgInfo) {
+      const { img, x, y, drawWidth, drawHeight } = imgInfo
+      noteBoard.imgCtx.drawImage(img, x, y, drawWidth, drawHeight)
+    }
+
+    const lastRecord = history.curValue
     if (!lastRecord) {
       return
     }
@@ -31,30 +66,33 @@ export class NoteBoardRenderer {
     /** 按记录顺序绘制所有内容 */
     for (const record of lastRecord) {
       /** 设置绘制样式 */
-      noteBoard.setStyle(record.canvasAttrs, noteBoard.ctx)
+      noteBoard.setStyle(record.canvasAttrs, ctx)
 
       /** 设置混合模式 */
       if (record.mode === 'erase') {
-        noteBoard.ctx.globalCompositeOperation = 'destination-out'
+        ctx.globalCompositeOperation = 'destination-out'
       }
       else if (noteBoard.interaction.isShapeMode(record.mode)) {
-        noteBoard.ctx.globalCompositeOperation = noteBoard.noteBoardOpts.shapeGlobalCompositeOperation
+        ctx.globalCompositeOperation = noteBoardOpts.shapeGlobalCompositeOperation
       }
       else {
-        noteBoard.ctx.globalCompositeOperation = noteBoard.noteBoardOpts.drawGlobalCompositeOperation
+        ctx.globalCompositeOperation = noteBoardOpts.drawGlobalCompositeOperation
       }
 
       /** 绘制所有图形 */
       for (const shape of record.shapes) {
-        /** 如果是 ImageShape 且还没加载，设置加载完成后的重绘回调 */
+        /** 如果是 ImageShape 且还没加载，设置加载完成和失败后的重绘回调 */
         if (shape.name === 'imageShape' && shape instanceof ImageShape) {
-          if (shape.loadState === 'loading' && !shape.onLoadCallback) {
-            shape.onLoadCallback = () => {
-              this.redrawAll()
+          if (shape.loadState === 'loading') {
+            if (!shape.onLoadCallback) {
+              shape.onLoadCallback = () => this.redrawAll()
+            }
+            if (!shape.onErrorCallback) {
+              shape.onErrorCallback = () => this.redrawAll()
             }
           }
         }
-        shape.draw(noteBoard.ctx)
+        shape.draw(ctx)
       }
     }
 

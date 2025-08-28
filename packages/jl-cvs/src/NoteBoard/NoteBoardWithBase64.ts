@@ -6,10 +6,10 @@ import { NoteBoardBase } from './NoteBoardBase'
 
 /**
  * 使用 base64 实现历史记录的画板
- * ### 如需使用绘制图像，请使用 NoteBoard
+ * ### 如需使用无限画布、绘制图像，请使用 NoteBoard
  *
  * 提供如下功能
- * - 签名涂抹
+ * - 笔刷涂抹（支持橡皮擦）
  * - 分层自适应绘图
  *
  * - 擦除（仅针对 brushCanvas 画板）
@@ -18,26 +18,59 @@ import { NoteBoardBase } from './NoteBoardBase'
  *
  * - 缩放
  * - 拖拽
- *
  * - 截图
  */
 export class NoteBoardWithBase64 extends NoteBoardBase<NoteBoardEvent> {
   mode: NoteBoardWithBase64Mode = 'brush'
 
-  /**
-   * 右键拖拽状态
-   */
+  /** 右键拖拽状态 */
   private rightMouseDragging = false
 
-  /**
-   * 历史记录
-   */
+  /** 历史记录 */
   history = createUnReDoList<string>()
+
+  /** 缩放 */
+  zoom = 1
+  /** 平移 */
+  translateX = 0
+  translateY = 0
 
   constructor(opts: NoteBoardOptions) {
     super(opts)
     this.bindEvent()
     this.setMode(this.mode)
+  }
+
+  /**
+   * CSS版本 拖拽、缩放画布
+   * @param callback 在设置完成 canvas 后执行的回调
+   */
+  async setTransform(callback?: (styles: {
+    transform: string
+    transformOrigin: string
+  }) => void) {
+    const transformOrigin = `${this.mousePoint.x}px ${this.mousePoint.y}px`
+    const transform = `scale(${this.zoom}, ${this.zoom}) translate(${this.translateX}px, ${this.translateY}px)`
+
+    this.canvasList.forEach((item) => {
+      item.canvas.style.transformOrigin = transformOrigin
+      item.canvas.style.transform = transform
+    })
+
+    callback?.({
+      transform,
+      transformOrigin,
+    })
+  }
+
+  /**
+   * 重置大小
+   */
+  async resetSize() {
+    this.canvasList.forEach((item) => {
+      item.canvas.style.transformOrigin = 'none'
+      item.canvas.style.transform = 'none'
+    })
   }
 
   /**
@@ -341,15 +374,15 @@ export class NoteBoardWithBase64 extends NoteBoardBase<NoteBoardEvent> {
       y: e.offsetY,
     }
 
-    this.scale = e.deltaY > 0
-      ? this.scale / 1.1
-      : this.scale * 1.1
+    this.zoom = e.deltaY > 0
+      ? this.zoom / 1.1
+      : this.zoom * 1.1
 
-    this.scale = Math.min(Math.max(this.scale, this.noteBoardOpts.minScale), this.noteBoardOpts.maxScale)
+    this.zoom = Math.min(Math.max(this.zoom, this.noteBoardOpts.minScale), this.noteBoardOpts.maxScale)
     this.setTransform()
 
     this.emit('wheel', {
-      zoom: this.scale,
+      zoom: this.zoom,
       e,
     })
   }

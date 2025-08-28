@@ -70,6 +70,11 @@ export type NoteBoardOptions = {
    * @default true
    */
   enableRightDrag?: boolean
+  /**
+   * 背景画布是否跟随主画布进行缩放和拖动
+   * @default true
+   */
+  isImgCanvasFollow?: boolean
 } & CanvasAttrs
 
 export type NoteBoardEvent = {
@@ -113,6 +118,7 @@ export type NoteBoardOptionsRequired = PartRequired<
   | 'drawGlobalCompositeOperation'
   | 'shapeGlobalCompositeOperation'
   | 'enableRightDrag'
+  | 'isImgCanvasFollow'
 >
 
 export type CanvasAttrs = {

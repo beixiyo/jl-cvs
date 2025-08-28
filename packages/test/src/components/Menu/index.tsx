@@ -10,7 +10,7 @@ const SEP = { path: '/', name: '' }
 const pathArr = [
   { path: '/waterRipple', name: '🌊 水波纹效果' },
 
-  { path: '/noteBoard', name: '🎨 无限画布画板' },
+  { path: '/noteBoard', name: '🎨 无限画布' },
   { path: '/shotImg', name: '📸 图片截图' },
   { path: '/cutoutImg', name: '✂️ 图像抠图' },
   { path: '/smartSelection', name: '🔍 图片智能选取' },

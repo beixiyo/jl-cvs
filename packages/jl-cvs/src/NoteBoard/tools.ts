@@ -11,6 +11,7 @@ export function mergeOpts(
     maxScale: 8,
     canvasZIndex: '20',
     enableRightDrag: true,
+    isImgCanvasFollow: true,
 
     lineWidth: 1,
     strokeStyle: '#000',
