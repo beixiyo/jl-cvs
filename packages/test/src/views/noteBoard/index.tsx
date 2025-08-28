@@ -65,22 +65,6 @@ export default function NoteBoard2Test() {
     }
   }
 
-  /** 缩放到指定级别 */
-  const handleZoomTo = (zoom: number) => {
-    /** 以画布中心为锚点缩放 */
-    const canvasRect = canvasContainerRef.current?.getBoundingClientRect()
-    if (canvasRect) {
-      const centerPoint = {
-        x: canvasRect.width / 2,
-        y: canvasRect.height / 2,
-      }
-      actions.setZoom(zoom, centerPoint)
-    }
-    else {
-      actions.setZoom(zoom)
-    }
-  }
-
   return (
     <div className="min-h-screen from-slate-50 via-blue-50 to-indigo-100 bg-gradient-to-br dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950">
       {/* 背景装饰 */ }
@@ -90,6 +74,15 @@ export default function NoteBoard2Test() {
       </div>
 
       <div>
+
+        <div className="relative text-center">
+          <h1 className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-2xl font-bold text-transparent dark:from-blue-400 dark:to-purple-400">
+            无限画布 (Infinite Canvas)
+          </h1>
+          <p className="mx-auto max-w-2xl text-gray-600 dark:text-gray-400 mt-2">
+            世界坐标系和视口变换的高性能画布，支持无限平移、缩放和丰富的交互功能。
+          </p>
+        </div>
 
         {/* 工具栏容器 */ }
         <Toolbar

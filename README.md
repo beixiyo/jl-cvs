@@ -69,7 +69,7 @@ npm i @jl-org/cvs
 - [🌀 半调波浪 (HalftoneWave)](#-半调波浪-halftonewave) - `/halftoneWave`
 - [🖼️ 图像灰飞烟灭 (ImgToFade)](#️-图像灰飞烟灭-imgtofade) - `/imgToFade`
 - [📝 图像转文字 (ImgToTxt)](#-图像转文字-imgtotxt) - `/imgToTxt`
-- [🎨 图像编辑画板 (NoteBoard)](#-图像编辑画板-noteboard) - `/noteBoard`
+- [🎨 无限画布 (NoteBoard)](#-无限画布-noteboard) - `/noteBoard`
 - [🎯 刮刮卡效果 (Scratch)](#-刮刮卡效果-scratch) - `/scratch`
 - [📸 截图工具 (ShotImg)](#-截图工具-shotimg) - `/shotImg`
 - [⭐ 星空场景 (StarField)](#-星空场景-starfield) - `/starField`
@@ -102,7 +102,6 @@ pnpm test
 ## 🎆 烟花效果 (Firework)
 
 - **在线查看**: https://jl-cvs.pages.dev/firework
-- [文件位置](./packages/test/src/views/firework/index.tsx)
 
 ![烟花效果预览](./docAssets/firework.webp)
 
@@ -117,10 +116,11 @@ pnpm test
 - 🎆 经典烟花：传统的烟花爆炸效果
 - 💥 二段爆炸烟花：更复杂的多层爆炸效果
 
+---
+
 ## 🌍 球体地球仪 (GlobeSphere)
 
 - **在线查看**: https://jl-cvs.pages.dev/globeSphere
-- [文件位置](./packages/test/src/views/globeSphere/index.tsx)
 
 ![球体地球仪预览](./docAssets/globesphere.webp)
 
@@ -174,7 +174,6 @@ pnpm test
 ## 📐 网格效果 (Grid)
 
 - **在线查看**: https://jl-cvs.pages.dev/grid
-- [文件位置](./packages/test/src/views/grid/index.tsx)
 
 ![网格效果预览](./docAssets/grid.webp)
 
@@ -184,10 +183,11 @@ pnpm test
 - 可调节网格密度
 - 多种样式选项
 
+---
+
 ## 🌀 半调波浪 (HalftoneWave)
 
 - **在线查看**: https://jl-cvs.pages.dev/halftoneWave
-- [文件位置](./packages/test/src/views/halftoneWave/index.tsx)
 
 ![半调波浪预览](./docAssets/halftoneWave.gif)
 
@@ -197,10 +197,11 @@ pnpm test
 - 可调节波浪参数
 - 多种视觉样式
 
+---
+
 ## 🖼️ 图像灰飞烟灭 (ImgToFade)
 
 - **在线查看**: https://jl-cvs.pages.dev/imgToFade
-- [文件位置](./packages/test/src/views/imgToFade/index.tsx)
 
 ![图像灰飞烟灭预览](./docAssets/imgFade.gif)
 
@@ -210,10 +211,11 @@ pnpm test
 - 实时预览
 - 自定义淡化参数
 
+---
+
 ## 📝 图像转文字 (ImgToTxt)
 
 - **在线查看**: https://jl-cvs.pages.dev/imgToTxt
-- [文件位置](./packages/test/src/views/imgToTxt/index.tsx)
 
 ![图像转文字预览](./docAssets/imgToTxt.webp)
 
@@ -223,31 +225,25 @@ pnpm test
 - 可调节转换精度
 - 实时转换预览
 
-## 🎨 图像编辑画板 (NoteBoard)
+---
+
+## 🎨 无限画布 (NoteBoard)
 
 - **在线查看**: https://jl-cvs.pages.dev/noteBoard
-- [文件位置](./packages/test/src/views/noteBoard/index.tsx)
-- [架构设计文档](packages/jl-cvs/src/NoteBoard/README.md)
 
-![图像编辑画板预览](./docAssets/noteBoard.webp)
+![无限画布预览](./docAssets/noteBoard.webp)
 
-**功能特性**:
-- 功能完整的 Canvas 画板组件
-- 多种绘图模式：绘制、擦除、拖拽、图形绘制
-- 支持撤销/重做操作
-- 图片上传和背景设置
-- 分层导出功能
-- 画笔样式自定义
+`NoteBoard` 已全面升级为基于**世界坐标系**和**视口变换**的无限画布，拥有极高的性能和扩展性。
 
-**绘图模式**:
-- ✏️ 绘制：自由绘制线条
-- 🧽 擦除：擦除已绘制内容
-- ✋ 拖拽：拖拽移动画布
-- ⬜ 矩形：绘制矩形图形
-- ⭕ 圆形：绘制圆形图形
-- ➡️ 箭头：绘制箭头图形
+### ✨ 核心亮点
 
-### 3.0 迁移说明
+- ♾️ **真·无限画布**: 通过视口 (Viewport) 变换实现，理论上可以无限缩放和平移。
+- ⚡ **高性能渲染**: 内置**视口剔除 (Culling)** 和**异步渲染队列**，即使画布内容极其庞大也能保持流畅。
+- 🎨 **面向对象的形状系统**: 所有图形均为独立对象，易于管理和扩展新形状。
+- ✍️ **丰富的交互功能**: 支持画笔、橡皮擦、基础图形绘制，以及对任意单个形状的**拖拽移动**。
+- 🧠 **统一的状态管理**: 通过 `Renderer`, `Interaction`, `Events` 等模块实现逻辑分离，并拥有可靠的撤销/重做功能。
+
+### 3.0 版本迁移说明
 
 1. `draw` 绘制模式改名为 `brush`
 2. 事件从构造器传入 `onXxx` 改为事件系统，比如 `noteBoard.on('wheel', ({ scale }) => {})`
@@ -255,10 +251,11 @@ pnpm test
 4. 添加 `addShape` 方法，可以自由添加图形
 5. `Mode` 类型改名为 `NoteBoardMode`，更加语义化
 
+---
+
 ## 🎯 刮刮卡效果 (Scratch)
 
 - **在线查看**: https://jl-cvs.pages.dev/scratch
-- [文件位置](./packages/test/src/views/scratch/index.tsx)
 
 ![刮刮卡效果预览](./docAssets/scratch.webp)
 
@@ -275,10 +272,11 @@ pnpm test
 - **lineCap**: 线条端点样式 (round/square/butt)
 - **lineJoin**: 线条连接样式 (round/bevel/miter)
 
+---
+
 ## 📸 截图工具 (ShotImg)
 
 - **在线查看**: https://jl-cvs.pages.dev/shotImg
-- [文件位置](./packages/test/src/views/shotImg/index.tsx)
 
 ![截图工具预览](./docAssets/shotImg.webp)
 
@@ -294,10 +292,11 @@ pnpm test
 - 支持精确的像素级选择
 - 可导出选中区域为图片
 
+---
+
 ## ⭐ 星空场景 (StarField)
 
 - **在线查看**: https://jl-cvs.pages.dev/starField
-- [文件位置](./packages/test/src/views/starField/index.tsx)
 
 ![星空场景预览](./docAssets/starField.webp)
 
@@ -316,10 +315,11 @@ pnpm test
 - **backgroundColor**: 背景颜色
 - **flickerSpeed**: 闪烁频率
 
+---
+
 ## 🔢 科技数字 (TechNum)
 
 - **在线查看**: https://jl-cvs.pages.dev/techNum
-- [文件位置](./packages/test/src/views/techNum/index.tsx)
 
 ![科技数字预览](./docAssets/techNum.gif)
 
@@ -340,10 +340,11 @@ pnpm test
 - **getStr**: 自定义字符生成函数
 - **getColor**: 自定义颜色生成函数
 
+---
+
 ## 🌊 水波纹效果 (WaterRipple)
 
 - **在线查看**: https://jl-cvs.pages.dev/waterRipple
-- [文件位置](./packages/test/src/views/waterRipple/index.tsx)
 
 ![水波纹效果预览](./docAssets/waterRipple.webp)
 
@@ -362,10 +363,11 @@ pnpm test
 - **intensity**: 动画速度强度
 - **strokeStyle**: 自定义描边样式
 
+---
+
 ## 〰️ 波浪线条 (WavyLines)
 
 - **在线查看**: https://jl-cvs.pages.dev/wavyLines
-- [文件位置](./packages/test/src/views/wavyLines/index.tsx)
 
 ![波浪线条预览](./docAssets/wavyLines.webp)
 
@@ -387,7 +389,6 @@ pnpm test
 ## 🖼️ 图像处理 (ImgProcessing)
 
 - **在线查看**: https://jl-cvs.pages.dev/imgProcessing
-- [文件位置](./packages/test/src/views/imgProcessing/index.tsx)
 
 **功能特性**:
 - **噪点化处理**: 为图像添加噪点效果，可调节噪点强度
@@ -403,10 +404,11 @@ pnpm test
 - **color**: 水印颜色 (支持透明度)
 - **rotate**: 水印旋转角度
 
+---
+
 ## 📊 图像数据处理 (ImgDataProcessing)
 
 - **在线查看**: https://jl-cvs.pages.dev/imgDataProcessing
-- [文件位置](./packages/test/src/views/imgDataProcessing/index.tsx)
 
 **功能特性**:
 - **灰度化处理**: 使用加权灰度化算法将彩色图像转为灰度图
@@ -420,10 +422,11 @@ pnpm test
 - **binarizeThreshold**: 二值化阈值 (0-255)
 - **fromColor/toColor**: 颜色替换的源颜色和目标颜色
 
+---
+
 ## 🔍 图像边缘检测 (ImgEdgeDetection)
 
 - **在线查看**: https://jl-cvs.pages.dev/imgEdgeDetection
-- [文件位置](./packages/test/src/views/imgEdgeDetection/index.tsx)
 
 ![图像边缘检测预览](./docAssets/imgEdge.webp)
 
@@ -436,10 +439,11 @@ pnpm test
 **配置选项**:
 - **threshold**: 边缘检测阈值 (0-255，数值越小检测到的边缘越多)
 
+---
+
 ## 🎬 截取视频帧 (CaptureVideoFrame)
 
 - **在线查看**: https://jl-cvs.pages.dev/captureVideoFrame
-- [文件位置](./packages/test/src/views/captureVideoFrame/index.tsx)
 
 **功能特性**:
 - **视频上传**: 支持拖拽或点击上传视频文件
@@ -628,5 +632,3 @@ pnpm test
 - **createScratch(canvas, opts?)**: 刮刮卡交互
 - **createFirework(canvas, opts?)** / **createFirework2(canvas, opts)**: 烟花效果
 - **createTechNum(options)**: 科技数字雨
-
-> 复杂类的完整参数可参考对应示例页面或类型定义（`packages/jl-cvs/src/**`）。

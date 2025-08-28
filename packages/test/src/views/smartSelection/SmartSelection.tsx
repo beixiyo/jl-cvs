@@ -61,11 +61,11 @@ export const SmartSelection = memo<SmartSelectionProps>((
       maxScale: 3.5,
     })
 
-    noteBoard.on('wheel', ({ scale }) => {
-      if (!noteBoard || scale < 1)
+    noteBoard.on('wheel', ({ zoom }) => {
+      if (!noteBoard || zoom < 1)
         return
 
-      noteBoard.setStyle({ lineWidth: DEFAULT_STROKE_WIDTH / scale })
+      noteBoard.setStyle({ lineWidth: DEFAULT_STROKE_WIDTH / zoom })
       if (noteBoard.mode !== 'brush')
         return
       noteBoard.setCursor()
