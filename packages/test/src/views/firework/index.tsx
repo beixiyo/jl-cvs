@@ -10,7 +10,7 @@ type FireworkType = 'classic' | 'burst'
 
 export default function FireworkTest() {
   const [isPlaying, setIsPlaying] = useState(false)
-  const [fireworkType, setFireworkType] = useGetState<FireworkType, true>('classic', true)
+  const [fireworkType, setFireworkType] = useGetState<FireworkType, true>('burst', true)
   const [config, setConfig] = useState({
     width: 800,
     height: 600,
@@ -106,6 +106,7 @@ export default function FireworkTest() {
         ...config,
         getFireworkColor: currentColorPreset.getFireworkColor,
         getBoomColor: currentColorPreset.getBoomColor,
+        speed: config.speed + 12,
       })
       stopFireworkRef.current = stopFn
     }
