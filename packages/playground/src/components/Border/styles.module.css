@@ -1,0 +1,13 @@
+/**
+ * 边框流动动画：用纯 CSS 驱动 stroke-dashoffset，
+ * 交给合成线程，避免 JS setInterval + setState 每帧重渲染
+ */
+@keyframes border-dash-flow {
+  to {
+    stroke-dashoffset: var(--dash-cycle);
+  }
+}
+
+.flow {
+  animation: border-dash-flow var(--dash-duration) linear infinite;
+}

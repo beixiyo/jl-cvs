@@ -1,0 +1,30 @@
+{
+  "name": "jl-org",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter @jl-org/cvs build",
+    "build:dev": "pnpm --filter @jl-org/cvs build:dev",
+    "build:test": "pnpm --filter playground build",
+    "clean": "pnpm --filter @jl-org/cvs clean",
+    "test": "pnpm --filter playground dev",
+    "lint": "pnpm --filter @jl-org/cvs lint && pnpm --filter playground lint",
+    "format": "dprint fmt --config-discovery=global .",
+    "format:check": "dprint check --config-discovery=global ."
+  },
+  "devDependencies": {
+    "@jl-org/eslint-plugins": "^1.0.1",
+    "@jl-org/ts-tool": "^0.0.8",
+    "@types/node": "^24.6.0",
+    "@types/web": "^0.0.236",
+    "oxlint": "^1.78.0",
+    "vite": "8.2.1",
+    "vite-plugin-dts": "^5.0.3"
+  },
+  "author": "CJL <2662442385@qq.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

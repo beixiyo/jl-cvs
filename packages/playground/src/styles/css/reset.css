@@ -1,0 +1,59 @@
+:root,
+body,
+#root,
+#app {
+  height: 100%;
+  width: 100%;
+  background-color: rgb(var(--background));
+}
+
+/* 覆盖Chrome浏览器自动填充的背景色 */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: inherit !important;
+  transition: background-color 5000s ease-in-out 0s;
+  background-color: transparent !important;
+}
+
+/* 暗黑模式下的自动填充 */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
+  /* slate-900 */
+  -webkit-text-fill-color: #cbd5e1 !important;
+  /* slate-300 */
+}
+
+/* 确保容器背景色不受影响 */
+.input-container-with-autofill {
+  background-color: inherit;
+}
+
+/* 针对自动填充的输入框容器进行特殊处理 */
+.input-container-with-autofill input:-webkit-autofill {
+  border-radius: 0.75rem;
+  /* rounded-xl */
+}
+
+/* 移除全局焦点样式（防止黑色外边框） */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: none;
+}
+
+/* 移除 SVG 元素的 focus 外边框 */
+svg:focus {
+  outline: none;
+}
+
+svg:focus-visible {
+  outline: none;
+}

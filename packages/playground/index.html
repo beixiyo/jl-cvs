@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>jl-cvs — 用 Canvas 创造令人惊叹的效果</title>
+    <meta
+      name="description"
+      content="零依赖的 Canvas 特效工具库：粒子场景、图像处理与互动玩法，TypeScript 编写，即装即用"
+    />
+
+    <script>
+    // 首屏前应用主题，避免闪烁：localStorage → 系统偏好
+    ;(() => {
+      try {
+        const theme = localStorage.getItem('theme')
+          || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        document.documentElement.classList.add(theme)
+      }
+      catch { /* noop */ }
+    })()
+    </script>
+  </head>
+
+  <body>
+    <div id="app"></div>
+
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
