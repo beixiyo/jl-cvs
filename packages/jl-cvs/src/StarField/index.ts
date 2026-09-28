@@ -9,6 +9,13 @@ export class StarField {
   private config: Required<StarFieldConfig>
   private animationFrameId: number | null = null
 
+  /** 逻辑坐标系的画布尺寸（CSS 像素，与 dpr 无关） */
+  private width: number
+  private height: number
+
+  /** 颜色 → 预渲染发光 sprite，整个生命周期只创建一次径向渐变 */
+  private spriteCache: Map<string, HTMLCanvasElement>
+
   private onResizeDebounce: (width: number, height: number) => void
 
   /**
@@ -19,13 +26,16 @@ export class StarField {
    * ```ts
    * const canvas = document.createElement('canvas')
    * document.body.appendChild(canvas)
-   * new StarField(canvas)
+   * const starField = new StarField(canvas)
+   * // 不再使用时停止动画释放资源
+   * starField.dispose()
    * ```
    */
   constructor(canvas: HTMLCanvasElement, options: StarFieldConfig = {}) {
     this.canvas = canvas
     this.context = canvas.getContext('2d') as CanvasRenderingContext2D
     this.stars = []
+    this.spriteCache = new Map()
 
     /** 默认配置 */
     const defaultConfig: Required<StarFieldConfig> = {
@@ -42,12 +52,16 @@ export class StarField {
 
     /** 合并用户配置和默认配置 */
     this.config = { ...defaultConfig, ...options }
+    this.width = this.config.width
+    this.height = this.config.height
 
     /** 设置画布尺寸（dpr 边界统一入口） */
-    applyHiDPI(this.canvas, this.context, this.config.width, this.config.height)
+    applyHiDPI(this.canvas, this.context, this.width, this.height)
 
     this.onResizeDebounce = debounce(
       (newWidth, newHeight) => {
+        this.width = newWidth
+        this.height = newHeight
         applyHiDPI(this.canvas, this.context, newWidth, newHeight)
         this.initStars()
       },
@@ -83,20 +97,24 @@ export class StarField {
   /** 销毁实例 */
   dispose() {
     this.stop()
+    this.spriteCache.clear()
   }
 
   /**
    * 初始化星星
    * - 根据配置生成星星的初始属性
+   * - 位置基于逻辑尺寸，与绘制坐标系一致
    */
   private initStars(): void {
     this.stars = []
     for (let i = 0; i < this.config.starCount; i++) {
+      const baseColor = this.getStarColor()
       const star: IStar = {
-        x: Math.random() * this.canvas.width,
-        y: Math.random() * this.canvas.height,
+        x: Math.random() * this.width,
+        y: Math.random() * this.height,
         radius: this.config.sizeRange[0] + Math.random() * (this.config.sizeRange[1] - this.config.sizeRange[0]),
-        baseColor: this.getStarColor(),
+        baseColor,
+        sprite: this.getSprite(baseColor),
         alpha: 0.5,
         dx: (Math.random() - 0.5) * 2 * this.config.speedRange,
         dy: (Math.random() - 0.5) * 2 * this.config.speedRange,
@@ -108,8 +126,8 @@ export class StarField {
 
   /**
    * 获取星星的颜色
+   * - 如果配置的是函数，随机选择一个颜色
    * - 如果配置的是数组，随机选择一个颜色
-   * - 如果配置的是函数，调用函数获取颜色
    * @returns string 星星的颜色
    */
   private getStarColor(): string {
@@ -123,6 +141,44 @@ export class StarField {
   }
 
   /**
+   * 预渲染单色发光 sprite
+   *
+   * 径向渐变只在这里创建一次：中心白色高亮、0.3 处主题色（80% 透明度）、边缘全透明，
+   * 每帧通过 globalAlpha 缩放得到与逐帧渐变一致的亮度曲线
+   */
+  private getSprite(color: string): HTMLCanvasElement {
+    const cached = this.spriteCache.get(color)
+    if (cached) {
+      return cached
+    }
+
+    const size = 32
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    const center = size / 2
+
+    const gradient = ctx.createRadialGradient(
+      center,
+      center,
+      0,
+      center,
+      center,
+      center,
+    )
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)')
+    gradient.addColorStop(0.3, withAlpha(color, 0.8))
+    gradient.addColorStop(1, 'transparent')
+
+    ctx.fillStyle = gradient
+    ctx.fillRect(0, 0, size, size)
+
+    this.spriteCache.set(color, canvas)
+    return canvas
+  }
+
+  /**
    * 更新星星状态
    * - 更新位置和透明度（闪烁效果）
    */
@@ -132,9 +188,9 @@ export class StarField {
       star.x += star.dx
       star.y += star.dy
 
-      /** 边缘环绕 */
-      star.x = ((star.x % this.canvas.width) + this.canvas.width) % this.canvas.width
-      star.y = ((star.y % this.canvas.height) + this.canvas.height) % this.canvas.height
+      /** 边缘环绕（逻辑坐标系） */
+      star.x = ((star.x % this.width) + this.width) % this.width
+      star.y = ((star.y % this.height) + this.height) % this.height
 
       /** 正弦波调整透明度，实现平滑闪烁 */
       star.alpha = 0.5 + 0.5 * Math.sin(this.time + star.phase)
@@ -143,57 +199,29 @@ export class StarField {
 
   /**
    * 绘制星星
-   * - 使用径向渐变实现光晕和闪烁效果
+   * - 每帧仅 drawImage 预渲染 sprite，零对象分配
    */
   private draw(): void {
-    /** 绘制背景 */
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    this.context.fillStyle = this.config.backgroundColor
-    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height)
+    this.context.clearRect(0, 0, this.width, this.height)
+
+    if (this.config.backgroundColor !== 'transparent') {
+      this.context.fillStyle = this.config.backgroundColor
+      this.context.fillRect(0, 0, this.width, this.height)
+    }
 
     for (const star of this.stars) {
-      /**
-       * createRadialGradient(x0, y0, r0, x1, y1, r1)
-       * 创建一个从 (x0, y0) 到 (x1, y1) 的径向渐变
-       *
-       * 在这里，起点和终点都设为星星的中心 (star.x, star.y)
-       * 但半径从 0 到 star.radius * 2，形成从中心向外扩散的渐变
-       */
-      const gradient = this.context.createRadialGradient(
-        star.x,
-        star.y,
-        0,
-        star.x,
-        star.y,
-        star.radius * 2,
+      /** 光晕直径 = 半径 × 2（渐变全径） */
+      const glowRadius = star.radius * 2
+      this.context.globalAlpha = star.alpha
+      this.context.drawImage(
+        star.sprite,
+        star.x - glowRadius,
+        star.y - glowRadius,
+        glowRadius * 2,
+        glowRadius * 2,
       )
-
-      /**
-       * 渐变色配置：
-       * - 中心：白色高亮，透明度随 alpha 变化
-       * - 中间：使用 star.baseColor，透明度略低
-       * - 边缘：完全透明
-       */
-      gradient.addColorStop(0, `hsla(0, 100%, 100%, ${star.alpha})`)
-
-      /**
-       * 使用 star.baseColor（从 colors 获取）
-       * 并通过 alpha * 0.8 计算透明度，转换为十六进制附加到颜色后
-       * 例如，若 baseColor 是 #ff0000，透明度为 0.8，则结果为 #ff0000cc
-       * 边缘：保持完全透明
-       */
-      gradient.addColorStop(
-        0.3,
-        `${star.baseColor}${Math.round(star.alpha * 0.8 * 255).toString(16).padStart(2, '0')}`,
-      )
-      gradient.addColorStop(1, 'transparent')
-
-      this.context.beginPath()
-      this.context.fillStyle = gradient
-      this.context.arc(star.x, star.y, star.radius, 0, Math.PI * 2, true)
-      this.context.fill()
-      this.context.closePath()
     }
+    this.context.globalAlpha = 1
   }
 
   /**
@@ -205,6 +233,19 @@ export class StarField {
     this.draw()
     this.animationFrameId = requestAnimationFrame(() => this.animate())
   }
+}
+
+/** 十六进制颜色附加透明度；非 #rrggbb 输入原样返回 */
+function withAlpha(color: string, alpha: number): string {
+  const match = color.match(/^#([0-9a-fA-F]{6})$/)
+  if (!match) {
+    return color
+  }
+  const value = Number.parseInt(match[1], 16)
+  const r = (value >> 16) & 0xFF
+  const g = (value >> 8) & 0xFF
+  const b = value & 0xFF
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
 export interface StarFieldConfig {
@@ -262,6 +303,8 @@ export interface IStar {
   radius: number
   /** 用于渐变中间色 */
   baseColor: string
+  /** 预渲染的发光 sprite（与 baseColor 一一对应） */
+  sprite: HTMLCanvasElement
   alpha: number
   dx: number
   dy: number
