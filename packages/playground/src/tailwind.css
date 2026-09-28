@@ -1,0 +1,38 @@
+/**
+ * Tailwind v4 入口
+ *
+ * - 先导入变量与重置样式，再引入 tailwindcss本体
+ * - `@config` 挂载仓库根的 v3 风格配置（颜色 / z-index / 阴影等语义 token）
+ */
+@import "./styles/css/autoVariables.css";
+@import "./styles/css/reset.css";
+@import "./styles/css/commonClass.css";
+@import "./styles/css/scrollBar.css";
+@import "tailwindcss";
+@config "../../../tailwind.config.js";
+
+@layer base {
+  /* 统一重置 textarea 的焦点样式 */
+  textarea {
+    @apply resize-none border border-transparent outline-hidden focus:outline-hidden;
+  }
+
+  /* 移除浏览器默认 focus-visible 样式 */
+  textarea:focus-visible {
+    @apply border-transparent outline-hidden ring-0 shadow-none;
+  }
+
+  input {
+    outline: none;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  @keyframes tail-blink {
+    to {
+      visibility: hidden;
+    }
+  }
+}

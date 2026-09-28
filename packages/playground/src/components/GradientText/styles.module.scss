@@ -1,0 +1,32 @@
+.animateGradient {
+  animation: gradient linear infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 单向无缝循环：渐变从左到右「转一圈」，配合首尾同色与 200% 背景宽度衔接 */
+.animateGradientLoop {
+  animation: gradientLoop linear infinite;
+}
+
+@keyframes gradientLoop {
+  from {
+    background-position: 0% 50%;
+  }
+
+  to {
+    background-position: -200% 50%;
+  }
+}

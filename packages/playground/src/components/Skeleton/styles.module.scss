@@ -1,0 +1,13 @@
+@keyframes skeleton {
+  from {
+    background-position: 100%;
+  }
+
+  to {
+    background-position: 0;
+  }
+}
+
+.skeleton {
+  animation: skeleton 1s linear infinite;
+}
