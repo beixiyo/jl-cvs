@@ -1,6 +1,7 @@
 'use client'
 
 import { useInsertStyle, useLatestCallback, useTheme, useToggleThemeWithTransition } from '@/hooks'
+import themeTransitionCss from '@/styles/transition/theme.css?raw'
 import { cn } from '@/utils'
 import type { CSSProperties } from 'react'
 import { memo, useMemo } from 'react'
@@ -41,8 +42,8 @@ export const ThemeToggle = memo<ThemeToggleProps>((props) => {
   const { theme = _theme, size = 80, onClick, className, ariaLabel, onChange } = props
 
   useInsertStyle({
-    lightStyleStrOrUrl: new URL('styles/transition/theme.css', import.meta.url).href,
-    darkStyleStrOrUrl: new URL('styles/transition/theme.css', import.meta.url).href,
+    lightStyleStrOrUrl: themeTransitionCss,
+    darkStyleStrOrUrl: themeTransitionCss,
   })
 
   /**
