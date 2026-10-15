@@ -2,7 +2,7 @@ import type { TransferType } from '@jl-org/tool'
 import { blobToBase64, getImg, isStr } from '@jl-org/tool'
 import { createCvs } from './'
 
-export { base64ToBlob, blobToBase64, compressImg, cutImg, downloadByData, downloadByUrl, getCvsImg, getImg, urlToBlob } from '@jl-org/tool'
+export { base64ToBlob, blobToBase64, compressImg, compressImgToMaxSize, cutImg, downloadByData, downloadByUrl, getCvsImg, getImg, supportsWebpEncode, urlToBlob } from '@jl-org/tool'
 
 /**
  * 图片噪点化

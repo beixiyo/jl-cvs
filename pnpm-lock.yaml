@@ -33,8 +33,8 @@ importers:
   packages/jl-cvs:
     dependencies:
       '@jl-org/tool':
-        specifier: ^5.2.0
-        version: 5.2.0
+        specifier: ^5.3.0
+        version: 5.3.0
     devDependencies:
       typescript:
         specifier: ^5.8.3
@@ -47,7 +47,7 @@ importers:
         version: link:../jl-cvs
       '@jl-org/tool':
         specifier: ^5.2.0
-        version: 5.2.0
+        version: 5.3.0
       '@jl-org/vite-auto-route':
         specifier: ^2.0.2
         version: 2.0.2
@@ -191,8 +191,8 @@ packages:
   '@jl-org/js-to-style@1.0.1':
     resolution: {integrity: sha512-Od53B3IU0h1hNYQ3zxf72vebVORvq3CdkUoI69h4sc+vibIdfunA8eM7iLmOtV9uz4ZWfAFjcC2TYeVEz/8eZA==}
 
-  '@jl-org/tool@5.2.0':
-    resolution: {integrity: sha512-KED//KPDrsczrKQCHDzLO2ixFn3zkiozB3cG3D5Vxk1SeovNndB/Qcu0X61fj4wF5Sme2zzV4jVg97J1B78RfA==}
+  '@jl-org/tool@5.3.0':
+    resolution: {integrity: sha512-cYrYrOnukXowYeukb8MmjVTPq55TQXOSsjnlYbKmWwRDanejXchwOo/1KA9OLTugQR3Xf7bWYENPy/zAd04S0A==}
 
   '@jl-org/ts-tool@0.0.8':
     resolution: {integrity: sha512-2YwGmzod5LBOi7cKknRXn2H9xcp99OhokZJ55t+kg7wvPST4obcwLxO03ji0gVuFoHp5BgrkwzDICV+z1a3TDg==}
@@ -1826,7 +1826,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@jl-org/tool@5.2.0': {}
+  '@jl-org/tool@5.3.0': {}
 
   '@jl-org/ts-tool@0.0.8': {}
 

@@ -1,6 +1,6 @@
 {
   "name": "@jl-org/cvs",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "利用 Canvas 创造令人惊叹的效果",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -30,7 +30,7 @@
     "lint": "oxlint ./src --fix"
   },
   "dependencies": {
-    "@jl-org/tool": "^5.2.0"
+    "@jl-org/tool": "^5.3.0"
   },
   "keywords": [
     "canvas",
